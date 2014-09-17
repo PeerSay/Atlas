@@ -1,9 +1,11 @@
-angular.module('peersay').controller('helloCtrl', ['$scope', '$window', 'restApi',
+/*global angular:true*/
 
-    function ($scope, $window, api) {
+angular.module('peersay').controller('helloCtrl', ['$scope', '$window', 'restApi', 'socket',
+
+    function ($scope, $window, api, socket) {
         $scope.hello = 'Hello World!';
         $scope.helloApi = '';
-        $scope.helloSocket = '';
+        $scope.socketMsg = '';
 
         api.hello()
             .success(function (res) {
@@ -13,5 +15,9 @@ angular.module('peersay').controller('helloCtrl', ['$scope', '$window', 'restApi
                     $scope.helloApi = JSON.stringify(res);
                 }
             });
+
+        socket.on('msg', function (msg) {
+            $scope.socketMsg = msg;
+        });
     }
 ]);

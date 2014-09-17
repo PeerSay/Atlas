@@ -23,9 +23,9 @@ Simplified, the workflow is the following:
     1.  git clone http://yourserver.com/~you/proj.git // time passes..
     2.  git pull
     3.  git diff HEAD^
-    4.  git checkout -b bad-feature / /work some time..
+    4.  git checkout -b bad-feature // work some time..
     5.  git commit -a -m "Created a bad feature"
-    6.  git checkout master
+    6.  git checkout dev
     7.  git pull
     8.  git merge --no-ff bad-feature
     9.  git commit -a
@@ -34,7 +34,7 @@ Simplified, the workflow is the following:
     12. git checkout bad-feature // fix bug..
     13. git -m bad-feature good-feature
     14. git commit -a -m "Better feature"
-    15. git checkout master
+    15. git checkout dev
     16. git pull	 
     17. git merge --no-ff good-feature
     18. git push

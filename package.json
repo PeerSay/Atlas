@@ -1,0 +1,29 @@
+{
+    "name": "Atlas",
+    "version": "0.0.0",
+    "description": "PeerSay MVP",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node server.js"
+    },
+    "engines": {
+        "node": "0.10.x"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/PeerSay/Atlas.git"
+    },
+    "author": "PeerSay team",
+    "license": "Private",
+    "bugs": {
+        "url": "https://github.com/PeerSay/Atlas/issues"
+    },
+    "dependencies": {
+        "express": "~4.9.1",
+        "restify": "~2.8.2",
+        "socket.io": "~1.1.0",
+        "path": "~0.4.9",
+        "lodash": "~2.4.1"
+    }
+}

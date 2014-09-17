@@ -33,4 +33,4 @@ bower_components
 *.cmd
 
 # Example: .css files are derived as we will probably use LESS
-*.css
+#*.css

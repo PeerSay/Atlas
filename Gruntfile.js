@@ -20,16 +20,16 @@ module.exports = function (grunt) {
                     'static/**/*.*'
                 ]
             }
-        }
-        /*,
-        connect: {
+        },
+
+        /*connect: {
             options: {
                 port: 9000,
                 // Change this to '0.0.0.0' to access the server from outside.
                 hostname: 'localhost',
                 livereload: '<%= connect.options.livereload %>'
             },
-            livereload: {
+            serve: {
                 options: {
                     open: true,
                     base: [
@@ -38,8 +38,18 @@ module.exports = function (grunt) {
                 }
             }
         }*/
+
+        mochaTest: {
+            test: {
+                options: {
+                    reporter: 'spec'
+                },
+                src: ['test/**/*.js']
+            }
+        }
     });
 
-    grunt.registerTask('dev', [/*'connect:livereload',*/ 'watch']);
+    grunt.registerTask('test', ['mochaTest']);
+    grunt.registerTask('dev', ['watch']);
     grunt.registerTask('default', ['dev']);
 };

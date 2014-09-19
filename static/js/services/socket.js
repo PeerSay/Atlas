@@ -1,7 +1,13 @@
 /*global angular:true, io:true*/
 
 angular.module('peersay').factory('socket', function ($rootScope) {
-    var socket = io();
+    var dummy = function () {};
+    var socket = window.io && io();
+
+    if (!socket) {
+        return { on: dummy, emit: dummy };
+    }
+
     return {
         on: function (evt, callback) {
             socket.on(evt, function () {

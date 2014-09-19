@@ -5,9 +5,6 @@ var app = express();
 var http = require('http').Server(app);
 var sio = require('socket.io')(http);
 
-
-// Middleware
-
 // Static
 var static_path = path.join(__dirname, 'static');
 app.use(express.static(static_path));

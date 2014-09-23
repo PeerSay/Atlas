@@ -6,6 +6,7 @@ module.exports = function (grunt) {
     require('time-grunt')(grunt);
 
     grunt.initConfig({
+        // Config may be useful, eventually
         //cfg: grunt.file.readJSON('config.json'),
 
         // Watch - monitors changes and runs tasks
@@ -80,7 +81,7 @@ module.exports = function (grunt) {
             // continuous integration mode: run tests once in PhantomJS browser.
             continuous: {
                 singleRun: true,
-                browsers: ['PhantomJS']
+                browsers: ['PhantomJS', 'Chrome']
             }
         },
 
@@ -102,7 +103,8 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('test', ['mochaTest', 'karma:continuous', 'protractor:run']);
+    grunt.registerTask('test', ['mochaTest', 'karma:continuous']);
+    grunt.registerTask('test_e2e', ['protractor:run']);
     grunt.registerTask('dev', ['karma:unit:start', 'watch']); // TODO: jshint, less
     grunt.registerTask('prod', ['test']); // TODO: dev + uglify, concat/copy, cssmin
     grunt.registerTask('default', ['dev']);

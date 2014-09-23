@@ -3,12 +3,14 @@
     "version": "0.0.0",
     "description": "PeerSay MVP",
     "scripts": {
-        "pretest": "npm run update-webdriver",
         "test": "grunt test",
 
         "preupdate-webdriver": "npm install",
         "update-webdriver": "node node_modules/protractor/bin/webdriver-manager update",
         "start-webdriver": "node node_modules/protractor/bin/webdriver-manager start",
+
+        "pretest_e2e": "npm run update-webdriver",
+        "test_e2e": "grunt test_e2e",
 
         "prestart": "npm install",
         "start": "node server.js",

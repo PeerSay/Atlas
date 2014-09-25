@@ -100,12 +100,29 @@ module.exports = function (grunt) {
                 }
             },
             run: {} // grunt requires at least one task
+        },
+
+        jshint: {
+            options: {
+                curly: true,
+                eqeqeq: true,
+                immed: true,
+                latedef: true,
+                newcap: true,
+                noarg: true,
+                sub: true,
+                undef: false,
+                boss: true,
+                eqnull: true,
+                browser: true
+            },
+            all: ['Gruntfile.js', '*.js', 'static/js/**/*.js']
         }
     });
 
-    grunt.registerTask('test', ['mochaTest', 'karma:continuous']);
+    grunt.registerTask('test', ['jshint', 'mochaTest', 'karma:continuous']);
     grunt.registerTask('test_e2e', ['protractor:run']);
-    grunt.registerTask('dev', ['karma:unit:start', 'watch']); // TODO: jshint, less
+    grunt.registerTask('dev', ['jshint', 'karma:unit:start', 'watch']); // TODO: less
     grunt.registerTask('prod', ['test']); // TODO: dev + uglify, concat/copy, cssmin
     grunt.registerTask('default', ['dev']);
 };

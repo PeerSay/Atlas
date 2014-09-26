@@ -8,6 +8,10 @@ module.exports = function (grunt) {
     grunt.initConfig({
         // Config may be useful, eventually
         //cfg: grunt.file.readJSON('config.json'),
+        pkg: grunt.file.readJSON('package.json'),
+        banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+            '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+            '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>*/\n',
 
         // Watch - monitors changes and runs tasks
         //
@@ -22,31 +26,15 @@ module.exports = function (grunt) {
                     'static/**/*.*'
                 ]
             },
-
             karma: {
                 files: ['static/js/**/*.js'],
                 tasks: ['karma:unit:run']
+            },
+            css: {
+                files: ['static/css/**/*.less'],
+                tasks: ['less']
             }
         },
-
-        // Connect - runs web server (might be useful, eventually)
-        //
-        /*connect: {
-            options: {
-                port: 9000,
-                // Change this to '0.0.0.0' to access the server from outside.
-                hostname: 'localhost',
-                livereload: '<%= connect.options.livereload %>'
-            },
-            serve: {
-                options: {
-                    open: true,
-                    base: [
-                        'static/'
-                    ]
-                }
-            }
-        }*/
 
         // Tests - server
         //
@@ -63,7 +51,7 @@ module.exports = function (grunt) {
         //
         karma: {
             options: {
-                basePath : './static',
+                basePath: './static',
                 files: [
                     'js/test/**/*.js'
                 ],
@@ -76,7 +64,7 @@ module.exports = function (grunt) {
             unit: {
                 background: true,
                 singleRun: false,
-                browsers: ['Chrome']
+                browsers: ['PhantomJS']
             },
             // continuous integration mode: run tests once in PhantomJS browser.
             continuous: {
@@ -102,6 +90,8 @@ module.exports = function (grunt) {
             run: {} // grunt requires at least one task
         },
 
+        // Verify the quality of JavaScript code
+        //
         jshint: {
             options: {
                 curly: true,
@@ -117,12 +107,96 @@ module.exports = function (grunt) {
                 browser: true
             },
             all: ['Gruntfile.js', '*.js', 'static/js/**/*.js']
+        },
+
+        // LESS compiler
+        //
+        less: {
+            dev: {
+                options: {
+                    paths: ["static/css"]
+                },
+                files: {
+                    "static/css/app.css": "static/css/app.less"
+                }
+            }
+        },
+
+        // Copy all non-transformed files
+        //
+        copy: {
+            all: {
+                expand: true,
+                cwd: 'static/',
+                src: [
+                    'index.html',
+                    'bower_components/angularjs/angular.{js,min.js,min.js.map}'
+                ],
+                dest: 'dist/'
+            }
+        },
+
+        // Replace several loaded resources in HTML to single include
+        //
+        useminPrepare: {
+            html: 'static/index.html'
+        },
+
+        usemin: {
+            html: ['dist/index.html']
+        },
+
+        // Minify concat-ed file
+        //
+        uglify: {
+            options: {
+                sourceMap: true,
+                banner: '<%= banner %>'
+            }
+            // paths are added by usemin automatically
+        },
+
+        // Asset revisions - allow long caches
+        //
+        rev: {
+            files: {
+                src: ['dist/**/*.{js,css}', '!dist/bower_components/**']
+            }
+        },
+
+        // Clean up build artifacts
+        //
+        clean: {
+            all: ['./dist/*', './tmp']
         }
     });
 
-    grunt.registerTask('test', ['jshint', 'mochaTest', 'karma:continuous']);
+    grunt.registerTask('test', [
+        'jshint',
+        'mochaTest',
+        'karma:continuous'
+    ]);
+
     grunt.registerTask('test_e2e', ['protractor:run']);
-    grunt.registerTask('dev', ['jshint', 'karma:unit:start', 'watch']); // TODO: less
-    grunt.registerTask('prod', ['test']); // TODO: dev + uglify, concat/copy, cssmin
+
+    grunt.registerTask('dev', [
+        'less',
+        'karma:unit:start',
+        'watch'
+    ]);
+
+    grunt.registerTask('build', [
+        'clean',
+        'less',
+        'copy',
+        'useminPrepare',
+            'concat',
+            'uglify',
+            'cssmin',
+            'rev',
+        'usemin'
+    ]);
+
+    grunt.registerTask('prod', ['build']);
     grunt.registerTask('default', ['dev']);
 };

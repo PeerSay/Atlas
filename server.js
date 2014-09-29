@@ -1,4 +1,5 @@
 // app.js
+var compression = require('compression');
 var express = require("express");
 var path = require('path');
 var app = express();
@@ -6,6 +7,8 @@ var http = require('http').Server(app);
 var sio = require('socket.io')(http);
 
 // Static
+app.use(compression());
+
 var static_dir = process.env.DEV ? 'static' : 'dist';
 var static_path = path.join(__dirname, static_dir);
 app.use(express.static(static_path));

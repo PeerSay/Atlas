@@ -27,7 +27,7 @@ module.exports = function (grunt) {
                 ]
             },
             karma: {
-                files: ['static/js/**/*.js'],
+                files: ['static/js/**/*.js', 'static/test/**/*.js'],
                 tasks: ['karma:unit:run']
             },
             css: {
@@ -53,10 +53,10 @@ module.exports = function (grunt) {
             options: {
                 basePath: './static',
                 files: [
-                    'js/test/**/*.js'
+                    'test/**/*.js'
                 ],
                 exclude: [
-                    'js/test/e2e/*.*'
+                    'test/e2e/*.*'
                 ],
                 frameworks: ['mocha', 'chai']
             },
@@ -81,7 +81,7 @@ module.exports = function (grunt) {
                 keepAlive: false,
                 args: {
                     /*seleniumAddress: 'http://localhost:4444/wd/hub',*/
-                    specs: ['./static/js/test/e2e/*.js'],
+                    specs: ['static/test/e2e/*.js'],
                     baseUrl: 'http://localhost:5000',
                     chromeOnly: true,
                     chromeDriver: 'node_modules/protractor/selenium/chromedriver'
@@ -97,7 +97,7 @@ module.exports = function (grunt) {
                 curly: true,
                 eqeqeq: true,
                 immed: true,
-                latedef: true,
+                latedef: false,
                 newcap: true,
                 noarg: true,
                 sub: true,
@@ -106,7 +106,7 @@ module.exports = function (grunt) {
                 eqnull: true,
                 browser: true
             },
-            all: ['Gruntfile.js', '*.js', 'static/js/**/*.js']
+            all: ['Gruntfile.js', '*.js', 'static/js/**/*.js', 'static/test/**/*.js']
         },
 
         // LESS compiler
@@ -130,7 +130,8 @@ module.exports = function (grunt) {
                 cwd: 'static/',
                 src: [
                     'index.html',
-                    'bower_components/angularjs/angular.{js,min.js,min.js.map}'
+                    'bower_components/angularjs/angular.{js,min.js,min.js.map}',
+                    'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}'
                 ],
                 dest: 'dist/'
             }
@@ -197,6 +198,6 @@ module.exports = function (grunt) {
         'usemin'
     ]);
 
-    grunt.registerTask('prod', ['build']);
+    grunt.registerTask('prod', ['build']); // TODO: security, performance
     grunt.registerTask('default', ['dev']);
 };

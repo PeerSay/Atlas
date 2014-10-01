@@ -129,11 +129,25 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'static/',
                 src: [
-                    'index.html',
                     'bower_components/angularjs/angular.{js,min.js,min.js.map}',
                     'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}'
                 ],
                 dest: 'dist/'
+            }
+        },
+
+        // Replace comments in HTML with code (for ga.js)
+        //
+        htmlbuild: {
+            dist: {
+                src: 'static/index.html',
+                dest: 'dist/',
+                options: {
+                    parseTag: 'htmlbuild', // avoid conflict with usemin
+                    scripts: {
+                        ga: ['static/ga.js']
+                    }
+                }
             }
         },
 
@@ -190,6 +204,7 @@ module.exports = function (grunt) {
         'clean',
         'less',
         'copy',
+        'htmlbuild',
         'useminPrepare',
             'concat',
             'uglify',

@@ -13,7 +13,7 @@ function restApi($http) {
 
 
     function getHello() {
-        var url = '/api';
+        var url = '/api/user';
         return $http.get(url);
     }
 }

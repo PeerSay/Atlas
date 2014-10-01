@@ -8,6 +8,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         // Config may be useful, eventually
         //cfg: grunt.file.readJSON('config.json'),
+
         pkg: grunt.file.readJSON('package.json'),
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
             '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
@@ -21,10 +22,7 @@ module.exports = function (grunt) {
                     livereload: 35729,
                     spawn: false
                 },
-                files: [
-                    'Gruntfile.js',
-                    'static/**/*.*'
-                ]
+                files: ['Gruntfile.js', 'static/**/*.*']
             },
             karma: {
                 files: ['static/js/**/*.js', 'static/test/**/*.js'],

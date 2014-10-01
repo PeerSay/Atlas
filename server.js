@@ -1,17 +1,27 @@
-// app.js
-var compression = require('compression');
-var express = require("express");
+// External dependencies
 var path = require('path');
+var express = require("express");
+var compression = require('compression');
+var mongoose = require('mongoose');
+
+// App dependencies
+var config = require('./app/config');
+var api = require('./app/api');
+
+// Connect to DB
+//console.log('[DB] url:' + config.db.url);
+//mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}});
+//mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
+
+// App config
 var app = express();
 var http = require('http').Server(app);
 var sio = require('socket.io')(http);
 
-// Static
+// Set options & middleware
+app.disable('x-powered-by');
 app.use(compression());
-
-var static_dir = process.env.DEV ? 'static' : 'dist';
-var static_path = path.join(__dirname, static_dir);
-app.use(express.static(static_path));
+app.use(express.static(path.join(__dirname, config.web.static_dir)));
 
 // Logger
 app.get('*', function (req, res, next) {
@@ -19,35 +29,30 @@ app.get('*', function (req, res, next) {
     next();
 });
 
-// Routes
-app.get('/', function (req, res) {
-    res.sendFile('index.html');
-});
 
+// REST API
 // Test: curl -is http://localhost:5000/api
-app.get('/api', function (req, res) {
-    res.send({ok: 'Hello World!'});
-});
+//
+app.get('/api/user', api.user);
 
 
 // Run
-
-var port = Number(process.env.PORT || 5000);
-http.listen(port, function () {
-    console.log("Listening on " + port);
+//
+http.listen(config.web.port, function () {
+    console.log("[Web] Listening on %s...", config.web.port);
 });
 
 
 // Socket
-
+//
 sio.on('connection', function (socket) {
-    console.log('New socket: client.id=[%s]', socket.client.id);
+    console.log('[Sock] New socket: client.id=[%s]', socket.client.id);
 
     socket.emit('msg', 'hello');
     socket.join('room');
 
     socket.on('disconnect', function () {
-        console.log('disconnect');
+        console.log('[Sock] disconnect');
     });
 });
 

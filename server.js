@@ -9,9 +9,9 @@ var config = require('./app/config');
 var api = require('./app/api');
 
 // Connect to DB
-//console.log('[DB] url:' + config.db.url);
-//mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}});
-//mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
+console.log('[DB] url:' + config.db.url);
+mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}});
+mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
 // App config
 var app = express();
@@ -23,17 +23,20 @@ app.disable('x-powered-by');
 app.use(compression());
 app.use(express.static(path.join(__dirname, config.web.static_dir)));
 
-// Logger
-app.get('*', function (req, res, next) {
-    console.log('[%s]: %s', req.method, req.url);
+function log (req, res, next) {
+    console.log('[%s]: %s - %s', req.method, req.url, res.statusCode);
     next();
-});
-
+}
 
 // REST API
 // Test: curl -is http://localhost:5000/api
 //
-app.get('/api/user', api.user);
+//app.get('/api/user', api.user);
+api.Users(app).setupRoutes();
+
+
+// Logger (comes last)
+app.all('*', log);
 
 
 // Run

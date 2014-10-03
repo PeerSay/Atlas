@@ -7,3 +7,53 @@ h1 {
 code {
   background: #eee;
 }
+
+body {
+  background: #ddd;
+}
+
+.content {
+  width: 400px;
+  margin: 30px auto;
+  padding: 10px;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 3px;
+  box-shadow: 0 0 1px 3px #ccc;
+}
+
+ul#users {
+
+  li {
+    line-height: 40px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    &:nth-child(even) {
+      background: #eee;
+    }
+
+    .name {
+      float: left;
+      padding-left: 10px;
+      width: 100px;
+    }
+
+    .action {
+      float: right;
+      width: 30px;
+      line-height: 40px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  }
+}
+
+form {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: rgba(255, 254, 197, 0.4);
+  .input-group {
+    margin-bottom: 10px;
+  }
+}

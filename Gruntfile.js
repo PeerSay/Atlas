@@ -128,7 +128,9 @@ module.exports = function (grunt) {
                 cwd: 'static/',
                 src: [
                     'bower_components/angularjs/angular.{js,min.js,min.js.map}',
-                    'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}'
+                    'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}',
+                    'bower_components/bootstrap/dist/css/bootstrap.{css,min.css,min.css.map}',
+                    'bower_components/bootstrap/dist/fonts/*.*'
                 ],
                 dest: 'dist/'
             }

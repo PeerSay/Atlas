@@ -4,24 +4,54 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PeerSay - MVP</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <!-- build:css css/app.css -->
-    <link rel="stylesheet" type="text/css" href="css/app.css">
+    <link rel="stylesheet" href="css/app.css">
     <!-- endbuild -->
 
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
 </head>
-<body ng-app="peersay" ng-controller="hello as m" ng-cloak>
+<body ng-app="peersay" ng-cloak>
 
+<div class="content" ng-controller="Users as m" >
+    <p class="label label-info">Total: {{m.users.length}}</p>
+
+    <ul id="users">
+        <li ng-repeat="u in m.users">
+            <div class="name">{{u.name}}</div>
+            <a class="action glyphicon glyphicon-trash" ng-click="m.removeUser(u)"></a>
+            <a class="action glyphicon glyphicon-edit" ng-click="m.editUser(u)"></a>
+            <div class="email">{{u.email}}</div>
+        </li>
+    </ul>
+    <button class="btn btn-default btn-sm pull-right" ng-show="m.showEdit === false" ng-click="m.addUser()">Add</button>
+
+    <form ng-show="m.showEdit">
+        <div class="input-group">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+            <input type="text" id="name" class="form-control" ng-model="m.edit.name" placeholder="User name">
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+            <input type="text" id="email" class="form-control" ng-model="m.edit.email" placeholder="User email">
+        </div>
+        <button class="btn btn-default btn-sm" ng-click="m.saveUser()">Save</button>
+        <button class="btn btn-sm" ng-click="m.cancel()">Cancel</button>
+    </form>
+</div>
+
+<!--
 <h3>{{m.helloMsg}}</h3>
 <h4>API says: <code>{{m.helloApi}}</code></h4>
 <button ng-click="m.getHello()">Call</button>
 <h4>Socket says: <code>{{m.socketMsg}}</code></h4>
+-->
 
 <script src="bower_components/socket.io-client/socket.io.min.js"></script>
 <script src="bower_components/angularjs/angular.min.js"></script>
 <!-- build:js js/app.js -->
 <script src="js/app.js"></script>
-<script src="js/hello.ctrl.js"></script>
+<script src="js/users.ctrl.js"></script>
 <script src="js/services/rest.svc.js"></script>
 <script src="js/services/socket.svc.js"></script>
 <!-- endbuild -->

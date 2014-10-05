@@ -50,7 +50,7 @@ function Users(rest) {
         } else {
             rest.create('user', m.edit).then(function (res) {
                 m.users.push(res.data);
-            })
+            });
         }
         cancel();
     }
@@ -70,7 +70,7 @@ function Users(rest) {
     function getIdx (id) {
         var idx = -1;
         angular.forEach(m.users, function (obj, i) {
-            if (obj.id == id) {
+            if (obj.id === id) {
                 idx = i;
             }
         });

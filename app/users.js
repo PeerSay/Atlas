@@ -3,6 +3,8 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 
 
+// Service model required for short incremental ids
+//
 var Settings = new Schema({
     nextUserId: { type: Number, default: 1 }
 });
@@ -11,7 +13,8 @@ SettingsModel
     .findOneAndUpdate({}, {}, {upsert: true})
     .exec();
 
-// Schemas
+
+// Schema
 //
 
 var User = new Schema({
@@ -35,16 +38,6 @@ User.pre('save', function (next) {
 // Model
 //
 var UserModel = mongoose.model('User', User);
-
-/*var usr1 = new UserModel({name: 'Ppp', email: '1@2.com'});
-usr1.save(function (err) {
-    if (err) return console.error(err);
-
-    UserModel.find(function (err, users) {
-        if (err) return console.error(err);
-        //console.log(users);
-    });
-});*/
 
 
 module.exports = {

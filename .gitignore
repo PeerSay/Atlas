@@ -34,5 +34,10 @@ bower_components
 *.lnk
 *.cmd
 
-# Example: .css files are derived as we will probably use LESS
-#*.css
+# Tmp/work dirs
+.tmp
+.doc
+.pocs
+
+# .css files are derived as we use LESS
+*.css

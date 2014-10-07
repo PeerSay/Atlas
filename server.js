@@ -6,7 +6,11 @@ var mongoose = require('mongoose');
 
 // App dependencies
 var config = require('./app/config');
-var api = require('./app/api');
+var RestApi = require('./app/rest-api');
+var models = {
+    users: require('./app/users').UserModel
+};
+
 
 // Connect to DB
 console.log('[DB] url:' + config.db.url);
@@ -29,10 +33,7 @@ function log (req, res, next) {
 }
 
 // REST API
-// Test: curl -is http://localhost:5000/api
-//
-//app.get('/api/user', api.user);
-api.Users(app).setupRoutes();
+RestApi(app, models).setupRoutes();
 
 
 // Logger (comes last)

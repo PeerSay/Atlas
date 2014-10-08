@@ -4,6 +4,7 @@ module.exports = {
         static_dir: process.env.DEV ? 'static' : 'dist'
     },
     db: {
-        url: process.env.DEV ? 'mongodb://localhost/test' : process.env.MONGOHQ_URL
+        url: process.env.DEV ? 'mongodb://localhost/peersay' : process.env.MONGOHQ_URL,
+        test_url: 'mongodb://localhost/peersay_test'
     }
 };

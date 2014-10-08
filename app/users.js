@@ -18,8 +18,8 @@ SettingsModel
 //
 
 var User = new Schema({
-    id: Number,
-    email: String,
+    id: {type: Number, unique: true},
+    email: {type: String, required : true, unique: true },
     name: String
 });
 
@@ -41,5 +41,6 @@ var UserModel = mongoose.model('User', User);
 
 
 module.exports = {
+    SettingsModel: SettingsModel,
     UserModel: UserModel
 };

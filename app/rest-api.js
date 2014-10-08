@@ -22,7 +22,7 @@ function RestApi(app, models) {
 
     function readAll(model, req, res, next) {
         model.find({}, 'id name email', function (err, arr) {
-            if (err) return console.error(err);
+            //if (err) return console.error(err);
 
             res.json({ result: arr });
             next();
@@ -33,7 +33,7 @@ function RestApi(app, models) {
         var id = Number(req.params.id);
 
         model.findOne({id: id}, 'id name email', function (err, doc) {
-            if (err) return console.error(err);
+            //if (err) return console.error(err);
 
             if (doc) {
                 res.json({ result: doc });
@@ -55,7 +55,7 @@ function RestApi(app, models) {
         }
 
         model.findOneAndUpdate({id: id}, req.body, function (err, doc) {
-            if (err) return console.error(err);
+            //if (err) return console.error(err);
 
             if (doc) {
                 res.json({ result: doc });
@@ -76,10 +76,14 @@ function RestApi(app, models) {
 
         (new model(req.body))
             .save(function (err, doc) {
-                if (err) return console.error(err);
+                //if (err) return console.error(err);
 
-                res.json({ result: doc});
-                next();
+                if (doc) {
+                    res.json({ result: doc});
+                    next();
+                } else {
+                    modelError(res, err);
+                }
             })
     }
 
@@ -87,7 +91,7 @@ function RestApi(app, models) {
         var id = Number(req.params.id);
 
         model.findOneAndRemove({id: id}, function (err, doc) {
-            if (err) return console.error(err);
+            //if (err) return console.error(err);
 
             if (doc) {
                 res.json({
@@ -125,24 +129,53 @@ function RestApi(app, models) {
         return ret;
     }
 
+    function modelError(res, err) {
+        var errors = {
+            ValidationError: function () {
+                var key = Object.keys(err.errors)[0];
+                var msg = [key, err.errors[key].type].join(' ');
+                return msg;
+            },
+            MongoError: function () {
+                if (err.code === 11000) { // non unique
+                    var error_msg = /dup key:.*"(.*?)"/.exec(err.err);
+                    var msg = [error_msg[1], 'exists'].join(' ');
+                    return msg;
+                }
+                else {
+                    return 'db validation';
+                }
+            }
+        };
+
+        return notValid(res, errors[err.name]());
+    }
+
     function notAcceptable(res) {
-        res
+        return res
             .status(406)
             .send({error: 'Not Acceptable'})
             .end();
     }
 
     function badRequest(res, msg) {
-        res
+        return res
             .status(400)
             .send({error: 'Bad request: ' + msg})
             .end();
     }
 
     function notFound(res, msg) {
-        res
+        return res
             .status(404)
             .send({error: 'Not found: ' + msg})
+            .end();
+    }
+
+    function notValid (res, msg) {
+        return res
+            .status(409)
+            .send({error: 'Not valid: ' + msg})
             .end();
     }
 

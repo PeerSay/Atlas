@@ -1,0 +1,26 @@
+<div class="content" ng-controller="Peers as m" >
+    <p class="label label-info">Total: {{m.users.length}}</p>
+
+    <ul id="users">
+        <li ng-repeat="u in m.users">
+            <div class="name">{{u.name}}</div>
+            <a class="action glyphicon glyphicon-trash" ng-click="m.removeUser(u)"></a>
+            <a class="action glyphicon glyphicon-edit" ng-click="m.editUser(u)"></a>
+            <div class="email">{{u.email}}</div>
+        </li>
+    </ul>
+    <button class="btn btn-default btn-sm pull-right" ng-show="m.showEdit === false" ng-click="m.addUser()">Add</button>
+
+    <form id="add-user" ng-show="m.showEdit">
+        <div class="input-group">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+            <input type="text" id="name" class="form-control" ng-model="m.edit.name" placeholder="User name">
+        </div>
+        <div class="input-group">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+            <input type="text" id="email" class="form-control" ng-model="m.edit.email" placeholder="User email">
+        </div>
+        <button class="btn btn-default btn-sm" ng-click="m.saveUser()">Save</button>
+        <button class="btn btn-sm" ng-click="m.cancel()">Cancel</button>
+    </form>
+</div>

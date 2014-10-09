@@ -132,7 +132,8 @@ module.exports = function (grunt) {
                     'bower_components/angular-route/angular-route.{js,min.js,min.js.map}',
                     'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}',
                     'bower_components/bootstrap/dist/css/bootstrap.{css,min.css,min.css.map}',
-                    'bower_components/bootstrap/dist/fonts/*.*'
+                    'bower_components/bootstrap/dist/fonts/*.*',
+                    'html/*.html'
                 ],
                 dest: 'dist/'
             }
@@ -156,11 +157,11 @@ module.exports = function (grunt) {
         // Replace several loaded resources in HTML to single include
         //
         useminPrepare: {
-            html: 'static/index.html'
+            html: ['static/index.html', 'static/app.html']
         },
 
         usemin: {
-            html: ['dist/index.html']
+            html: ['dist/*.html']
         },
 
         // Minify concat-ed file
@@ -184,7 +185,11 @@ module.exports = function (grunt) {
         // Clean up build artifacts
         //
         clean: {
-            all: ['./dist/*', './tmp']
+            all: [
+                './dist/*',
+                './tmp',
+                'static/css/*.css'
+            ]
         }
     });
 

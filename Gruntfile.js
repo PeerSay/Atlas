@@ -115,6 +115,7 @@ module.exports = function (grunt) {
                     paths: ["static/css"]
                 },
                 files: {
+                    "static/css/public.css": "static/css/public.less",
                     "static/css/app.css": "static/css/app.less"
                 }
             }
@@ -127,7 +128,8 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'static/',
                 src: [
-                    'bower_components/angularjs/angular.{js,min.js,min.js.map}',
+                    'bower_components/angular/angular.{js,min.js,min.js.map}',
+                    'bower_components/angular-route/angular-route.{js,min.js,min.js.map}',
                     'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}',
                     'bower_components/bootstrap/dist/css/bootstrap.{css,min.css,min.css.map}',
                     'bower_components/bootstrap/dist/fonts/*.*'
@@ -140,7 +142,7 @@ module.exports = function (grunt) {
         //
         htmlbuild: {
             dist: {
-                src: 'static/index.html',
+                src: 'static/*.html',
                 dest: 'dist/',
                 options: {
                     parseTag: 'htmlbuild', // avoid conflict with usemin
@@ -196,7 +198,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dev', [
         'less',
-        'karma:unit:start',
+/*        'karma:unit:start',*/
         'watch'
     ]);
 

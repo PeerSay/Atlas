@@ -1,3 +1,3 @@
 /*global angular:true*/
 
-angular.module('peersay', []);
+angular.module('peersay', ['ngRoute']);

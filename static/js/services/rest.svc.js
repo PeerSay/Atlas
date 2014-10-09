@@ -3,10 +3,12 @@
 angular.module('peersay')
     .factory('restApi', restApi);
 
-restApi.$inject = ['$http'];
+restApi.$inject = ['$http', '$q'];
 
-function restApi($http) {
+function restApi($http, $q) {
     var service = {
+        register: register,
+        authenticate: authenticate,
         readAll: readAll,
         read: read,
         update: update,
@@ -22,6 +24,23 @@ function restApi($http) {
     // patch →  PATCH   /collection/id
     // delete → DELETE  /collection/id
 
+    function register () {
+        var deferred = $q.defer();
+        setTimeout(function () {
+            deferred.resolve({ok: true});
+        },200);
+
+        return deferred.promise;
+    }
+
+    function authenticate () {
+        var deferred = $q.defer();
+        setTimeout(function () {
+            deferred.resolve({ok: true});
+        },200);
+
+        return deferred.promise;
+    }
 
     function readAll(collection) {
         var url = '/api/' + collection;

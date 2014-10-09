@@ -1,11 +1,11 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('Users', Users);
+    .controller('Peers', Peers);
 
-Users.$inject = ['restApi'];
+Peers.$inject = ['restApi'];
 
-function Users(rest) {
+function Peers(rest) {
     var m = this;
 
     m.users = [];

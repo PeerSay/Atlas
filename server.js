@@ -1,11 +1,11 @@
 // External dependencies
-var path = require('path');
 var express = require("express");
 var compression = require('compression');
 var mongoose = require('mongoose');
 
 // App dependencies
 var config = require('./app/config');
+var Auth = require('./app/auth');
 var RestApi = require('./app/rest-api');
 var models = {
     users: require('./app/users').UserModel
@@ -19,22 +19,23 @@ mongoose.connection.on('error', console.error.bind(console, 'connection error:')
 
 // App config
 var app = express();
+app.config = config;
 var http = require('http').Server(app);
 var sio = require('socket.io')(http);
 
 // Set options & middleware
 app.disable('x-powered-by');
 app.use(compression());
-app.use(express.static(path.join(__dirname, config.web.static_dir)));
+app.use(express.static(config.web.static_dir));
 
 function log (req, res, next) {
     console.log('[%s]: %s - %s', req.method, req.url, res.statusCode);
     next();
 }
 
-// REST API
+// Setup routes
 RestApi(app, models).setupRoutes();
-
+Auth(app).setupRoutes();
 
 // Logger (comes last)
 app.all('*', log);

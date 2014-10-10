@@ -19,7 +19,7 @@ function Auth(rest, $location) {
     };
     m.signup = signup;
     m.login = login;
-
+    m.logout = logout;
 
     function signup() {
         m.form.$setPristine();
@@ -55,6 +55,13 @@ function Auth(rest, $location) {
                 }
                 m.error.show = true;
             });
+    }
+
+    function logout() {
+        rest.logout()
+            .then(function () {
+                $location.path('/login');
+            })
     }
 
 }

@@ -1,7 +1,10 @@
 // External dependencies
 var express = require("express");
 var compression = require('compression');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var mongoose = require('mongoose');
+var passport = require('passport');
 
 // App dependencies
 var config = require('./app/config');
@@ -27,6 +30,14 @@ var sio = require('socket.io')(http);
 app.disable('x-powered-by');
 app.use(compression());
 app.use(express.static(config.web.static_dir));
+app.use(cookieParser());
+app.use(session({
+    secret: 'some secret',
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 function log (req, res, next) {
     console.log('[%s]: %s - %s', req.method, req.url, res.statusCode);

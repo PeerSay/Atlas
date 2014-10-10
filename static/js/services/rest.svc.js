@@ -9,6 +9,8 @@ function restApi($http, $q) {
     var service = {
         register: register,
         authenticate: authenticate,
+        logout: logout,
+
         readAll: readAll,
         read: read,
         update: update,
@@ -25,13 +27,18 @@ function restApi($http, $q) {
     // delete → DELETE  /collection/id
 
     function register (user) {
-        var url = '/api/register';
+        var url = '/signup';
         return $http.post(url, user);
     }
 
     function authenticate (user) {
-        var url = '/api/authenticate';
+        var url = '/login';
         return $http.post(url, user);
+    }
+
+    function logout() {
+        var url = '/logout';
+        return $http.get(url);
     }
 
     function readAll(collection) {

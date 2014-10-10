@@ -45,7 +45,7 @@ User.statics.authenticate = function (email, password, cb) {
         if (err) return cb(err);
 
         if (!user) {
-            console.log('Failed to find: %s', email);
+            //console.log('Failed to find: %s', email);
             return cb(null, null, code.NOT_FOUND);
         }
 

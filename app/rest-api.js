@@ -154,29 +154,25 @@ function RestApi(app, models) {
     function notAcceptable(res) {
         return res
             .status(406)
-            .send({error: 'Not Acceptable'})
-            .end();
+            .send({error: 'Not Acceptable'});
     }
 
     function badRequest(res, msg) {
         return res
             .status(400)
-            .send({error: 'Bad request: ' + msg})
-            .end();
+            .send({error: 'Bad request: ' + msg});
     }
 
     function notFound(res, msg) {
         return res
             .status(404)
-            .send({error: 'Not found: ' + msg})
-            .end();
+            .send({error: 'Not found: ' + msg});
     }
 
     function notValid(res, msg) {
         return res
             .status(409)
-            .send({error: 'Not valid: ' + msg})
-            .end();
+            .send({error: 'Not valid: ' + msg});
     }
 
 

@@ -1,5 +1,14 @@
-<div class="content" ng-controller="Peers as m" >
-    <p class="label label-info">Total: {{m.users.length}}</p>
+<div class="content"> <!--ng-controller="Peers as m" >-->
+    <div class="page-header">
+        <h3>Nothing useful so far. <small>Come back later...</small></h3>
+    </div>
+
+    <div ng-controller="Auth as m">
+        <button class="btn btn-sm" ng-click="m.logout()">Logout</button>
+    </div>
+
+
+    <!--<p class="label label-info">Total: {{m.users.length}}</p>
 
     <ul id="users">
         <li ng-repeat="u in m.users">
@@ -22,5 +31,6 @@
         </div>
         <button class="btn btn-default btn-sm" ng-click="m.saveUser()">Save</button>
         <button class="btn btn-sm" ng-click="m.cancel()">Cancel</button>
-    </form>
+    </form>-->
+
 </div>

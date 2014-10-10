@@ -17,7 +17,7 @@ function Peers(rest) {
     m.saveUser = save;
     m.cancel = cancel;
 
-    getUsers();
+    //getUsers();
 
 
     function getUsers() {

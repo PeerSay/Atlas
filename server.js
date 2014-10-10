@@ -13,7 +13,7 @@ var models = {
 
 
 // Connect to DB
-console.log('[DB] url:' + config.db.url);
+console.log('[DB] url: %s, security: %d', config.db.url, config.db.hash_iters);
 mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}});
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
@@ -34,8 +34,8 @@ function log (req, res, next) {
 }
 
 // Setup routes
+Auth(app, models.users).setupRoutes();
 RestApi(app, models).setupRoutes();
-Auth(app).setupRoutes();
 
 // Logger (comes last)
 app.all('*', log);

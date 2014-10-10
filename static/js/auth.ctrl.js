@@ -8,7 +8,11 @@ Auth.$inject = ['restApi', '$location'];
 function Auth(rest, $location) {
     var m = this;
 
-    m.showError = false;
+    m.error = {
+        show: false,
+        msg: "Something's wrong"
+
+    };
     m.user = {
         email: 'a@a',
         password: '1'
@@ -18,28 +22,38 @@ function Auth(rest, $location) {
 
 
     function signup() {
-        console.log(m.user);
+        m.form.$setPristine();
 
-        rest.register(m.user.email, m.user.password)
+        rest.register(m.user)
             .then(function (res) {
-                console.log('ok:', res);
+                //console.log('registered:', res);
                 $location.path('/dashboard');
             })
-            .catch(function () {
-                console.log('fail');
+            .catch(function (res) {
+                //console.log('Err: %O',s res);
+                var err = res.data.error;
+                if (err) {
+                    m.error.msg = err;
+                }
+                m.error.show = true;
             });
     }
 
     function login() {
-        console.log(m.user);
+        m.form.$setPristine();
 
-        rest.authenticate(m.user.email, m.user.password)
+        rest.authenticate(m.user)
             .then(function (res) {
-                console.log('ok:', res);
+                //console.log('ok:', res);
                 $location.path('/dashboard');
             })
-            .catch(function () {
-                console.log('fail');
+            .catch(function (res) {
+                //console.log('fail');
+                var err = res.data.error;
+                if (err) {
+                    m.error.msg = err;
+                }
+                m.error.show = true;
             });
     }
 

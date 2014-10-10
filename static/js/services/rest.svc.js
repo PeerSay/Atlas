@@ -24,22 +24,14 @@ function restApi($http, $q) {
     // patch →  PATCH   /collection/id
     // delete → DELETE  /collection/id
 
-    function register () {
-        var deferred = $q.defer();
-        setTimeout(function () {
-            deferred.resolve({ok: true});
-        },200);
-
-        return deferred.promise;
+    function register (user) {
+        var url = '/api/register';
+        return $http.post(url, user);
     }
 
-    function authenticate () {
-        var deferred = $q.defer();
-        setTimeout(function () {
-            deferred.resolve({ok: true});
-        },200);
-
-        return deferred.promise;
+    function authenticate (user) {
+        var url = '/api/authenticate';
+        return $http.post(url, user);
     }
 
     function readAll(collection) {

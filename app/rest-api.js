@@ -84,7 +84,7 @@ function RestApi(app, models) {
                 } else {
                     modelError(res, err);
                 }
-            })
+            });
     }
 
     function remove(model, req, res, next) {
@@ -172,7 +172,7 @@ function RestApi(app, models) {
             .end();
     }
 
-    function notValid (res, msg) {
+    function notValid(res, msg) {
         return res
             .status(409)
             .send({error: 'Not valid: ' + msg})

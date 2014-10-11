@@ -96,7 +96,7 @@ module.exports = function (grunt) {
                 eqeqeq: true,
                 immed: true,
                 latedef: false,
-                newcap: true,
+                newcap: false,
                 noarg: true,
                 sub: true,
                 undef: false,
@@ -115,6 +115,7 @@ module.exports = function (grunt) {
                     paths: ["static/css"]
                 },
                 files: {
+                    "static/css/public.css": "static/css/public.less",
                     "static/css/app.css": "static/css/app.less"
                 }
             }
@@ -127,10 +128,13 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'static/',
                 src: [
-                    'bower_components/angularjs/angular.{js,min.js,min.js.map}',
+                    'bower_components/jquery/dist/jquery.{js,min.js,min.map}',
+                    'bower_components/angular/angular.{js,min.js,min.js.map}',
+                    'bower_components/angular-route/angular-route.{js,min.js,min.js.map}',
                     'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}',
                     'bower_components/bootstrap/dist/css/bootstrap.{css,min.css,min.css.map}',
-                    'bower_components/bootstrap/dist/fonts/*.*'
+                    'bower_components/bootstrap/dist/fonts/*.*',
+                    'html/*.html'
                 ],
                 dest: 'dist/'
             }
@@ -140,7 +144,7 @@ module.exports = function (grunt) {
         //
         htmlbuild: {
             dist: {
-                src: 'static/index.html',
+                src: 'static/*.html',
                 dest: 'dist/',
                 options: {
                     parseTag: 'htmlbuild', // avoid conflict with usemin
@@ -154,11 +158,11 @@ module.exports = function (grunt) {
         // Replace several loaded resources in HTML to single include
         //
         useminPrepare: {
-            html: 'static/index.html'
+            html: ['static/index.html', 'static/app.html']
         },
 
         usemin: {
-            html: ['dist/index.html']
+            html: ['dist/*.html']
         },
 
         // Minify concat-ed file
@@ -182,21 +186,25 @@ module.exports = function (grunt) {
         // Clean up build artifacts
         //
         clean: {
-            all: ['./dist/*', './tmp']
+            all: [
+                './dist/*',
+                './tmp',
+                'static/css/*.css'
+            ]
         }
     });
 
     grunt.registerTask('test', [
         'jshint',
         'mochaTest',
-        'karma:continuous'
+/*        'karma:continuous'*/
     ]);
 
     grunt.registerTask('test_e2e', ['protractor:run']);
 
     grunt.registerTask('dev', [
         'less',
-        'karma:unit:start',
+/*        'karma:unit:start',*/
         'watch'
     ]);
 

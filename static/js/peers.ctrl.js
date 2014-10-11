@@ -1,11 +1,11 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('Users', Users);
+    .controller('Peers', Peers);
 
-Users.$inject = ['restApi'];
+Peers.$inject = ['restApi'];
 
-function Users(rest) {
+function Peers(rest) {
     var m = this;
 
     m.users = [];
@@ -17,7 +17,7 @@ function Users(rest) {
     m.saveUser = save;
     m.cancel = cancel;
 
-    getUsers();
+    //getUsers();
 
 
     function getUsers() {
@@ -33,8 +33,8 @@ function Users(rest) {
     }
 
     function edit(user) {
-        return rest.read('user', user.id).then(function (res) {
-            m.edit = res.data;
+        return rest.read('users', user.id).then(function (res) {
+            m.edit = res.data.result;
             m.showEdit = true;
             //return m.edit;
         });
@@ -44,30 +44,30 @@ function Users(rest) {
         var id = m.edit.id;
 
         if (id) {
-            rest.update('user', m.edit).then(function (res) {
-                m.users[getIdx(id)] = res.data;
+            rest.update('users', m.edit).then(function (res) {
+                m.users[getIdx(id)] = res.data.result;
             });
         } else {
-            rest.create('user', m.edit).then(function (res) {
-                m.users.push(res.data);
+            rest.create('users', m.edit).then(function (res) {
+                m.users.push(res.data.result);
             });
         }
         cancel();
     }
 
-    function remove (user) {
-        rest.remove('user', user.id).then(function (res) {
-            var idx = getIdx(res.data.id);
+    function remove(user) {
+        rest.remove('users', user.id).then(function (res) {
+            var idx = getIdx(res.data.result.id);
             m.users.splice(idx, 1);
         });
     }
 
-    function cancel () {
+    function cancel() {
         m.edit = null;
         m.showEdit = false;
     }
 
-    function getIdx (id) {
+    function getIdx(id) {
         var idx = -1;
         angular.forEach(m.users, function (obj, i) {
             if (obj.id === id) {

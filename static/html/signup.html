@@ -1,0 +1,63 @@
+<div class="container-fluid" ng-controller="Auth as m">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+            <form class="auth" name="m.form" >
+                <h2>Signup</h2>
+
+                <div class="alert alert-warning text-center" role="alert" ng-show="m.form.$pristine && m.error.show">
+                    <strong>Error:</strong> {{m.error.msg}}.
+                </div>
+
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+                    <div class="hint" ng-show="m.form.email.$dirty && m.form.email.$invalid">
+                        <span ng-show="m.form.email.$error.required">Required</span>
+                        <span ng-show="m.form.email.$error.email">Invalid email!</span>
+                    </div>
+                    <input type="email" name="email" class="form-control" placeholder="Your email"
+                            ng-model="m.user.email"
+                            required>
+                </div>
+                <!--<span>form: {{m.form | json}}</span><br>
+                <span>form.$invalid: {{m.form.$invalid | json}}</span><br>
+                <span>form.email.$dirty: {{m.form.email.$dirty}}</span><br>
+                <span>form.email.$invalid: {{m.form.email.$invalid}}</span><br>
+                <span>form.email.$error: {{m.form.email.$error | json}}</span><br>
+                <span>user: {{m.user | json}}</span>-->
+
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+                    <div class="hint" ng-show="m.form.pwd.$dirty && m.form.pwd.$invalid">
+                        <span ng-show="m.form.pwd.$error.required">Required</span>
+                    </div>
+                    <input type="password" id="password" class="form-control" placeholder="Password"
+                            name="pwd"
+                            ng-model="m.user.password"
+                            required>
+                </div>
+
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+                    <div class="hint" ng-show="m.form.pwd2.$dirty && m.form.pwd2.$invalid">
+                        <span ng-show="m.form.pwd2.$error.required">Required</span>
+                        <span ng-show="m.form.pwd2.$error.match">Don't match!</span>
+                    </div>
+                    <input type="password" id="password2" class="form-control" placeholder="Repeat password"
+                            name="pwd2"
+                            ng-model="m.passwordRepeat"
+                            data-match="m.user.password"
+                            required>
+                </div>
+
+                <button class="btn btn-lg btn-success pull-right"
+                        ng-click="m.signup()"
+                        ng-disabled="m.form.$invalid"
+                        >Signup
+                </button>
+
+                <!--<input type="checkbox" ng-click="m.error.show = !m.error.show;">-->
+            </form>
+        </div>
+    </div>
+</div>
+

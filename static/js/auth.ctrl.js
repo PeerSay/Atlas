@@ -1,25 +1,38 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('Auth', Auth);
+    .controller('Auth', Auth)
+    .controller('Main', Main); // TOOD: proper place
 
-Auth.$inject = ['restApi', '$location'];
+Auth.$inject = ['restApi', '$location', '$scope'];
 
-function Auth(rest, $location) {
+
+function Main() {
     var m = this;
+
+    m.setActivePage = function (name) {
+        m.activePage = name;
+    };
+}
+
+
+function Auth(rest, $location, $scope) {
+    var m = this;
+    var pm = $scope.pm; // access parent scope
 
     m.error = {
         show: false,
         msg: "Something's wrong"
-
     };
     m.user = {
-        email: 'a@a',
-        password: '1'
+        email: '',
+        password: ''
     };
     m.signup = signup;
     m.login = login;
     m.logout = logout;
+
+    setHeader();
 
     function signup() {
         m.form.$setPristine();
@@ -28,6 +41,7 @@ function Auth(rest, $location) {
             .then(function (res) {
                 //console.log('registered:', res);
                 $location.path('/dashboard');
+                setHeader();
             })
             .catch(function (res) {
                 //console.log('Err: %O',s res);
@@ -46,6 +60,7 @@ function Auth(rest, $location) {
             .then(function (res) {
                 //console.log('ok:', res);
                 $location.path('/dashboard');
+                setHeader();
             })
             .catch(function (res) {
                 //console.log('fail');
@@ -61,7 +76,13 @@ function Auth(rest, $location) {
         rest.logout()
             .then(function () {
                 $location.path('/login');
-            })
+                setHeader();
+            });
+    }
+
+    function setHeader() {
+        var name = $location.path().replace(/\//, '');
+        pm.setActivePage(name);
     }
 
 }

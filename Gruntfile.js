@@ -128,6 +128,7 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'static/',
                 src: [
+                    'bower_components/jquery/dist/jquery.{js,min.js,min.map}',
                     'bower_components/angular/angular.{js,min.js,min.js.map}',
                     'bower_components/angular-route/angular-route.{js,min.js,min.js.map}',
                     'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}',
@@ -196,7 +197,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', [
         'jshint',
         'mochaTest',
-        'karma:continuous'
+/*        'karma:continuous'*/
     ]);
 
     grunt.registerTask('test_e2e', ['protractor:run']);

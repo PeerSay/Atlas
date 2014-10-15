@@ -40,7 +40,7 @@ function Auth(rest, $location, $scope) {
         rest.register(m.user)
             .then(function (res) {
                 //console.log('registered:', res);
-                $location.path('/dashboard');
+                $location.path('/projects');
                 setHeader();
             })
             .catch(function (res) {
@@ -59,7 +59,7 @@ function Auth(rest, $location, $scope) {
         rest.authenticate(m.user)
             .then(function (res) {
                 //console.log('ok:', res);
-                $location.path('/dashboard');
+                $location.path('/projects');
                 setHeader();
             })
             .catch(function (res) {

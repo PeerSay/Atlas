@@ -10,7 +10,7 @@ function Auth(app, UserModel) {
         // statics
         app.get('/login', sendAppEntry);
         app.get('/signup', sendAppEntry);
-        app.get('/dashboard', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
 
         //auth
         app.post('/signup', jsonParser, signup);
@@ -59,9 +59,10 @@ function Auth(app, UserModel) {
         }
     ));
 
+
     function sendAppEntry(req, res) {
-        if (req.isAuthenticated() && req.path !== '/dashboard') {
-            return res.redirect('/dashboard');
+        if (req.isAuthenticated() && req.path !== '/projects') {
+            return res.redirect('/projects');
         }
 
         res.sendFile('app.html', {

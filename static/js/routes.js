@@ -18,13 +18,13 @@ function config($routeProvider, $locationProvider) {
             controller: 'Auth',
             controllerAs: 'm'
         })
-        .when('/dashboard', {
+        .when('/projects', {
             templateUrl: 'html/dashboard.html',
             controller: 'Peers',
             controllerAs: 'm'
         })
         .otherwise({
-            redirectTo: '/signup'
+            redirectTo: '/login'
         });
 
     $locationProvider.html5Mode(true);

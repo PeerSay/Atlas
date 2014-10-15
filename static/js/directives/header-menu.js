@@ -10,22 +10,23 @@ function headerMenu() {
         controllerAs: 'pm'
     };
 
-    function link(scope, $elem) {
-        var $auth_els = $elem.find('.auth');
-        var $db_els = $elem.find('.dashboard');
+    function link(scope, $navbar) {
+        var $auth_els = $navbar.find('.js-auth');
+        var $app_els = $navbar.find('.js-app');
+        var AUTH_RE = /(login|signup)/;
 
         scope.$watch('pm.activePage', function (value) {
-            var activeLink = $elem.find('.' + value);
+            var activeLink = $navbar.find('.' + value);
             var activeClass = 'active';
-            var is_auth = (value !== 'dashboard');
+            var is_auth = AUTH_RE.test(value);
 
-            $elem
+            $navbar
                 .find('.' + activeClass)
                 .removeClass(activeClass);
             activeLink.addClass(activeClass);
 
             $auth_els.toggle(is_auth);
-            $db_els.toggle(!is_auth);
+            $app_els.toggle(!is_auth);
         });
     }
 }

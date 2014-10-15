@@ -59,13 +59,22 @@ function Auth(app, UserModel) {
         }
     ));
 
+    function sendAppEntry(req, res) {
+        if (req.isAuthenticated() && req.path !== '/dashboard') {
+            return res.redirect('/dashboard');
+        }
+
+        res.sendFile('app.html', {
+            root: app.config.web.static_dir
+        });
+    }
+
 
     function ensureAuthenticated(req, res, next) {
         if (req.isAuthenticated()) {
             return next();
         }
         res.redirect('/login');
-
     }
 
 
@@ -118,14 +127,6 @@ function Auth(app, UserModel) {
     function logout(req, res, next) {
         req.logout();
         res.json({ result: true });
-    }
-
-
-    function sendAppEntry(req, res) {
-        var options = {
-            root: app.config.web.static_dir
-        };
-        res.sendFile('app.html', options);
     }
 
 

@@ -11,6 +11,7 @@ function Auth(app, UserModel) {
         app.get('/login', sendAppEntry);
         app.get('/signup', sendAppEntry);
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects/:id', ensureAuthenticated, sendAppEntry); // send on F5
 
         //auth
         app.post('/signup', jsonParser, signup);
@@ -61,7 +62,8 @@ function Auth(app, UserModel) {
 
 
     function sendAppEntry(req, res) {
-        if (req.isAuthenticated() && req.path !== '/projects') {
+        var AUTH_RE = /(\/login|\/signup)/;
+        if (req.isAuthenticated() && AUTH_RE.test(req.path)) {
             return res.redirect('/projects');
         }
 

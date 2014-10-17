@@ -25,8 +25,8 @@ function Auth(rest, $location, $scope) {
         msg: "Something's wrong"
     };
     m.user = {
-        email: '',
-        password: ''
+        email: 'a@a',
+        password: '1'
     };
     m.signup = signup;
     m.login = login;
@@ -81,8 +81,7 @@ function Auth(rest, $location, $scope) {
     }
 
     function setHeader() {
-        var name = $location.path().replace(/\//, '');
+        var name = $location.path().replace(/\//g, '');
         pm.setActivePage(name);
     }
-
 }

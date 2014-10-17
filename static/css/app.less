@@ -13,7 +13,7 @@ code {
 }
 
 body {
-  background: #ddd;
+  background: #ececec;
 }
 
 /*
@@ -88,51 +88,56 @@ form.auth {
 }
 
 /*
-* TODO
+* Projects
 */
 
-.content {
-  width: 400px;
-  margin: 30px auto;
-  padding: 10px;
-  overflow: hidden;
+
+.tile {
+  display: block;
+  min-height: 100px;
   background: #fff;
-  border-radius: 3px;
-  box-shadow: 0 0 1px 3px #ccc;
-}
+  color: #666;
+  &:hover {
+    color: #000;
+    text-decoration: none;
+  }
 
-ul#users {
-
-  li {
-    line-height: 40px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    &:nth-child(even) {
-      background: #eee;
+  &.new {
+    background: rgba(0,0,0,0.2);
+    color: #ddd;
+    text-align: center;
+    box-shadow: none;
+    &:hover {
+      color: #fff;
     }
-
-    .name {
-      float: left;
-      padding-left: 10px;
-      width: 100px;
-    }
-
-    .action {
-      float: right;
-      width: 30px;
-      line-height: 40px;
-      text-decoration: none;
-      cursor: pointer;
+    h4 {
+      line-height: 45px;
     }
   }
 }
 
-form#add-user {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  background: rgba(255, 254, 197, 0.4);
-  .input-group {
-    margin-bottom: 10px;
+.project {
+  .name { display: block; }
+  .input-group { display: none; }
+
+  &.edit {
+    .name { display: none; }
+    .input-group { display: inline-block; }
+  }
+}
+
+.panel {
+  .btn.menu {
+    position: absolute;
+    padding: 3px 9px;
+    border-radius: 50%;
+    &.top {
+      top: 5px;
+      right: 20px;
+    }
+    &.bottom {
+      bottom: 20px;
+      right: 20px;
+    }
   }
 }

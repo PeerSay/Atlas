@@ -1,0 +1,26 @@
+<div class="container-fluid" ng-controller="Projects as m">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h3><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2" ng-repeat="prj in m.projects">
+            <a class="panel panel-default tile" href="/projects/{{prj.id}}">
+                <div class="panel-body project" ng-class="{edit:prj.edit}">
+                    <h4 class="name">{{prj.name}}</h4>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Project Name">
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
+            <a class="panel panel-default tile new" href ng-click="m.newProject()">
+                <div class="panel-body">
+                    <h4>Create New...</h4>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

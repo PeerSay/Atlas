@@ -51,8 +51,8 @@
                 <li class="dropdown add">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <span class="glyphicon glyphicon-plus-sign"></span> Add <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li class="disabled"><a href="#">Add Project</a></li>
+                    <ul class="dropdown-menu" role="menu" ng-controller="ProjectListCtrl as m">
+                        <li><a href ng-click="m.toggleCreateDlg(true)">Add Project</a></li>
                     </ul>
                 </li>
                 <li class="dropdown user">
@@ -95,7 +95,8 @@
 <script src="/bower_components/angular-route/angular-route.min.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/auth.ctrl.js"></script>
-<script src="/js/projects.ctrl.js"></script>
+<script src="/js/projects/projects.js"></script>
+<script src="/js/projects/projects.ctrl.js"></script>
 <script src="/js/services/rest.svc.js"></script>
 <script src="/js/directives/input-match.js"></script>
 <script src="/js/directives/header-menu.js"></script>

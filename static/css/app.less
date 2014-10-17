@@ -84,7 +84,6 @@ form.auth {
       }
     }
   }
-
 }
 
 /*
@@ -94,6 +93,7 @@ form.auth {
 
 .tile {
   display: block;
+  position: relative;
   min-height: 100px;
   background: #fff;
   color: #666;
@@ -116,24 +116,19 @@ form.auth {
   }
 }
 
-.project {
-  .name { display: block; }
-  .input-group { display: none; }
-
-  &.edit {
-    .name { display: none; }
-    .input-group { display: inline-block; }
-  }
-}
-
 .panel {
+  &.dialog {
+    position: relative;
+    top: -120px;
+  }
+
   .btn.menu {
     position: absolute;
     padding: 3px 9px;
     border-radius: 50%;
     &.top {
       top: 5px;
-      right: 20px;
+      right: 5px;
     }
     &.bottom {
       bottom: 20px;

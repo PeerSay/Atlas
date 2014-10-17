@@ -25,7 +25,7 @@ function config($routeProvider, $locationProvider) {
         })
         .when('/projects/:id', {
             templateUrl: '/html/project-details.html',
-            controller: 'ProjectDetails',
+            controller: 'ProjectDetailsCtrl',
             controllerAs: 'm'
         })
         .otherwise({

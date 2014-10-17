@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-controller="Projects as m">
+<div class="container-fluid" ng-controller="ProjectListCtrl as m">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <h3><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
@@ -7,20 +7,42 @@
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2" ng-repeat="prj in m.projects">
             <a class="panel panel-default tile" href="/projects/{{prj.id}}">
-                <div class="panel-body project" ng-class="{edit:prj.edit}">
-                    <h4 class="name">{{prj.name}}</h4>
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Project Name">
-                    </div>
+                <div class="panel-body">
+                    <h4 class="name">{{prj.title}}</h4>
                 </div>
             </a>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
-            <a class="panel panel-default tile new" href ng-click="m.newProject()">
+            <a class="panel panel-default tile new" href ng-click="m.toggleCreateDlg(true)">
                 <div class="panel-body">
                     <h4>Create New...</h4>
                 </div>
             </a>
+
+            <div class="panel panel-default dialog" ng-show="m.create.showDlg">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Create Project</h3>
+                    <button type="button" class="close btn menu top" ng-click="m.toggleCreateDlg(false)">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <form name="m.form">
+                        <div class="form-group">
+                            <label for="project-title" class="control-label">Title</label>
+                            <input type="text" id="project-title" class="form-control"
+                                    placeholder='Like "Storage Project" for example...'
+                                    autofocus
+                                    required
+                                    ng-model="m.create.title">
+                        </div>
+                        <button class="btn btn-success"
+                                ng-disabled="m.form.$invalid"
+                                ng-click="m.createProject()"
+                                >Create</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

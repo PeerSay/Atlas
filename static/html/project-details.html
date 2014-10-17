@@ -1,7 +1,7 @@
-<div class="container-fluid" ng-controller="ProjectDetails as m">
+<div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h3><span class="glyphicon glyphicon-dashboard"></span> {{m.project.name}}</h3>
+            <h3><span class="glyphicon glyphicon-dashboard"></span> {{m.project.title}}</h3>
         </div>
     </div>
 
@@ -10,7 +10,9 @@
             <div class="panel panel-default tile">
                 <div class="panel-heading">
                     <h3 class="panel-title">Project checklist</h3>
-                    <a href class="btn btn-default menu top"><span class="caret"></span></a>
+                    <button type="button" class="btn btn-default menu top">
+                        <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
+                    </button>
                 </div>
                 <div class="panel-body">
                     <div class="progress">
@@ -26,7 +28,7 @@
                         </li>
                         <li class="list-group-item">
                             <span class="badge">1/10</span>
-                            <input type="checkbox"> <a href="#">Evaluation Requirments</a>
+                            <input type="checkbox"> <a href="#">Evaluation Requirements</a>
                         </li>
                         <li class="list-group-item">
                             <span class="badge">1/10</span>

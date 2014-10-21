@@ -15,7 +15,7 @@ function Storage() {
     }
 
     function set (name, val) {
-        localStorage[name] = JSON.stringify(val)
+        localStorage[name] = JSON.stringify(val);
         return val; // return plain!
     }
 

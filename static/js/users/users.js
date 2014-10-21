@@ -11,6 +11,7 @@ function Users(rest, $location, Menu, Storage) {
     U.signup = signup;
     U.login = login;
     U.logout = logout;
+    U.setHeader = setHeader;
 
     setHeader();
 

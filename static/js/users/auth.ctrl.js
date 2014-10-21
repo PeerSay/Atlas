@@ -11,11 +11,13 @@ function AuthCtrl(Users) {
         msg: "Something is wrong"
     };
     m.user = {
-        email: 'a@a',
-        password: '1'
+        email: '',
+        password: ''
     };
     m.signup = signup;
     m.login = login;
+
+    Users.setHeader(); // switch menu upon navigation
 
     function signup() {
         m.form.$setPristine();

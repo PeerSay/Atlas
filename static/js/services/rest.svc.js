@@ -19,12 +19,7 @@ function restApi($http, $q) {
     };
     return service;
 
-    // General CRUD rule:
-    // create → POST    /collection
-    // read →   GET     /collection[/id]
-    // update → PUT     /collection/id
-    // patch →  PATCH   /collection/id
-    // delete → DELETE  /collection/id
+    // Auth services
 
     function register (user) {
         var url = '/signup';
@@ -40,6 +35,13 @@ function restApi($http, $q) {
         var url = '/logout';
         return $http.get(url);
     }
+
+    // General CRUD rule:
+    // create → POST    /collection
+    // read →   GET     /collection[/id]
+    // update → PUT     /collection/id
+    // patch →  PATCH   /collection/id
+    // delete → DELETE  /collection/id
 
     function readAll(collection) {
         var url = '/api/' + collection;

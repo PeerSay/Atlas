@@ -25,8 +25,8 @@ module.exports = function (grunt) {
                 files: ['Gruntfile.js', 'static/**/*.*']
             },
             karma: {
-                files: ['static/js/**/*.js', 'static/test/**/*.js'],
-                tasks: ['karma:unit:run']
+                files: ['static/js/**/*.js', 'static/test/**/*.js']/*,
+                tasks: ['karma:unit:run']*/
             },
             css: {
                 files: ['static/css/**/*.less'],
@@ -133,6 +133,7 @@ module.exports = function (grunt) {
                     'bower_components/angular-route/angular-route.{js,min.js,min.js.map}',
                     'bower_components/socket.io-client/socket.io.{js,min.js,min.js.map}',
                     'bower_components/bootstrap/dist/css/bootstrap.{css,min.css,min.css.map}',
+                    'bower_components/bootstrap/dist/js/bootstrap.{js,min.js}',
                     'bower_components/bootstrap/dist/fonts/*.*',
                     'html/*.html'
                 ],

@@ -203,5 +203,8 @@ function MongooseModelMock() {
     M.findOneAndRemove = function (query, cb) {
         cb(null, _.find(collection, query));
     };
+    M.create = function (body, cb) {
+        cb(null, _.extend(body, {id: 3}));
+    };
     return M;
 }

@@ -3,16 +3,18 @@ var should = require('chai').should();
 var mongoose = require('mongoose');
 
 var config = require('../app/config');
-var db = require('../app/users');
-var UserModel = db.UserModel;
-var SettingsModel = db.SettingsModel;
+var user = require('../app/models/users');
+var project = require('../app/models/projects');
+var UserModel = user.UserModel;
+var SettingsModel = user.SettingsModel;
+var Project = project.ProjectModel;
 
 // Connect to test DB
 mongoose.connect(config.db.test_url/*, {server: {socketOptions: {keepAlive: 1}}}*/);
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
 
-describe('Users Model', function () {
+describe('User Model', function () {
 
     beforeEach(function (done) {
         // Ensure initial id=1
@@ -141,4 +143,100 @@ describe('Users Model', function () {
         });
     });
 
+});
+
+
+describe('Project Model', function () {
+    var curUser = null;
+
+    beforeEach(function (done) {
+        // Ensure one entry exists
+        var curUser = new UserModel({name: 'me', email: 'some@email.com', password: '1'})
+            .save(done);
+    });
+
+    afterEach(function (done) {
+        UserModel.remove({}, function () {
+            Project.remove({}, done);
+        });
+        curUser = null;
+        //done();
+    });
+
+    describe('CRUD', function () {
+
+        it('should have project stub created by default', function (done) {
+            UserModel
+                .findByEmail('some@email.com')
+                .exec(function (err, user) {
+                    should.not.exist(err);
+
+                    user.projects[0].should.be.an('object');
+                    user.projects[0].should.have.property('id').equal(1);
+                    user.projects[0].should.have.property('title').equal('Welcome Project'); // XXX
+                    done();
+                });
+        });
+
+        it('should populate full Project form stub, which has collaborator set', function (done) {
+            UserModel
+                .findByEmail('some@email.com')
+                .populate('projects._ref')
+                .exec(function (err, user) {
+                    should.not.exist(err);
+                    var project = user.projects[0];
+                    project._ref.collaborators[0].should.be.deep.equal(user._id);
+                    done();
+                });
+        });
+
+        it('should create project by user', function (done) {
+            UserModel
+                .findByEmail('some@email.com')
+                .exec(function (err, user) {
+                    should.not.exist(err);
+
+                    user.createProject({
+                        title: 'xyz'
+                    }, function (err, prj) {
+                        should.not.exist(err);
+                        prj.should.have.property('title').equal('xyz');
+
+                        UserModel
+                            .findByEmail(user.email)
+                            .populate('projects._ref')
+                            .exec(function (err, user) {
+                                should.not.exist(err);
+
+                                var project = user.projects[1];
+                                project.should.have.property('id').equal(2);
+                                project._ref.collaborators[0].should.be.deep.equal(user._id);
+                                done();
+                            });
+                    });
+                });
+        });
+
+        it('should remove project by id', function (done) {
+            UserModel
+                .findByEmail('some@email.com')
+                .exec(function (err, user) {
+                    should.not.exist(err);
+
+                    user.removeProject(1, function (err, prj) {
+                        should.not.exist(err);
+
+                        UserModel
+                            .findByEmail(user.email)
+                            .populate('projects._ref')
+                            .exec(function (err, user) {
+                                should.not.exist(err);
+                                should.not.exist(user.projects[1]);
+                                done();
+                            });
+                    });
+                });
+        });
+
+    });
 });

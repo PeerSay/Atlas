@@ -1,0 +1,58 @@
+<div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h3><span class="glyphicon glyphicon-dashboard"></span> {{m.project.title}}</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+            <div class="panel panel-default tile">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Project checklist</h3>
+                    <button type="button" class="btn btn-default menu top">
+                        <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
+                            <span class="sr-only">60% Complete</span>
+                        </div>
+                    </div>
+
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span class="badge">7/10</span>
+                            <input type="checkbox"> <a href="#">Project Essentials</a>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">1/10</span>
+                            <input type="checkbox"> <a href="#">Evaluation Requirements</a>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">1/10</span>
+                            <input type="checkbox"> <a href="#">Vendor Input</a>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">1/10</span>
+                            <input type="checkbox"> <a href="#">Shortlists</a>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">1/10</span>
+                            <input type="checkbox"> <a href="#">POCs</a>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">1/10</span>
+                            <input type="checkbox"> <a href="#">Vendor Reference</a>
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">1/10</span>
+                            <input type="checkbox"> <a href="#">Audit / Debrief</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

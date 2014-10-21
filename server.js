@@ -11,7 +11,7 @@ var config = require('./app/config');
 var Auth = require('./app/auth');
 var RestApi = require('./app/rest-api');
 var models = {
-    users: require('./app/users').UserModel
+    users: require('./app/models/users').UserModel
 };
 
 

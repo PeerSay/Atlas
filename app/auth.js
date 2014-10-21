@@ -10,7 +10,8 @@ function Auth(app, UserModel) {
         // statics
         app.get('/login', sendAppEntry);
         app.get('/signup', sendAppEntry);
-        app.get('/dashboard', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects/:id', ensureAuthenticated, sendAppEntry); // send on F5
 
         //auth
         app.post('/signup', jsonParser, signup);
@@ -54,10 +55,28 @@ function Auth(app, UserModel) {
                 if (!user && code === 2) {
                     return done(null, false, { message: 'Incorrect password.' });
                 }
-                return done(null, user);
+
+                var ret = {
+                    id: user.id,
+                    email: user.email,
+                    projects: user.projects
+                };
+                return done(null, ret);
             });
         }
     ));
+
+
+    function sendAppEntry(req, res) {
+        var AUTH_RE = /(\/login|\/signup)/;
+        if (req.isAuthenticated() && AUTH_RE.test(req.path)) {
+            return res.redirect('/projects');
+        }
+
+        res.sendFile('app.html', {
+            root: app.config.web.static_dir
+        });
+    }
 
 
     function ensureAuthenticated(req, res, next) {
@@ -65,7 +84,6 @@ function Auth(app, UserModel) {
             return next();
         }
         res.redirect('/login');
-
     }
 
 
@@ -109,6 +127,7 @@ function Auth(app, UserModel) {
 
             req.login(user, function (err) {
                 if (err) { return next(err); }
+
                 res.json({ result: user});
             });
         })(req, res, next);
@@ -118,14 +137,6 @@ function Auth(app, UserModel) {
     function logout(req, res, next) {
         req.logout();
         res.json({ result: true });
-    }
-
-
-    function sendAppEntry(req, res) {
-        var options = {
-            root: app.config.web.static_dir
-        };
-        res.sendFile('app.html', options);
     }
 
 

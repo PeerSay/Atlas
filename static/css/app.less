@@ -90,7 +90,6 @@ form.auth {
 * Projects
 */
 
-
 .tile {
   display: block;
   position: relative;
@@ -103,7 +102,7 @@ form.auth {
   }
 
   &.new {
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     color: #ddd;
     text-align: center;
     box-shadow: none;
@@ -121,18 +120,32 @@ form.auth {
     position: relative;
     top: -120px;
   }
+}
 
-  .btn.menu {
+/*
+  Tile Menus
+*/
+
+.btn.menu {
+  position: absolute;
+  padding: 3px 9px;
+  border-radius: 50%;
+  &.top {
+    right: 5px;
+    top: 5px;
+  }
+  &.bottom {
+    bottom: 0px;
+    right: -25px;
+  }
+}
+
+.tile-container {
+  position: relative;
+
+  .btn-group {
     position: absolute;
-    padding: 3px 9px;
-    border-radius: 50%;
-    &.top {
-      top: 5px;
-      right: 5px;
-    }
-    &.bottom {
-      bottom: 20px;
-      right: 20px;
-    }
+    bottom: 25px;
+    right: 45px;
   }
 }

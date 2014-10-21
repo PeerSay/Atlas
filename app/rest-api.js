@@ -13,15 +13,59 @@ function RestApi(app, models) {
     function setupRoutes() {
         app.get('/api/users', _.curry(validateAccept)(readAll, 'users'));
         app.get('/api/users/:id', _.curry(validateAccept)(read, 'users'));
-        app.put('/api/users/:id', jsonParser, _.curry(validateAccept)(update, 'users'));
-        app.post('/api/users', jsonParser, _.curry(validateAccept)(create, 'users'));
+        app.put('/api/users/:id', jsonParser, _.curry(validateAcceptAndBody)(update, 'users'));
+        app.post('/api/users', jsonParser, _.curry(validateAcceptAndBody)(create, 'users'));
         app.delete('/api/users/:id', _.curry(validateAccept)(remove, 'users'));
+
+        app.post('/api/projects', jsonParser, _.curry(validateAcceptAndBody)(createProject, 'users'));
+        app.delete('/api/projects/:id', _.curry(validateAccept)(removeProject, 'users'));
         return U;
     }
 
+    function createProject(model, req, res, next) {
+        var project = req.body;
+
+        if (!req.user) {
+            // TODO: real auth
+            return notFound(res, 1);
+        }
+
+        model.findOne({id: req.user.id}, function (err, user) {
+            //if (err) return console.error(err);
+
+            user.createProject(project, function (err, prj) {
+                //if (err) return console.error(err);
+
+                res.json({ result: prj });
+            });
+        });
+    }
+
+    function removeProject(model, req, res, next) {
+        var project_id = Number(req.params.id);
+
+        if (!req.user) {
+            // TODO: real auth
+            return notFound(res, 1);
+        }
+
+        model.findOne({id: req.user.id}, function (err, user) {
+            //if (err) return console.error(err);
+
+            console.log('>>Removing for: ', user);
+
+            user.removeProject(project_id, function (err, result) {
+                //if (err) return console.error(err);
+
+                res.json({ result: result });
+            });
+        });
+    }
+
+    // Generic CRUD API (TODO: see if all can be expressed with it)
 
     function readAll(model, req, res, next) {
-        model.find({}, 'id name email', function (err, arr) {
+        model.find({}, '', function (err, arr) {
             //if (err) return console.error(err);
 
             res.json({ result: arr });
@@ -32,12 +76,11 @@ function RestApi(app, models) {
     function read(model, req, res, next) {
         var id = Number(req.params.id);
 
-        model.findOne({id: id}, 'id name email', function (err, doc) {
-            //if (err) return console.error(err);
+        model.findOne({id: id}, 'id email projects -_id', function (err, doc) { // XXX: not generic!
+            //if (err) return console.error(err); // XXX: 500 err
 
             if (doc) {
                 res.json({ result: doc });
-                next();
             }
             else {
                 notFound(res, id);
@@ -47,12 +90,6 @@ function RestApi(app, models) {
 
     function update(model, req, res, next) {
         var id = Number(req.params.id);
-
-        delete req.body._id; // XXX
-
-        if (!validateBody(req.body, res)) {
-            return;
-        }
 
         model.findOneAndUpdate({id: id}, req.body, function (err, doc) {
             //if (err) return console.error(err);
@@ -70,21 +107,16 @@ function RestApi(app, models) {
     function create(model, req, res, next) {
         delete req.body._id; // XXX
 
-        if (!validateBody(req.body, res)) {
-            return;
-        }
+        model.create(req.body, function (err, doc) {
+            //if (err) return console.error(err);
 
-        (new model(req.body))
-            .save(function (err, doc) {
-                //if (err) return console.error(err);
-
-                if (doc) {
-                    res.json({ result: doc});
-                    next();
-                } else {
-                    modelError(res, err);
-                }
-            });
+            if (doc) {
+                res.json({ result: doc});
+                next();
+            } else {
+                modelError(res, err);
+            }
+        });
     }
 
     function remove(model, req, res, next) {
@@ -117,6 +149,14 @@ function RestApi(app, models) {
                 notAcceptable(res);
             }
         });
+    }
+
+    function validateAcceptAndBody(method, model_name, req, res, next) {
+        if (!validateBody(req.body, res)) {
+            return;
+        }
+
+        validateAccept(method, model_name, req, res, next);
     }
 
     function validateBody(body, res) {

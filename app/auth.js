@@ -121,6 +121,7 @@ function Auth(app, UserModel) {
 
             req.login(user, function (err) {
                 if (err) { return next(err); }
+
                 res.json({ result: user});
             });
         })(req, res, next);

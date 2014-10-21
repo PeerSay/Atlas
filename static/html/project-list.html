@@ -5,12 +5,21 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2" ng-repeat="prj in m.projects">
+        <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2 tile-container" ng-repeat="prj in m.projects">
             <a class="panel panel-default tile" href="/projects/{{prj.id}}">
                 <div class="panel-body">
                     <h4 class="name">{{prj.title}}</h4>
                 </div>
             </a>
+            <div class="btn-group" ng-click="$event.preventDefault();">
+                <button type="button" class="btn btn-default dropdown-toggle menu bottom" data-toggle="dropdown">
+                    <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href
+                            ng-click="m.removeProject(prj.id)">Remove</a></li>
+                </ul>
+            </div>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
             <a class="panel panel-default tile new" href ng-click="m.toggleCreateDlg(true)">

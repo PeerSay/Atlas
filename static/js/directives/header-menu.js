@@ -6,7 +6,7 @@ function headerMenu() {
     return {
         restrict: 'A',
         link: link,
-        controller: 'Main',
+        controller: 'MainCtrl',
         controllerAs: 'pm'
     };
 

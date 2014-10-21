@@ -10,17 +10,17 @@ function config($routeProvider, $locationProvider) {
     $routeProvider
         .when('/signup', {
             templateUrl: '/html/signup.html',
-            controller: 'Auth',
+            controller: 'AuthCtrl',
             controllerAs: 'm'
         })
         .when('/login', {
             templateUrl: '/html/login.html',
-            controller: 'Auth',
+            controller: 'AuthCtrl',
             controllerAs: 'm'
         })
         .when('/projects', {
             templateUrl: '/html/project-list.html',
-            controller: 'Projects',
+            controller: 'Projects', // TODO: proper Ctrl?
             controllerAs: 'm'
         })
         .when('/projects/:id', {

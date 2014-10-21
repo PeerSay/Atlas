@@ -4,57 +4,70 @@ angular.module('peersay')
     .factory('Projects', Projects);
 
 Projects.$inject = ['restApi'];
-
-var PROJECTS = [
-    {
-        id: 1,
-        title: 'Welcome Project',
-        dueTo: +new Date
-    },
-    {
-        id: 2,
-        title: 'My Project',
-        dueTo: +new Date + 100
-    }
-];
-
 function Projects(rest) {
+    var P = {};
 
-    Projects.projects = [];
-    Projects.create = {
+    P.projects = [];
+    P.create = {
         showDlg: false,
         title: ''
     };
-    Projects.getProjects = getProjects;
-    Projects.toggleCreateDlg = toggleCreateDlg;
-    Projects.createProject = createProject;
-
-    getProjects();
+    P.getProjects = getProjects;
+    P.toggleCreateDlg = toggleCreateDlg;
+    P.createProject = createProject;
+    P.removeProject = removeProject;
 
 
     function getProjects() {
-        Projects.projects = PROJECTS;
+        return rest.read('users', 1)// TODO: user id
+            .success(function (data) {
+                P.projects = data.result.projects;
+            })
+            .error(function () {
+                console.log('TODO: handle getProjects API error');
+            });
     }
 
     function toggleCreateDlg(on) {
-        Projects.create.showDlg = on;
+        P.create.showDlg = on;
     }
 
     function createProject() {
-        var id = nextId();
-        Projects.projects.push({
-            id: id,
-            title: Projects.create.title,
-            dueTo: +new Date
+        return rest.create('projects', {title: P.create.title})
+            .success(function (data) {
+                P.projects.push(data.result);
+            })
+            .error(function () {
+                console.log('TODO: handle createProject API error');
+            })
+            .then(function () {
+                P.create.showDlg = false; // UX: or not hide?
+                P.create.title = '';
+            });
+    }
+
+    function removeProject(id) {
+        return rest.remove('projects', id)
+            .success(function (data) {
+                console.log('>>Removed: ', data);
+
+                P.projects.splice(getIdxbyId(data.result.id), 1);
+            })
+            .error(function () {
+                console.log('TODO: handle createProject API error');
+            });
+    }
+
+    function getIdxbyId(id) {
+        var res = P.projects.length; // out-of-bounds
+        $.each(P.projects, function (i, v) {
+            if (v.id === id) {
+                res = i;
+                return false;
+            }
         });
-
-        Projects.create.showDlg = false;
-        Projects.create.title = '';
+        return res;
     }
 
-    function nextId() {
-        return Projects.projects[Projects.projects.length - 1].id + 1
-    }
-
-    return Projects;
+    return P;
 }

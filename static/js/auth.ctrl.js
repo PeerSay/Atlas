@@ -1,13 +1,11 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('Auth', Auth)
-    .controller('Main', Main); // TOOD: proper place
-
-Auth.$inject = ['restApi', '$location', '$scope'];
+    .controller('AuthCtrl', AuthCtrl)
+    .controller('MainCtrl', MainCtrl); // TOOD: proper place
 
 
-function Main() {
+function MainCtrl() { // TODO: to proper place
     var m = this;
 
     m.setActivePage = function (name) {
@@ -15,8 +13,8 @@ function Main() {
     };
 }
 
-
-function Auth(rest, $location, $scope) {
+AuthCtrl.$inject = ['restApi', '$location', '$scope'];
+function AuthCtrl(rest, $location, $scope) {
     var m = this;
     var pm = $scope.pm; // access parent scope
 

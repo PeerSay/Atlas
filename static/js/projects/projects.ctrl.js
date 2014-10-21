@@ -2,8 +2,7 @@
 
 angular.module('peersay')
     .controller('ProjectListCtrl', ProjectListCtrl)
-    .controller('ProjectDetailsCtrl', ProjectDetailsCtrl)
-    .controller('MenuCtrl', MenuCtrl);
+    .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
 ProjectListCtrl.$inject = ['Projects'];
 function ProjectListCtrl(Projects) {
@@ -31,11 +30,4 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
     m.project = $.map(Projects.projects, function (p) {
         return (p.id !== id) ? null : p;
     })[0];
-}
-
-
-MenuCtrl.$inject = ['Projects']; // TODO: to proper place
-function MenuCtrl(Projects) {
-    var m = this;
-    m.toggleCreateDlg = Projects.toggleCreateDlg.bind(Projects);
 }

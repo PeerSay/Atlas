@@ -55,7 +55,13 @@ function Auth(app, UserModel) {
                 if (!user && code === 2) {
                     return done(null, false, { message: 'Incorrect password.' });
                 }
-                return done(null, user);
+
+                var ret = {
+                    id: user.id,
+                    email: user.email,
+                    projects: user.projects
+                };
+                return done(null, ret);
             });
         }
     ));

@@ -3,10 +3,11 @@
 angular.module('peersay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['restApi'];
-function Projects(rest) {
+Projects.$inject = ['restApi', 'Users'];
+function Projects(rest, Users) {
     var P = {};
 
+    //P.user = Users.user;
     P.projects = [];
     P.create = {
         showDlg: false,
@@ -19,7 +20,7 @@ function Projects(rest) {
 
 
     function getProjects() {
-        return rest.read('users', 1)// TODO: user id
+        return rest.read('users', Users.user.id)
             .success(function (data) {
                 P.projects = data.result.projects;
             })
@@ -49,8 +50,6 @@ function Projects(rest) {
     function removeProject(id) {
         return rest.remove('projects', id)
             .success(function (data) {
-                console.log('>>Removed: ', data);
-
                 P.projects.splice(getIdxbyId(data.result.id), 1);
             })
             .error(function () {

@@ -52,8 +52,6 @@ function RestApi(app, models) {
         model.findOne({id: req.user.id}, function (err, user) {
             //if (err) return console.error(err);
 
-            console.log('>>Removing for: ', user);
-
             user.removeProject(project_id, function (err, result) {
                 //if (err) return console.error(err);
 

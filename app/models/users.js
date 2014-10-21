@@ -49,7 +49,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
         PWD_MISMATCH: 2
     };
 
-    this.findOne({email: email}, 'id email password -_id', function (err, user) {
+    this.findOne({email: email}, 'id -_id email password projects', function (err, user) {
         if (err) return cb(err);
 
         if (!user) {
@@ -65,11 +65,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
                 return cb(null, null, code.PWD_MISMATCH);
             }
 
-            var ret = {
-                id: user.id,
-                email: user.email
-            };
-            return cb(null, ret);
+            return cb(null, user);
         });
     });
 

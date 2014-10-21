@@ -13,12 +13,12 @@
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
 
 </head>
-<body ng-app="peersay" ng-cloak ng-controller="MainCtrl as pm">
+<body ng-app="peersay" ng-cloak>
 <!--[if lt IE 8]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
 
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" data-header-menu>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="MenuCtrl as m" data-header-menu>
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -51,8 +51,8 @@
                 <li class="dropdown add">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <span class="glyphicon glyphicon-plus-sign"></span> Add <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu" ng-controller="MenuCtrl as m">
-                        <li><a href ng-click="m.toggleCreateDlg(true)">Add Project</a></li>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href ng-click="m.project.toggleCreateDlg(true)">Add Project</a></li>
                     </ul>
                 </li>
                 <li class="dropdown user">
@@ -64,8 +64,8 @@
                         <li class="disabled"><a href="#">Edit Profile</a></li>
                         <li class="disabled"><a href="#">Edit Organization</a></li>
                         <li class="divider"></li>
-                        <li ng-controller="AuthCtrl as m">
-                            <a href="#" ng-click="m.logout()">Log Out</a>
+                        <li>
+                            <a href="#" ng-click="m.user.logout()">Log Out</a>
                         </li>
                     </ul>
                 </li>
@@ -94,10 +94,13 @@
 <!-- build:js js/app.js -->
 <script src="/bower_components/angular-route/angular-route.min.js"></script>
 <script src="/js/app.js"></script>
-<script src="/js/auth.ctrl.js"></script>
+<script src="/js/menu.js"></script>
+<script src="/js/users/users.js"></script>
+<script src="/js/users/auth.ctrl.js"></script>
 <script src="/js/projects/projects.js"></script>
 <script src="/js/projects/projects.ctrl.js"></script>
 <script src="/js/services/rest.svc.js"></script>
+<script src="/js/services/storage.svc.js"></script>
 <script src="/js/directives/input-match.js"></script>
 <script src="/js/directives/header-menu.js"></script>
 <script src="/js/routes.js"></script>

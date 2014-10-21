@@ -6,8 +6,8 @@ function headerMenu() {
     return {
         restrict: 'A',
         link: link,
-        controller: 'MainCtrl',
-        controllerAs: 'pm'
+        controller: 'MenuCtrl',
+        controllerAs: 'm'
     };
 
     function link(scope, $navbar) {
@@ -15,7 +15,7 @@ function headerMenu() {
         var $app_els = $navbar.find('.js-app');
         var AUTH_RE = /(login|signup)/;
 
-        scope.$watch('pm.activePage', function (value) {
+        scope.$watch('m.activePage.name', function (value) {
             var activeLink = $navbar.find('.' + value);
             var activeClass = 'active';
             var is_auth = AUTH_RE.test(value);

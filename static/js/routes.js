@@ -20,7 +20,7 @@ function config($routeProvider, $locationProvider) {
         })
         .when('/projects', {
             templateUrl: '/html/project-list.html',
-            controller: 'Projects', // TODO: proper Ctrl?
+            controller: 'ProjectListCtrl',
             controllerAs: 'm'
         })
         .when('/projects/:id', {

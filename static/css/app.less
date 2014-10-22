@@ -36,52 +36,47 @@ body {
 }
 
 /*
+* Alerts
+*/
+
+/*.alert {
+  margin: -62px -20px 10px;;
+}*/
+
+/*
 * Auth forms
 */
 
-form.auth {
-  padding: 30px 40px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  background: #fff;
+.panel.auth {
   box-shadow: 0 0 1px 3px #ccc;
   overflow: hidden;
 
-  h2 {
-    margin: 0 0 55px;
-  }
-  .alert {
-    margin: -62px -20px 10px;;
-  }
-  .input-group {
-    margin-bottom: 10px;
-    .hint {
-      position: absolute;
-      bottom: 35px;
-      right: -10px;
-      z-index: 3;
-      background: #FFFFBE;
-      padding: 2px 10px;
-      border-radius: 5px 5px 5px 0;
-      color: #CD5C5C;
-      border: 1px solid #EAB6B6;
+  .hint {
+    position: absolute;
+    bottom: 35px;
+    right: -10px;
+    z-index: 3;
+    background: #FFFFBE;
+    padding: 2px 10px;
+    border-radius: 5px 5px 5px 0;
+    color: #CD5C5C;
+    border: 1px solid #EAB6B6;
 
-      &:before, &:after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -8px;
-        border-top: 10px solid #FFFFBE;
-        border-right: 10px solid transparent;
-      }
-      &:before {
-        left: -1px;
-        bottom: -9px;
-        border-top: 9px solid #EAB6B6;
-      }
-      span {
-        display: block;
-      }
+    &:before, &:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      border-top: 10px solid #FFFFBE;
+      border-right: 10px solid transparent;
+    }
+    &:before {
+      left: -1px;
+      bottom: -9px;
+      border-top: 9px solid #EAB6B6;
+    }
+    span {
+      display: block;
     }
   }
 }

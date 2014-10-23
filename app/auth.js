@@ -1,10 +1,15 @@
+var _ = require('lodash');
 var jsonParser = require('body-parser').json();
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var LinkedInStrategy = require('passport-linkedin').Strategy;
 
+var config = require('../app/config');
 
-function Auth(app, UserModel) {
+function Auth(app, models) {
     var U = {};
+    var User = models.User;
+    var errors = models.errors;
 
     function setupRoutes() {
         // statics
@@ -13,25 +18,31 @@ function Auth(app, UserModel) {
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
         app.get('/projects/:id', ensureAuthenticated, sendAppEntry); // send on F5
 
-        //auth
-        app.post('/signup', jsonParser, signup);
-        app.post('/login', jsonParser, login);
-        app.get('/logout', logout);
+        // api auth
+        app.post('/api/auth/signup', jsonParser, register);
+        app.post('/api/auth/login', jsonParser, authenticate);
+        app.post('/api/auth/logout', logout);
+
+        // linkedin
+        app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
+        app.get('/auth/linkedin/callback', authenticateByLinkedIn); // redirect back from linkedin.com
 
         return U;
     }
 
-    //Setup passport
+    // Setup passport
+    //
     passport.serializeUser(function (user, done) {
-        //console.log('Passport: serialize: %s', user.email);
+        console.log('[AUTH]: Passport: serialize for [%s]', user.email);
+
         done(null, user.email);
     });
 
     passport.deserializeUser(function (email, done) {
-        //console.log('Passport: deserialize: %s', email);
+        console.log('[AUTH]: Passport: deserialize for [%s]', email);
 
-        UserModel.findByEmail(email, function (err, user) {
-            //console.log('Passport: deserialized: %s', user.email);
+        User.findByEmail(email, function (err, user) {
+            console.log('[AUTH] Passport: deserialized: ', user);
 
             done(err, user);
         });
@@ -41,32 +52,156 @@ function Auth(app, UserModel) {
             usernameField: 'email',
             passwordField: 'password'
         },
-        function (username, password, done) {
-            console.log('Passport: use - username=%s, pwd=%s', username, password);
+        passportVerifyLocal
+    ));
 
-            UserModel.authenticate(username, password, function (err, user, code) {
-                console.log('Passport: used - authenticated? user=%s, code=%s', (user ? user.email : null), code);
-
-                if (err) { return done(err); }
-
-                if (!user && code === 1) {
-                    return done(null, false, { message: 'Incorrect username.' });
-                }
-                if (!user && code === 2) {
-                    return done(null, false, { message: 'Incorrect password.' });
-                }
-
-                var ret = {
-                    id: user.id,
-                    email: user.email,
-                    projects: user.projects
-                };
-                return done(null, ret);
-            });
-        }
+    passport.use(new LinkedInStrategy({
+            consumerKey: config.auth.linkedin.api_key,
+            consumerSecret: config.auth.linkedin.secret_key,
+            callbackURL: config.web.base_url + "/auth/linkedin/callback",
+            profileFields: ['id', 'first-name', 'last-name', 'email-address']
+        },
+        passportVerifyLinkedIn
     ));
 
 
+    // Register
+    //
+    function register(req, res, next) {
+        var params = req.body;
+        var email = params.email;
+        var password = params.password;
+
+        console.log('[AUTH] Register-local attempt by [%s]', email);
+
+        User.register(email, password, params, function (err, user, code) {
+            if (err) return next(err); //TODO
+
+            if (code === errors.AUTH_DUPLICATE) {
+                var msg = 'duplicate ' + email;
+                console.log('AUTH] Failed: info=%s', msg);
+                return notValid(res, msg);
+            }
+
+            loginUser(req, res, {
+                user: user,
+                isNew: (code === errors.AUTH_NEW_OK),
+                longSession: true // don't ask on signup, long by default
+            });
+        });
+    }
+
+    function loginUser(req, res, options) {
+        var user = _.pick(options.user, ['id', 'email', 'projects']); // TODO: pick projects - move to model
+        user.isNew = options.isNew; // TODO: handle on client
+
+        // TODO: handle longSession
+
+        console.log('[AUTH] Success-local [%s]', user.email);
+
+        req.login(user, function (err) {
+            if (err) { return next(err); }
+            res.json({ result: user});
+        });
+    }
+
+    // Authenticate - local
+    //
+    function authenticate(req, res, next) {
+        var params = req.body;
+        // delegates to passportVerifyLocal, knows email/password from setup options
+        passport.authenticate('local', function (err, user, info) {
+            if (err) { return next(err); }
+
+            if (!user) {
+                console.log('AUTH] Failed: info=%s', info.error);
+                return notFound(res, info);
+            }
+
+            console.log('[AUTH] Verified-local of: user=%s, info=%s', user, info);
+
+            loginUser(req, res, {
+                user: user,
+                isNew: false,
+                longSession: params.longSession
+            });
+        })(req, res, next);
+    }
+
+    function passportVerifyLocal(username, password, done) {
+        console.log('[AUTH] Verify-local attempt by [%s]', username);
+
+        User.authenticate(username, password, function (err, user, code) {
+            if (err) { return done(err); }
+
+            if (!user && code === 1) {
+                return done(null, false, { error: 'Incorrect username.' });
+            }
+            if (!user && code === 2) {
+                return done(null, false, { error: 'Incorrect password.' });
+            }
+
+            return done(null, user);
+        });
+    }
+
+    // Auth/register - LinkedIn
+    //
+
+    function logAuthAttempt(req, res, next) {
+        console.log('[AUTH] Auth-linkedin attempt by unknown');
+        next()
+    }
+
+    function authenticateByLinkedIn(req, res, next) {
+        // delegates to passportVerifyLinkedIn, profile is passed by linkedin.com
+        passport.authenticate('linkedin', function (err, user, info) {
+            if (err) { return next(err); }
+
+            if (!user) {
+                var error = (info || {}).error || 'cancel';
+                var qs = '?err=' + error;
+                console.log('[AUTH] Failed: err=%s', error);
+                return res.redirect('/signup' + qs);
+            }
+
+            console.log('[AUTH] Success-linkedin: user=%s, info=%s', user, info);
+
+            res.redirect('/projects');
+
+        })(req, res, next);
+    }
+
+    function passportVerifyLinkedIn(token, tokenSecret, profile, done) {
+        // Both signup/login lead here & have the same flow
+
+        // Profile format:
+        //  id: 'string'
+        //  emails: [ { value: 'a@a.com' } ],
+        //  name: { familyName: 'Zhytko', givenName: 'Pavel' },
+        var email = (profile.emails || {}).length ? profile.emails[0] : {};
+        var data = {
+            email: email.value,
+            password: profile.id, // use as password!
+            name: profile.name, // nice to get for free TODO: add to scheme
+            linkedIn: true
+        };
+
+        console.log('[AUTH] Verify-linkedin attempt by [%s]', data.email);
+
+        return User.register(data.email, data.password, data, function (err, user, code) {
+            if (err) return done(err); //TODO
+
+            if (code === errors.AUTH_DUPLICATE) {
+                return done(null, false, {error: 'duplicate ' + email});
+            }
+
+            done(null, user);
+        });
+    }
+
+    // Statics
+    //
     function sendAppEntry(req, res) {
         var AUTH_RE = /(\/login|\/signup)/;
         if (req.isAuthenticated() && AUTH_RE.test(req.path)) {
@@ -86,60 +221,15 @@ function Auth(app, UserModel) {
         res.redirect('/login');
     }
 
-
-    function signup(req, res, next) {
-        var params = req.body;
-        console.log('Registering email', params.email);
-
-        UserModel.findByEmail(params.email, function (err, user) {
-            if (user) {
-                return notValid(res, 'duplicate ' + user.email);
-            }
-            else {
-                console.log('New user', params);
-
-                (new UserModel(params))
-                    .save(function (err, doc) {
-                        if (err) return console.error(err);
-
-                        if (!doc) {
-                            return notValid(res, 'it'); // TODO
-                        }
-
-                        req.login(doc, function (err) {
-                            if (err) { return next(err); }
-                            res.json({ result: doc});
-                        });
-                    })
-            }
-        });
-    }
-
-
-    function login(req, res, next) {
-        passport.authenticate('local', function (err, user, info) {
-            if (err) { return next(err); }
-
-            if (!user) {
-                console.log('Auth fail: info=%s', info.message);
-                return notFound(res, info);
-            }
-
-            req.login(user, function (err) {
-                if (err) { return next(err); }
-
-                res.json({ result: user});
-            });
-        })(req, res, next);
-    }
-
-
+    // Logout / expire
+    //
     function logout(req, res, next) {
         req.logout();
         res.json({ result: true });
     }
 
-
+    // Errors
+    //
     function notValid(res, msg) {
         return res
             .status(409)

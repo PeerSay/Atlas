@@ -7,6 +7,12 @@ var Project = require('../../app/models/projects').ProjectModel;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000;
+var errors = {
+    AUTH_NEW_OK: 0,
+    AUTH_NOT_FOUND: 1,
+    AUTH_PWD_MISMATCH: 2,
+    AUTH_DUPLICATE: 3
+};
 
 
 // Service model required for short incremental ids
@@ -44,16 +50,12 @@ userSchema.statics.findByEmail = function (email, cb) {
 
 
 userSchema.statics.authenticate = function (email, password, cb) {
-    var code = {
-        NOT_FOUND: 1,
-        PWD_MISMATCH: 2
-    };
 
     this.findOne({email: email}, 'id -_id email password projects', function (err, user) {
         if (err) return cb(err);
 
         if (!user) {
-            return cb(null, null, code.NOT_FOUND);
+            return cb(null, null, errors.AUTH_NOT_FOUND);
         }
 
         var verify = split(user.password);
@@ -62,7 +64,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
 
             var hash = result.key.toString('hex');
             if (hash !== verify.hash) {
-                return cb(null, null, code.PWD_MISMATCH);
+                return cb(null, null, errors.AUTH_PWD_MISMATCH);
             }
 
             return cb(null, user);
@@ -77,6 +79,32 @@ userSchema.statics.authenticate = function (email, password, cb) {
             salt: new Buffer(arr[1], 'hex')
         };
     }
+};
+
+
+userSchema.statics.register = function (email, password, user_data, cb) {
+    User.authenticate(email, password, function (err, user, code) {
+        if (err) return cb(err);
+
+        if (code === errors.AUTH_PWD_MISMATCH) {
+            // user exists with different password -> return 'already registered'
+            return cb(null, null, errors.AUTH_DUPLICATE);
+        }
+
+        if (user) {
+            // user exists & password match, may be LinkedIn login/signup or just full match
+            // anyway -> authorize user
+            return cb(null, user);
+        }
+
+        //TODO: assert(code === errors.AUTH_NOT_FOUND)
+
+        User.create(user_data, function (err, user) {
+            if (err) return cb(err);
+
+            return cb(null, user, errors.AUTH_NEW_OK);
+        })
+    });
 };
 
 
@@ -159,5 +187,6 @@ var User = mongoose.model('User', userSchema);
 
 module.exports = {
     SettingsModel: Settings,
-    UserModel: User
+    UserModel: User,
+    errors: errors
 };

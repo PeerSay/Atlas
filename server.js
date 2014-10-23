@@ -10,8 +10,10 @@ var passport = require('passport');
 var config = require('./app/config');
 var Auth = require('./app/auth');
 var RestApi = require('./app/rest-api');
+var users = require('./app/models/users');
 var models = {
-    users: require('./app/models/users').UserModel
+    User: users.UserModel,
+    errors: users.errors
 };
 
 
@@ -45,7 +47,7 @@ function log (req, res, next) {
 }
 
 // Setup routes
-Auth(app, models.users).setupRoutes();
+Auth(app, models).setupRoutes();
 RestApi(app, models).setupRoutes();
 
 // Logger (comes last)

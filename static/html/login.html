@@ -35,14 +35,14 @@
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
                                 <div class="hint" ng-messages="m.form.pwd.$error" ng-class="{show: m.form.pwd.$touched}">
                                     <div ng-message="required">Required</div>
-                                    <div ng-message="minlength">8 chars or more</div>
+                                    <div ng-message="minlength">6 chars or more</div>
                                 </div>
                                 <input type="password" id="password" class="form-control" placeholder="Password"
                                         name="pwd"
                                         ng-model="m.user.password"
                                         ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
                                         ng-focus="m.form.pwd.$setUntouched()"
-                                        minlength="8"
+                                        minlength="6"
                                         required>
                             </div>
                         </div>

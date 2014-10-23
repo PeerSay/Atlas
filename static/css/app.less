@@ -51,12 +51,16 @@ body {
   box-shadow: 0 0 1px 3px #ccc;
   overflow: hidden;
 
+  .panel-title {
+    font-size: 25px;
+  }
+
   .hint {
     position: absolute;
     bottom: 50px;
     right: -10px;
     z-index: 3;
-    background: #FFFFBE;
+    background: #FCF8E3;
     padding: 2px 10px;
     border-radius: 5px 5px 5px 0;
     color: #CD5C5C;
@@ -84,6 +88,27 @@ body {
     }
     span {
       display: block;
+    }
+  }
+
+  .linkedin-section {
+    .title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .title-or {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      margin-left: -25px;
+      width: 50px;
+      background-color: #FFF;
+      color: #CCC;
+      font-style: italic;
+      text-align: center;
+    }
+    .btn {
+      width: 100%;
     }
   }
 }

@@ -7,10 +7,6 @@ restApi.$inject = ['$http', '$q'];
 
 function restApi($http, $q) {
     var service = {
-        register: register,
-        authenticate: authenticate,
-        logout: logout,
-
         readAll: readAll,
         read: read,
         update: update,
@@ -18,23 +14,6 @@ function restApi($http, $q) {
         remove: remove
     };
     return service;
-
-    // Auth services
-
-    function register (user) {
-        var url = '/signup';
-        return $http.post(url, user);
-    }
-
-    function authenticate (user) {
-        var url = '/login';
-        return $http.post(url, user);
-    }
-
-    function logout() {
-        var url = '/logout';
-        return $http.get(url);
-    }
 
     // General CRUD rule:
     // create → POST    /collection

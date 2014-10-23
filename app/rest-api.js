@@ -11,14 +11,14 @@ function RestApi(app, models) {
     var U = {};
 
     function setupRoutes() {
-        app.get('/api/users', _.curry(validateAccept)(readAll, 'users'));
-        app.get('/api/users/:id', _.curry(validateAccept)(read, 'users'));
-        app.put('/api/users/:id', jsonParser, _.curry(validateAcceptAndBody)(update, 'users'));
-        app.post('/api/users', jsonParser, _.curry(validateAcceptAndBody)(create, 'users'));
-        app.delete('/api/users/:id', _.curry(validateAccept)(remove, 'users'));
+        app.get('/api/users', _.curry(validateAccept)(readAll, 'User'));
+        app.get('/api/users/:id', _.curry(validateAccept)(read, 'User'));
+        app.put('/api/users/:id', jsonParser, _.curry(validateAcceptAndBody)(update, 'User'));
+        app.post('/api/users', jsonParser, _.curry(validateAcceptAndBody)(create, 'User'));
+        app.delete('/api/users/:id', _.curry(validateAccept)(remove, 'User'));
 
-        app.post('/api/projects', jsonParser, _.curry(validateAcceptAndBody)(createProject, 'users'));
-        app.delete('/api/projects/:id', _.curry(validateAccept)(removeProject, 'users'));
+        app.post('/api/projects', jsonParser, _.curry(validateAcceptAndBody)(createProject, 'User'));
+        app.delete('/api/projects/:id', _.curry(validateAccept)(removeProject, 'User'));
         return U;
     }
 

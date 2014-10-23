@@ -16,7 +16,7 @@ function Users(rest, $location, Menu, Storage) {
     setHeader();
 
     function signup (user) {
-        return rest.register(user)
+        return restRegister(user)
             .success(function (res) {
                 //console.log('registered:', res);
                 U.user  = Storage.set('user', res.result);
@@ -29,7 +29,7 @@ function Users(rest, $location, Menu, Storage) {
     }
 
     function login(user) {
-        return rest.authenticate(user)
+        return restAuthenticate(user)
             .success(function (res) {
                 console.log('login:', res);
                 U.user  = Storage.set('user', res.result);
@@ -43,7 +43,7 @@ function Users(rest, $location, Menu, Storage) {
 
 
     function logout() {
-        rest.logout()
+        return restLogout()
             .success(function () {
                 U.user  = Storage.remove('name') || {};
                 $location.path('/login');
@@ -54,6 +54,24 @@ function Users(rest, $location, Menu, Storage) {
             });
     }
 
+
+    // Auth API services
+    //
+    function restRegister (user) {
+        return rest.create('auth/signup', user);
+    }
+
+    function restAuthenticate (user) {
+        return rest.create('auth/login', user);
+    }
+
+    function restLogout() {
+        return rest.create('auth/logout', {});
+    }
+
+
+    // Menu
+    //
     function setHeader() {
         var name = $location.path().replace(/\//g, '');
         Menu.setActivePage(name);

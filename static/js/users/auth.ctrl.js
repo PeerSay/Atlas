@@ -11,8 +11,8 @@ function AuthCtrl(Users) {
         msg: "Something is wrong"
     };
     m.user = {
-        email: '',
-        password: ''
+        email: 'a@a',
+        password: '123123'
     };
     m.signup = signup;
     m.login = login;

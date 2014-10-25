@@ -11,7 +11,8 @@ var errors = {
     AUTH_NEW_OK: 0,
     AUTH_NOT_FOUND: 1,
     AUTH_PWD_MISMATCH: 2,
-    AUTH_DUPLICATE: 3
+    AUTH_DUPLICATE: 3,
+    AUTH_NOT_VERIFIED: 4
 };
 
 
@@ -39,8 +40,18 @@ var userSchema = new Schema({
     id: { type: Number, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    name: { type: String},
+    name: {
+        familyName: String,
+        givenName: String
+    },
+    linkedIn: { type: Boolean, default: false },
+    needVerify: { type: Schema.Types.Mixed }, // false or 'uid'
     projects: [ projectStubSchema ]
+});
+
+
+userSchema.virtual('name.full').get(function () {
+    return (this.name.givenName + ' ' + this.name.familyName).trim();
 });
 
 
@@ -50,12 +61,15 @@ userSchema.statics.findByEmail = function (email, cb) {
 
 
 userSchema.statics.authenticate = function (email, password, cb) {
-
     this.findOne({email: email}, 'id -_id email password projects', function (err, user) {
         if (err) return cb(err);
 
         if (!user) {
             return cb(null, null, errors.AUTH_NOT_FOUND);
+        }
+
+        if (user.needVerify !== false) {
+            return cb(null, null, errors.AUTH_NOT_VERIFIED);
         }
 
         var verify = split(user.password);
@@ -87,8 +101,13 @@ userSchema.statics.register = function (email, password, user_data, cb) {
         if (err) return cb(err);
 
         if (code === errors.AUTH_PWD_MISMATCH) {
-            // user exists with different password -> return 'already registered'
+            // user exists with different password -> show 'already registered'
             return cb(null, null, errors.AUTH_DUPLICATE);
+        }
+
+        if (code === errors.AUTH_NOT_VERIFIED) {
+            // user exists but not verified -> show 'check inbox' or resend?
+            return cb(null, null, errors.AUTH_NOT_VERIFIED); /// XXX: can lead to 'account hijack??'
         }
 
         if (user) {
@@ -97,13 +116,40 @@ userSchema.statics.register = function (email, password, user_data, cb) {
             return cb(null, user);
         }
 
-        //TODO: assert(code === errors.AUTH_NOT_FOUND)
+        //TODO: assert(code === errors.AUTH_NOT_FOUND) or AUTH_NOT_VERIFIED
 
         User.create(user_data, function (err, user) {
             if (err) return cb(err);
 
             return cb(null, user, errors.AUTH_NEW_OK);
         })
+    });
+};
+
+
+userSchema.statics.verifyAccount = function (email, uid, cb) {
+    User.findOne({email: email}, function (err, user) {
+        if (err) return cb(err);
+
+        if (!user) {
+            return cb(null, null, errors.AUTH_NOT_FOUND);
+        }
+
+        if (user.needVerify === false) {
+            // Already verified, e.g. by LinkedIn
+            return cb(null, user);
+        }
+
+        if (user.needVerify !== uid) {
+            // Probably bad url copy-paste or something really bad..
+            return cb(null, null, errors.AUTH_NOT_VERIFIED);
+        }
+
+        user.needVerify = false;
+        user.save(function (err, verifiedUser) {
+            if (err) return cb(err);
+            cb(null, verifiedUser);
+        });
     });
 };
 
@@ -137,6 +183,20 @@ userSchema.methods.removeProject = function (stub_id, cb) {
 };
 
 
+userSchema.pre('save', function ensureId(next) {
+    var user = this;
+    if (!user.isNew) { return next(); }
+
+    // ensure auto-increment of user.id
+    Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
+        if (err) next(err);
+        user.id = settings.nextUserId;
+
+        next();
+    });
+});
+
+
 userSchema.pre('save', function ensurePassword(next) {
     var user = this;
 
@@ -154,31 +214,32 @@ userSchema.pre('save', function ensurePassword(next) {
 });
 
 
-userSchema.pre('save', function ensureId(next) {
+userSchema.pre('save', function ensureValidEmail(next) {
     var user = this;
-
     if (!user.isNew) { return next(); }
 
-    // unsure auto-increment of id
-    Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
-        if (err) next(err);
-        user.id = settings.nextUserId;
-
+    if (!user.linkedIn) { // No need to verify for LinkedIn
+        util.randomBase64(64, function (str) {
+            user.needVerify = str;
+            next();
+        });
+    }
+    else {
         next();
-    });
+    }
 });
 
 
 userSchema.pre('save', function ensureProject(next) {
-    var $user = this;
+    var user = this;
+    if (!user.isNew) { return next(); }
 
-    if (!$user.isNew) { return next(); }
-
-    Project.createByUser(null/*default*/, $user, function (err) {
+    Project.createByUser(null/*default*/, user, function (err) {
         if (err) next(err);
         next();
     });
 });
+
 
 // Model
 //

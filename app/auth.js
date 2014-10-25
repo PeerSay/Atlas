@@ -1,10 +1,13 @@
 var _ = require('lodash');
-var jsonParser = require('body-parser').json();
+//var jsonParser = require('body-parser').json();
+var urlencodedParser = require('body-parser').urlencoded({extended: false});
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var LinkedInStrategy = require('passport-linkedin').Strategy;
 
 var config = require('../app/config');
+var mailer = require('../app/email/mailer');
+
 
 function Auth(app, models) {
     var U = {};
@@ -15,13 +18,16 @@ function Auth(app, models) {
         // statics
         app.get('/login', sendAppEntry);
         app.get('/signup', sendAppEntry);
+        app.get('/signup/success', sendAppEntry);  // show activation required page
+        app.get('/signup/error', sendAppEntry);  // show activation required page
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
-        app.get('/projects/:id', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
         // api auth
-        app.post('/api/auth/signup', jsonParser, register);
-        app.post('/api/auth/login', jsonParser, authenticate);
-        app.post('/api/auth/logout', logout);
+        app.post('/auth/signup', urlencodedParser, register); // form submit
+        app.get('/auth/signup/verify', verifyAccount); // link from email
+        app.post('/auth/login', urlencodedParser, authenticate);
+        app.post('/api/auth/logout', logout); // api call!
 
         // linkedin
         app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
@@ -80,7 +86,22 @@ function Auth(app, models) {
             if (code === errors.AUTH_DUPLICATE) {
                 var msg = 'duplicate ' + email;
                 console.log('AUTH] Failed: info=%s', msg);
-                return notValid(res, msg);
+                return redirectErrorQs(req, res, msg);
+            }
+
+            if (!user) {
+                console.log('AUTH] Failed: error=%s', code);
+                return redirectErrorQs(req, res, 'code ' + code);
+            }
+
+            if (user.needVerify) {
+                var locals = {
+                    name: user.name.full,
+                    url: config.web.base_url + "/auth/signup/verify?id=" + user.needVerify
+                };
+                mailer.send(user.email, 'account-activation', locals); // async! TODO: err handling
+
+                return res.redirect('/signup/success'); // show verify page
             }
 
             loginUser(req, res, {
@@ -91,17 +112,27 @@ function Auth(app, models) {
         });
     }
 
-    function loginUser(req, res, options) {
-        var user = _.pick(options.user, ['id', 'email', 'projects']); // TODO: pick projects - move to model
-        user.isNew = options.isNew; // TODO: handle on client
+    function verifyAccount (req, res, next) {
+        var uid = req.params.id;
+        var email = req.params.email;
 
-        // TODO: handle longSession
+        console.log('[AUTH] Acc verify attempt from [%s]', email);
 
-        console.log('[AUTH] Success-local [%s]', user.email);
-
-        req.login(user, function (err) {
+        User.verifyAccount(email, uid, function (err, user, code) {
             if (err) { return next(err); }
-            res.json({ result: user});
+
+            if (code) {
+                console.log('[AUTH] Acc verify failed for [%s], code=%s', user.email, code);
+                return res.redirect('/signup/error?err' + code);
+            }
+
+            if (user) {
+                loginUser(req, res, {
+                    user: user,
+                    isNew: true,
+                    longSession: true // don't ask on signup, long by default
+                });
+            }
         });
     }
 
@@ -115,7 +146,7 @@ function Auth(app, models) {
 
             if (!user) {
                 console.log('AUTH] Failed: info=%s', info.error);
-                return notFound(res, info);
+                return redirectErrorQs(req, res, 'Wrong email or password');
             }
 
             console.log('[AUTH] Verified-local of: user=%s, info=%s', user, info);
@@ -123,7 +154,7 @@ function Auth(app, models) {
             loginUser(req, res, {
                 user: user,
                 isNew: false,
-                longSession: params.longSession
+                longSession: params.longSession // TODO: form control
             });
         })(req, res, next);
     }
@@ -160,14 +191,17 @@ function Auth(app, models) {
 
             if (!user) {
                 var error = (info || {}).error || 'cancel';
-                var qs = '?err=' + error;
                 console.log('[AUTH] Failed: err=%s', error);
-                return res.redirect('/signup' + qs);
+                return redirectErrorQs(req, res, error);
             }
 
             console.log('[AUTH] Success-linkedin: user=%s, info=%s', user, info);
 
-            res.redirect('/projects');
+            loginUser(req, res, {
+                user: user,
+                isNew: false, // TODO
+                longSession: true
+            });
 
         })(req, res, next);
     }
@@ -200,6 +234,21 @@ function Auth(app, models) {
         });
     }
 
+    function loginUser(req, res, options) {
+        var user = _.pick(options.user, ['id', 'email', 'projects']); // TODO: pick projects - move to model?
+        user.isNew = options.isNew; // TODO: handle on client
+
+        // TODO: handle longSession
+
+        console.log('[AUTH] Success-local [%s]', user.email);
+
+        req.login(user, function (err) { // establish session...
+            if (err) { return next(err); }
+
+            res.redirect('/projects');
+        });
+    }
+
     // Statics
     //
     function sendAppEntry(req, res) {
@@ -223,24 +272,17 @@ function Auth(app, models) {
 
     // Logout / expire
     //
-    function logout(req, res, next) {
+    function logout(req, res) {
         req.logout();
         res.json({ result: true });
     }
 
     // Errors
     //
-    function notValid(res, msg) {
-        return res
-            .status(409)
-            .send({error: 'Not valid: ' + msg});
-    }
 
-    function notFound(res, code) {
-        //TODO: log code
-        return res
-            .status(404)
-            .send({error: 'Wrong email or password'}); // Do not expose code/reason to user!
+    function redirectErrorQs(req, res, error) {
+        var qs = '?err=' + error;
+        return res.redirect(req.path + qs);
     }
 
 

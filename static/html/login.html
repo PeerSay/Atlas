@@ -47,6 +47,10 @@
                             </div>
                         </div>
 
+                        <div class="pull-left">
+                            <a href="#" >Forgot passord?</a>
+                        </div>
+
                         <button class="btn btn-lg btn-success pull-right"
                                 ng-click="m.login()"
                                 ng-disabled="m.form.$invalid"
@@ -54,6 +58,17 @@
                         </button>
                     </form>
                 </div>
+
+                <ul class="list-group">
+                    <li class="list-group-item linkedin-section">
+                        <h4 class="title-or">OR</h4>
+                        <h4 class="title">Have LinkedIn account?</h4>
+                        <a href="/auth/linkedin" target="_self"  class="btn btn-lg btn-success">
+                            <span class="glyphicon glyphicon-link"></span>
+                            Login with LinkedIn
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

@@ -1,3 +1,5 @@
+/*global __dirname:true*/
+
 var path = require('path');
 
 var PORT = Number(process.env.PORT || 5000);
@@ -17,6 +19,17 @@ module.exports = {
         linkedin: {
             api_key: '77st41xz0halpu',
             secret_key: 'nVcfUeYOJSx8vEaP'
+        }
+    },
+    email: {
+        /*TODO: SendGrid:
+         auth: {
+            api_user: 'pag',
+            api_key: '\\H6hFx(YO<lT'
+        }*/
+        auth: {
+            user: 'peersaytest@gmail.com',
+            pass: 'x}BQPK(f0xBP'
         }
     }
 };

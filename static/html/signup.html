@@ -10,7 +10,7 @@
                         <strong>Error:</strong> {{m.error.msg}}.
                     </div>
 
-                    <form class="auth" name="m.form">
+                    <form class="auth" name="m.form" action="/auth/signup" method="POST">
                         <div class="form-group">
                             <div class="input-group input-group-lg" ng-class="{
                                     'has-success': m.form.email.$valid,
@@ -30,18 +30,18 @@
 
                         <div class="form-group">
                             <div class="input-group input-group-lg" ng-class="{
-                                    'has-success': m.form.pwd.$valid,
-                                    'has-warning': m.form.pwd.$touched && m.form.pwd.$invalid}">
+                                    'has-success': m.form.password.$valid,
+                                    'has-warning': m.form.password.$touched && m.form.password.$invalid}">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-                                <div class="hint" ng-messages="m.form.pwd.$error" ng-class="{show: m.form.pwd.$touched}">
+                                <div class="hint" ng-messages="m.form.password.$error" ng-class="{show: m.form.password.$touched}">
                                     <div ng-message="required">Required</div>
                                     <div ng-message="minlength">6 chars or more</div>
                                 </div>
                                 <input type="password" id="password" class="form-control" placeholder="Password"
-                                        name="pwd"
+                                        name="password"
                                         ng-model="m.user.password"
                                         ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
-                                        ng-focus="m.form.pwd.$setUntouched()"
+                                        ng-focus="m.form.password.$setUntouched()"
                                         minlength="6"
                                         required>
                             </div>
@@ -74,8 +74,7 @@
                         </div>
 
                         <button class="btn btn-lg btn-success pull-right"
-                                ng-click="m.signup()"
-                                ng-disabled="m.form.$invalid"
+                               ng-disabled="m.form.$invalid"
                                 >Signup
                         </button>
                     </form>

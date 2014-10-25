@@ -29,7 +29,7 @@ function config($routeProvider, $locationProvider) {
             controllerAs: 'm'
         })
         .otherwise({
-            redirectTo: '/login'
+            redirectTo: '/not-implemented'
         });
 
     $locationProvider.html5Mode(true);

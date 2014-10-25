@@ -139,6 +139,7 @@ function RestApi(app, models) {
     }
 
     function validateAccept(method, model_name, req, res, next) {
+        console.log('[API]', req);
         res.format({
             json: function () {
                 method.call(U, models[model_name], req, res, next);

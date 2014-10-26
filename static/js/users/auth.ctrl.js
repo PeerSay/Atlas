@@ -1,10 +1,12 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('AuthCtrl', AuthCtrl);
+    .controller('AuthCtrl', AuthCtrl)
+    .factory('Location', Location);
 
-AuthCtrl.$inject = ['Users'];
-function AuthCtrl(Users) {
+
+AuthCtrl.$inject = ['Users', 'Location'];
+function AuthCtrl(Users, location) {
     var m = this;
     m.error = {
         show: false,
@@ -14,34 +16,38 @@ function AuthCtrl(Users) {
         email: 'a@a',
         password: '123123'
     };
-    m.signup = signup;
-    m.login = login;
 
     Users.setHeader(); // switch menu upon navigation
+    showErrorFromQs();
 
-    function signup() {
-        m.form.$setPristine();
 
-        Users.signup(m.user)
-            .catch(function (res) {
-                var err = res.data.error;
-                if (err) {
-                    m.error.msg = err;
-                }
-                m.error.show = true;
-            });
+    function showErrorFromQs() {
+        var qs = location.search();
+        var err = qs && qs.err;
+        if (err) {
+            m.error.msg = err;
+            m.error.show = true;
+
+            // remove err from url, no history, no model reload
+            location
+                .skipReload()
+                .search('err', null)
+                .replace();
+        }
     }
+}
 
-    function login() {
-        m.form.$setPristine();
 
-        Users.login(m.user)
-            .catch(function (res) {
-                var err = res.data.error;
-                if (err) {
-                    m.error.msg = err;
-                }
-                m.error.show = true;
-            });
-    }
+// Credit: https://github.com/angular/angular.js/issues/1699
+Location.$inject = ['$location', '$route', '$rootScope'];
+function Location($location, $route, $rootScope) {
+    $location.skipReload = function () {
+        var lastRoute = $route.current;
+        var un = $rootScope.$on('$locationChangeSuccess', function () {
+            $route.current = lastRoute;
+            un();
+        });
+        return $location;
+    };
+    return $location;
 }

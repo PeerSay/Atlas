@@ -8,25 +8,23 @@ config.$inject = ['$routeProvider', '$locationProvider'];
 
 function config($routeProvider, $locationProvider) {
     $routeProvider
-        .when('/signup', {
-            templateUrl: '/html/signup.html',
-            controller: 'AuthCtrl',
-            controllerAs: 'm'
+        .when('/auth/signup', {
+            templateUrl: '/html/signup.html'
         })
-        .when('/login', {
-            templateUrl: '/html/login.html',
-            controller: 'AuthCtrl',
-            controllerAs: 'm'
+        .when('/auth/signup/success', {
+            templateUrl: '/html/signup-success.html'
+        })
+        .when('/auth/signup/verified', {
+            templateUrl: '/html/signup-verified.html'
+        })
+        .when('/auth/login', {
+            templateUrl: '/html/login.html'
         })
         .when('/projects', {
-            templateUrl: '/html/project-list.html',
-            controller: 'ProjectListCtrl',
-            controllerAs: 'm'
+            templateUrl: '/html/project-list.html'
         })
         .when('/projects/:id', {
-            templateUrl: '/html/project-details.html',
-            controller: 'ProjectDetailsCtrl',
-            controllerAs: 'm'
+            templateUrl: '/html/project-details.html'
         })
         .otherwise({
             redirectTo: '/not-implemented'

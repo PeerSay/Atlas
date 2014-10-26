@@ -14,12 +14,6 @@ RestApi(app, modelsMock).setupRoutes();
 
 describe('REST API - Users', function () {
 
-    describe('Auth operations', function () {
-        it('should return 409 if no email is passed');
-        it('should return 409 if no password is passed');
-
-    });
-
     describe.skip('CRUD operations', function () {
         it('should (r)ead collection', function (done) {
             request(app)

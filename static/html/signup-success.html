@@ -1,0 +1,25 @@
+<div id="activate-acc-dlg" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" ng-controller="AuthCtrl as m">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Activate Account</h4>
+            </div>
+            <div class="modal-body">
+                <p>We've just sent a confirmation email to:</p>
+                <h5 class="email-sent">{{m.user.email}}</h5>
+                <p>It contains important information about activating your account and getting started with Peersay.</p>
+            </div>
+            <div class="modal-footer">
+                You can close this page now.
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#activate-acc-dlg')
+            .modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+</script>

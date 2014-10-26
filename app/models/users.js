@@ -7,13 +7,7 @@ var Project = require('../../app/models/projects').ProjectModel;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000;
-var errors = {
-    AUTH_NEW_OK: 0,
-    AUTH_NOT_FOUND: 1,
-    AUTH_PWD_MISMATCH: 2,
-    AUTH_DUPLICATE: 3,
-    AUTH_NOT_VERIFIED: 4
-};
+var errors = require('../../app/errors');
 
 
 // Service model required for short incremental ids
@@ -61,7 +55,7 @@ userSchema.statics.findByEmail = function (email, cb) {
 
 
 userSchema.statics.authenticate = function (email, password, cb) {
-    this.findOne({email: email}, 'id -_id email password projects', function (err, user) {
+    this.findOne({email: email}, function (err, user) {
         if (err) return cb(err);
 
         if (!user) {
@@ -69,7 +63,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
         }
 
         if (user.needVerify !== false) {
-            return cb(null, null, errors.AUTH_NOT_VERIFIED);
+            return cb(null, user, errors.AUTH_NOT_VERIFIED);
         }
 
         var verify = split(user.password);
@@ -85,7 +79,6 @@ userSchema.statics.authenticate = function (email, password, cb) {
         });
     });
 
-
     function split(joined) {
         var arr = joined.split('_');
         return {
@@ -100,14 +93,21 @@ userSchema.statics.register = function (email, password, user_data, cb) {
     User.authenticate(email, password, function (err, user, code) {
         if (err) return cb(err);
 
-        if (code === errors.AUTH_PWD_MISMATCH) {
-            // user exists with different password -> show 'already registered'
-            return cb(null, null, errors.AUTH_DUPLICATE);
+        if (code === errors.AUTH_NOT_VERIFIED) {
+            // user exists but not verified -> the best thing we can do is update pwd and re-send email
+            // otherwise it would lead to 'account hijack' - attacker could create accounts without having email,
+            // thus blocking actual owners signup
+            user.password = password;
+            user.needVerify = true;
+            return user.save(function (err, userUpd) {
+                if (err) return cb(err);
+                cb(null, userUpd);
+            });
         }
 
-        if (code === errors.AUTH_NOT_VERIFIED) {
-            // user exists but not verified -> show 'check inbox' or resend?
-            return cb(null, null, errors.AUTH_NOT_VERIFIED); /// XXX: can lead to 'account hijack??'
+        if (code === errors.AUTH_PWD_MISMATCH) {
+            // user exists, verified but has different password -> show 'already registered'
+            return cb(null, null, errors.AUTH_DUPLICATE);
         }
 
         if (user) {
@@ -216,17 +216,22 @@ userSchema.pre('save', function ensurePassword(next) {
 
 userSchema.pre('save', function ensureValidEmail(next) {
     var user = this;
-    if (!user.isNew) { return next(); }
 
-    if (!user.linkedIn) { // No need to verify for LinkedIn
-        util.randomBase64(64, function (str) {
-            user.needVerify = str;
-            next();
-        });
-    }
-    else {
+    // set to true when need to generate uid and send email
+    if (!user.isModified('needVerify')) { return next(); }
+
+    console.log('>>>pre: ensureValidEmail linkedin?=%s, old=%s', user.linkedIn, user.needVerify);
+
+    // No need to verify for LinkedIn; false means verification complete
+    if (user.linkedIn || user.needVerify === false) { return next(); }
+
+    util.randomBase64(64, function (err, str) {
+        if (err) return next(err);
+        console.log('>>>pre: ensureValidEmail new=%s', str);
+        user.needVerify = str;
+        user.markModified('needVerify'); // BUG: doesn't work?
         next();
-    }
+    });
 });
 
 
@@ -248,6 +253,5 @@ var User = mongoose.model('User', userSchema);
 
 module.exports = {
     SettingsModel: Settings,
-    UserModel: User,
-    errors: errors
+    UserModel: User
 };

@@ -4,26 +4,22 @@ var urlencodedParser = require('body-parser').urlencoded({extended: false});
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var LinkedInStrategy = require('passport-linkedin').Strategy;
+var errors = require('../app/errors');
 
-var config = require('../app/config');
-var mailer = require('../app/email/mailer');
-
-
-function Auth(app, models) {
+function Auth(app, models, mailer, config) {
     var U = {};
     var User = models.User;
-    var errors = models.errors;
 
     function setupRoutes() {
         // statics
-        app.get('/login', sendAppEntry);
-        app.get('/signup', sendAppEntry);
-        app.get('/signup/success', sendAppEntry);  // show activation required page
-        app.get('/signup/error', sendAppEntry);  // show activation required page
+        app.get('/auth/login', sendAppEntry);
+        app.get('/auth/signup', sendAppEntry);
+        app.get('/auth/signup/success', sendAppEntry);  // show activation required page
+        app.get('/auth/signup/verified', sendAppEntry);  // redirect after verify link click
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
         app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
-        // api auth
+        // local
         app.post('/auth/signup', urlencodedParser, register); // form submit
         app.get('/auth/signup/verify', verifyAccount); // link from email
         app.post('/auth/login', urlencodedParser, authenticate);
@@ -74,13 +70,14 @@ function Auth(app, models) {
     // Register
     //
     function register(req, res, next) {
-        var params = req.body;
-        var email = params.email;
-        var password = params.password;
+        var data = req.body;
+        var email = data.email;
+        var password = data.password;
 
         console.log('[AUTH] Register-local attempt by [%s]', email);
 
-        User.register(email, password, params, function (err, user, code) {
+        data.needVerify = true;
+        User.register(email, password, data, function (err, user, code) {
             if (err) return next(err); //TODO
 
             if (code === errors.AUTH_DUPLICATE) {
@@ -91,17 +88,12 @@ function Auth(app, models) {
 
             if (!user) {
                 console.log('AUTH] Failed: error=%s', code);
-                return redirectErrorQs(req, res, 'code ' + code);
+                return redirectErrorQs(req, res, 'code:' + code);
             }
 
             if (user.needVerify) {
-                var locals = {
-                    name: user.name.full,
-                    url: config.web.base_url + "/auth/signup/verify?id=" + user.needVerify
-                };
-                mailer.send(user.email, 'account-activation', locals); // async! TODO: err handling
-
-                return res.redirect('/signup/success'); // show verify page
+                mailVerifyAsync(user);
+                return res.redirect('/auth/signup/success'); // show verify page
             }
 
             loginUser(req, res, {
@@ -112,9 +104,9 @@ function Auth(app, models) {
         });
     }
 
-    function verifyAccount (req, res, next) {
-        var uid = req.params.id;
-        var email = req.params.email;
+    function verifyAccount(req, res, next) {
+        var uid = req.query.id;
+        var email = req.query.email;
 
         console.log('[AUTH] Acc verify attempt from [%s]', email);
 
@@ -122,31 +114,31 @@ function Auth(app, models) {
             if (err) { return next(err); }
 
             if (code) {
-                console.log('[AUTH] Acc verify failed for [%s], code=%s', user.email, code);
-                return res.redirect('/signup/error?err' + code);
+                console.log('[AUTH] Acc verify failed for [%s], code=%s', email, code);
+                return res.redirect('/auth/signup/verified?err=' + code);
             }
 
-            if (user) {
-                loginUser(req, res, {
-                    user: user,
-                    isNew: true,
-                    longSession: true // don't ask on signup, long by default
-                });
-            }
+            return res.redirect('/auth/signup/verified');
         });
     }
 
     // Authenticate - local
     //
     function authenticate(req, res, next) {
-        var params = req.body;
+        var data = req.body;
         // delegates to passportVerifyLocal, knows email/password from setup options
         passport.authenticate('local', function (err, user, info) {
             if (err) { return next(err); }
 
             if (!user) {
-                console.log('AUTH] Failed: info=%s', info.error);
-                return redirectErrorQs(req, res, 'Wrong email or password');
+                if (info.code === errors.AUTH_NOT_VERIFIED) {
+                    console.log('[AUTH] Failed: acc not verified for [%s]', data.email);
+                    mailVerifyAsync(user);
+                    return res.redirect('/auth/signup/success'); // show verify page
+                }
+
+                console.log('[AUTH] Failed: err=%s, code=%s', info.error, info.code);
+                return redirectErrorQs(req, res, info.error);
             }
 
             console.log('[AUTH] Verified-local of: user=%s, info=%s', user, info);
@@ -154,7 +146,7 @@ function Auth(app, models) {
             loginUser(req, res, {
                 user: user,
                 isNew: false,
-                longSession: params.longSession // TODO: form control
+                longSession: data.longSession // TODO: form control
             });
         })(req, res, next);
     }
@@ -165,11 +157,17 @@ function Auth(app, models) {
         User.authenticate(username, password, function (err, user, code) {
             if (err) { return done(err); }
 
-            if (!user && code === 1) {
-                return done(null, false, { error: 'Incorrect username.' });
+            if (code === errors.AUTH_NOT_FOUND) {
+                return done(null, false, { code: code, error: 'Wrong email or password' });
             }
-            if (!user && code === 2) {
-                return done(null, false, { error: 'Incorrect password.' });
+            if (code === errors.AUTH_PWD_MISMATCH) {
+                return done(null, false, { code: code, error: 'Wrong email or password' });
+            }
+            if (code === errors.AUTH_NOT_VERIFIED) {
+                return done(null, false, { code: code, error: 'Account is not verified' });
+            }
+            if (!user) {
+                return done(null, false, { code: -1, error: 'Unexpected' });
             }
 
             return done(null, user);
@@ -223,7 +221,7 @@ function Auth(app, models) {
 
         console.log('[AUTH] Verify-linkedin attempt by [%s]', data.email);
 
-        return User.register(data.email, data.password, data, function (err, user, code) {
+        User.register(data.email, data.password, data, function (err, user, code) {
             if (err) return done(err); //TODO
 
             if (code === errors.AUTH_DUPLICATE) {
@@ -279,10 +277,26 @@ function Auth(app, models) {
 
     // Errors
     //
-
     function redirectErrorQs(req, res, error) {
         var qs = '?err=' + error;
         return res.redirect(req.path + qs);
+    }
+
+    // Mail
+    //
+    function mailVerifyAsync(user) {
+        var verify_url = config.web.base_url +
+            "/auth/signup/verify" +
+            '?email=' + encodeURIComponent(user.email) +
+            "&id=" + encodeURIComponent(user.needVerify);
+        var locals = {
+            name: user.name.full,
+            url: verify_url
+        };
+        console.log('[AUTH] Sending verify email to [%s], url=[%s]', user.email, verify_url);
+        mailer.send(user.email, 'account-activation', locals); // async!
+
+        // TODO: err handling
     }
 
 

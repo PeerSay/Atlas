@@ -1,6 +1,6 @@
 var crypto = require('crypto');
 
-function randomBase64 (bytes_num, cb) {
+function randomBase64(bytes_num, cb) {
     return crypto.randomBytes(bytes_num, function (err, buf) {
         if (err) cb(err);
         cb(null, buf.toString('base64'));

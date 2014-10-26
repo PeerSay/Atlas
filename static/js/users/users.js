@@ -46,7 +46,7 @@ function Users(rest, $location, Menu, Storage) {
         return restLogout()
             .success(function () {
                 U.user  = Storage.remove('name') || {};
-                $location.path('/login');
+                $location.path('/auth/login');
                 setHeader();
             })
             .error(function (res) {

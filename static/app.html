@@ -14,12 +14,12 @@
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
 
 </head>
-<body ng-app="peersay" ng-cloak> <!--TODO: ng-strict-di-->
+<body ng-app="peersay"> <!--TODO: ng-strict-di-->
 <!--[if lt IE 8]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
 
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="MenuCtrl as m" data-header-menu>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="MenuCtrl as m" data-header-menu ng-cloak>
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -44,8 +44,8 @@
             <h4 class="js-app logo navbar-text hidden-xs"><a href="/" class="navbar-link" target="_blank">Peersay</a></h4>
 
             <ul class="js-auth nav navbar-nav navbar-right">
-                <li class="login"><a href="/login">Login</a></li>
-                <li class="signup"><a href="/signup">Signup</a></li>
+                <li class="authlogin"><a href="/auth/login">Login</a></li>
+                <li class="authsignup"><a href="/auth/signup">Signup</a></li>
             </ul>
 
             <ul class="js-app nav navbar-nav navbar-right">

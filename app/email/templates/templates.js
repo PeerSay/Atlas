@@ -8,11 +8,11 @@ function getTemplate (name) {
 
 module.exports = {
     'welcome': {
-        subj: 'Welcome to Peersay!',
+        subj: 'Welcome to PeerSay!',
         tpl: getTemplate('welcome')
     },
     'account-activation': {
-        subj: '[ACTION REQUIRED] Complete Your Peersay Account Registration',
+        subj: '[ACTION REQUIRED] Complete Your PeerSay Account Registration',
         tpl: getTemplate('account-activation')
     }
 };

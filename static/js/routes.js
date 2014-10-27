@@ -20,10 +20,12 @@ function config($routeProvider, $locationProvider) {
         .when('/auth/login', {
             templateUrl: '/html/login.html'
         })
-        .when('/projects', {
-            templateUrl: '/html/project-list.html'
+        .when('/user/:id/projects', {
+            templateUrl: '/html/project-list.html',
+            controller: 'ProjectListCtrl',
+            controllerAs: 'm'
         })
-        .when('/projects/:id', {
+        .when('/user/:id/projects/:projectId', {
             templateUrl: '/html/project-details.html'
         })
         .otherwise({

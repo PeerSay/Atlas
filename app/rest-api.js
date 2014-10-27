@@ -22,13 +22,15 @@ function RestApi(app, models) {
         return U;
     }
 
-    function createProject(model, req, res, next) {
+    function createProject(model, req, res) {
         var project = req.body;
 
         if (!req.user) {
             // TODO: real auth
             return notFound(res, 1);
         }
+
+        console.log('[API] Creating project for user id=[%s]', req.user.id);
 
         model.findOne({id: req.user.id}, function (err, user) {
             //if (err) return console.error(err);
@@ -41,8 +43,10 @@ function RestApi(app, models) {
         });
     }
 
-    function removeProject(model, req, res, next) {
+    function removeProject(model, req, res) {
         var project_id = Number(req.params.id);
+
+        console.log('[API] Removing project for user id=[%s]', req.user.id);
 
         if (!req.user) {
             // TODO: real auth

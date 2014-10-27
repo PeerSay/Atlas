@@ -19,13 +19,11 @@ function Projects(rest, Users) {
     P.removeProject = removeProject;
 
 
-    function getProjects() {
-        return rest.read('users', Users.user.id)
-            .success(function (data) {
-                P.projects = data.result.projects;
-            })
-            .error(function () {
-                console.log('TODO: handle getProjects API error');
+    function getProjects(user_id) {
+        return Users.getUser(user_id)
+            .success(function () {
+                P.projects = Users.user.projects;
+                P.projects.user = Users.user; // XXX
             });
     }
 

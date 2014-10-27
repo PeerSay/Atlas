@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-controller="ProjectListCtrl as m">
+<div class="container-fluid">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <h3><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
@@ -6,7 +6,7 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in m.projects">
-            <a class="panel panel-default tile" href="/projects/{{prj.id}}">
+            <a class="panel panel-default tile" href="/user/{{m.projects.user.id}}/projects/{{prj.id}}">
                 <div class="panel-body">
                     <h4 class="name">{{prj.title}}</h4>
                 </div>

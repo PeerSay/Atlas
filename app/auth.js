@@ -16,8 +16,7 @@ function Auth(app, models, mailer, config) {
         app.get('/auth/signup', sendAppEntry);
         app.get('/auth/signup/success', sendAppEntry);  // show activation required page
         app.get('/auth/signup/verified', sendAppEntry);  // redirect after verify link click
-        app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
-        app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/user/*', ensureAuthenticated, sendAppEntry); // send on F5
 
         // local
         app.post('/auth/signup', urlencodedParser, register); // form submit
@@ -43,7 +42,7 @@ function Auth(app, models, mailer, config) {
     passport.deserializeUser(function (email, done) {
         console.log('[AUTH]: Passport: deserialize for [%s]', email);
 
-        User.findByEmail(email, function (err, user) {
+        User.findOne({email: email},'id -_id email', function (err, user) {
             console.log('[AUTH] Passport: deserialized: ', user);
 
             done(err, user);
@@ -132,16 +131,16 @@ function Auth(app, models, mailer, config) {
 
             if (!user) {
                 if (info.code === errors.AUTH_NOT_VERIFIED) {
-                    console.log('[AUTH] Failed: acc not verified for [%s]', data.email);
+                    console.log('[AUTH] Failed local: acc not verified for [%s]', data.email);
                     mailVerifyAsync(user);
                     return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
                 }
 
-                console.log('[AUTH] Failed: err=%s, code=%s', info.error, info.code);
+                console.log('[AUTH] Failed local: err=%s, code=%s', info.error, info.code);
                 return redirectErrorQs(req, res, info.error);
             }
 
-            console.log('[AUTH] Verified-local of: user=%s, info=%s', user, info);
+            console.log('[AUTH] Verified-local [%s], info=%s', user.email, info);
 
             loginUser(req, res, {
                 user: user,
@@ -206,7 +205,6 @@ function Auth(app, models, mailer, config) {
 
     function passportVerifyLinkedIn(token, tokenSecret, profile, done) {
         // Both signup/login lead here & have the same flow
-
         // Profile format:
         //  id: 'string'
         //  emails: [ { value: 'a@a.com' } ],
@@ -233,8 +231,7 @@ function Auth(app, models, mailer, config) {
     }
 
     function loginUser(req, res, options) {
-        var user = _.pick(options.user, ['id', 'email', 'projects']); // TODO: pick projects - move to model?
-        user.isNew = options.isNew; // TODO: handle on client
+        var user = _.pick(options.user, ['id', 'email']);
 
         // TODO: handle longSession
 
@@ -243,16 +240,16 @@ function Auth(app, models, mailer, config) {
         req.login(user, function (err) { // establish session...
             if (err) { return next(err); }
 
-            res.redirect('/projects');
+            return res.redirect('/user/' + req.user.id + '/projects');
         });
     }
 
     // Statics
     //
     function sendAppEntry(req, res) {
-        var AUTH_RE = /(\/login|\/signup)/;
-        if (req.isAuthenticated() && AUTH_RE.test(req.path)) {
-            return res.redirect('/projects');
+        var AUTH_RE = /\/auth\/(login|signup)/; // skip auth pages if user is logged in
+        if (AUTH_RE.test(req.path) && req.isAuthenticated()) {
+            return res.redirect('/user/' + req.user.id + '/projects');
         }
 
         res.sendFile('app.html', {
@@ -265,7 +262,7 @@ function Auth(app, models, mailer, config) {
         if (req.isAuthenticated()) {
             return next();
         }
-        res.redirect('/login');
+        res.redirect('/auth/login');
     }
 
     // Logout / expire

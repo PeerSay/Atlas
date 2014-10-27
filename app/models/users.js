@@ -220,14 +220,12 @@ userSchema.pre('save', function ensureValidEmail(next) {
     // set to true when need to generate uid and send email
     if (!user.isModified('needVerify')) { return next(); }
 
-    console.log('>>>pre: ensureValidEmail linkedin?=%s, old=%s', user.linkedIn, user.needVerify);
-
     // No need to verify for LinkedIn; false means verification complete
     if (user.linkedIn || user.needVerify === false) { return next(); }
 
     util.randomBase64(64, function (err, str) {
         if (err) return next(err);
-        console.log('>>>pre: ensureValidEmail new=%s', str);
+
         user.needVerify = str;
         user.markModified('needVerify'); // BUG: doesn't work?
         next();

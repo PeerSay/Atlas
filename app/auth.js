@@ -93,7 +93,7 @@ function Auth(app, models, mailer, config) {
 
             if (user.needVerify) {
                 mailVerifyAsync(user);
-                return res.redirect('/auth/signup/success'); // show verify page
+                return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
             }
 
             loginUser(req, res, {
@@ -134,7 +134,7 @@ function Auth(app, models, mailer, config) {
                 if (info.code === errors.AUTH_NOT_VERIFIED) {
                     console.log('[AUTH] Failed: acc not verified for [%s]', data.email);
                     mailVerifyAsync(user);
-                    return res.redirect('/auth/signup/success'); // show verify page
+                    return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
                 }
 
                 console.log('[AUTH] Failed: err=%s, code=%s', info.error, info.code);

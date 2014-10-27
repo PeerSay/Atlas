@@ -13,27 +13,41 @@ function AuthCtrl(Users, location) {
         msg: "Something is wrong"
     };
     m.user = {
-        email: 'a@a',
-        password: '123123'
+        email: '',
+        password: ''
     };
 
     Users.setHeader(); // switch menu upon navigation
     showErrorFromQs();
+    getUserFromQs();
 
 
     function showErrorFromQs() {
-        var qs = location.search();
-        var err = qs && qs.err;
+        var err = getValuefromQs('err');
         if (err) {
             m.error.msg = err;
             m.error.show = true;
+        }
+    }
 
+    function getUserFromQs() {
+        var email = getValuefromQs('email');
+        if (email) {
+            m.user.email = email;
+        }
+    }
+
+    function getValuefromQs(key) {
+        var qs = location.search();
+        var value = qs && qs[key];
+        if (value) {
             // remove err from url, no history, no model reload
             location
                 .skipReload()
-                .search('err', null)
+                .search(key, null)
                 .replace();
         }
+        return value;
     }
 }
 

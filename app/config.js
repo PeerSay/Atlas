@@ -22,14 +22,9 @@ module.exports = {
         }
     },
     email: {
-        /*TODO: SendGrid:
-         auth: {
-            api_user: 'pag',
-            api_key: '\\H6hFx(YO<lT'
-        }*/
         auth: {
-            user: 'peersaytest@gmail.com',
-            pass: 'x}BQPK(f0xBP'
+            api_user: 'peersaymailer',
+            api_key: 'Peersay1'
         }
     }
 };

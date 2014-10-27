@@ -82,12 +82,12 @@ function Auth(app, models, mailer, config) {
 
             if (code === errors.AUTH_DUPLICATE) {
                 var msg = 'duplicate ' + email;
-                console.log('AUTH] Failed: info=%s', msg);
+                console.log('AUTH] Failed local: info=%s', msg);
                 return redirectErrorQs(req, res, msg);
             }
 
             if (!user) {
-                console.log('AUTH] Failed: error=%s', code);
+                console.log('AUTH] Failed local for [%s], error=%s', email, code);
                 return redirectErrorQs(req, res, 'code:' + code);
             }
 
@@ -188,12 +188,12 @@ function Auth(app, models, mailer, config) {
             if (err) { return next(err); }
 
             if (!user) {
-                var error = (info || {}).error || 'cancel';
-                console.log('[AUTH] Failed: err=%s', error);
-                return redirectErrorQs(req, res, error);
+                var error = (info || {}).error || 'canceled';
+                console.log('[AUTH] Failed linkedin: err=%s', error);
+                return redirectErrorQs(req, res, error, '/auth/signup');
             }
 
-            console.log('[AUTH] Success-linkedin: user=%s, info=%s', user, info);
+            console.log('[AUTH] Success-linkedin for [%s], info=%s', user.email, info);
 
             loginUser(req, res, {
                 user: user,
@@ -238,7 +238,7 @@ function Auth(app, models, mailer, config) {
 
         // TODO: handle longSession
 
-        console.log('[AUTH] Success-local [%s]', user.email);
+        console.log('[AUTH] Success - logging in [%s]', user.email);
 
         req.login(user, function (err) { // establish session...
             if (err) { return next(err); }
@@ -277,9 +277,10 @@ function Auth(app, models, mailer, config) {
 
     // Errors
     //
-    function redirectErrorQs(req, res, error) {
+    function redirectErrorQs(req, res, error, path) {
+        path = path || req.path;
         var qs = '?err=' + error;
-        return res.redirect(req.path + qs);
+        return res.redirect(path + qs);
     }
 
     // Mail

@@ -8,7 +8,7 @@ module.exports = {
     web: {
         port: PORT,
         static_dir: path.join(__dirname, '..', process.env.DEV ? 'static' : 'dist'),
-        base_url: 'http://localhost:' + PORT
+        base_url: process.env.DEV ? 'http://localhost:' + PORT : 'http://peersay.herokuapp.com'
     },
     db: {
         url: process.env.DEV ? 'mongodb://localhost/peersay' : process.env.MONGOHQ_URL,

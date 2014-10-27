@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>PeerSay - MVP - app</title>
+    <base href="/">
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <!-- build:css css/app.css -->
     <link rel="stylesheet" href="/css/app.css">
@@ -13,12 +14,12 @@
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
 
 </head>
-<body ng-app="peersay" ng-cloak>
+<body ng-app="peersay"> <!--TODO: ng-strict-di-->
 <!--[if lt IE 8]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
 
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="MenuCtrl as m" data-header-menu>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="MenuCtrl as m" data-header-menu ng-cloak>
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -43,8 +44,8 @@
             <h4 class="js-app logo navbar-text hidden-xs"><a href="/" class="navbar-link" target="_blank">Peersay</a></h4>
 
             <ul class="js-auth nav navbar-nav navbar-right">
-                <li class="login"><a href="/login">Login</a></li>
-                <li class="signup"><a href="/signup">Signup</a></li>
+                <li class="authlogin"><a href="/auth/login">Login</a></li>
+                <li class="authsignup"><a href="/auth/signup">Signup</a></li>
             </ul>
 
             <ul class="js-app nav navbar-nav navbar-right">
@@ -90,9 +91,10 @@
 <!--<script src="bower_components/socket.io-client/socket.io.min.js"></script>-->
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/bower_components/angular/angular.min.js"></script>
+<script src="/bower_components/angular/angular.js"></script>
 <!-- build:js js/app.js -->
-<script src="/bower_components/angular-route/angular-route.min.js"></script>
+<script src="/bower_components/angular-route/angular-route.js"></script>
+<script src="/bower_components/angular-messages/angular-messages.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/menu.js"></script>
 <script src="/js/users/users.js"></script>

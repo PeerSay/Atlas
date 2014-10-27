@@ -4,9 +4,10 @@ angular.module('peersay')
     .controller('ProjectListCtrl', ProjectListCtrl)
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectListCtrl.$inject = ['Projects'];
-function ProjectListCtrl(Projects) {
+ProjectListCtrl.$inject = ['Projects', '$routeParams'];
+function ProjectListCtrl(Projects, $routeParams) {
     var m = this;
+    var user_id = Number($routeParams.id);
 
     m.projects = [];
     m.create = Projects.create;
@@ -15,8 +16,8 @@ function ProjectListCtrl(Projects) {
     m.removeProject = Projects.removeProject.bind(Projects);
 
     Projects
-        .getProjects()
-        .then(function () {
+        .getProjects(user_id)
+        .success(function () {
             m.projects = Projects.projects;
         });
 }

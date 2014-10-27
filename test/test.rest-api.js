@@ -14,7 +14,7 @@ RestApi(app, modelsMock).setupRoutes();
 
 describe('REST API - Users', function () {
 
-    describe('CRUD operations', function () {
+    describe.skip('CRUD operations', function () {
         it('should (r)ead collection', function (done) {
             request(app)
                 .get('/api/users')

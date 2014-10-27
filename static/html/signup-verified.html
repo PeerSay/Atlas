@@ -1,0 +1,39 @@
+<div id="activate-res-dlg" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" ng-controller="AuthCtrl as m">
+        <!--Success-->
+        <div class="modal-content" ng-show="!m.error.show">
+            <div class="modal-header">
+                <h4 class="modal-title">You're All Set!</h4>
+            </div>
+            <div class="modal-body">
+                <p>Your Peersay account is activated! Please proceed to login page.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="/auth/login" target="_self" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+
+        <!--Error-->
+        <div class="modal-content" ng-show="m.error.show">
+            <div class="modal-header">
+                <h4 class="modal-title">Activation Failed!</h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
+                    The link you provided looks incorrect. Please make you copy-pasted the right link or just click it in email.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="/auth/signup" target="_self" class="btn btn-primary">Signup</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#activate-res-dlg')
+            .modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+</script>

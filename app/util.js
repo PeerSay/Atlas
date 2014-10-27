@@ -1,5 +1,12 @@
 var crypto = require('crypto');
 
+function randomBase64(bytes_num, cb) {
+    return crypto.randomBytes(bytes_num, function (err, buf) {
+        if (err) cb(err);
+        cb(null, buf.toString('base64'));
+    });
+}
+
 function hasher(opts, cb) {
     // Credit: http://www.boronine.com/2012/08/30/Strong-Password-Hashing-with-Node-Standard-Library/
 
@@ -30,5 +37,6 @@ function hasher(opts, cb) {
 }
 
 module.exports = {
-    hasher: hasher
+    hasher: hasher,
+    randomBase64: randomBase64
 };

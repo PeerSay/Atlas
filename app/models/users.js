@@ -7,6 +7,7 @@ var Project = require('../../app/models/projects').ProjectModel;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000;
+var errors = require('../../app/errors');
 
 
 // Service model required for short incremental ids
@@ -33,8 +34,18 @@ var userSchema = new Schema({
     id: { type: Number, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    name: { type: String},
+    name: {
+        familyName: String,
+        givenName: String
+    },
+    linkedIn: { type: Boolean, default: false },
+    needVerify: { type: Schema.Types.Mixed }, // false or 'uid'
     projects: [ projectStubSchema ]
+});
+
+
+userSchema.virtual('name.full').get(function () {
+    return (this.name.givenName + ' ' + this.name.familyName).trim();
 });
 
 
@@ -44,16 +55,15 @@ userSchema.statics.findByEmail = function (email, cb) {
 
 
 userSchema.statics.authenticate = function (email, password, cb) {
-    var code = {
-        NOT_FOUND: 1,
-        PWD_MISMATCH: 2
-    };
-
-    this.findOne({email: email}, 'id -_id email password projects', function (err, user) {
+    this.findOne({email: email}, function (err, user) {
         if (err) return cb(err);
 
         if (!user) {
-            return cb(null, null, code.NOT_FOUND);
+            return cb(null, null, errors.AUTH_NOT_FOUND);
+        }
+
+        if (user.needVerify !== false) {
+            return cb(null, user, errors.AUTH_NOT_VERIFIED);
         }
 
         var verify = split(user.password);
@@ -62,13 +72,12 @@ userSchema.statics.authenticate = function (email, password, cb) {
 
             var hash = result.key.toString('hex');
             if (hash !== verify.hash) {
-                return cb(null, null, code.PWD_MISMATCH);
+                return cb(null, null, errors.AUTH_PWD_MISMATCH);
             }
 
             return cb(null, user);
         });
     });
-
 
     function split(joined) {
         var arr = joined.split('_');
@@ -77,6 +86,71 @@ userSchema.statics.authenticate = function (email, password, cb) {
             salt: new Buffer(arr[1], 'hex')
         };
     }
+};
+
+
+userSchema.statics.register = function (email, password, user_data, cb) {
+    User.authenticate(email, password, function (err, user, code) {
+        if (err) return cb(err);
+
+        if (code === errors.AUTH_NOT_VERIFIED) {
+            // user exists but not verified -> the best thing we can do is update pwd and re-send email
+            // otherwise it would lead to 'account hijack' - attacker could create accounts without having email,
+            // thus blocking actual owners signup
+            user.password = password;
+            user.needVerify = true;
+            return user.save(function (err, userUpd) {
+                if (err) return cb(err);
+                cb(null, userUpd);
+            });
+        }
+
+        if (code === errors.AUTH_PWD_MISMATCH) {
+            // user exists, verified but has different password -> show 'already registered'
+            return cb(null, null, errors.AUTH_DUPLICATE);
+        }
+
+        if (user) {
+            // user exists & password match, may be LinkedIn login/signup or just full match
+            // anyway -> authorize user
+            return cb(null, user);
+        }
+
+        //TODO: assert(code === errors.AUTH_NOT_FOUND) or AUTH_NOT_VERIFIED
+
+        User.create(user_data, function (err, user) {
+            if (err) return cb(err);
+
+            return cb(null, user, errors.AUTH_NEW_OK);
+        })
+    });
+};
+
+
+userSchema.statics.verifyAccount = function (email, uid, cb) {
+    User.findOne({email: email}, function (err, user) {
+        if (err) return cb(err);
+
+        if (!user) {
+            return cb(null, null, errors.AUTH_NOT_FOUND);
+        }
+
+        if (user.needVerify === false) {
+            // Already verified, e.g. by LinkedIn
+            return cb(null, user);
+        }
+
+        if (user.needVerify !== uid) {
+            // Probably bad url copy-paste or something really bad..
+            return cb(null, null, errors.AUTH_NOT_VERIFIED);
+        }
+
+        user.needVerify = false;
+        user.save(function (err, verifiedUser) {
+            if (err) return cb(err);
+            cb(null, verifiedUser);
+        });
+    });
 };
 
 
@@ -109,6 +183,20 @@ userSchema.methods.removeProject = function (stub_id, cb) {
 };
 
 
+userSchema.pre('save', function ensureId(next) {
+    var user = this;
+    if (!user.isNew) { return next(); }
+
+    // ensure auto-increment of user.id
+    Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
+        if (err) next(err);
+        user.id = settings.nextUserId;
+
+        next();
+    });
+});
+
+
 userSchema.pre('save', function ensurePassword(next) {
     var user = this;
 
@@ -126,31 +214,35 @@ userSchema.pre('save', function ensurePassword(next) {
 });
 
 
-userSchema.pre('save', function ensureId(next) {
+userSchema.pre('save', function ensureValidEmail(next) {
     var user = this;
 
-    if (!user.isNew) { return next(); }
+    // set to true when need to generate uid and send email
+    if (!user.isModified('needVerify')) { return next(); }
 
-    // unsure auto-increment of id
-    Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
-        if (err) next(err);
-        user.id = settings.nextUserId;
+    // No need to verify for LinkedIn; false means verification complete
+    if (user.linkedIn || user.needVerify === false) { return next(); }
 
+    util.randomBase64(64, function (err, str) {
+        if (err) return next(err);
+
+        user.needVerify = str;
+        user.markModified('needVerify'); // BUG: doesn't work?
         next();
     });
 });
 
 
 userSchema.pre('save', function ensureProject(next) {
-    var $user = this;
+    var user = this;
+    if (!user.isNew) { return next(); }
 
-    if (!$user.isNew) { return next(); }
-
-    Project.createByUser(null/*default*/, $user, function (err) {
+    Project.createByUser(null/*default*/, user, function (err) {
         if (err) next(err);
         next();
     });
 });
+
 
 // Model
 //

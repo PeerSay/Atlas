@@ -8,28 +8,28 @@ config.$inject = ['$routeProvider', '$locationProvider'];
 
 function config($routeProvider, $locationProvider) {
     $routeProvider
-        .when('/signup', {
-            templateUrl: '/html/signup.html',
-            controller: 'AuthCtrl',
-            controllerAs: 'm'
+        .when('/auth/signup', {
+            templateUrl: '/html/signup.html'
         })
-        .when('/login', {
-            templateUrl: '/html/login.html',
-            controller: 'AuthCtrl',
-            controllerAs: 'm'
+        .when('/auth/signup/success', {
+            templateUrl: '/html/signup-success.html'
         })
-        .when('/projects', {
+        .when('/auth/signup/verified', {
+            templateUrl: '/html/signup-verified.html'
+        })
+        .when('/auth/login', {
+            templateUrl: '/html/login.html'
+        })
+        .when('/user/:id/projects', {
             templateUrl: '/html/project-list.html',
-            controller: 'Projects', // TODO: proper Ctrl?
+            controller: 'ProjectListCtrl',
             controllerAs: 'm'
         })
-        .when('/projects/:id', {
-            templateUrl: '/html/project-details.html',
-            controller: 'ProjectDetailsCtrl',
-            controllerAs: 'm'
+        .when('/user/:id/projects/:projectId', {
+            templateUrl: '/html/project-details.html'
         })
         .otherwise({
-            redirectTo: '/login'
+            redirectTo: '/not-implemented'
         });
 
     $locationProvider.html5Mode(true);

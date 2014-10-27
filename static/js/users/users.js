@@ -8,19 +8,17 @@ function Users(rest, $location, Menu, Storage) {
     var U = {};
 
     U.user = Storage.get('user') || {};
-    U.signup = signup;
-    U.login = login;
-    U.logout = logout;
     U.setHeader = setHeader;
+    U.getUser = getUser;
+    U.logout = logout;
 
     setHeader();
 
-    function signup (user) {
-        return rest.register(user)
+    function getUser(id) {
+        return rest.read('users', id)
             .success(function (res) {
                 //console.log('registered:', res);
                 U.user  = Storage.set('user', res.result);
-                $location.path('/projects');
                 setHeader();
             })
             .error(function (res) {
@@ -28,25 +26,11 @@ function Users(rest, $location, Menu, Storage) {
             });
     }
 
-    function login(user) {
-        return rest.authenticate(user)
-            .success(function (res) {
-                console.log('login:', res);
-                U.user  = Storage.set('user', res.result);
-                $location.path('/projects');
-                setHeader();
-            })
-            .error(function (res) {
-                console.log('TODO handle auth err: %O', res);
-            });
-    }
-
-
     function logout() {
-        rest.logout()
+        return rest.create('auth/logout', {}) // post
             .success(function () {
                 U.user  = Storage.remove('name') || {};
-                $location.path('/login');
+                $location.path('/auth/login');
                 setHeader();
             })
             .error(function (res) {
@@ -54,6 +38,10 @@ function Users(rest, $location, Menu, Storage) {
             });
     }
 
+
+
+    // Menu
+    //
     function setHeader() {
         var name = $location.path().replace(/\//g, '');
         Menu.setActivePage(name);

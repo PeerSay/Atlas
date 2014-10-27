@@ -8,10 +8,13 @@ var passport = require('passport');
 
 // App dependencies
 var config = require('./app/config');
+var mailer = require('./app/email/mailer');
 var Auth = require('./app/auth');
 var RestApi = require('./app/rest-api');
+var users = require('./app/models/users');
 var models = {
-    users: require('./app/models/users').UserModel
+    User: users.UserModel,
+    errors: users.errors
 };
 
 
@@ -45,7 +48,7 @@ function log (req, res, next) {
 }
 
 // Setup routes
-Auth(app, models.users).setupRoutes();
+Auth(app, models, mailer, config).setupRoutes();
 RestApi(app, models).setupRoutes();
 
 // Logger (comes last)

@@ -1,32 +1,54 @@
 var _ = require('lodash');
-//var jsonParser = require('body-parser').json();
+var jsonParser = require('body-parser').json();
 var urlencodedParser = require('body-parser').urlencoded({extended: false});
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var LinkedInStrategy = require('passport-linkedin').Strategy;
-var errors = require('../app/errors');
 
-function Auth(app, models, mailer, config) {
+// App dependencies
+var config = require('../app/config');
+var util = require('../app/util');
+var errors = require('../app/errors');
+var mailer = require('../app/email/mailer');
+var User = require('../app/models/users').UserModel;
+
+var constant = {
+    SESS_NORMAL: 1000*60*60*12, // 12h
+    SESS_LONG: 1000*60*60*24*14, // 14d
+    SESS_RESTORE: 1000*60*20 // 20min
+};
+
+function Auth(app) {
     var U = {};
-    var User = models.User;
 
     function setupRoutes() {
-        // statics
+        // login
         app.get('/auth/login', sendAppEntry);
+        app.post('/auth/login', urlencodedParser, authenticate);
+
+        // signup
         app.get('/auth/signup', sendAppEntry);
         app.get('/auth/signup/success', sendAppEntry);  // show activation required page
         app.get('/auth/signup/verified', sendAppEntry);  // redirect after verify link click
-        app.get('/user/*', ensureAuthenticated, sendAppEntry); // send on F5
-
-        // local
         app.post('/auth/signup', urlencodedParser, register); // form submit
         app.get('/auth/signup/verify', verifyAccount); // link from email
-        app.post('/auth/login', urlencodedParser, authenticate);
+
+        // restore
+        app.get('/auth/restore', sendAppEntry);
+        app.get('/auth/restore/complete', sendAppEntry); // ask for code and new password
+        app.post('/api/auth/restore', jsonParser, _.curry(validateAcceptAndBody)(restorePassword));
+        app.post('/api/auth/restore/complete', jsonParser, _.curry(validateAcceptAndBody)(restorePasswordComplete));
+
+        // logout
         app.post('/api/auth/logout', logout); // api call!
 
         // linkedin
         app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
         app.get('/auth/linkedin/callback', authenticateByLinkedIn); // redirect back from linkedin.com
+
+        // Entry point
+        app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
         return U;
     }
@@ -34,17 +56,12 @@ function Auth(app, models, mailer, config) {
     // Setup passport
     //
     passport.serializeUser(function (user, done) {
-        console.log('[AUTH]: Passport: serialize for [%s]', user.email);
-
         done(null, user.email);
     });
 
     passport.deserializeUser(function (email, done) {
-        console.log('[AUTH]: Passport: deserialize for [%s]', email);
-
-        User.findOne({email: email},'id -_id email', function (err, user) {
-            console.log('[AUTH] Passport: deserialized: ', user);
-
+        // Get minimal fields only; additional requests are required to perform API operations
+        User.findOne({email: email}, 'id -_id email', function (err, user) {
             done(err, user);
         });
     });
@@ -95,10 +112,14 @@ function Auth(app, models, mailer, config) {
                 return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
             }
 
-            loginUser(req, res, {
+            var login = {
                 user: user,
                 isNew: (code === errors.AUTH_NEW_OK),
                 longSession: true // don't ask on signup, long by default
+            };
+            loginUser(req, login, function (err) {
+                if (err) { return next(err); }
+                return res.redirect('/projects');
             });
         });
     }
@@ -116,6 +137,8 @@ function Auth(app, models, mailer, config) {
                 console.log('[AUTH] Acc verify failed for [%s], code=%s', email, code);
                 return res.redirect('/auth/signup/verified?err=' + code);
             }
+
+            console.log('[AUTH] Acc verify success for [%s]', email);
 
             return res.redirect('/auth/signup/verified');
         });
@@ -142,10 +165,14 @@ function Auth(app, models, mailer, config) {
 
             console.log('[AUTH] Verified-local [%s], info=%s', user.email, info);
 
-            loginUser(req, res, {
+            var login = {
                 user: user,
                 isNew: false,
                 longSession: data.longSession // TODO: form control
+            };
+            loginUser(req, login, function (err) {
+                if (err) { return next(err); }
+                return res.redirect('/projects');
             });
         })(req, res, next);
     }
@@ -194,10 +221,14 @@ function Auth(app, models, mailer, config) {
 
             console.log('[AUTH] Success-linkedin for [%s], info=%s', user.email, info);
 
-            loginUser(req, res, {
+            var login = {
                 user: user,
-                isNew: false, // TODO
+                isNew: false,
                 longSession: true
+            };
+            loginUser(req, login, function (err) {
+                if (err) { return next(err); }
+                return res.redirect('/projects');
             });
 
         })(req, res, next);
@@ -205,6 +236,7 @@ function Auth(app, models, mailer, config) {
 
     function passportVerifyLinkedIn(token, tokenSecret, profile, done) {
         // Both signup/login lead here & have the same flow
+        //
         // Profile format:
         //  id: 'string'
         //  emails: [ { value: 'a@a.com' } ],
@@ -212,8 +244,8 @@ function Auth(app, models, mailer, config) {
         var email = (profile.emails || {}).length ? profile.emails[0] : {};
         var data = {
             email: email.value,
-            password: profile.id, // use as password!
-            name: profile.name, // nice to get for free TODO: add to scheme
+            password: profile.id, // use id as password!
+            name: profile.name, // nice to get for free
             linkedIn: true
         };
 
@@ -230,17 +262,83 @@ function Auth(app, models, mailer, config) {
         });
     }
 
-    function loginUser(req, res, options) {
-        var user = _.pick(options.user, ['id', 'email']);
+    function loginUser(req, options, done) {
+        var user = options.user;
+        var maxAge = options.longSession ?
+            constant.SESS_LONG : constant.SESS_NORMAL;
 
-        // TODO: handle longSession
+        console.log('[AUTH] Success - logging in [%s], for %sh', user.email, maxAge/(1000*60*60));
 
-        console.log('[AUTH] Success - logging in [%s]', user.email);
-
+        req.session.cookie.maxAge = maxAge;
         req.login(user, function (err) { // establish session...
+            if (err) { return done(err); }
+            done(null, req.user);
+        });
+    }
+
+    // Restore
+    //
+    function restorePassword(req, res, next) {
+        var data = req.body; // TODO: validate params
+
+        console.log('[AUTH] Restore for [%s]', data.email);
+
+        User.findOne({email: data.email}, 'email linkedIn', function (err, user) {
+            if (err) { next(err); }
+
+            if (!user) {
+                console.log('[AUTH] Restore failed - not found [%s]', data.email);
+                return res.json({error: 'not found: ' + data.email});
+            }
+
+            if (user.linkedIn) {
+                console.log('[AUTH] Restore failed - [%s] is linkedIn', data.email);
+                return res.json({error: 'linkedin'});
+            }
+
+            req.session.cookie.maxAge = constant.SESS_RESTORE;
+            var restore = req.session.restore = {
+                email: user.email,
+                code: util.genRestorePwdKey()
+            };
+
+            mailRestoreAsync(restore);
+            res.json({ result: true });
+        });
+    }
+
+    function restorePasswordComplete(req, res, next) {
+        var data = req.body; // TODO: validate params
+        var restore = req.session.restore;
+
+        if (!restore) {
+            console.log('[AUTH] Restore complete failed - no session');
+            return res.json({error: 'no session'});
+        }
+        if (restore.code !== data.code) {
+            console.log('[AUTH] Restore complete failed - invalid [%s] != [%s]', restore.code, data.code);
+            return res.json({error: 'invalid code'});
+        }
+
+        User.updatePassword(restore.email, data.password, function (err, user, code) {
             if (err) { return next(err); }
 
-            return res.redirect('/user/' + req.user.id + '/projects');
+            if (!user) {
+                // this should not happen as
+                // 1) user exists check is done on prev step and
+                // 2) email must be stored in session
+                return res.json({error: 'code:' + code});
+            }
+
+            var login = {
+                user: user,
+                isNew: false,
+                longSession: true
+            };
+            loginUser(req, login, function (err, loggedUser) {
+                if (err) { return next(err); }
+                return res.json({ result: loggedUser });
+            });
         });
     }
 
@@ -291,16 +389,92 @@ function Auth(app, models, mailer, config) {
             name: user.name.full,
             url: verify_url
         };
-        console.log('[AUTH] Sending verify email to [%s], url=[%s]', user.email, verify_url);
-        mailer.send(user.email, 'account-activation', locals); // async!
+        var tpl = 'account-activation';
+        console.log('[AUTH] Sending %s email to [%s], url=[%s]', tpl, user.email, verify_url);
 
+        mailer.send(user.email, tpl, locals); // async!
         // TODO: err handling
+    }
+
+    function mailWelcomeAsync() {
+
+    }
+
+    function mailRestoreAsync(data) {
+        var locals = {
+            code: data.code
+        };
+        var tpl = 'restore-pwd';
+        console.log('[AUTH] Sending %s email to [%s], code=[%s]', tpl, data.email, data.code);
+
+        mailer.send(data.email, tpl, locals); // async!
+        // TODO: err handling
+    }
+
+
+    // TODO: move to proper place
+    function validateAcceptAndBody(func, req, res, next) {
+        if (!validateBody(req.body, res)) {
+            return;
+        }
+
+        validateAccept(func, req, res, next);
+    }
+
+    function validateBody(body, res) {
+        var ret = true;
+        if (isEmpty(body)) {
+            badRequest(res, 'No JSON');
+            ret = false;
+        }
+
+        return ret;
+    }
+
+    function validateAccept(func, req, res, next) {
+        console.log('[API] %s %s', req.method, req.url);
+        res.format({
+            json: function () {
+                func.call(U, req, res, next);
+            },
+            'default': function () {
+                notAcceptable(res);
+            }
+        });
+    }
+
+    function notAcceptable(res) {
+        return res
+            .status(406)
+            .send({error: 'Not Acceptable'});
+    }
+
+    function badRequest(res, msg) {
+        return res
+            .status(400)
+            .send({error: 'Bad request: ' + msg});
+    }
+
+    function notFound(res, msg) {
+        return res
+            .status(404)
+            .send({error: 'Not found: ' + msg});
+    }
+
+    function notValid(res, msg) {
+        return res
+            .status(409)
+            .send({error: 'Not valid: ' + msg});
+    }
+
+    function isEmpty(obj) {
+        return !Object.keys(obj).length;
     }
 
 
     U.setupRoutes = setupRoutes;
     return U;
-}
+};
 
 
 module.exports = Auth;

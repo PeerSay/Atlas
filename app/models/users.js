@@ -56,7 +56,7 @@ userSchema.statics.findByEmail = function (email, cb) {
 
 userSchema.statics.authenticate = function (email, password, cb) {
     this.findOne({email: email}, function (err, user) {
-        if (err) return cb(err);
+        if (err) { return cb(err); }
 
         if (!user) {
             return cb(null, null, errors.AUTH_NOT_FOUND);
@@ -68,7 +68,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
 
         var verify = split(user.password);
         util.hasher({plaintext: password, salt: verify.salt, iterations: HASH_ITERS}, function (err, result) {
-            if (err) return cb(err);
+            if (err) { return cb(err); }
 
             var hash = result.key.toString('hex');
             if (hash !== verify.hash) {
@@ -91,16 +91,17 @@ userSchema.statics.authenticate = function (email, password, cb) {
 
 userSchema.statics.register = function (email, password, user_data, cb) {
     User.authenticate(email, password, function (err, user, code) {
-        if (err) return cb(err);
+        if (err) { return cb(err); }
 
         if (code === errors.AUTH_NOT_VERIFIED) {
             // user exists but not verified -> the best thing we can do is update pwd and re-send email
-            // otherwise it would lead to 'account hijack' - attacker could create accounts without having email,
-            // thus blocking actual owners signup
+            // otherwise it would lead to DOS - attacker could create accounts without having email,
+            // thus blocking actual owners' access
             user.password = password;
             user.needVerify = true;
             return user.save(function (err, userUpd) {
-                if (err) return cb(err);
+                if (err) { return cb(err); }
+
                 cb(null, userUpd);
             });
         }
@@ -116,11 +117,8 @@ userSchema.statics.register = function (email, password, user_data, cb) {
             return cb(null, user);
         }
 
-        //TODO: assert(code === errors.AUTH_NOT_FOUND) or AUTH_NOT_VERIFIED
-
         User.create(user_data, function (err, user) {
-            if (err) return cb(err);
-
+            if (err) { return cb(err); }
             return cb(null, user, errors.AUTH_NEW_OK);
         })
     });
@@ -129,14 +127,14 @@ userSchema.statics.register = function (email, password, user_data, cb) {
 
 userSchema.statics.verifyAccount = function (email, uid, cb) {
     User.findOne({email: email}, function (err, user) {
-        if (err) return cb(err);
+        if (err) { return cb(err); }
 
         if (!user) {
             return cb(null, null, errors.AUTH_NOT_FOUND);
         }
 
         if (user.needVerify === false) {
-            // Already verified, e.g. by LinkedIn
+            // Already verified, e.g. by LinkedIn or Pwd restore
             return cb(null, user);
         }
 
@@ -147,20 +145,39 @@ userSchema.statics.verifyAccount = function (email, uid, cb) {
 
         user.needVerify = false;
         user.save(function (err, verifiedUser) {
-            if (err) return cb(err);
+            if (err) { return cb(err); }
             cb(null, verifiedUser);
+        });
+    });
+};
+
+userSchema.statics.updatePassword = function (email, password, cb) {
+    // Cannot use findOneAndUpdate, where/update etc. - it doesn't call 'pre' hooks
+    User.findOne({email: email}, function (err, user) {
+        if (err) { return cb(err); }
+
+        if (!user) {
+            return cb(null, null, errors.AUTH_NOT_FOUND);
+        }
+
+        // This is sort of account validation too, as user can get valid code only from inbox
+        user.needVerify = false;
+        user.password = password;
+        user.save(function (err, updatedUser) {
+            if (err) { return cb(err); }
+            cb(null, updatedUser);
         });
     });
 };
 
 
 userSchema.methods.createProject = function (project, cb) {
-    var $user = this;
-    Project.createByUser(project, $user, function (err, stubPrj) {
+    var user = this;
+    Project.createByUser(project, user, function (err, stubPrj) {
         if (err) return cb(err);
 
-        $user.save(function (err, user) {
-            if (err) return cb(err);
+        user.save(function (err, user) {
+            if (err) { return cb(err); }
             cb(null, stubPrj); // stub is enough for create
         });
     });
@@ -168,12 +185,13 @@ userSchema.methods.createProject = function (project, cb) {
 
 
 userSchema.methods.removeProject = function (stub_id, cb) {
-    var $user = this;
-    Project.removeByUser(stub_id, $user, function (err) {
-        if (err) return cb(err);
+    var user = this;
+    Project.removeByUser(stub_id, user, function (err) {
+        if (err) { return cb(err); }
 
-        $user.save(function (err) {
-            if (err) return cb(err);
+        user.save(function (err) {
+            if (err) { return cb(err); }
+
             cb(null, {
                 id: stub_id,
                 removed: true

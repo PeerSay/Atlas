@@ -1,152 +1,110 @@
 var _ = require('lodash');
 var jsonParser = require('body-parser').json();
 
-// util
+// App dependencies
+var User = require('../app/models/users').UserModel;
+
+
+// util - TODO
 function isEmpty(obj) {
     return !Object.keys(obj).length;
 }
 
 
-function RestApi(app, models) {
+function RestApi(app) {
     var U = {};
 
     function setupRoutes() {
-        app.get('/api/users', _.curry(validateAccept)(readAll, 'User'));
-        app.get('/api/users/:id', _.curry(validateAccept)(read, 'User'));
-        app.put('/api/users/:id', jsonParser, _.curry(validateAcceptAndBody)(update, 'User'));
-        app.post('/api/users', jsonParser, _.curry(validateAcceptAndBody)(create, 'User'));
-        app.delete('/api/users/:id', _.curry(validateAccept)(remove, 'User'));
+        // validation & logging
+        app.use('/api/*', logApi, validateAccept);
+        app.post('/api/*', jsonParser, validateBody);
+        app.use(/\/user|\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
 
-        app.post('/api/projects', jsonParser, _.curry(validateAcceptAndBody)(createProject, 'User'));
-        app.delete('/api/projects/:id', _.curry(validateAccept)(removeProject, 'User'));
+        // user
+        app.get('/api/user', readUser);
+
+        // projects
+        app.post('/api/projects', createProject);
+        app.delete('/api/projects/:id', removeProject);
         return U;
     }
 
-    function createProject(model, req, res) {
+    // User
+    //
+    function readUser(req, res, next) {
+        var email = req.user.email;
+
+        console.log('[API] Read user [%s]', email);
+
+        User.findOne({email: email}, 'id -_id email name projects.id projects.title', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
+
+            res.json({ result: user });
+        });
+    }
+
+    // Projects
+    //
+    function createProject(req, res, next) {
         var project = req.body;
+        var user = req.user;
+        var email = user.email;
 
-        if (!req.user) {
-            // TODO: real auth
-            return notFound(res, 1);
-        }
+        console.log('[API] Creating project for user=[%s]', email);
 
-        console.log('[API] Creating project for user id=[%s]', req.user.id);
-
-        model.findOne({id: req.user.id}, function (err, user) {
-            //if (err) return console.error(err);
+        User.findOne({email: email}, 'projects', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
 
             user.createProject(project, function (err, prj) {
-                //if (err) return console.error(err);
-
+                if (err) { return next(err); }
                 res.json({ result: prj });
             });
         });
     }
 
-    function removeProject(model, req, res) {
+    function removeProject(req, res) {
         var project_id = Number(req.params.id);
+        var user = req.user;
+        var email = user.email;
 
-        console.log('[API] Removing project for user id=[%s]', req.user.id);
+        console.log('[API] Removing project for user=[%s]', email);
 
-        if (!req.user) {
-            // TODO: real auth
-            return notFound(res, 1);
-        }
-
-        model.findOne({id: req.user.id}, function (err, user) {
-            //if (err) return console.error(err);
+        User.findOne({email: email}, 'projects', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
 
             user.removeProject(project_id, function (err, result) {
-                //if (err) return console.error(err);
-
+                if (err) { return next(err); }
                 res.json({ result: result });
             });
         });
     }
 
-    // Generic CRUD API (TODO: see if all can be expressed with it)
-
-    function readAll(model, req, res, next) {
-        model.find({}, '', function (err, arr) {
-            //if (err) return console.error(err);
-
-            res.json({ result: arr });
-            next();
-        });
+    // Validation
+    function logApi(req, res, next) {
+        console.log('[API] %s %s', req.method, req.originalUrl);
+        next();
     }
 
-    function read(model, req, res, next) {
-        var id = Number(req.params.id);
-
-        model.findOne({id: id}, 'id email projects -_id', function (err, doc) { // XXX: not generic!
-            //if (err) return console.error(err); // XXX: 500 err
-
-            if (doc) {
-                res.json({ result: doc });
-            }
-            else {
-                notFound(res, id);
-            }
-        });
+    function ensureAuthorized(reg, res, next) {
+        if (!req.user) {
+            return notAuthorized(res);
+        }
+        next();
     }
 
-    function update(model, req, res, next) {
-        var id = Number(req.params.id);
-
-        model.findOneAndUpdate({id: id}, req.body, function (err, doc) {
-            //if (err) return console.error(err);
-
-            if (doc) {
-                res.json({ result: doc });
-                next();
-            }
-            else {
-                notFound(res, id);
-            }
-        });
-    }
-
-    function create(model, req, res, next) {
-        delete req.body._id; // XXX
-
-        model.create(req.body, function (err, doc) {
-            //if (err) return console.error(err);
-
-            if (doc) {
-                res.json({ result: doc});
-                next();
-            } else {
-                modelError(res, err);
-            }
-        });
-    }
-
-    function remove(model, req, res, next) {
-        var id = Number(req.params.id);
-
-        model.findOneAndRemove({id: id}, function (err, doc) {
-            //if (err) return console.error(err);
-
-            if (doc) {
-                res.json({
-                    result: {
-                        id: doc.id,
-                        removed: true
-                    }
-                });
-                next();
-            }
-            else {
-                notFound(res, id);
-            }
-        })
-    }
-
-    function validateAccept(method, model_name, req, res, next) {
-        console.log('[API] %s %s', req.method, req.url);
+    function validateAccept(req, res, next) {
         res.format({
             json: function () {
-                method.call(U, models[model_name], req, res, next);
+                next();
             },
             'default': function () {
                 notAcceptable(res);
@@ -154,22 +112,11 @@ function RestApi(app, models) {
         });
     }
 
-    function validateAcceptAndBody(method, model_name, req, res, next) {
-        if (!validateBody(req.body, res)) {
-            return;
+    function validateBody(reg, res, next) {
+        if (isEmpty(reg.body)) {
+            badRequest(res, 'No JSON'); // TODO: post({}) should be OK
         }
-
-        validateAccept(method, model_name, req, res, next);
-    }
-
-    function validateBody(body, res) {
-        var ret = true;
-        if (isEmpty(body)) {
-            badRequest(res, 'No JSON');
-            ret = false;
-        }
-
-        return ret;
+        next();
     }
 
     function modelError(res, err) {
@@ -192,6 +139,12 @@ function RestApi(app, models) {
         };
 
         return notValid(res, errors[err.name]());
+    }
+
+    function notAuthorized(res) {
+        return res
+            .status(401)
+            .send({error: 'Not Authorized'});
     }
 
     function notAcceptable(res) {

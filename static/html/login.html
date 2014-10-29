@@ -47,8 +47,17 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label class="checkbox-ext" ng-class="{checked: m.user.longSession}">
+                                <input type="checkbox"
+                                        name="longSession"
+                                        ng-model="m.user.longSession">
+                                Keep me signed in
+                            </label>
+                        </div>
+
                         <div class="pull-left">
-                            <a href="#" >Forgot passord?</a>
+                            <a href="/auth/restore">Forgot password?</a>
                         </div>
 
                         <button class="btn btn-lg btn-success pull-right"
@@ -62,7 +71,7 @@
                     <li class="list-group-item linkedin-section">
                         <h4 class="title-or">OR</h4>
                         <h4 class="title">Have LinkedIn account?</h4>
-                        <a href="/auth/linkedin" target="_self"  class="btn btn-lg btn-success">
+                        <a href="/auth/linkedin" target="_self" class="btn btn-lg btn-success full-width">
                             <span class="glyphicon glyphicon-link"></span>
                             Login with LinkedIn
                         </a>

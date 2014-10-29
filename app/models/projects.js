@@ -18,20 +18,20 @@ var projectSchema = new Schema({
 });
 
 
-projectSchema.statics.createByUser = function (project, $user, next) {
+projectSchema.statics.createByUser = function (project, user, next) {
     project = (project || defaultProject);
-    project.collaborators = [$user._id];
+    project.collaborators = [user._id];
 
     Project.create(project, function (err, prj) {
         if (err) return next(err);
 
         // Create stub sub-doc
         var stubPrj = {
-            id: nextId($user.projects),
+            id: nextId(user.projects),
             title: prj.title,
             _ref: prj._id
         };
-        $user.projects.push(stubPrj); // save() is required and responsibility of caller
+        user.projects.push(stubPrj); // save() is required and responsibility of caller
         next(null, stubPrj);
     });
 
@@ -43,14 +43,14 @@ projectSchema.statics.createByUser = function (project, $user, next) {
 };
 
 
-projectSchema.statics.removeByUser = function (stub_id, $user, next) {
-    var stubPrj = _.find($user.projects, {id: stub_id});
+projectSchema.statics.removeByUser = function (stub_id, user, next) {
+    var stubPrj = _.find(user.projects, {id: stub_id});
 
     Project.findOneAndRemove({_id: stubPrj._ref}, function (err, prj) {
         if (err) return cb(err);
 
         // Remove stub sub-doc
-        $user.projects.id(stubPrj._id).remove(); // mongoose can only remove by id().remove()
+        user.projects.id(stubPrj._id).remove(); // mongoose can only remove by id().remove()
         next(null, stubPrj); // save() is required and responsibility of caller
 
         // TODO: remove collaborator's stubs

@@ -1,0 +1,49 @@
+<div class="container-fluid" ng-controller="AuthCtrl as m">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+            <div class="panel panel-default auth">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Forgot Password?</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
+                        <strong>Error:</strong> {{m.error.msg}}.
+                    </div>
+                    <div class="alert alert-warning text-center" role="alert" ng-show="m.errorLinkedIn.show">
+                        <strong>Hey!</strong> You are registered with LinkedIn.
+                        <a href="/auth/linkedin" target="_self">Login</a>
+                    </div>
+
+                    <p>A message will be sent to email address provided below.
+                        Please follow the instructions inside to restore your password.</p>
+
+                    <form class="auth" name="m.form">
+                        <div class="form-group">
+                            <div class="input-group input-group-lg" ng-class="{
+                                    'has-success': m.form.email.$valid,
+                                    'has-warning': m.form.email.$touched && m.form.email.$invalid}">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+                                <div class="hint" ng-messages="m.form.email.$error" ng-class="{show: m.form.email.$touched}">
+                                    <div ng-message="required">Required</div>
+                                    <div ng-message="email">Invalid email!</div>
+                                </div>
+                                <input type="email" name="email" class="form-control" placeholder="Your email"
+                                        ng-model="m.user.email"
+                                        ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
+                                        ng-focus="m.form.email.$setUntouched()"
+                                        required>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-lg btn-success pull-right full-width"
+                                ng-disabled="m.form.$invalid"
+                                ng-click="m.restorePwd()"
+                                >Send Restore Email
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

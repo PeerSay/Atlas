@@ -13,7 +13,7 @@ function headerMenu() {
     function link(scope, $navbar) {
         var $auth_els = $navbar.find('.js-auth');
         var $app_els = $navbar.find('.js-app');
-        var AUTH_RE = /auth(login|signup)/;
+        var AUTH_RE = /^auth/;
 
         scope.$watch('m.activePage.name', function (value) {
             var activeLink = $navbar.find('.' + value);

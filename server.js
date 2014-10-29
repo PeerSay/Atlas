@@ -3,19 +3,14 @@ var express = require("express");
 var compression = require('compression');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 var passport = require('passport');
 
 // App dependencies
 var config = require('./app/config');
-var mailer = require('./app/email/mailer');
 var Auth = require('./app/auth');
 var RestApi = require('./app/rest-api');
-var users = require('./app/models/users');
-var models = {
-    User: users.UserModel,
-    errors: users.errors
-};
 
 
 // Connect to DB
@@ -35,21 +30,24 @@ app.use(compression());
 app.use(express.static(config.web.static_dir));
 app.use(cookieParser());
 app.use(session({
-    secret: 'some secret',
+    secret: '8a779a89-8e82-4c31-80a0-284eed6ee12f',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: new MongoStore({
+        mongoose_connection: mongoose.connections[0]
+    })
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-function log (req, res, next) {
+function log(req, res, next) {
     console.log('[%s]: %s - %s', req.method, req.url, res.statusCode);
     next();
 }
 
 // Setup routes
-Auth(app, models, mailer, config).setupRoutes();
-RestApi(app, models).setupRoutes();
+Auth(app).setupRoutes();
+RestApi(app).setupRoutes();
 
 // Logger (comes last)
 app.all('*', log);

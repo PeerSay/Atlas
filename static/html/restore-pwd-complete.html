@@ -3,30 +3,34 @@
         <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
             <div class="panel panel-default auth">
                 <div class="panel-heading">
-                    <h2 class="panel-title">Signup</h2>
+                    <h2 class="panel-title">Restore Password</h2>
                 </div>
                 <div class="panel-body">
                     <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
                         <strong>Error:</strong> {{m.error.msg}}.
                     </div>
 
-                    <form class="auth" name="m.form" action="/auth/signup" method="POST">
+                    <p>A message was sent to your email address with one-time <strong>restore code</strong>.
+                        Please copy that code and paste below. The code will expire in <strong>20 min</strong>.</p>
+
+                    <form class="auth" name="m.form">
                         <div class="form-group">
                             <div class="input-group input-group-lg" ng-class="{
-                                    'has-success': m.form.email.$valid,
-                                    'has-warning': m.form.email.$touched && m.form.email.$invalid}">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
-                                <div class="hint" ng-messages="m.form.email.$error" ng-class="{show: m.form.email.$touched}">
+                                    'has-success': m.form.code.$valid,
+                                    'has-warning': m.form.code.$touched && m.form.code.$invalid}">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon glyphicon-eye-close"></span></span>
+                                <div class="hint" ng-messages="m.form.code.$error" ng-class="{show: m.form.code.$touched}">
                                     <div ng-message="required">Required</div>
-                                    <div ng-message="email">Invalid email!</div>
                                 </div>
-                                <input type="email" name="email" class="form-control" placeholder="Your email"
-                                        ng-model="m.user.email"
+                                <input type="text" name="code" class="form-control" placeholder="Restore code"
+                                        ng-model="m.user.restore"
                                         ng-model-options="{updateOn: 'blur'}"
-                                        ng-focus="m.form.email.$setUntouched()"
+                                        ng-focus="m.form.code.$setUntouched()"
                                         required>
                             </div>
                         </div>
+
+                        <p>Create new password to be used from now on:</p>
 
                         <div class="form-group">
                             <div class="input-group input-group-lg" ng-class="{
@@ -68,28 +72,13 @@
                             </div>
                         </div>
 
-                        <div class="pull-left">
-                            Already have an account?<br>
-                            <a href="/auth/login" >Login</a>
-                        </div>
-
-                        <button class="btn btn-lg btn-success pull-right"
-                               ng-disabled="m.form.$invalid"
-                                >Signup
+                        <button class="btn btn-lg btn-success full-width"
+                                ng-disabled="m.form.$invalid"
+                                ng-click="m.restorePwdComplete()"
+                                >Create New Password
                         </button>
                     </form>
                 </div>
-
-                <ul class="list-group">
-                    <li class="list-group-item linkedin-section">
-                        <h4 class="title-or">OR</h4>
-                        <h4 class="title">Have LinkedIn account?</h4>
-                        <a href="/auth/linkedin" target="_self"  class="btn btn-lg btn-success full-width">
-                            <span class="glyphicon glyphicon-link"></span>
-                            Signup with LinkedIn
-                        </a>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>

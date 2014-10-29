@@ -8,6 +8,7 @@ config.$inject = ['$routeProvider', '$locationProvider'];
 
 function config($routeProvider, $locationProvider) {
     $routeProvider
+        // Auth
         .when('/auth/signup', {
             templateUrl: '/html/signup.html'
         })
@@ -20,12 +21,20 @@ function config($routeProvider, $locationProvider) {
         .when('/auth/login', {
             templateUrl: '/html/login.html'
         })
-        .when('/user/:id/projects', {
+        .when('/auth/restore', {
+            templateUrl: '/html/restore-pwd.html'
+        })
+        .when('/auth/restore/complete', {
+            templateUrl: '/html/restore-pwd-complete.html'
+        })
+
+        // Projects
+        .when('/projects', {
             templateUrl: '/html/project-list.html',
             controller: 'ProjectListCtrl',
             controllerAs: 'm'
         })
-        .when('/user/:id/projects/:projectId', {
+        .when('/projects/:projectId', {
             templateUrl: '/html/project-details.html'
         })
         .otherwise({

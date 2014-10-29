@@ -347,7 +347,7 @@ function Auth(app) {
     function sendAppEntry(req, res) {
         var AUTH_RE = /\/auth\/(login|signup)/; // skip auth pages if user is logged in
         if (AUTH_RE.test(req.path) && req.isAuthenticated()) {
-            return res.redirect('/user/' + req.user.id + '/projects');
+            return res.redirect('/projects');
         }
 
         res.sendFile('app.html', {

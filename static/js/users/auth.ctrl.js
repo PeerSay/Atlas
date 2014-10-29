@@ -17,7 +17,8 @@ function AuthCtrl(User, Location, $http) {
     m.user = {
         email: '',
         password: '',
-        restore: ''
+        restore: '',
+        longSession: true
     };
     m.restorePwd = restorePwd;
     m.restorePwdComplete = restorePwdComplete;

@@ -12,6 +12,11 @@ var errors = require('../app/errors');
 var mailer = require('../app/email/mailer');
 var User = require('../app/models/users').UserModel;
 
+var constant = {
+    SESS_NORMAL: 1000*60*60*12, // 12h
+    SESS_LONG: 1000*60*60*24*14, // 14d
+    SESS_RESTORE: 1000*60*20 // 20min
+};
 
 function Auth(app) {
     var U = {};
@@ -258,12 +263,13 @@ function Auth(app) {
     }
 
     function loginUser(req, options, done) {
-        var user = _.pick(options.user, ['id', 'email']);
+        var user = options.user;
+        var maxAge = options.longSession ?
+            constant.SESS_LONG : constant.SESS_NORMAL;
 
-        // TODO: handle longSession
+        console.log('[AUTH] Success - logging in [%s], for %sh', user.email, maxAge/(1000*60*60));
 
-        console.log('[AUTH] Success - logging in [%s]', user.email);
-
+        req.session.cookie.maxAge = maxAge;
         req.login(user, function (err) { // establish session...
             if (err) { return done(err); }
             done(null, req.user);
@@ -290,8 +296,7 @@ function Auth(app) {
                 return res.json({error: 'linkedin'});
             }
 
-            req.session.cookie.expires = false;
-            req.session.cookie.expires = new Date(Date.now() + 1000 * 60); // expires in 20min
+            req.session.cookie.maxAge = constant.SESS_RESTORE;
             var restore = req.session.restore = {
                 email: user.email,
                 code: util.genRestorePwdKey()

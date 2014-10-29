@@ -41,8 +41,9 @@ function Auth(app) {
         app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
         app.get('/auth/linkedin/callback', authenticateByLinkedIn); // redirect back from linkedin.com
 
-        //TODO - move away?
-        app.get('/user/*', ensureAuthenticated, sendAppEntry); // send on F5
+        // Entry point
+        app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
+        app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
         return U;
     }
@@ -50,17 +51,12 @@ function Auth(app) {
     // Setup passport
     //
     passport.serializeUser(function (user, done) {
-        console.log('[AUTH]: Passport: serialize for [%s]', user.email);
-
         done(null, user.email);
     });
 
     passport.deserializeUser(function (email, done) {
-        console.log('[AUTH]: Passport: deserialize for [%s]', email);
-
+        // Get minimal fields only; additional requests are required to perform API operations
         User.findOne({email: email}, 'id -_id email', function (err, user) {
-            console.log('[AUTH] Passport: deserialized: ', user);
-
             done(err, user);
         });
     });
@@ -116,9 +112,9 @@ function Auth(app) {
                 isNew: (code === errors.AUTH_NEW_OK),
                 longSession: true // don't ask on signup, long by default
             };
-            loginUser(req, login, function (err, loggedUser) {
+            loginUser(req, login, function (err) {
                 if (err) { return next(err); }
-                return res.redirect('/user/' + loggedUser.id + '/projects');
+                return res.redirect('/projects');
             });
         });
     }
@@ -136,6 +132,8 @@ function Auth(app) {
                 console.log('[AUTH] Acc verify failed for [%s], code=%s', email, code);
                 return res.redirect('/auth/signup/verified?err=' + code);
             }
+
+            console.log('[AUTH] Acc verify success for [%s]', email);
 
             return res.redirect('/auth/signup/verified');
         });
@@ -167,9 +165,9 @@ function Auth(app) {
                 isNew: false,
                 longSession: data.longSession // TODO: form control
             };
-            loginUser(req, login, function (err, loggedUser) {
+            loginUser(req, login, function (err) {
                 if (err) { return next(err); }
-                return res.redirect('/user/' + loggedUser.id + '/projects');
+                return res.redirect('/projects');
             });
         })(req, res, next);
     }
@@ -223,9 +221,9 @@ function Auth(app) {
                 isNew: false,
                 longSession: true
             };
-            loginUser(req, login, function (err, loggedUser) {
+            loginUser(req, login, function (err) {
                 if (err) { return next(err); }
-                return res.redirect('/user/' + loggedUser.id + '/projects');
+                return res.redirect('/projects');
             });
 
         })(req, res, next);

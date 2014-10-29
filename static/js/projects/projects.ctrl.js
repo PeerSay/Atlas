@@ -7,7 +7,6 @@ angular.module('peersay')
 ProjectListCtrl.$inject = ['Projects', '$routeParams'];
 function ProjectListCtrl(Projects, $routeParams) {
     var m = this;
-    var user_id = Number($routeParams.id);
 
     m.projects = [];
     m.create = Projects.create;
@@ -16,7 +15,7 @@ function ProjectListCtrl(Projects, $routeParams) {
     m.removeProject = Projects.removeProject.bind(Projects);
 
     Projects
-        .getProjects(user_id)
+        .getProjects()
         .success(function () {
             m.projects = Projects.projects;
         });
@@ -26,9 +25,13 @@ function ProjectListCtrl(Projects, $routeParams) {
 ProjectDetailsCtrl.$inject = ['Projects', '$routeParams'];
 function ProjectDetailsCtrl(Projects, $routeParams) {
     var m = this;
-    var id = Number($routeParams.id);
+    var id = Number($routeParams.projectId);
 
-    m.project = $.map(Projects.projects, function (p) {
-        return (p.id !== id) ? null : p;
-    })[0];
+    Projects
+        .getProjects()
+        .success(function () {
+            m.project = $.map(Projects.projects, function (p) {
+                return (p.id !== id) ? null : p;
+            })[0];
+        });
 }

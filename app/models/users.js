@@ -172,11 +172,11 @@ userSchema.statics.updatePassword = function (email, password, cb) {
 
 
 userSchema.methods.createProject = function (project, cb) {
-    var $user = this;
-    Project.createByUser(project, $user, function (err, stubPrj) {
+    var user = this;
+    Project.createByUser(project, user, function (err, stubPrj) {
         if (err) return cb(err);
 
-        $user.save(function (err, user) {
+        user.save(function (err, user) {
             if (err) { return cb(err); }
             cb(null, stubPrj); // stub is enough for create
         });
@@ -185,11 +185,11 @@ userSchema.methods.createProject = function (project, cb) {
 
 
 userSchema.methods.removeProject = function (stub_id, cb) {
-    var $user = this;
-    Project.removeByUser(stub_id, $user, function (err) {
+    var user = this;
+    Project.removeByUser(stub_id, user, function (err) {
         if (err) { return cb(err); }
 
-        $user.save(function (err) {
+        user.save(function (err) {
             if (err) { return cb(err); }
 
             cb(null, {

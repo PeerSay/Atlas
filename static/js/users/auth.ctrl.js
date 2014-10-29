@@ -1,12 +1,11 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('AuthCtrl', AuthCtrl)
-    .factory('Location', Location);
+    .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['Users', 'Location', '$http'];
-function AuthCtrl(Users, location, $http) {
+AuthCtrl.$inject = ['User', 'Location', '$http'];
+function AuthCtrl(User, Location, $http) {
     var m = this;
     m.error = {
         show: false,
@@ -20,14 +19,20 @@ function AuthCtrl(Users, location, $http) {
         password: '',
         restore: ''
     };
+    m.logout = logout;
     m.restorePwd = restorePwd;
     m.restorePwdComplete = restorePwdComplete;
 
 
-    Users.setHeader(); // switch menu upon navigation
     showErrorFromQs();
     getUserFromQs();
 
+    function logout () {
+        User.logout()
+            .success(function () {
+                Location.path('/auth/login').replace();
+            });
+    }
 
     function restorePwd() {
         return $http.post('/api/auth/restore', {email: m.user.email})
@@ -44,7 +49,7 @@ function AuthCtrl(Users, location, $http) {
                     }
                 }
                 else if (res.result) {
-                    location.path('/auth/restore/complete').replace();
+                    Location.path('/auth/restore/complete').replace();
                 }
             })
             .error(function (res) {
@@ -63,7 +68,7 @@ function AuthCtrl(Users, location, $http) {
                     m.error.show = true;
                 }
                 else if (res.result) {
-                    location.path('/user/1/projects').replace();
+                    Location.path('/projects').replace();
                 }
             })
             .error(function (res) {
@@ -88,30 +93,15 @@ function AuthCtrl(Users, location, $http) {
     }
 
     function getValuefromQs(key) {
-        var qs = location.search();
+        var qs = Location.search();
         var value = qs && qs[key];
         if (value) {
             // remove err from url, no history, no model reload
-            location
+            Location
                 .skipReload()
                 .search(key, null)
                 .replace();
         }
         return value;
     }
-}
-
-
-// Credit: https://github.com/angular/angular.js/issues/1699
-Location.$inject = ['$location', '$route', '$rootScope'];
-function Location($location, $route, $rootScope) {
-    $location.skipReload = function () {
-        var lastRoute = $route.current;
-        var un = $rootScope.$on('$locationChangeSuccess', function () {
-            $route.current = lastRoute;
-            un();
-        });
-        return $location;
-    };
-    return $location;
 }

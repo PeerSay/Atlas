@@ -1,25 +1,20 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .factory('Users', Users);
+    .factory('User', User);
 
-Users.$inject = ['$http', '$location', 'Menu', 'Storage'];
-function Users($http, $location, Menu, Storage) {
+User.$inject = ['$http', 'restApi', 'Storage'];
+function User($http, rest, Storage) {
     var U = {};
 
     U.user = Storage.get('user') || {};
-    U.setHeader = setHeader;
     U.getUser = getUser;
     U.logout = logout;
 
-    setHeader();
-
-    function getUser(id) {
-        return rest.read('users', id)
+    function getUser() {
+        return rest.readAll('user')
             .success(function (res) {
-                //console.log('registered:', res);
                 U.user = Storage.set('user', res.result);
-                setHeader();
             })
             .error(function (res) {
                 console.log('TODO handle register err: %O', res);
@@ -30,21 +25,11 @@ function Users($http, $location, Menu, Storage) {
     function logout() {
         return $http.post('/api/auth/logout', {})
             .success(function () {
-                U.user = Storage.remove('name') || {};
-                $location.path('/auth/login');
-                setHeader();
+                U.user = Storage.remove('user') || {};
             })
             .error(function (res) {
                 console.log('TODO handle logout err: %O', res);
             });
-    }
-
-
-    // Menu
-    //
-    function setHeader() {
-        var name = $location.path().replace(/\//g, '');
-        Menu.setActivePage(name);
     }
 
     return U;

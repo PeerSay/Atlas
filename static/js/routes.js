@@ -29,12 +29,12 @@ function config($routeProvider, $locationProvider) {
         })
 
         // Projects
-        .when('/user/:id/projects', {
+        .when('/projects', {
             templateUrl: '/html/project-list.html',
             controller: 'ProjectListCtrl',
             controllerAs: 'm'
         })
-        .when('/user/:id/projects/:projectId', {
+        .when('/projects/:projectId', {
             templateUrl: '/html/project-details.html'
         })
         .otherwise({

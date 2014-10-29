@@ -33,7 +33,7 @@ function AuthCtrl(User, Location, $http) {
                 if (res.error) {
                     if (res.error === 'linkedin') {
                         m.error.show = false;
-                        m.errorLinkedIn.show = true
+                        m.errorLinkedIn.show = true;
                     }
                     else {
                         m.errorLinkedIn.show = false;
@@ -47,7 +47,7 @@ function AuthCtrl(User, Location, $http) {
             })
             .error(function (res) {
                 console.log('TODO handle restore err: %O', res);
-            })
+            });
     }
 
     function restorePwdComplete() {
@@ -66,7 +66,7 @@ function AuthCtrl(User, Location, $http) {
             })
             .error(function (res) {
                 console.log('TODO handle restore err: %O', res);
-            })
+            });
     }
 
 

@@ -5,21 +5,71 @@ angular.module('peersay')
     .factory('Location', Location);
 
 
-AuthCtrl.$inject = ['Users', 'Location'];
-function AuthCtrl(Users, location) {
+AuthCtrl.$inject = ['Users', 'Location', '$http'];
+function AuthCtrl(Users, location, $http) {
     var m = this;
     m.error = {
         show: false,
         msg: "Something is wrong"
     };
+    m.errorLinkedIn = {
+        show: false
+    };
     m.user = {
         email: '',
-        password: ''
+        password: '',
+        restore: ''
     };
+    m.restorePwd = restorePwd;
+    m.restorePwdComplete = restorePwdComplete;
+
 
     Users.setHeader(); // switch menu upon navigation
     showErrorFromQs();
     getUserFromQs();
+
+
+    function restorePwd() {
+        return $http.post('/api/auth/restore', {email: m.user.email})
+            .success(function (res) {
+                if (res.error) {
+                    if (res.error === 'linkedin') {
+                        m.error.show = false;
+                        m.errorLinkedIn.show = true
+                    }
+                    else {
+                        m.errorLinkedIn.show = false;
+                        m.error.msg = res.error;
+                        m.error.show = true;
+                    }
+                }
+                else if (res.result) {
+                    location.path('/auth/restore/complete').replace();
+                }
+            })
+            .error(function (res) {
+                console.log('TODO handle restore err: %O', res);
+            })
+    }
+
+    function restorePwdComplete() {
+        return $http.post('/api/auth/restore/complete', {
+            code: m.user.restore,
+            password: m.user.password
+        })
+            .success(function (res) {
+                if (res.error) {
+                    m.error.msg = res.error;
+                    m.error.show = true;
+                }
+                else if (res.result) {
+                    location.path('/user/1/projects').replace();
+                }
+            })
+            .error(function (res) {
+                console.log('TODO handle restore err: %O', res);
+            })
+    }
 
 
     function showErrorFromQs() {

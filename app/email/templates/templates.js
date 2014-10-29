@@ -7,12 +7,16 @@ function getTemplate (name) {
 }
 
 module.exports = {
+    'account-activation': {
+        subj: '[ACTION REQUIRED] Complete Your PeerSay Account Registration',
+        tpl: getTemplate('account-activation')
+    },
     'welcome': {
         subj: 'Welcome to PeerSay!',
         tpl: getTemplate('welcome')
     },
-    'account-activation': {
-        subj: '[ACTION REQUIRED] Complete Your PeerSay Account Registration',
-        tpl: getTemplate('account-activation')
+    'restore-pwd': {
+        subj: '[ACTION REQUIRED] Restore Your PeerSay Password',
+        tpl: getTemplate('restore-pwd')
     }
 };

@@ -1,13 +1,19 @@
 var _ = require('lodash');
 var jsonParser = require('body-parser').json();
 
+
+var models = {
+    User: require('../app/models/users').UserModel
+};
+
+
 // util
 function isEmpty(obj) {
     return !Object.keys(obj).length;
 }
 
 
-function RestApi(app, models) {
+function RestApi(app) {
     var U = {};
 
     function setupRoutes() {

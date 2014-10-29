@@ -36,7 +36,13 @@ function hasher(opts, cb) {
     });
 }
 
+function genRestorePwdKey() {
+    return Math.random().toString(36).substring(9);
+}
+
+
 module.exports = {
     hasher: hasher,
-    randomBase64: randomBase64
+    randomBase64: randomBase64,
+    genRestorePwdKey: genRestorePwdKey
 };

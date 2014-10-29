@@ -16,7 +16,8 @@ function send(to, tpl_name, locals, cb) {
         generateTextFromHTML: true,
         "x-smtpapi": { "category": tpl_name } // TODO: fix
     };
-    cb = cb || function () {}; // optional
+    cb = cb || function () {
+    }; // optional
 
     console.log('[EMAIL] Sending [%s] to [%s]', tpl_name, to);
 

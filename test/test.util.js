@@ -75,6 +75,16 @@ describe('Util', function () {
                res.should.be.a('string');
                new Buffer(res, 'base64').should.have.length(10);
            });
-       })
+       });
+
+       it('should generate alpha-num random restore code', function () {
+           util.genRestorePwdKey.restore(); // remove stub
+
+           var code = util.genRestorePwdKey();
+           var code_re = /[\d\w]{8,11}/;
+
+           code.should.be.a('string');
+           code_re.test(code).should.equal(true);
+       });
    })
 });

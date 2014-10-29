@@ -18,19 +18,26 @@ function Menu() {
 }
 
 
-MenuCtrl.$inject = ['$location', 'Menu', 'User', 'Projects'];
-function MenuCtrl($location, Menu, User, Projects) {
+MenuCtrl.$inject = ['Location', 'Menu', 'User', 'Projects'];
+function MenuCtrl(Location, Menu, User, Projects) {
     var m = this;
     m.activePage = Menu.activePage;
     m.user = {
-        logout: User.logout.bind(User)
+        logout: logout
     };
     m.project = {
         toggleCreateDlg: Projects.toggleCreateDlg.bind(Projects)
     };
 
+    function logout () {
+        User.logout()
+            .success(function () {
+                Location.path('/auth/login').replace();
+            });
+    }
+
     //init menu
-    Menu.setActivePage($location.path());
+    Menu.setActivePage(Location.path());
 }
 
 // Credit: https://github.com/angular/angular.js/issues/1699

@@ -19,20 +19,12 @@ function AuthCtrl(User, Location, $http) {
         password: '',
         restore: ''
     };
-    m.logout = logout;
     m.restorePwd = restorePwd;
     m.restorePwdComplete = restorePwdComplete;
 
 
     showErrorFromQs();
     getUserFromQs();
-
-    function logout () {
-        User.logout()
-            .success(function () {
-                Location.path('/auth/login').replace();
-            });
-    }
 
     function restorePwd() {
         return $http.post('/api/auth/restore', {email: m.user.email})

@@ -35,13 +35,6 @@ body {
   }
 }
 
-/*
-* Alerts
-*/
-
-/*.alert {
-  margin: -62px -20px 10px;;
-}*/
 
 /*
 * Auth forms
@@ -118,6 +111,21 @@ body {
 }
 
 /*
+* App Header
+*/
+
+.page-title {
+  margin: 0px 0 20px;
+}
+
+.btn.head {
+  margin-left: 10px;
+  color: #666;
+  text-shadow: 1px 1px 1px #fff;
+}
+
+
+/*
 * Projects
 */
 
@@ -157,26 +165,32 @@ body {
   Tile Menus
 */
 
-.btn.menu {
-  position: absolute;
-  padding: 3px 9px;
-  border-radius: 50%;
-  &.top {
-    right: 5px;
-    top: 5px;
-  }
-  &.bottom {
-    bottom: 0px;
-    right: -155px;
-  }
-}
 
 .tile-container {
   position: relative;
 
-  .btn-group {
+  .btn-group.menu {
     position: absolute;
-    bottom: 25px;
-    right: 175px;
+    &.bottom {
+      bottom: 25px;
+      right: 175px;
+    }
+    &.top {
+      top: 35px;
+      right: 190px;
+    }
+    .btn {
+      position: absolute;
+      padding: 3px 9px;
+      border-radius: 50%;
+      &.top {
+        top: -30px;
+        right: -185px;
+      }
+      &.bottom {
+        bottom: 0px;
+        right: -155px;
+      }
+    }
   }
 }

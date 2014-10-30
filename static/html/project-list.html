@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h3><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
+            <h3 class="page-title"><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
         </div>
     </div>
     <div class="row">
@@ -11,13 +11,24 @@
                     <h4 class="name">{{prj.title}}</h4>
                 </div>
             </a>
-            <div class="btn-group" ng-click="$event.preventDefault();">
-                <button type="button" class="btn btn-default dropdown-toggle menu bottom" data-toggle="dropdown">
+            <div class="btn-group menu bottom" ng-click="$event.preventDefault();">
+                <button type="button" class="btn btn-default dropdown-toggle bottom" data-toggle="dropdown">
                     <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                    <li role="presentation"><a role="menuitem" tabindex="-1" href
-                            ng-click="m.removeProject(prj.id)">Remove</a></li>
+                    <li role="presentation" class="disabled">
+                        <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
+                    </li>
+                    <li role="presentation" class="disabled">
+                        <a role="menuitem" tabindex="-1" href="#">Present to Auditor</a>
+                    </li>
+                    <li role="presentation" class="disabled">
+                        <a role="menuitem" tabindex="-1" href="#">Debrief</a>
+                    </li>
+                    <li role="presentation" class="divider"></li>
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj.id)">Remove</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -48,7 +59,8 @@
                         <button class="btn btn-success"
                                 ng-disabled="m.form.$invalid"
                                 ng-click="m.createProject()"
-                                >Create</button>
+                                >Create
+                        </button>
                     </form>
                 </div>
             </div>

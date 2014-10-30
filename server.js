@@ -14,7 +14,7 @@ var RestApi = require('./app/rest-api');
 
 
 // Connect to DB
-console.log('[DB] url: %s, security: %d', config.db.url, config.db.hash_iters);
+console.log(' [DB] url: %s, security: %d', config.db.url, config.db.hash_iters);
 mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}});
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
@@ -56,7 +56,7 @@ app.all('*', log);
 // Run
 //
 http.listen(config.web.port, function () {
-    console.log("[Web] Listening on %s...", config.web.port);
+    console.log(" [Web] Listening on %s...", config.web.port);
 });
 
 

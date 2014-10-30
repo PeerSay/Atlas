@@ -10,7 +10,8 @@ var SettingsModel = user.SettingsModel;
 var Project = project.ProjectModel;
 
 // Connect to test DB
-mongoose.connect(config.db.test_url/*, {server: {socketOptions: {keepAlive: 1}}}*/);
+var DB_URL = 'mongodb://localhost/peersay_test';
+mongoose.connect(DB_URL/*, {server: {socketOptions: {keepAlive: 1}}}*/);
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
 

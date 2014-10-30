@@ -41,3 +41,6 @@ bower_components
 
 # .css files are derived as we use LESS
 *.css
+
+# Local configs
+config.*.js

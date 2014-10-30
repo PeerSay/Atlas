@@ -1,0 +1,23 @@
+/*global __dirname:true*/
+
+// Make a copy in root as confog.{deploy}.js
+// run 'npm run {deploy}' to start
+//
+var path = require('path');
+
+// Overriding default config for Dev deploy
+//
+module.exports = {
+    web: {
+        port: 5000,
+        base_url:  'http://localhost:5000',
+        static_dir: path.join(__dirname, '.', 'static')
+    },
+    db: {
+        url: 'mongodb://localhost/peersay',
+        hash_iters: 100
+    },
+    email: {
+        enable: false
+    }
+};

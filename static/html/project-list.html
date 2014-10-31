@@ -11,25 +11,28 @@
                     <h4 class="name">{{prj.title}}</h4>
                 </div>
             </a>
-            <div class="btn-group menu bottom" ng-click="$event.preventDefault();">
-                <button type="button" class="btn btn-default dropdown-toggle bottom" data-toggle="dropdown">
-                    <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li role="presentation" class="disabled">
-                        <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
-                    </li>
-                    <li role="presentation" class="disabled">
-                        <a role="menuitem" tabindex="-1" href="#">Present to Auditor</a>
-                    </li>
-                    <li role="presentation" class="disabled">
-                        <a role="menuitem" tabindex="-1" href="#">Debrief</a>
-                    </li>
-                    <li role="presentation" class="divider"></li>
-                    <li role="presentation">
-                        <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj.id)">Remove</a>
-                    </li>
-                </ul>
+            <div class="btn-menu-wrap bottom">
+                <div class="btn-group menu" ng-click="$event.preventDefault();">
+                    <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
+                        <span data-toggle="tooltip" title="Menu" ps-tooltip></span>
+                        <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
+                        </li>
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Present to Auditor</a>
+                        </li>
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Debrief</a>
+                        </li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj.id)">Remove</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">

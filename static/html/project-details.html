@@ -4,20 +4,22 @@
             <h3 class="page-title pull-left">
                 <span class="glyphicon glyphicon-dashboard"></span> {{m.project.title}}
             </h3>
-            <button type="button" class="btn btn-default pull-right head"
-                    ng-click="m.toggleTileView()">
-                <span aria-hidden="true" class="glyphicon"
-                        ng-class="{
-                            'glyphicon-zoom-out': m.tileView === 'norm',
-                            'glyphicon-zoom-in': m.tileView === 'min'
-                        }"></span>
-            </button>
-            <button type="button" class="btn btn-default pull-right head">
+
+                <button type="button" class="btn btn-default pull-right head hint" ng-click="m.toggleTileView()">
+                    <span class="tooltip" data-toggle="tooltip" title="Toggle View" ps-tooltip></span>
+                    <span aria-hidden="true" class="glyphicon"
+                            ng-class="{'glyphicon-zoom-out': m.tileView === 'norm',
+                            'glyphicon-zoom-in': m.tileView === 'min'}"></span>
+                </button>
+
+            <button type="button" class="btn btn-default pull-right head hint">
+                <span class="tooltip" data-toggle="tooltip" title="Add Members" ps-tooltip></span>
                 <span aria-hidden="true" class="glyphicon glyphicon-user"></span>
             </button>
 
             <div class="btn-group pull-right">
-                <button type="button" class="btn btn-default dropdown-toggle head" data-toggle="dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle head hint" data-toggle="dropdown">
+                    <span class="tooltip" data-toggle="tooltip" title="Project Menu" ps-tooltip></span>
                     <span aria-hidden="true" class="glyphicon glyphicon-play"></span><span class="sr-only">Menu</span>
                 </button>
                 <ul class="dropdown-menu" role="menu">

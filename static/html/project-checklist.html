@@ -48,7 +48,10 @@
                     <li class="list-group-item" ng-repeat="tile in m.tiles">
                         <span class="badge">{{tile.progress}}</span>
                         <input type="checkbox" ng-model="tile.show">
-                        <a href ng-click="m.toggleTile(tile)">{{tile.title}}</a>
+                        <a href data-toggle="modal"
+                                data-target="#{{tile.name}}-full-dlg"
+                                ng-click="m.toggleTile(tile, true)"
+                                >{{tile.title}}</a>
                     </li>
                 </ul>
             </div>

@@ -37,7 +37,7 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
             name: 'essentials',
             title: 'Project Essentials',
             progress: '1/10',
-            show: true,
+            show: false,
             html: '/html/project-essentials.html'
         },
         {
@@ -85,6 +85,7 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
     ];
     m.curTile = m.tiles[0];
     m.toggleTile = toggleTile;
+    m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     getProject();
 
@@ -100,8 +101,8 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
         m.tileView = (m.tileView === 'norm') ? 'min' : 'norm';
     }
 
-    function toggleTile(tile) {
-        tile.show = !tile.show;
+    function toggleTile(tile, on) {
+        tile.show = (arguments.length > 1) ? on : !tile.show;
     }
 
     function findBy(key) {

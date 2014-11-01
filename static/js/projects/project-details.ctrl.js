@@ -21,7 +21,7 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
             name: 'essentials',
             title: 'Project Essentials',
             progress: '1/10',
-            show: false,
+            show: true,
             html: '/html/project-essentials.html'
         },
         {
@@ -85,6 +85,8 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
             .getProjects()
             .success(function () {
                 m.project = findBy('id')(Projects.projects, id)[0];
+                m.project.duration = '6 months';
+                m.project.budget = '$50k';
             });
     }
 

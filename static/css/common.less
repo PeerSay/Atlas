@@ -49,3 +49,20 @@ ul {
     background-color: #eee;
   }
 }
+
+.ellipsis {
+  /*requires width!*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+textarea {
+  resize: both; /* none|horizontal|vertical|both */
+  &.vert {
+    resize: vertical;
+  }
+  &.noresize {
+    resize: none;
+  }
+}

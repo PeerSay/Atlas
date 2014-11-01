@@ -1,31 +1,15 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('ProjectListCtrl', ProjectListCtrl)
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
-
-ProjectListCtrl.$inject = ['Projects', '$routeParams'];
-function ProjectListCtrl(Projects, $routeParams) {
-    var m = this;
-
-    m.projects = [];
-    m.create = Projects.create;
-    m.toggleCreateDlg = Projects.toggleCreateDlg.bind(Projects);
-    m.createProject = Projects.createProject.bind(Projects);
-    m.removeProject = Projects.removeProject.bind(Projects);
-
-    Projects
-        .getProjects()
-        .success(function () {
-            m.projects = Projects.projects;
-        });
-}
 
 
 ProjectDetailsCtrl.$inject = ['Projects', '$routeParams'];
 function ProjectDetailsCtrl(Projects, $routeParams) {
     var m = this;
     var id = Number($routeParams.projectId);
+
+    m.project = {};
     m.tileView = 'norm';
     m.tileBtnClass= {
         'glyphicon-zoom-out': m.tileView === 'norm',
@@ -86,6 +70,13 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
     m.curTile = m.tiles[0];
     m.toggleTile = toggleTile;
     m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    // Title
+    m.editTitle = {
+        show: false,
+        value: ''
+    };
+    m.toggleEditTitleDlg = toggleEditTitleDlg;
+    m.updateProjectTitle = updateProjectTitle;
 
     getProject();
 
@@ -103,6 +94,23 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
 
     function toggleTile(tile, on) {
         tile.show = (arguments.length > 1) ? on : !tile.show;
+    }
+
+    function toggleEditTitleDlg(on) {
+        if (on) {
+            m.editTitle.value = m.project.title;
+        }
+        m.editTitle.show = on;
+    }
+
+    function updateProjectTitle () {
+        Projects.updateProject(m.project)
+            .then(function () {
+                m.project.title = m.editTitle.value;
+            })
+            .finally(function () {
+                m.editTitle.show = false;
+            });
     }
 
     function findBy(key) {

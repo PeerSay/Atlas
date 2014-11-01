@@ -17,6 +17,7 @@ function Projects(rest, User) {
     P.toggleCreateDlg = toggleCreateDlg;
     P.createProject = createProject;
     P.removeProject = removeProject;
+    P.updateProject = updateProject;
 
 
     function getProjects() {
@@ -50,6 +51,13 @@ function Projects(rest, User) {
             .success(function (data) {
                 P.projects.splice(getIdxbyId(data.result.id), 1);
             })
+            .error(function () {
+                console.log('TODO: handle createProject API error');
+            });
+    }
+
+    function updateProject(project) {
+        return rest.update('projects', project)
             .error(function () {
                 console.log('TODO: handle createProject API error');
             });

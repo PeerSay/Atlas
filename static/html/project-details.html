@@ -1,16 +1,36 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
     <div class="row">
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <h3 class="page-title pull-left">
-                <span class="glyphicon glyphicon-dashboard"></span> {{m.project.title}}
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h3 class="page-title pull-left project-title" ng-show="!m.editTitle.show">
+                <span class="glyphicon glyphicon-dashboard"></span>
+                <a href ng-click="m.toggleEditTitleDlg(true)">{{m.project.title}}</a>
+                <span class="glyphicon glyphicon-edit hover-edit"></span>
             </h3>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+            <form name="m.form" class="edit-form" ng-show="m.editTitle.show">
+                <div class="form-group">
+                    <textarea class="form-control vert" ng-model="m.editTitle.value"
+                            required></textarea>
+                </div>
+                <button class="btn btn-success"
+                        ng-disabled="m.form.$invalid"
+                        ng-click="m.updateProjectTitle()">Save</button>
+                <button type="button" class="btn close" ng-click="m.toggleEditTitleDlg(false)">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+            </form>
+        </div>
+    </div>
 
-                <button type="button" class="btn btn-default pull-right head hint" ng-click="m.toggleTileView()">
-                    <span class="tooltip" data-toggle="tooltip" title="Toggle View" ps-tooltip></span>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+            <button type="button" class="btn btn-default pull-right head hint" ng-click="m.toggleTileView()">
+                <span class="tooltip" data-toggle="tooltip" title="Toggle View" ps-tooltip></span>
                     <span aria-hidden="true" class="glyphicon"
                             ng-class="{'glyphicon-zoom-out': m.tileView === 'norm',
                             'glyphicon-zoom-in': m.tileView === 'min'}"></span>
-                </button>
+            </button>
 
             <button type="button" class="btn btn-default pull-right head hint">
                 <span class="tooltip" data-toggle="tooltip" title="Add Members" ps-tooltip></span>

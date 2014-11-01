@@ -1,6 +1,6 @@
 angular
     .module('peersay')
-    .directive('headerMenu', headerMenu);
+    .directive('psHeaderMenu', headerMenu);
 
 function headerMenu() {
     return {

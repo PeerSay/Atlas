@@ -50,13 +50,6 @@ ul {
   }
 }
 
-.ellipsis {
-  /*requires width!*/
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 textarea {
   resize: both; /* none|horizontal|vertical|both */
   &.vert {
@@ -65,4 +58,22 @@ textarea {
   &.noresize {
     resize: none;
   }
+}
+
+/*
+* Useful utils
+*/
+
+.no-select {
+  user-select: none;
+  -o-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.ellipsis {
+  /*requires width!*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

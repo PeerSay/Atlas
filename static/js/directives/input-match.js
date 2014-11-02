@@ -1,11 +1,11 @@
 angular
     .module('peersay')
-    .directive('match', function () {
+    .directive('psMatch', function () {
         return {
             require: 'ngModel',
             restrict: 'A',
             scope: {
-                match: '='
+                match: '=psMatch'
             },
             link: function (scope, elem, attrs, ctrl) {
                 scope.$watch(function () {

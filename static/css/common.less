@@ -1,4 +1,3 @@
-
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 70px;
@@ -22,8 +21,20 @@ ul {
 /*
 * Controls
 */
-.btn.full-width {
-  width: 100%;
+.btn {
+  &.full-width {
+    width: 100%;
+  }
+
+  &.hint {
+    position: relative;
+    span[data-toggle=tooltip] {
+      display: inline-block;
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 0; right: 0;
+    }
+  }
 }
 
 .checkbox-ext {
@@ -37,4 +48,32 @@ ul {
   &.checked {
     background-color: #eee;
   }
+}
+
+textarea {
+  resize: both; /* none|horizontal|vertical|both */
+  &.vert {
+    resize: vertical;
+  }
+  &.noresize {
+    resize: none;
+  }
+}
+
+/*
+* Useful utils
+*/
+
+.no-select {
+  user-select: none;
+  -o-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.ellipsis {
+  /*requires width!*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

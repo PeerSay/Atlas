@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h3><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
+            <h3 class="page-title"><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
         </div>
     </div>
     <div class="row">
@@ -11,27 +11,41 @@
                     <h4 class="name">{{prj.title}}</h4>
                 </div>
             </a>
-            <div class="btn-group" ng-click="$event.preventDefault();">
-                <button type="button" class="btn btn-default dropdown-toggle menu bottom" data-toggle="dropdown">
-                    <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li role="presentation"><a role="menuitem" tabindex="-1" href
-                            ng-click="m.removeProject(prj.id)">Remove</a></li>
-                </ul>
+            <div class="btn-menu-wrap bottom">
+                <div class="btn-group menu" ng-click="$event.preventDefault();">
+                    <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
+                        <span data-toggle="tooltip" title="Menu" ps-tooltip></span>
+                        <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
+                        </li>
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Present to Auditor</a>
+                        </li>
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Debrief</a>
+                        </li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj.id)">Remove</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
             <a class="panel panel-default tile new" href ng-click="m.toggleCreateDlg(true)">
                 <div class="panel-body">
-                    <h4>Create New...</h4>
+                    <h4 class="text-center">Create New...</h4>
                 </div>
             </a>
 
             <div class="panel panel-default dialog" ng-show="m.create.showDlg">
                 <div class="panel-heading">
                     <h3 class="panel-title">Create Project</h3>
-                    <button type="button" class="close btn menu top" ng-click="m.toggleCreateDlg(false)">
+                    <button type="button" class="btn close" ng-click="m.toggleCreateDlg(false)">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
                 </div>
@@ -41,14 +55,15 @@
                             <label for="project-title" class="control-label">Title</label>
                             <input type="text" id="project-title" class="form-control"
                                     placeholder='Like "Storage Project" for example...'
-                                    autofocus
                                     required
-                                    ng-model="m.create.title">
+                                    ng-model="m.create.title"
+                                    ps-focus-on="m.create.showDlg">
                         </div>
                         <button class="btn btn-success"
                                 ng-disabled="m.form.$invalid"
                                 ng-click="m.createProject()"
-                                >Create</button>
+                                >Create
+                        </button>
                     </form>
                 </div>
             </div>

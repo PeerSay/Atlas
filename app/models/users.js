@@ -6,7 +6,7 @@ var config = require('../../app/config');
 var Project = require('../../app/models/projects').ProjectModel;
 
 // Need few iterations for fast tests, thus it is configurable
-var HASH_ITERS = config.db.hash_iters || 100000;
+var HASH_ITERS = config.db.hash_iters || 100000; // TODO - test
 var errors = require('../../app/errors');
 
 

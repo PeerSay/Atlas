@@ -1,8 +1,7 @@
 /*global angular:true*/
 
 angular.module('peersay')
-    .controller('ProjectListCtrl', ProjectListCtrl)
-    .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
+    .controller('ProjectListCtrl', ProjectListCtrl);
 
 ProjectListCtrl.$inject = ['Projects', '$routeParams'];
 function ProjectListCtrl(Projects, $routeParams) {
@@ -18,20 +17,5 @@ function ProjectListCtrl(Projects, $routeParams) {
         .getProjects()
         .success(function () {
             m.projects = Projects.projects;
-        });
-}
-
-
-ProjectDetailsCtrl.$inject = ['Projects', '$routeParams'];
-function ProjectDetailsCtrl(Projects, $routeParams) {
-    var m = this;
-    var id = Number($routeParams.projectId);
-
-    Projects
-        .getProjects()
-        .success(function () {
-            m.project = $.map(Projects.projects, function (p) {
-                return (p.id !== id) ? null : p;
-            })[0];
         });
 }

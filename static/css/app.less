@@ -36,14 +36,6 @@ body {
 }
 
 /*
-* Alerts
-*/
-
-/*.alert {
-  margin: -62px -20px 10px;;
-}*/
-
-/*
 * Auth forms
 */
 
@@ -93,7 +85,6 @@ body {
 
   .linkedin-section {
     .title {
-      text-align: center;
       margin-bottom: 20px;
     }
     .title-or {
@@ -105,12 +96,11 @@ body {
       background-color: #FFF;
       color: #CCC;
       font-style: italic;
-      text-align: center;
     }
   }
 }
 
-#activate-acc-dlg{
+#activate-acc-dlg {
   .email-sent {
     font-size: 18px;
     color: #428BCA;
@@ -118,9 +108,30 @@ body {
 }
 
 /*
-* Projects
+* App Header
 */
 
+.page-title {
+  margin: 0 0 10px;
+}
+
+.btn.head {
+  margin: 0 0 10px 10px;
+  color: #666;
+  .glyphicon {
+    text-shadow: 1px 1px 1px #fff;
+  }
+}
+
+.notification {
+  margin-top: -20px;
+  padding: 8px;
+  font-size: 12px;
+}
+
+/*
+* Projects
+*/
 .tile {
   display: block;
   position: relative;
@@ -135,7 +146,6 @@ body {
   &.new {
     background: rgba(0, 0, 0, 0.2);
     color: #ddd;
-    text-align: center;
     box-shadow: none;
     &:hover {
       color: #fff;
@@ -144,39 +154,105 @@ body {
       line-height: 45px;
     }
   }
+
+  .table {
+    td {
+      border: none;
+      padding: 2px;
+    }
+  }
 }
 
 .panel {
   &.dialog {
     position: relative;
     top: -120px;
+    .btn.close {
+      margin-top: -20px; /* XXX - fix*/
+    }
   }
 }
+
+/*
+* Project Details
+*/
+
+.project-title {
+  a{
+    color: inherit;
+    text-decoration: none;
+  }
+  .hover-edit {
+    opacity: 0;
+    font-size: 16px;
+    transition: opacity .2s;
+  }
+  &:hover {
+    .hover-edit {
+      opacity: .2;
+    }
+  }
+}
+
+.edit-form {
+  position: relative;
+  top: -10px;
+
+  textarea {
+    font-size: 24px;
+    height: 48px;
+    max-height: 120px;
+  }
+  .close {
+    float: none;
+    margin-left: 10px;
+    font-size: 30px;
+  }
+}
+
 
 /*
   Tile Menus
 */
 
-.btn.menu {
-  position: absolute;
-  padding: 3px 9px;
-  border-radius: 50%;
-  &.top {
-    right: 5px;
-    top: 5px;
-  }
-  &.bottom {
-    bottom: 0px;
-    right: -155px;
-  }
-}
-
 .tile-container {
   position: relative;
 
-  .btn-group {
+  .view-minimal {
+    height: 70px;
+  }
+
+  .btn-menu-wrap {
     position: absolute;
-    bottom: 25px;
-    right: 175px;
+    height: 38px;
+    width: 38px;
+    overflow: visible;
+    &.bottom {
+      bottom: 20px;
+      right: 15px;
+    }
+    &.top {
+      top: 0;
+      right: 0;
+    }
+
+    .btn-group.menu {
+      margin: 5px;
+      .btn {
+        padding: 3px 9px;
+        border-radius: 50%;
+      }
+      .dropdown-menu {
+        right: 0;
+        left: auto;
+      }
+    }
+  }
+}
+
+.debug {
+  display: none;
+  .col {
+    outline: 1px solid #00a98d;
   }
 }

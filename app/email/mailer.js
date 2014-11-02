@@ -4,8 +4,13 @@ var templates = require('../../app/email/templates/templates.js');
 
 var sgTransport = require('nodemailer-sendgrid-transport');
 var client = nodemailer.createTransport(sgTransport(config.email));
+var enabled = config.email.enable;
+
+console.log(' [Email] enabled: %s', enabled && 'SendGrid');
 
 
+// Usage: mailer.send(to, 'welcome', locals, cb)
+//
 function send(to, tpl_name, locals, cb) {
     var tpl = templates[tpl_name];
     var email = {
@@ -32,9 +37,6 @@ function send(to, tpl_name, locals, cb) {
     });
 }
 
-
-// Usage: mailer.send(to, 'welcome', locals, cb)
-//
 module.exports = {
-    send: send
+    send: enabled ? send : function () {}
 };

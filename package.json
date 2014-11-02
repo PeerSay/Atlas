@@ -6,11 +6,10 @@
         "postinstall": "grunt prod",
         "start": "node server.js",
 
-        "predev": "npm install",
-        "dev": "set DEV=1 && nodemon --watch app server.js",
-
-        "pretest": "npm install",
         "test": "grunt test",
+        "prestage": "npm install",
+        "stage": "set _DEPLOY=stage && node server.js",
+        "dev": "set _DEPLOY=dev && nodemon --watch app server.js",
 
         "preupdate-webdriver": "npm install",
         "update-webdriver": "node node_modules/protractor/bin/webdriver-manager update",

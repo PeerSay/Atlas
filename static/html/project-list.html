@@ -55,9 +55,9 @@
                             <label for="project-title" class="control-label">Title</label>
                             <input type="text" id="project-title" class="form-control"
                                     placeholder='Like "Storage Project" for example...'
-                                    autofocus
                                     required
-                                    ng-model="m.create.title">
+                                    ng-model="m.create.title"
+                                    ps-focus-on="m.create.showDlg">
                         </div>
                         <button class="btn btn-success"
                                 ng-disabled="m.form.$invalid"

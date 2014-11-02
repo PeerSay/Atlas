@@ -69,7 +69,6 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
     ];
     m.curTile = m.tiles[0];
     m.toggleTile = toggleTile;
-    m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     // Title
     m.editTitle = {
         show: false,
@@ -77,6 +76,8 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
     };
     m.toggleEditTitleDlg = toggleEditTitleDlg;
     m.updateProjectTitle = updateProjectTitle;
+    // xxx
+    m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     getProject();
 

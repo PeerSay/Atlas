@@ -2,7 +2,28 @@
     <div class="panel panel-default tile">
         <div class="panel-heading">
             <h3 class="panel-title">{{tile.title}}</h3>
+
+            <div class="btn-menu-wrap top">
+                <div class="btn-group menu">
+                    <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
+                        <span data-toggle="tooltip" title="Menu" ps-tooltip></span>
+                        <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Add Members</a>
+                        </li>
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Consult with Colleagues</a>
+                        </li>
+                        <li role="presentation" class="disabled">
+                            <a role="menuitem" tabindex="-1" href="#">Reality Check</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
+
         <div class="panel-body">
             <div class="view-minimal" ng-show="m.tileView === 'min'">
                 <table class="table">

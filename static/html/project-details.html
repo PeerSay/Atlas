@@ -11,7 +11,8 @@
             <form name="m.form" class="edit-form" ng-show="m.editTitle.show">
                 <div class="form-group">
                     <textarea class="form-control vert" ng-model="m.editTitle.value"
-                            required></textarea>
+                            required
+                            ps-focus-on="m.editTitle.show"></textarea>
                 </div>
                 <button class="btn btn-success"
                         ng-disabled="m.form.$invalid"

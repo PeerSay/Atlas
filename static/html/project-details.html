@@ -1,3 +1,14 @@
+<div class="container-fluid" ng-controller="NotificationCtrl as m">
+    <div class="row">
+        <div class="alert alert-danger text-center notification" role="alert" ng-show="m.error.show">
+            <button type="button" class="close" ng-click="m.hide()">
+                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+            </button>
+            <strong>{{m.error.title}}:</strong> {{m.error.msg}}.
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

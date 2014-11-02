@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['restApi', 'User'];
-function Projects(rest, User) {
+Projects.$inject = ['restApi', 'User', 'Notification'];
+function Projects(rest, User, Notification) {
     var P = {};
 
     //P.user = Users.user;
@@ -59,7 +59,7 @@ function Projects(rest, User) {
     function updateProject(project) {
         return rest.update('projects', project)
             .error(function () {
-                console.log('TODO: handle createProject API error');
+                Notification.showError('API Error', 'Pretending there\'s no internet, in fact this API is not implemented :)');
             });
     }
 

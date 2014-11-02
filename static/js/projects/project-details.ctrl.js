@@ -11,7 +11,7 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
 
     m.project = {};
     m.tileView = 'norm';
-    m.tileBtnClass= {
+    m.tileBtnClass = {
         'glyphicon-zoom-out': m.tileView === 'norm',
         'glyphicon-zoom-in': m.tileView === 'min'
     };
@@ -106,7 +106,7 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
         m.editTitle.show = on;
     }
 
-    function updateProjectTitle () {
+    function updateProjectTitle() {
         Projects.updateProject(m.project)
             .then(function () {
                 m.project.title = m.editTitle.value;
@@ -121,6 +121,6 @@ function ProjectDetailsCtrl(Projects, $routeParams) {
             return $.map(arr, function (p) {
                 return (p[key] !== val) ? null : p;
             });
-        }
+        };
     }
 }

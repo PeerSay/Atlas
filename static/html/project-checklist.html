@@ -3,6 +3,7 @@
         <div class="panel-heading">
             <h3 class="panel-title">Project Checklist</h3>
 
+            <!--Menu-->
             <div class="btn-menu-wrap top">
                 <div class="btn-group menu">
                     <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
@@ -51,7 +52,7 @@
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="tile in m.tiles">
                         <span class="badge">{{tile.progress}}</span>
-                        <input type="checkbox" ng-model="tile.show">
+                        <input type="checkbox" ng-model="tile.show" ng-click="m.toggleTile(tile)">
                         <a href data-toggle="modal"
                                 data-target="#{{tile.name}}-full-dlg"
                                 ng-click="m.toggleTile(tile, true)"

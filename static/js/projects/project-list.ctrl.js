@@ -14,7 +14,7 @@ function ProjectListCtrl(Projects, $routeParams) {
     m.removeProject = Projects.removeProject.bind(Projects);
 
     Projects
-        .getProjects()
+        .getProjectStubs()
         .success(function () {
             m.projects = Projects.projects;
         });

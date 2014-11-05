@@ -25,8 +25,8 @@ module.exports = function (grunt) {
                 files: ['Gruntfile.js', 'static/**/*.*']
             },
             karma: {
-                files: ['static/js/**/*.js', 'static/test/**/*.js']/*,
-                tasks: ['karma:unit:run']*/
+                files: ['static/js/**/*.js', 'static/test/**/*.js'],
+                tasks: ['karma:unit:run']
             },
             css: {
                 files: ['static/css/**/*.less'],
@@ -51,12 +51,17 @@ module.exports = function (grunt) {
             options: {
                 basePath: './static',
                 files: [
+                    'bower_components/angular/angular.js',
+                    'bower_components/angular-route/angular-route.js',
+                    'bower_components/angular-messages/angular-messages.js',
+                    'bower_components/angular-mocks/angular-mocks.js',
+                    'js/**/*.js',
                     'test/**/*.js'
                 ],
                 exclude: [
                     'test/e2e/*.*'
                 ],
-                frameworks: ['mocha', 'chai']
+                frameworks: ['mocha', 'chai', 'sinon-chai']
             },
             // watch mode - runs karma server and lets watch re-run tests
             unit: {
@@ -198,15 +203,19 @@ module.exports = function (grunt) {
     grunt.registerTask('test', [
         'jshint',
         'mochaTest',
-/*        'karma:continuous'*/
+        'karma:continuous'
     ]);
 
     grunt.registerTask('test_e2e', ['protractor:run']);
 
     grunt.registerTask('dev', [
         'less',
-/*        'karma:unit:start',*/
         'watch'
+    ]);
+
+    grunt.registerTask('karma-watch', [
+        'karma:unit:start',
+        'watch:karma'
     ]);
 
     grunt.registerTask('build', [

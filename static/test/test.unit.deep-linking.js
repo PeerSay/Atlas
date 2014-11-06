@@ -21,19 +21,18 @@ describe('Client - unit', function () {
     });
 
     describe('TileLocation', function () {
-        var TileLocation, Storage, rootScope;
+        var DeepLinking, Storage, rootScope, Location;
         beforeEach(function () {
             module('peersay');
 
-            inject(function (_TileLocation_, _Storage_, _$rootScope_) {
-                TileLocation = _TileLocation_;
-                Storage = _Storage_;
+            inject(function (_$rootScope_, _Storage_, _Location_, _DeepLinking_) {
                 rootScope = _$rootScope_;
+                Storage = _Storage_;
+                Location = _Location_;
+                DeepLinking = _DeepLinking_;
 
-                sinon.stub(Storage, 'get', function () {
-                });
-                sinon.stub(Storage, 'set', function () {
-                });
+                sinon.stub(Storage, 'get', function () {});
+                sinon.stub(Storage, 'set', function () {});
             })
         });
 
@@ -42,22 +41,23 @@ describe('Client - unit', function () {
         });
 
         it('should contain TileLocation service & methods & wrap $location', function () {
-            TileLocation.should.be.a('object');
-            TileLocation.load.should.be.a('function');
-            TileLocation.add.should.be.a('function');
-            TileLocation.remove.should.be.a('function');
-            TileLocation.url.should.be.a('function'); // $location.url
+            DeepLinking.should.be.a('object');
+            DeepLinking.load.should.be.a('function');
+            DeepLinking.add.should.be.a('function');
+            DeepLinking.remove.should.be.a('function');
+            DeepLinking.url.should.be.a('function'); // $location.url
+            DeepLinking.skipReload.should.be.a('function'); // from Location
         });
 
         it('should read Storage on load()', function () {
-            TileLocation.load();
+            DeepLinking.load('namespace');
             Storage.get.callCount.should.be.equal(1);
         });
 
         it('should not emit on empty storage', function () {
             var spy = sinon.spy();
             rootScope.$on('add:tile', spy);
-            TileLocation.load();
+            DeepLinking.load('namespace');
             spy.callCount.should.be.equal(0);
         });
 
@@ -67,24 +67,24 @@ describe('Client - unit', function () {
                 .returns({tile: 'xy,ab'});
 
             var spy = sinon.spy();
-            rootScope.$on('add:tile', spy);
+            rootScope.$on('replace:tile', spy);
 
-            rootScope.$on('add:tile', function (event, arr) {
+            rootScope.$on('replace:tile', function (event, arr) {
                 arr.should.be.deep.equal(['xy', 'ab']);
                 done();
             });
 
-            TileLocation.load();
-            TileLocation.url().should.be.equal('/?tile=xy,ab');
+            DeepLinking.load('namespace');
+            DeepLinking.url().should.be.equal('/?tile=xy,ab');
             spy.callCount.should.be.equal(1);
         });
 
         it('should change $location on add()', function () {
-            TileLocation.add('tile', 'xy');
-            TileLocation.url().should.be.equal('/?tile=xy');
+            DeepLinking.add('tile', 'xy');
+            DeepLinking.url().should.be.equal('/?tile=xy');
 
-            TileLocation.add('tile', 'ab');
-            TileLocation.url().should.be.equal('/?tile=xy,ab');
+            DeepLinking.add('tile', 'ab');
+            DeepLinking.url().should.be.equal('/?tile=xy,ab');
         });
 
         it('should emit add:tile once on add()', function (done) {
@@ -96,12 +96,12 @@ describe('Client - unit', function () {
                 done();
             });
 
-            TileLocation.add('tile', 'xy');
+            DeepLinking.add('tile', 'xy');
             spy.callCount.should.be.equal(1);
         });
 
         it('should store on add()', function () {
-            TileLocation.add('tile', 'xy');
+            DeepLinking.add('tile', 'xy');
             Storage.set.callCount.should.be.equal(1);
         });
 
@@ -110,12 +110,12 @@ describe('Client - unit', function () {
             sinon.stub(Storage, 'get')
                 .returns({tile: 'xy,ab'});
 
-            TileLocation.load();
-            TileLocation.remove('tile', 'xy');
-            TileLocation.url().should.be.equal('/?tile=ab');
+            DeepLinking.load('namespace');
+            DeepLinking.remove('tile', 'xy');
+            DeepLinking.url().should.be.equal('/?tile=ab');
 
-            TileLocation.remove('tile', 'ab');
-            TileLocation.url().should.be.equal('/');
+            DeepLinking.remove('tile', 'ab');
+            DeepLinking.url().should.be.equal('/');
         });
 
         it('should emit once remove:tile on remove()', function (done) {
@@ -129,13 +129,13 @@ describe('Client - unit', function () {
                 done();
             });
 
-            TileLocation.load();
-            TileLocation.remove('tile', 'xy');
+            DeepLinking.load('namespace');
+            DeepLinking.remove('tile', 'xy');
             spy.callCount.should.be.equal(1);
         });
 
         it('should store on remove()', function () {
-            TileLocation.remove('tile', 'xy');
+            DeepLinking.remove('tile', 'xy');
             Storage.set.callCount.should.be.equal(1);
         });
     });

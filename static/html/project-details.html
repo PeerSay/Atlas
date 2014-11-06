@@ -76,7 +76,7 @@
         <!--Project Checklist-->
         <div ng-include="'/html/project-checklist.html'"></div>
         <!--Others-->
-        <div ng-repeat="tile in m.tiles">
+        <div ng-repeat="tile in m.visible.tiles">
             <div ng-include="tile.html"></div>
         </div>
     </div>

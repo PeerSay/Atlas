@@ -4,8 +4,8 @@ angular.module('peersay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
 
-ProjectDetailsCtrl.$inject = ['$routeParams', 'Projects', 'Tiles'];
-function ProjectDetailsCtrl($routeParams, Projects, Tiles) {
+ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Projects', 'Tiles'];
+function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     var m = this;
     var id = Number($routeParams.projectId);
 
@@ -18,16 +18,25 @@ function ProjectDetailsCtrl($routeParams, Projects, Tiles) {
     };
     m.toggleTileView = toggleTileView;
     // Checklist
-    m.tiles = Tiles.tiles;
-    m.curTile = m.tiles[0];
+    m.checklist = Tiles.checklist;
+    m.curTile = curTile;
     m.toggleTile = Tiles.toggleTile.bind(Tiles);
     // Tiles
-    m.visibleTiles = Tiles.visibleTiles;
+    m.visible = Tiles.visible;
 
     // xxx
     m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    getProject();
+    activate();
+
+    function activate() {
+        getProject();
+
+        Tiles.load('project-' + id);
+        $scope.$on('$destroy', function () {
+            Tiles.unload();
+        });
+    }
 
     function getProject() {
         Projects.getProject(id)
@@ -38,5 +47,9 @@ function ProjectDetailsCtrl($routeParams, Projects, Tiles) {
 
     function toggleTileView() {
         m.tileView = (m.tileView === 'norm') ? 'min' : 'norm';
+    }
+
+    function curTile() {
+        return m.checklist.tiles[0]; // TODO
     }
 }

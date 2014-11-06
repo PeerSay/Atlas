@@ -37,8 +37,8 @@
                     Current Step:
                     <a href
                         data-toggle="modal"
-                        data-target="#{{m.curTile.name}}-full-dlg"
-                        ng-click="m.toggleTile(m.curTile, true)">{{m.curTile.title}}</a>
+                        data-target="#{{m.curTile().name}}-full-dlg"
+                        ng-click="m.toggleTile(m.curTile(), true)">{{m.curTile().title}}</a>
                 </p>
             </div>
 
@@ -50,9 +50,11 @@
                 </div>
 
                 <ul class="list-group">
-                    <li class="list-group-item" ng-repeat="tile in m.tiles">
+                    <li class="list-group-item" ng-repeat="tile in m.checklist.tiles">
                         <span class="badge">{{tile.progress}}</span>
-                        <input type="checkbox" ng-model="tile.show" ng-click="m.toggleTile(tile)">
+                        <input type="checkbox"
+                                ng-model="tile.show"
+                                ng-click="m.toggleTile(tile)">
                         <a href data-toggle="modal"
                                 data-target="#{{tile.name}}-full-dlg"
                                 ng-click="m.toggleTile(tile, true)"

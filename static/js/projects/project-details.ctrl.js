@@ -11,15 +11,10 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
 
     m.project = {};
     // Toggle views
-    m.tileView = 'norm';
-    m.tileBtnClass = {
-        'glyphicon-zoom-out': m.tileView === 'norm',
-        'glyphicon-zoom-in': m.tileView === 'min'
-    };
-    m.toggleTileView = toggleTileView;
+    m.tilesMode = 'norm';
+    m.toggleTilesMode = toggleTilesMode;
     // Checklist
     m.checklist = Tiles.checklist;
-    m.curTile = curTile;
     m.toggleTile = Tiles.toggleTile.bind(Tiles);
     // Tiles
     m.visible = Tiles.visible;
@@ -45,11 +40,7 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
             });
     }
 
-    function toggleTileView() {
-        m.tileView = (m.tileView === 'norm') ? 'min' : 'norm';
-    }
-
-    function curTile() {
-        return m.checklist.tiles[0]; // TODO
+    function toggleTilesMode() {
+        m.tilesMode = (m.tilesMode === 'norm') ? 'min' : 'norm';
     }
 }

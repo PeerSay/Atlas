@@ -81,14 +81,17 @@ function DeepLinking($location, $rootScope, Storage) {
     function add(key, val) {
         var search = $location.search()[key];
         var arr = search ? search.split(',') : [];
-        arr.push(val);
 
-        $location
-            .skipReload()
-            .search(key, arr.join(','));
+        if (arr.indexOf(val) < 0) { // ignore duplicates
+            arr.push(val);
 
-        $rootScope.$emit('add:' + key, [val]);
-        store();
+            $location
+                .skipReload()
+                .search(key, arr.join(','));
+
+            $rootScope.$emit('add:' + key, [val]);
+            store();
+        }
         return $location;
     }
 

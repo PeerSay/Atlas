@@ -105,6 +105,18 @@ describe('Client - unit', function () {
             Storage.set.callCount.should.be.equal(1);
         });
 
+        it('should ignore duplicate on add()', function () {
+            var spy = sinon.spy();
+            DeepLinking.load('nsp1');
+            DeepLinking.add('tile', 'xy');
+
+            rootScope.$on('add:tile', spy);
+
+            DeepLinking.add('tile', 'xy'); //<- duplicate
+            spy.callCount.should.be.equal(0);
+            DeepLinking.url().should.be.equal('/?tile=xy');
+        });
+
         it('should change $location on remove()', function () {
             Storage.get.restore();
             sinon.stub(Storage, 'get')

@@ -66,7 +66,8 @@ function Tiles($rootScope, DeepLinking) {
         }
     ];
     T.checklist = {
-        tiles: []
+        tiles: [],
+        current: null
     };
     T.visible = {
         tiles: []
@@ -100,7 +101,7 @@ function Tiles($rootScope, DeepLinking) {
         $rootScope.$on('remove:tile', function (evt, val) {
             var tile = findBy('uri')(tiles, val)[0];
             tile.show = false;
-            var idx = tiles.indexOf(tile);
+            var idx = T.visible.tiles.indexOf(tile);
             T.visible.tiles.splice(idx, 1);
         });
     }
@@ -111,6 +112,7 @@ function Tiles($rootScope, DeepLinking) {
             // tile.progress = 1; TODO
             T.checklist.tiles.push(tile);
         });
+        T.checklist.current = T.checklist.tiles[0]; //TODO
         DeepLinking.load(nspace);
     }
 

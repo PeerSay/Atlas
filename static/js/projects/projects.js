@@ -3,18 +3,21 @@
 angular.module('peersay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['restApi', 'User', 'Notification'];
-function Projects(rest, User, Notification) {
+Projects.$inject = ['$q', 'restApi', 'User', 'Notification'];
+function Projects($q, rest, User, Notification) {
     var P = {};
+    var cache = {};
 
     P.projects = [];
-    P.curProject = {};
+    P.current = {
+        project: null
+    };
     P.create = {
         showDlg: false,
         title: ''
     };
     P.getProjectStubs = getProjectStubs;
-    P.getProject = getProject;
+    P.readProject = readProject;
     P.toggleCreateDlg = toggleCreateDlg;
     P.createProject = createProject;
     P.removeProject = removeProject;
@@ -25,20 +28,29 @@ function Projects(rest, User, Notification) {
         return User.getUser()
             .success(function () {
                 P.projects = User.user.projects;
-                //P.projects.user = User.user; // XXX why?
             });
     }
 
-    function getProject(id) {
-        return getProjectStubs()
-            .success(function () {
-                // TODO: API call
-                var prj = findBy('id')(P.projects, id)[0];
-                P.curProject.id = prj.id;
-                P.curProject.title = prj.title;
-                P.curProject.duration = '6 months';
-                P.curProject.budget = '$50k';
+    function readProject(id) {
+        var cached_prj = cache[id];
+        if (cached_prj) {
+            return cached_prj.promise; // TODO: invalidate cache, when?
+        }
+
+        var deferred = cache[id] = $q.defer();
+
+        rest.read('projects', id)
+            .success(function (data) {
+                P.current.project = data.result;
+                cache[id].resolve(data.result);
+            })
+            .error(function () {
+                var err = 'Failed to read project ' + id;
+                Notification.showError('API Error', err);
+                cache[id].reject(err);
             });
+
+        return deferred.promise;
     }
 
     function toggleCreateDlg(on) {
@@ -69,9 +81,9 @@ function Projects(rest, User, Notification) {
             });
     }
 
-    function updateProject(project) {
-        var prj = project || P.curProject;
-        return rest.update('projects', prj)
+    function updateProject(id, data) {
+        data.id = id;
+        return rest.update('projects', data)
             .error(function () {
                 Notification.showError('API Error', 'Pretending there\'s no internet, in fact this API is not implemented :)');
             });

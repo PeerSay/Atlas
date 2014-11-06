@@ -25,7 +25,7 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     activate();
 
     function activate() {
-        getProject();
+        readProject();
 
         Tiles.load('project-' + id);
         $scope.$on('$destroy', function () {
@@ -33,10 +33,10 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
         });
     }
 
-    function getProject() {
-        Projects.getProject(id)
-            .success(function () {
-                m.project = Projects.curProject;
+    function readProject() {
+        Projects.readProject(id)
+            .then(function (res) {
+                m.project = res;
             });
     }
 

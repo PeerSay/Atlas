@@ -17,28 +17,27 @@ function ProjectTitleCtrl($routeParams, Projects) {
     m.toggleEditTitleDlg = toggleEditTitleDlg;
     m.updateProjectTitle = updateProjectTitle;
 
-    getProject();
+    readProject();
 
-    function getProject() {
-        // TODO: fix double API call
-        Projects.getProject(id)
-            .success(function () {
-                m.project = Projects.curProject;
+    function readProject() {
+        Projects.readProject(id)
+            .then(function (res) {
+                m.project = res;
             });
     }
 
     function toggleEditTitleDlg(on) {
         if (on) {
-            m.editTitle.value = Projects.curProject.title;
+            m.editTitle.value = m.project.title;
         }
         m.editTitle.show = on;
     }
 
     function updateProjectTitle() {
-        Projects.updateProject()
-            .then(function () {
-                // TODO: use response
-                Projects.curProject.title = m.editTitle.value;
+        var title = m.editTitle.value.trim();
+        Projects.updateProject(id, {title: title})
+            .success(function (res) {
+                m.project.title = res.result.title;
             })
             .finally(function () {
                 m.editTitle.show = false;

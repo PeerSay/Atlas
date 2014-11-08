@@ -13,7 +13,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'essentials',
             title: 'Project Essentials',
             html: '/html/project-essentials.html',
-            progress: '1/10',
+            progress: {},
             show: false
         },
         {
@@ -21,7 +21,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'evaluation',
             title: 'Evaluation Requirements',
             html: '/html/project-todo.html',
-            progress: '1/10',
+            progress: {},
             show: false
         },
         {
@@ -29,7 +29,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'vendor-input',
             title: 'Vendor Input',
             html: '/html/project-todo.html',
-            progress: '1/10',
+            progress: {},
             show: false
         },
         {
@@ -37,7 +37,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'shortlists',
             title: 'Shortlists',
             html: '/html/project-todo.html',
-            progress: '1/10',
+            progress: {},
             show: false
         },
         {
@@ -45,7 +45,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'pocs',
             title: 'POCs',
             html: '/html/project-todo.html',
-            progress: '1/10',
+            progress: {},
             show: false
         },
         {
@@ -53,7 +53,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'vendor-ref',
             title: 'Vendor Reference',
             html: '/html/project-todo.html',
-            progress: '1/10',
+            progress: {},
             show: false
         },
         {
@@ -61,7 +61,7 @@ function Tiles($rootScope, DeepLinking) {
             name: 'debrief',
             title: 'Audit / Debrief',
             html: '/html/project-todo.html',
-            progress: '1/10',
+            progress: {},
             show: false
         }
     ];
@@ -75,6 +75,12 @@ function Tiles($rootScope, DeepLinking) {
     T.load = load;
     T.unload = unload;
     T.toggleTile = toggleTile;
+    // Progress
+    T.setProgress = setProgress;
+    T.progressTotal = {
+        max: 0,
+        current: 0
+    };
 
     activate();
 
@@ -109,7 +115,6 @@ function Tiles($rootScope, DeepLinking) {
     function load(nspace) {
         angular.forEach(tiles, function (tile) {
             tile.show = false;
-            // tile.progress = 1; TODO
             T.checklist.tiles.push(tile);
         });
         T.checklist.current = T.checklist.tiles[0]; //TODO
@@ -127,6 +132,14 @@ function Tiles($rootScope, DeepLinking) {
         //console.log('>>>Toggling tile: %s - %s', show, tile.uri);
 
         DeepLinking[show ? 'add' : 'remove']('tile', tile.uri);
+    }
+    
+    function setProgress(uri, progress) {
+        var tile = findBy('uri')(tiles, uri)[0];
+        tile.progress = progress;
+
+        T.progressTotal.max += progress.total;
+        T.progressTotal.current += progress.value;
     }
 
     // TODO: to util

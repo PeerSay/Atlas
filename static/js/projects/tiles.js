@@ -76,11 +76,12 @@ function Tiles($rootScope, DeepLinking) {
     T.unload = unload;
     T.toggleTile = toggleTile;
     // Progress
-    T.setProgress = setProgress;
     T.progressTotal = {
         max: 0,
         current: 0
     };
+    T.setProgress = setProgress;
+
 
     activate();
 
@@ -91,24 +92,17 @@ function Tiles($rootScope, DeepLinking) {
     function listenToNavEvents() {
         $rootScope.$on('replace:tile', function (evt, vals) {
             T.visible.tiles = [];
-            angular.forEach(vals, function (v) {
-                var tile = findBy('uri')(tiles, v)[0];
-                tile.show = true;
-                T.visible.tiles.push(tile);
+            angular.forEach(vals, function (uri) {
+                addTile(uri);
             });
         });
         $rootScope.$on('add:tile', function (evt, vals) {
-            angular.forEach(vals, function (v) {
-                var tile = findBy('uri')(tiles, v)[0];
-                tile.show = true;
-                T.visible.tiles.push(tile);
+            angular.forEach(vals, function (uri) {
+                addTile(uri);
             });
         });
         $rootScope.$on('remove:tile', function (evt, val) {
-            var tile = findBy('uri')(tiles, val)[0];
-            tile.show = false;
-            var idx = T.visible.tiles.indexOf(tile);
-            T.visible.tiles.splice(idx, 1);
+            removeTile(val);
         });
     }
 
@@ -127,19 +121,42 @@ function Tiles($rootScope, DeepLinking) {
         DeepLinking.unload();
     }
 
+    function addTile(uri) {
+        var tile = findBy('uri')(tiles, uri)[0];
+
+        tile.show = true;
+        T.visible.tiles.push(tile);
+    }
+
+    function removeTile(uri) {
+        var tile = findBy('uri')(tiles, uri)[0];
+        var idx = T.visible.tiles.indexOf(tile);
+
+        tile.show = false;
+        T.visible.tiles.splice(idx, 1);
+    }
+
     function toggleTile(tile, on) {
-        var show = (arguments.length > 1) ? on : tile.show; // XXX - no negation cause negated by ng-model already
+        var show = (arguments.length > 1) ? on : tile.show; // No negation cause negated by ng-model already
         //console.log('>>>Toggling tile: %s - %s', show, tile.uri);
 
         DeepLinking[show ? 'add' : 'remove']('tile', tile.uri);
     }
-    
-    function setProgress(uri, progress) {
-        var tile = findBy('uri')(tiles, uri)[0];
-        tile.progress = progress;
 
-        T.progressTotal.max += progress.total;
-        T.progressTotal.current += progress.value;
+    function setProgress(tile, progress) {
+        tile.progress = progress;
+        setProgressTotal();
+    }
+
+    function setProgressTotal() {
+        var total = T.progressTotal;
+        total.max = 0;
+        total.current = 0;
+
+        angular.forEach(T.visible.tiles, function (tile) {
+            total.max += tile.progress.total;
+            total.current += tile.progress.value;
+        });
     }
 
     // TODO: to util

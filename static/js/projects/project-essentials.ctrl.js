@@ -16,6 +16,10 @@ function ProjectEssentialsCtrl($scope, Tiles) {
     activate();
 
     function activate() {
-        Tiles.setProgress(m.tile.uri, m.progress);
+        Tiles.setProgress(m.tile, m.progress);
+        $scope.$on('$destroy', function () {
+            m.progress = { value: 0, total: 0 };
+            Tiles.setProgress(m.tile, m.progress);
+        });
     }
 }

@@ -48,8 +48,8 @@
                             ng-mouseleave="tile.highlight = false"
                             >
                         <span class="badge score no-select"
-                                ng-class="tile.progressClass"
-                                ng-click="m.progressTile(tile, $event)">{{m.progressLabel(tile)}}</span>
+                                ng-class="m.tileProgressClass(tile)"
+                                ng-click="m.setTileProgress(tile, $event)">{{m.tileProgressLabel(tile)}}</span>
                         <input type="checkbox"
                                 ng-model="tile.show"
                                 ng-click="m.toggleTile(tile)">

@@ -7,7 +7,7 @@ angular.module('peersay')
 ProjectTitleCtrl.$inject = ['$routeParams', 'Projects'];
 function ProjectTitleCtrl($routeParams, Projects) {
     var m = this;
-    var id = Number($routeParams.projectId);
+    var id = $routeParams.projectId;
 
     m.project = {};
     m.editTitle = {

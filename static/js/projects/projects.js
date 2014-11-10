@@ -63,7 +63,8 @@ function Projects($q, rest, User, Notification) {
                 P.projects.push(data.result);
             })
             .error(function () {
-                console.log('TODO: handle createProject API error');
+                var err = 'Failed to create project';
+                Notification.showError('API Error', err);
             })
             .then(function () {
                 P.create.showDlg = false; // UX: or not hide?
@@ -77,20 +78,21 @@ function Projects($q, rest, User, Notification) {
                 P.projects.splice(getIdxById(data.result.id), 1);
             })
             .error(function () {
-                console.log('TODO: handle createProject API error');
+                var err = 'Failed to remove project ' + id;
+                Notification.showError('API Error', err);
             });
     }
 
     function updateProject(id, data) {
-        data.id = id;
-        return rest.update('projects', data)
+        return rest.update('projects', id, data)
             .error(function () {
-                Notification.showError('API Error', 'Pretending there\'s no internet, in fact this API is not implemented :)');
+                var err = 'Failed to update project ' + id;
+                Notification.showError('API Error', err);
             });
     }
 
     function getIdxById(id) {
-        var prj = findBy('id')(P.projects, id)[0];
+        var prj = findBy('_ref')(P.projects, id)[0];
         var idx = P.projects.indexOf(prj);
         return idx < 0 ? P.projects.length : idx
     }

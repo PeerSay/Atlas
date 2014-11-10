@@ -7,7 +7,7 @@ angular.module('peersay')
 ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Projects', 'Tiles'];
 function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     var m = this;
-    var id = Number($routeParams.projectId);
+    var id = $routeParams.projectId;
 
     m.project = {};
     // Toggle views

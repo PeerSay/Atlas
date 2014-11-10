@@ -40,7 +40,7 @@ function RestApi(app) {
 
         console.log('[API] Read user [%s]', email);
 
-        User.findOne({email: email}, 'id -_id email name projects.id projects.title', function (err, user) {
+        User.findOne({email: email}, 'id -_id email name projects.title projects._ref projects._stub', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return notFound(res, email);
@@ -53,7 +53,7 @@ function RestApi(app) {
     // Projects
     //
     function createProject(req, res, next) {
-        var project = req.body;
+        var data = req.body;
         var user = req.user;
         var email = user.email;
 
@@ -65,15 +65,16 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            user.createProject(project, function (err, prj) {
+            Project.createByUser(data, user, function (err, stubPrj) {
                 if (err) { return next(err); }
-                res.json({ result: prj });
+
+                res.json({ result: stubPrj }); // stub is enough for create
             });
         });
     }
 
     function removeProject(req, res, next) {
-        var project_id = Number(req.params.id);
+        var project_id = req.params.id;
         var user = req.user;
         var email = user.email;
 
@@ -85,15 +86,19 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            user.removeProject(project_id, function (err, result) {
+            Project.removeByUser(project_id, user, function (err) {
                 if (err) { return next(err); }
-                res.json({ result: result });
+
+                res.json({ result: {
+                    id: project_id,
+                    removed: true
+                }});
             });
         });
     }
 
     function readProject(req, res, next) {
-        var project_id = Number(req.params.id);
+        var project_id = req.params.id;
         var user = req.user;
         var email = user.email;
 
@@ -105,16 +110,19 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            var stubPrj = _.find(user.projects, {id: project_id});
-            Project.findOne({_id: stubPrj._ref}, function (err, prj) {
+            Project.findOne({_id: project_id}, '-_id -__v -collaborators', function (err, prj) {
                 if (err) { return next(err); }
+                if (!prj) {
+                    return notFound(res, project_id);
+                }
+
                 res.json({ result: prj });
             });
         });
     }
 
     function updateProject(req, res, next) {
-        var project_id = Number(req.params.id);
+        var project_id = req.params.id;
         var new_data = req.body;
         var user = req.user;
         var email = user.email;
@@ -127,12 +135,21 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            var stubPrj = _.find(user.projects, {id: project_id});
-            Project.findOneAndUpdate({_id: stubPrj._ref}, {$set: new_data}, function (err, prj) {
+            var select = Object.keys(new_data).join(' ');
+            Project.findOne({_id: project_id}, select, function (err, prj) {
                 if (err) { return next(err); }
+                if (!prj) {
+                    return notFound(res, project_id);
+                }
 
-                var picked = _.pick(prj, _.keys(new_data));
-                res.json({ result: picked });
+                _.extend(prj, new_data); // cannot use findAndUpdate as it bypasses pre hooks
+
+                prj.save(function (err) {
+                    if (err) { return next(err); }
+
+                    var picked = _.pick(prj, _.keys(new_data));
+                    res.json({ result: picked });
+                });
             });
         });
     }

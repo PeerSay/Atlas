@@ -28,84 +28,111 @@
             </div>
         </div>
 
-        <div class="panel-body">
-            <div class="view-minimal" ng-show="m.tilesMode === 'min'">
-                <table class="table">
-                    <tr>
-                        <td>Title:</td>
-                        <td><a href="#">{{m.project.title}}</a></td>
-                    </tr>
-                    <tr>
-                        <td>Duration:</td>
-                        <td><a href="#">{{m.project.duration.days}}</a></td>
-                    </tr>
-                    <tr>
-                        <td>Budget:</td>
-                        <td><a href="#">${{m.project.budget}}</a></td>
-                    </tr>
-                </table>
-            </div>
+        <div class="panel-body view">
+            <div class="view-mode" ng-class="m.tilesMode">
+                <div class="tile-section">
+                    <table class="table">
+                        <tr>
+                            <td>Title:</td>
+                            <td><a class="btn edit" href="#"
+                                    ng-class="{'btn-primary': !cm.title.ok, 'btn-default': cm.title.ok}"
+                                    >{{cm.title.value}}</a></td>
+                            <td>
+                                <span class="badge" ng-show="cm.title.default">Guess</span>
+                                <span class="badge empty" ng-show="cm.title.empty">Missed</span>
+                                <span class="badge ok" ng-show="cm.title.ok">OK</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Duration:</td>
+                            <td><a class="btn btn-primary edit" href="#">{{cm.duration.value.days}} days</a></td>
+                            <td>
+                                <span class="badge" ng-show="cm.title.default">Guess</span>
+                                <span class="badge empty" ng-show="cm.title.empty">Missed</span>
+                                <span class="badge ok" ng-show="cm.title.ok">OK</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Budget:</td>
+                            <td><a class="btn btn-primary edit" href="#">${{cm.budget.value}}</a></td>
+                            <td>
+                                <span class="badge" ng-show="cm.title.default">Guess</span>
+                                <span class="badge empty" ng-show="cm.title.empty">Missed</span>
+                                <span class="badge ok" ng-show="cm.title.ok">OK</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
 
-            <div class="view-normal" ng-show="m.tilesMode === 'norm'">
-                <table class="table">
-                    <tr>
-                        <td>Title:</td>
-                        <td><a href="#">{{m.project.title}}</a></td>
-                    </tr>
-                    <tr>
-                        <td>Duration:</td>
-                        <td><a href="#">{{m.project.duration.days}}</a></td>
-                    </tr>
-                    <tr>
-                        <td>Budget:</td>
-                        <td><a href="#">${{m.project.budget}}</a></td>
-                    </tr>
-                </table>
-
-                <h5 class="section-title text-center"><a href="#">Shortlisted Vendors</a></h5>
-                <div class="row">
-                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                        <ul class="section-list">
-                            <li>Net App</li>
-                            <li>HP</li>
-                        </ul>
-                    </div>
-                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                        <ul class="section-list">
-                            <li>Dell</li>
-                        </ul>
+                <!--TODO: Vendors-->
+                <div class="tile-section norm">
+                    <h5 class="section-title text-center"><a href="#">Shortlisted Vendors</a></h5>
+                    <div class="row section-list">
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <div class="li">Net App</div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                            <div class="li">HP</div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                            <div class="li">Dell</div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                            <div class="li">M$</div>
+                        </div>
                     </div>
                 </div>
 
-                <h5 class="section-title text-center"><a href="#">Collaborators</a></h5>
-                <div class="row">
-                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                        <ul class="section-list">
-                            <li>John</li>
-                            <li>Doe</li>
-                        </ul>
+                <!--TODO: Collaborators-->
+                <div class="tile-section norm">
+                    <h5 class="section-title text-center"><a href="#">Collaborators</a></h5>
+                    <div class="row section-list">
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <div class="li">John</div>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <div class="li">Doe</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-
-<div id="{{tile.name}}-full-dlg" class="modal fade" tabindex="-1" role="dialog" ps-dialog>
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title">{{tile.title}}</h4>
-            </div>
-            <div class="modal-body">
-                <p>TODO</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-default pull-right" data-dismiss="modal">Done</button>
+    <!--Full view-->
+    <div id="{{tile.name}}-full-dlg" class="modal fade" tabindex="-1" role="dialog" ps-dialog>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title">{{tile.title}}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="tile-section">
+                        <table class="table">
+                            <tr>
+                                <td>Title:</td>
+                                <td><a class="btn btn-primary edit" href="#">{{cm.title.value}}</a></td>
+                                <td><span class="badge">Guess</span></td>
+                            </tr>
+                            <tr>
+                                <td>Duration:</td>
+                                <td><a class="btn btn-primary edit" href="#">{{cm.duration.value.days}} days</a></td>
+                                <td><span class="badge">Guess</span></td>
+                            </tr>
+                            <tr>
+                                <td>Budget:</td>
+                                <td><a class="btn btn-primary edit" href="#">${{cm.budget.value}}</a></td>
+                                <td><span class="badge">Guess</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary pull-right" data-dismiss="modal">Done</button>
+                </div>
             </div>
         </div>
     </div>

@@ -9,7 +9,7 @@ function ProjectTitleCtrl($routeParams, Projects) {
     var m = this;
     var id = $routeParams.projectId;
 
-    m.project = {};
+    m.title = {};
     m.editTitle = {
         show: false,
         value: ''
@@ -22,13 +22,13 @@ function ProjectTitleCtrl($routeParams, Projects) {
     function readProject() {
         Projects.readProject(id)
             .then(function (res) {
-                m.project = res;
+                m.title = res.title;
             });
     }
 
     function toggleEditTitleDlg(on) {
         if (on) {
-            m.editTitle.value = m.project.title;
+            m.editTitle.value = m.title.value;
         }
         m.editTitle.show = on;
     }
@@ -37,7 +37,9 @@ function ProjectTitleCtrl($routeParams, Projects) {
         var title = m.editTitle.value.trim();
         Projects.updateProject(id, {title: title})
             .success(function (res) {
-                m.project.title = res.result.title;
+                m.title.value = res.result.title;
+                m.title.ok = true; // TODO
+                m.title.default = false;
             })
             .finally(function () {
                 m.editTitle.show = false;

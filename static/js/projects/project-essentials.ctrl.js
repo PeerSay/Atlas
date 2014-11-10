@@ -8,10 +8,10 @@ function ProjectEssentialsCtrl($scope, Tiles) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
-    m.progress = {
-        value: 2,
-        total: 5
-    };
+    m.title = $scope.$parent.m.project.title;
+    m.budget = $scope.$parent.m.project.budget;
+    m.duration = $scope.$parent.m.project.duration;
+    m.progress = getProgress(['title', 'budget', 'duration']);
 
     activate();
 
@@ -21,5 +21,18 @@ function ProjectEssentialsCtrl($scope, Tiles) {
             m.progress = { value: 0, total: 0 };
             Tiles.setProgress(m.tile, m.progress);
         });
+    }
+
+    function getProgress(fields) {
+        var progress = { value: 0, total: 0 };
+
+        angular.forEach(fields, function (fld) {
+            progress.total++;
+            if (m[fld].ok) {
+               progress.value++;
+            }
+        });
+
+        return progress;
     }
 }

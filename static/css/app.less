@@ -144,7 +144,7 @@ body {
     text-decoration: none;
   }
 
-  &.new {
+  &.create-new {
     background: rgba(0, 0, 0, 0.2);
     color: #ddd;
     box-shadow: none;
@@ -156,44 +156,101 @@ body {
     }
   }
 
-  .section-title {
-    border-bottom: 1px solid #ccc;
-    &>a {
-      display: inline-block;
-      min-width: 40%;
-      position: relative;
-      bottom: -1px;
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-bottom: 0;
-      border-radius: 4px 4px 0 0;
-      background: #fff;
+  .tile-section {
+    margin-bottom: 20px;
+    &>* {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      border-bottom: 1px solid #ccc;
+      &>a {
+        display: inline-block;
+        min-width: 40%;
+        position: relative;
+        bottom: -1px;
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-bottom: 0;
+        border-radius: 4px 4px 0 0;
+        background: #fff;
+      }
+    }
+
+    .section-list {
+      &>div {
+        padding: 0 10px;
+      }
+      .li {
+        margin-bottom: 3px;
+        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.05);
+        text-align: center;
+      }
+    }
+
+    .btn.edit {
+      padding: 0 12px;
+      max-width: 90%;
+      .ellipsis();
+    }
+
+    .table {
+      td {
+        display: inline-block;
+        width: 30%;
+        border: none;
+        padding: 2px;
+      }
+      td+td {
+        width: 50%;
+      }
+      td+td+td {
+        width: 20%;
+      }
+    }
+
+    /*Badges*/
+    .badge {
+      background-color: #999;
+      &.empty {
+        background-color: hsv(10, 50%, 72%);
+      }
+      &.ok {
+        background-color: hsv(120, 50%, 72%);
+      }
     }
   }
 
-  .section-list {
-    margin-bottom: 10px;
-    &>li {
-      padding: 0 4px;
-      margin-bottom: 2px;
-      border-radius: 3px;
-      background: rgba(0, 0, 0, 0.05);
-      text-align: center;
+  /*Min/norm view*/
+  .tile-section {
+    &.norm, &.min {
+      overflow: hidden;
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      /*transition: all .3s ease;*/
     }
   }
 
-  /* Tile table */
-  .table {
-    td {
-      display: inline-block;
-      width: 30%;
-      border: none;
-      padding: 2px;
-    }
-    td+td {
-      width: 70%;
+  .view-mode.norm {
+    height: auto;
+    .tile-section.norm {
+      opacity: 1;
+      margin-bottom: 20px;
+      height: auto;
     }
   }
+  .view-mode.min {
+    height: 70px;
+    .tile-section.min {
+      opacity: 1;
+      margin-bottom: 20px;
+      height: auto;
+    }
+  }
+
 
   /* Checklist badges with score */
   .badge.score {
@@ -271,10 +328,6 @@ body {
 
 .tile-container {
   position: relative;
-
-  .view-minimal {
-    height: 70px;
-  }
 
   .btn-menu-wrap {
     position: absolute;

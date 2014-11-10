@@ -41,8 +41,8 @@ function Projects($q, rest, User, Notification) {
 
         rest.read('projects', id)
             .success(function (data) {
-                P.current.project = data.result;
-                cache[id].resolve(data.result);
+                P.current.project = wrapModel(data.result);
+                cache[id].resolve(P.current.project);
             })
             .error(function () {
                 var err = 'Failed to read project ' + id;
@@ -51,6 +51,23 @@ function Projects($q, rest, User, Notification) {
             });
 
         return deferred.promise;
+    }
+
+    function wrapModel(data) {
+        var result = {};
+        var defaults = data.defaults;
+        delete data.defaults;
+
+        angular.forEach(data, function (val, key) {
+            result[key] = {
+                value: val,
+                'default': true,
+                empty: false,
+                ok: false
+            };
+        });
+
+        return result;
     }
 
     function toggleCreateDlg(on) {

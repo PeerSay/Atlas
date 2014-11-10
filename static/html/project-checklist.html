@@ -26,39 +26,40 @@
         </div>
 
         <div class="panel-body">
-            <div class="view-minimal" ng-show="m.tilesMode === 'min'">
-                <ps-progress valuenow="m.progressTotal()" style="'success'"></ps-progress>
+            <div class="view-mode" ng-class="m.tilesMode">
+                <div class="tile-section">
+                    <ps-progress valuenow="m.progressTotal()" style="'success'"></ps-progress>
+                </div>
 
-                <p>
+                <div class="tile-section min">
                     Current Step:
                     <a href
                             data-toggle="modal"
                             data-target="#{{m.checklist.current.name}}-full-dlg"
                             ng-click="m.toggleTile(m.checklist.current, true)"
                             >{{m.checklist.current.title}}</a>
-                </p>
-            </div>
 
-            <div class="view-normal" ng-show="m.tilesMode === 'norm'">
-                <ps-progress valuenow="m.progressTotal()" style="'success'"></ps-progress>
+                </div>
 
-                <ul class="list-group">
-                    <li class="list-group-item" ng-repeat="tile in m.checklist.tiles"
-                            ng-mouseover="tile.highlight = true"
-                            ng-mouseleave="tile.highlight = false"
-                            >
+                <div class="tile-section norm">
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="tile in m.checklist.tiles"
+                                ng-mouseover="tile.highlight = true"
+                                ng-mouseleave="tile.highlight = false"
+                                >
                         <span class="badge score no-select"
                                 ng-class="m.tileProgressClass(tile)"
                                 ng-click="m.setTileProgress(tile, $event)">{{m.tileProgressLabel(tile)}}</span>
-                        <input type="checkbox"
-                                ng-model="tile.show"
-                                ng-click="m.toggleTile(tile)">
-                        <a href data-toggle="modal"
-                                data-target="#{{tile.name}}-full-dlg"
-                                ng-click="m.toggleTile(tile, true)"
-                                >{{tile.title}}</a>
-                    </li>
-                </ul>
+                            <input type="checkbox"
+                                    ng-model="tile.show"
+                                    ng-click="m.toggleTile(tile)">
+                            <a href data-toggle="modal"
+                                    data-target="#{{tile.name}}-full-dlg"
+                                    ng-click="m.toggleTile(tile, true)"
+                                    >{{tile.title}}</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

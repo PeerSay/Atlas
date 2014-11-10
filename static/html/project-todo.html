@@ -8,11 +8,13 @@
             <h3 class="panel-title">{{cm.tile.title}}</h3>
         </div>
         <div class="panel-body">
-            <div class="view-minimal" ng-show="m.tilesMode === 'min'">
-                TODO - minimal
-            </div>
-            <div class="view-normal" ng-show="m.tilesMode === 'norm'">
-                TODO - normal
+            <div class="view-mode" ng-class="m.tilesMode">
+                <div class="tile-section norm">
+                    TODO - normal
+                </div>
+                <div class="tile-section min">
+                    TODO - minimal
+                </div>
             </div>
         </div>
     </div>

@@ -122,20 +122,16 @@ function Tiles($rootScope, DeepLinking) {
         });
         // Full view deep-linking
         $rootScope.$on('replace:dlg', function (evt, arr) {
-            var vals = arr[0];
+            var vals = arr[0];  // comes as ['dlg-ctrl'] or [null]
             if (!vals) {
-                console.log('>> got remove dlg: ');
-
                 T.fullView.dlg = null;
                 T.fullView.control = null;
             }
             else {
                 vals = vals.split('-');
-                console.log('>> got replace dlg: ', vals);
-
                 T.fullView.dlg = vals[0];
                 if (vals[1]) {
-                    T.fullView.control = vals[1]; // val comes as ['dlg-ctrl']
+                    T.fullView.control = vals[1];
                 }
             }
         });
@@ -182,8 +178,6 @@ function Tiles($rootScope, DeepLinking) {
     }
 
     function toggleFullView(on, dlg, control) {
-        console.log('>>Tiles.toggleFullView', arguments);
-
         if (on) {
             var vals = [dlg];
             if (control) {

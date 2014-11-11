@@ -3,15 +3,16 @@
 angular.module('peersay')
     .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
 
-ProjectEssentialsCtrl.$inject = ['$scope', 'Tiles'];
-function ProjectEssentialsCtrl($scope, Tiles) {
+ProjectEssentialsCtrl.$inject = ['$scope', 'Tiles', 'Projects'];
+function ProjectEssentialsCtrl($scope, Tiles, Projects) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
-    m.title = $scope.$parent.m.project.title;
-    m.budget = $scope.$parent.m.project.budget;
-    m.duration = $scope.$parent.m.project.duration;
-    m.progress = getProgress(['title', 'budget', 'duration']);
+    m.projectId = $scope.$parent.m.projectId;
+    m.title = {};
+    m.budget = {};
+    m.duration = {};
+    m.progress = {};
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
@@ -19,7 +20,16 @@ function ProjectEssentialsCtrl($scope, Tiles) {
     activate();
 
     function activate() {
-        Tiles.setProgress(m.tile, m.progress);
+        Projects.readProject(m.projectId)
+            .then(function (res) {
+                m.title = res.title;
+                m.budget = res.budget;
+                m.duration = res.duration;
+
+                m.progress = getProgress(['title', 'budget', 'duration']);
+                Tiles.setProgress(m.tile, m.progress);
+            });
+
         $scope.$on('$destroy', function () {
             m.progress = { value: 0, total: 0 };
             Tiles.setProgress(m.tile, m.progress);

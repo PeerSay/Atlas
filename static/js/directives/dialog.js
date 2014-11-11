@@ -16,15 +16,13 @@ function psTileDialog(Tiles) {
             });
 
             $el.on('hide.bs.modal', function () {
-                console.log('>>> Directive toggle off: ', scope.dlg);
-                Tiles.toggleFullView(false);
-                scope.$apply(); // digest for $search changes
+                // digest for $search change
+                scope.$apply(function () {
+                    Tiles.toggleFullView(false);
+                });
             });
 
-            scope.$watch('toggle', function (newVal, oldVal) {
-                console.log('>>> Directive toggle on: new[%s], old[%s]', newVal.dlg, oldVal.dlg);
-                console.log('>>> Directive toggle on: new[%s], old[%s]', newVal.control, oldVal.control);
-
+            scope.$watch('toggle', function (newVal) {
                 if (scope.dlg === newVal.dlg) {
                     $el.modal('show');
                 }

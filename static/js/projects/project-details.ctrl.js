@@ -7,8 +7,8 @@ angular.module('peersay')
 ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Projects', 'Tiles'];
 function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     var m = this;
-    var id = $routeParams.projectId;
 
+    m.projectId = $routeParams.projectId;
     m.project = {};
     // Toggle view mode
     m.viewMode = Tiles.viewMode;
@@ -35,14 +35,14 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     function activate() {
         readProject();
 
-        Tiles.load('project-' + id);
+        Tiles.load('project-' + m.projectId);
         $scope.$on('$destroy', function () {
             Tiles.unload();
         });
     }
 
     function readProject() {
-        Projects.readProject(id)
+        Projects.readProject(m.projectId)
             .then(function (res) {
                 m.project = res;
             });

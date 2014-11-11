@@ -4,11 +4,11 @@ angular.module('peersay')
     .controller('ProjectTitleCtrl', ProjectTitleCtrl);
 
 
-ProjectTitleCtrl.$inject = ['$routeParams', 'Projects'];
-function ProjectTitleCtrl($routeParams, Projects) {
+ProjectTitleCtrl.$inject = ['$scope', 'Projects'];
+function ProjectTitleCtrl($scope, Projects) {
     var m = this;
-    var id = $routeParams.projectId;
 
+    m.projectId = $scope.$parent.m.projectId;
     m.title = {};
     m.editTitle = {
         show: false,
@@ -17,10 +17,10 @@ function ProjectTitleCtrl($routeParams, Projects) {
     m.toggleEditTitleDlg = toggleEditTitleDlg;
     m.updateProjectTitle = updateProjectTitle;
 
-    readProject();
+    activate();
 
-    function readProject() {
-        Projects.readProject(id)
+    function activate() {
+        Projects.readProject(m.projectId)
             .then(function (res) {
                 m.title = res.title;
             });
@@ -35,7 +35,7 @@ function ProjectTitleCtrl($routeParams, Projects) {
 
     function updateProjectTitle() {
         var title = m.editTitle.value.trim();
-        Projects.updateProject(id, {title: title})
+        Projects.updateProject(m.projectId, {title: title})
             .success(function (res) {
                 m.title.value = res.result.title;
                 m.title.ok = true; // TODO

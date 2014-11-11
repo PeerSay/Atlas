@@ -41,7 +41,10 @@ function Projects($q, rest, User, Notification) {
 
         rest.read('projects', id)
             .success(function (data) {
-                P.current.project = wrapModel(data.result);
+                P.current.project = wrapAndFlattenModel(data.result);
+
+                console.log('>> Wrapped model', P.current.project);
+
                 cache[id].resolve(P.current.project);
             })
             .error(function () {
@@ -53,18 +56,25 @@ function Projects($q, rest, User, Notification) {
         return deferred.promise;
     }
 
-    function wrapModel(data) {
+    function wrapAndFlattenModel(data, prefix) {
         var result = {};
         var defaults = data.defaults;
         delete data.defaults;
 
         angular.forEach(data, function (val, key) {
-            result[key] = {
-                value: val,
-                'default': true,
-                empty: false,
-                ok: false
-            };
+            if (angular.isObject(val)) {
+                angular.extend(result, wrapAndFlattenModel(val, key));
+            }
+            else {
+                var full_key = prefix ? [prefix, key].join('_') : key;
+                result[full_key] = {
+                    key: full_key,
+                    value: val,
+                    'default': true,
+                    empty: false,
+                    ok: false
+                };
+            }
         });
 
         return result;

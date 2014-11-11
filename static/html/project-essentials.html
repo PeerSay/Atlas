@@ -46,7 +46,7 @@
                         </tr>
                         <tr>
                             <td>Duration:</td>
-                            <td><a class="btn btn-primary edit" href="#">{{cm.duration.value.days}} days</a></td>
+                            <td><a class="btn btn-primary edit" href="#">{{cm.duration_days.value}} days</a></td>
                             <td>
                                 <span class="badge" ng-show="cm.duration.default">Guess</span>
                                 <span class="badge empty" ng-show="cm.duration.empty">Missed</span>
@@ -114,24 +114,54 @@
                     <h4 class="modal-title">{{tile.title}}</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="tile-section">
-                        <table class="table">
-                            <tr>
-                                <td>Title:</td>
-                                <td><a class="btn btn-primary edit" href="#">{{cm.title.value}}</a></td>
-                                <td><span class="badge">Guess</span></td>
-                            </tr>
-                            <tr>
-                                <td>Duration:</td>
-                                <td><a class="btn btn-primary edit" href="#">{{cm.duration.value.days}} days</a></td>
-                                <td><span class="badge">Guess</span></td>
-                            </tr>
-                            <tr>
-                                <td>Budget:</td>
-                                <td><a class="btn btn-primary edit" href="#">${{cm.budget.value}}</a></td>
-                                <td><span class="badge">Guess</span></td>
-                            </tr>
-                        </table>
+                    <!--Edits-->
+                    <div class="tile-section row">
+                        <!--Col #1-->
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <ps-inline-edit ps-control="cm.title" title="Title"></ps-inline-edit>
+                            <ps-inline-edit ps-control="cm.duration_startedAt" title="Kick off"></ps-inline-edit>
+                            <ps-inline-edit ps-control="cm.budget" title="Budget"></ps-inline-edit>
+                        </div>
+                        <!--Col #2-->
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <ps-inline-edit ps-control="cm.domain" title="Domain"></ps-inline-edit>
+                            <ps-inline-edit ps-control="cm.duration_finishedAt" title="Finish"></ps-inline-edit>
+                        </div>
+                    </div>
+
+                    <div class="tile-section row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 media">
+                            <img src="http://placehold.it/568x150&text=Timeline" alt="placeholder">
+                        </div>
+                    </div>
+
+                    <div class="tile-section row">
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <h5 class="text-center"><a href="#">Shortlisted Vendors</a></h5>
+                            <div class="row section-list">
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                                    <div class="li">Net App</div>
+                                </div>
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                                    <div class="li">HP</div>
+                                </div>
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                                    <div class="li">Dell</div>
+                                </div>
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                                    <div class="li">M$</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                            <h5 class="text-center"><a href="#">Shortlisted Services</a></h5>
+                            <div class="row section-list">
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 item">
+                                    <!--<div class="li">Super Storage</div>-->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -1,0 +1,28 @@
+<div class="row inline-edit" ng-class="{'edit': ctl.edit}">
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 title">{{title}}:</div>
+    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" ng-show="!ctl.edit">
+        <a href
+                ng-show="ctl.value"
+                ng-click="ctl.toggleEdit(ctl, true)">{{ctl.displayValue(ctl)}}</a>
+        <a href class="btn btn-default edit"
+                ng-show="!ctl.value"
+                ng-click="ctl.toggleEdit(ctl, true)">Add</a>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <form name="cm.form" class="compact-form" ng-show="ctl.edit">
+            <div class="form-group">
+                <textarea class="form-control vert" ng-model="ctl.editValue"
+                        required
+                        ps-focus-on="ctl.edit"></textarea>
+            </div>
+            <button class="btn btn-success"
+                    ng-disabled="cm.form.$invalid"
+                    ng-click="ctl.saveEdit(ctl)">Save
+            </button>
+            <button type="button" class="btn close"
+                    ng-click="ctl.toggleEdit(ctl, false)">
+                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+            </button>
+        </form>
+    </div>
+</div>

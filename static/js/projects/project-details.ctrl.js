@@ -10,9 +10,10 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     var id = $routeParams.projectId;
 
     m.project = {};
-    // Toggle views
-    m.tilesMode = 'norm';
-    m.toggleTilesMode = toggleTilesMode;
+    // Toggle view mode
+    m.viewMode = Tiles.viewMode;
+    m.toggleViewMode = Tiles.toggleViewMode.bind(Tiles);
+    m.viewModeBtnClass = viewModeBtnClass;
     // Tiles
     m.visible = Tiles.visible;
     // Checklist
@@ -43,10 +44,6 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
             .then(function (res) {
                 m.project = res;
             });
-    }
-
-    function toggleTilesMode() {
-        m.tilesMode = (m.tilesMode === 'norm') ? 'min' : 'norm';
     }
 
     function tileProgressLabel(tile) {
@@ -88,5 +85,12 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
         var total = Tiles.progressTotal;
         var val = total.max ? total.current / total.max * 100 : 0;
         return Math.floor(val + 0.5);
+    }
+
+    function viewModeBtnClass() {
+        return {
+            'glyphicon-zoom-out': m.viewMode.value === 'norm',
+            'glyphicon-zoom-in': m.viewMode.value === 'min'
+        };
     }
 }

@@ -130,7 +130,7 @@ describe('Client - unit', function () {
             DeepLinking.url().should.be.equal('/');
         });
 
-        it('should emit once remove:tile on remove()', function (done) {
+        it('should emit remove:tile once on remove()', function (done) {
             Storage.get.restore();
             sinon.stub(Storage, 'get')
                 .returns({tile: 'xy'});
@@ -149,6 +149,31 @@ describe('Client - unit', function () {
         it('should store on remove()', function () {
             DeepLinking.remove('tile', 'xy');
             Storage.set.callCount.should.be.equal(1);
+        });
+
+        it('should replace/add on overwrite()', function () {
+            DeepLinking.overwrite('mode', 'xy');
+            DeepLinking.url().should.be.equal('/?mode=xy');
+
+            DeepLinking.overwrite('mode', 'ab');
+            DeepLinking.url().should.be.equal('/?mode=ab');
+        });
+
+        it('should emit replace:mode once on replace()', function (done) {
+            Storage.get.restore();
+            sinon.stub(Storage, 'get')
+                .returns({tile: 'xy'});
+            var spy = sinon.spy();
+            rootScope.$on('restore:mode', spy);
+
+            rootScope.$on('replace:mode', function (event, vals) {
+                vals[0].should.be.equal('ab');
+                done();
+            });
+
+            DeepLinking.load('namespace1');
+            DeepLinking.overwrite('mode', 'ab');
+            spy.callCount.should.be.equal(1);
         });
     });
 });

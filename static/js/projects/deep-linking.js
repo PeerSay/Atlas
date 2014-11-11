@@ -42,6 +42,7 @@ function DeepLinking($location, $rootScope, Storage) {
     $location.unload = unload;
     $location.add = add;
     $location.remove = remove;
+    $location.overwrite = overwrite; // replace exists
 
     function load(nspace) {
         namespace = nspace;
@@ -105,6 +106,16 @@ function DeepLinking($location, $rootScope, Storage) {
             .search(key, arr.join(',') || null);
 
         $rootScope.$emit('remove:' + key, val);
+        store();
+        return $location;
+    }
+
+    function overwrite(key, val) {
+        $location
+            .skipReload()
+            .search(key, val);
+
+        $rootScope.$emit('replace:' + key, [val]); // arr to unify with event sent on load
         store();
         return $location;
     }

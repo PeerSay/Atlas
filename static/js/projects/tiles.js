@@ -81,6 +81,9 @@ function Tiles($rootScope, DeepLinking) {
         current: 0
     };
     T.setProgress = setProgress;
+    // View mode
+    T.viewMode = { value: 'norm' };
+    T.toggleViewMode = toggleViewMode;
 
 
     activate();
@@ -90,6 +93,7 @@ function Tiles($rootScope, DeepLinking) {
     }
 
     function listenToNavEvents() {
+        // Tiles deep-linking
         $rootScope.$on('replace:tile', function (evt, vals) {
             T.visible.tiles = [];
             angular.forEach(vals, function (uri) {
@@ -103,6 +107,10 @@ function Tiles($rootScope, DeepLinking) {
         });
         $rootScope.$on('remove:tile', function (evt, val) {
             removeTile(val);
+        });
+        // Modes deep-linking
+        $rootScope.$on('replace:mode', function (evt, vals) {
+            T.viewMode.value = vals[0]; // must be 1 item
         });
     }
 
@@ -138,9 +146,12 @@ function Tiles($rootScope, DeepLinking) {
 
     function toggleTile(tile, on) {
         var show = (arguments.length > 1) ? on : tile.show; // No negation cause negated by ng-model already
-        //console.log('>>>Toggling tile: %s - %s', show, tile.uri);
-
         DeepLinking[show ? 'add' : 'remove']('tile', tile.uri);
+    }
+
+    function toggleViewMode() {
+        var newMode = (T.viewMode.value === 'norm') ? 'min' : 'norm';
+        DeepLinking.overwrite('mode', newMode);
     }
 
     function setProgress(tile, progress) {
@@ -158,6 +169,7 @@ function Tiles($rootScope, DeepLinking) {
             total.current += tile.progress.value;
         });
     }
+
 
     // TODO: to util
     function findBy(key) {

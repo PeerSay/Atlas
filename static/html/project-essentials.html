@@ -36,6 +36,7 @@
                             <td>Title:</td>
                             <td><a class="btn edit" href="#"
                                     ng-class="{'btn-primary': !cm.title.ok, 'btn-default': cm.title.ok}"
+                                    ng-click="cm.showFullView('title')"
                                     >{{cm.title.value}}</a></td>
                             <td>
                                 <span class="badge" ng-show="cm.title.default">Guess</span>
@@ -47,18 +48,18 @@
                             <td>Duration:</td>
                             <td><a class="btn btn-primary edit" href="#">{{cm.duration.value.days}} days</a></td>
                             <td>
-                                <span class="badge" ng-show="cm.title.default">Guess</span>
-                                <span class="badge empty" ng-show="cm.title.empty">Missed</span>
-                                <span class="badge ok" ng-show="cm.title.ok">OK</span>
+                                <span class="badge" ng-show="cm.duration.default">Guess</span>
+                                <span class="badge empty" ng-show="cm.duration.empty">Missed</span>
+                                <span class="badge ok" ng-show="cm.duration.ok">OK</span>
                             </td>
                         </tr>
                         <tr>
                             <td>Budget:</td>
                             <td><a class="btn btn-primary edit" href="#">${{cm.budget.value}}</a></td>
                             <td>
-                                <span class="badge" ng-show="cm.title.default">Guess</span>
-                                <span class="badge empty" ng-show="cm.title.empty">Missed</span>
-                                <span class="badge ok" ng-show="cm.title.ok">OK</span>
+                                <span class="badge" ng-show="cm.budget.default">Guess</span>
+                                <span class="badge empty" ng-show="cm.budget.empty">Missed</span>
+                                <span class="badge ok" ng-show="cm.budget.ok">OK</span>
                             </td>
                         </tr>
                     </table>
@@ -100,7 +101,10 @@
     </div>
 
     <!--Full view-->
-    <div id="{{tile.name}}-full-dlg" class="modal fade" tabindex="-1" role="dialog" ps-dialog>
+    <div class="modal fade" tabindex="-1" role="dialog"
+            ps-tile-dialog
+            ps-dlg-uri="tile.uri"
+            ps-toggle="cm.fullView">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

@@ -53,9 +53,8 @@
                             <input type="checkbox"
                                     ng-model="tile.show"
                                     ng-click="m.toggleTile(tile)">
-                            <a href data-toggle="modal"
-                                    data-target="#{{tile.name}}-full-dlg"
-                                    ng-click="m.toggleTile(tile, true)"
+                            <a href
+                                    ng-click="m.showFullView(tile)"
                                     >{{tile.title}}</a>
                         </li>
                     </ul>

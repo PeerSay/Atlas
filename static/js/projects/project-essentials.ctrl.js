@@ -12,6 +12,9 @@ function ProjectEssentialsCtrl($scope, Tiles) {
     m.budget = $scope.$parent.m.project.budget;
     m.duration = $scope.$parent.m.project.duration;
     m.progress = getProgress(['title', 'budget', 'duration']);
+    // Full view
+    m.fullView = Tiles.fullView;
+    m.showFullView = showFullView;
 
     activate();
 
@@ -29,10 +32,14 @@ function ProjectEssentialsCtrl($scope, Tiles) {
         angular.forEach(fields, function (fld) {
             progress.total++;
             if (m[fld].ok) {
-               progress.value++;
+                progress.value++;
             }
         });
 
         return progress;
+    }
+
+    function showFullView(control) {
+        Tiles.toggleFullView(true, m.tile.uri, control);
     }
 }

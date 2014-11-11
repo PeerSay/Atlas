@@ -24,6 +24,8 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     m.tileProgressLabel = tileProgressLabel;
     m.tileProgressClass = tileProgressClass;
     m.setTileProgress = setTileProgress;
+    // Full view
+    m.showFullView = showFullView;
 
     // xxx
     m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -92,5 +94,11 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
             'glyphicon-zoom-out': m.viewMode.value === 'norm',
             'glyphicon-zoom-in': m.viewMode.value === 'min'
         };
+    }
+
+    function showFullView(tile) {
+        tile.show = true;
+        Tiles.toggleTile(tile); // otherwise dialog html is not rendered
+        Tiles.toggleFullView(true, tile.uri);
     }
 }

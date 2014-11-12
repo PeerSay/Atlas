@@ -3,18 +3,21 @@
 angular.module('peersay')
     .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
 
-ProjectEssentialsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'Projects', 'currencyFilter'];
-function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, currencyFilter) {
+ProjectEssentialsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'Projects'];
+function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
+    m.progress = {};
+    // Editable fields
     m.title = {};
     m.budget = {};
     m.duration_days = {};
     m.duration_startedAt = {};
     m.duration_finishedAt = {};
-    m.progress = {};
+    m.domain = {};
+    m.curEdit = null;
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
@@ -33,7 +36,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, currencyFilter)
                 m.duration_finishedAt = res.duration_finishedAt;
                 m.duration_days = res.duration_days;
 
-                m.progress = getProgress(['title', 'budget', 'duration_startedAt', 'duration_finishedAt']);
+                m.progress = getProgress(['title', 'budget', 'duration_startedAt', 'duration_finishedAt', 'domain']);
                 Tiles.setProgress(m.tile, m.progress);
             });
 
@@ -61,6 +64,14 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, currencyFilter)
     }
 
     function toggleEditInline(ctl, on) {
+        if(on && m.curEdit) {
+            toggle(m.curEdit, false); // only 1 can be edited at a time
+        }
+        toggle(ctl, on);
+        m.curEdit = ctl;
+    }
+
+    function toggle(ctl, on) {
         ctl.editValue = on ? ctl.value: '';
         ctl.edit = on;
     }

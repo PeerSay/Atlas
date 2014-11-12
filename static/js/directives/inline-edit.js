@@ -10,14 +10,20 @@ function psInlineEdit() {
             ctl: '=psControl',
             title: '@'
         },
-        link: function (scope) {
-            console.log('>>>', scope.ctl);
+        link: function (scope, element) {
+            //console.log('>>>', scope.ctl);
             var parent = scope.$parent.cm;
+            var $modal_el = $(element).parents('.modal');
 
-            if (scope.ctl) {
-                scope.ctl.toggleEdit = parent.toggleEditInline.bind(parent);
-                scope.ctl.saveEdit = parent.saveEditInline.bind(parent);
-                scope.ctl.displayValue = parent.displayValue.bind(parent);
+            // Hide edit on dlg close
+            $modal_el.on('hidden.bs.modal', hide);
+
+            scope.ctl.toggleEdit = parent.toggleEditInline.bind(parent);
+            scope.ctl.saveEdit = parent.saveEditInline.bind(parent);
+            scope.ctl.displayValue = parent.displayValue.bind(parent);
+
+            function hide() {
+                scope.ctl.toggleEdit(scope.ctl, false);
             }
         }
     };

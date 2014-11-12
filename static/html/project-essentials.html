@@ -48,9 +48,9 @@
                             <td>Duration:</td>
                             <td><a class="btn btn-primary edit" href="#">{{cm.duration_days.value}} days</a></td>
                             <td>
-                                <span class="badge" ng-show="cm.duration.default">Guess</span>
-                                <span class="badge empty" ng-show="cm.duration.empty">Missed</span>
-                                <span class="badge ok" ng-show="cm.duration.ok">OK</span>
+                                <span class="badge" ng-show="cm.duration_days.default">Guess</span>
+                                <span class="badge empty" ng-show="cm.duration_days.empty">Missed</span>
+                                <span class="badge ok" ng-show="cm.duration_days.ok">OK</span>
                             </td>
                         </tr>
                         <tr>
@@ -125,7 +125,7 @@
                         <!--Col #2-->
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <ps-inline-edit ps-control="cm.domain" title="Domain"></ps-inline-edit>
-                            <ps-inline-edit ps-control="cm.duration_finishedAt" title="Finish"></ps-inline-edit>
+                            <ps-inline-edit ps-control="cm.duration_finishedAt" title="Finish date"></ps-inline-edit>
                         </div>
                     </div>
 

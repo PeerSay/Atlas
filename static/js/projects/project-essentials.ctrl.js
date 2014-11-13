@@ -71,7 +71,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         var data = {};
         data[ctl.key] = ctl.editValue;
 
-        Projects.updateProject(m.projectId, ctl.key, data)
+        Projects.updateProject(m.projectId, data)
             .finally(function () {
                 toggleEditInline(ctl, false);
             });

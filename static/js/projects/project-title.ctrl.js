@@ -35,7 +35,7 @@ function ProjectTitleCtrl($scope, Projects) {
 
     function updateProjectTitle() {
         var title = m.editTitle.value.trim();
-        Projects.updateProject(m.projectId, 'title', {title: title})
+        Projects.updateProject(m.projectId, {title: title})
             .success(function (res) {
                 m.title.value = res.result.title;
                 m.title.ok = true; // TODO

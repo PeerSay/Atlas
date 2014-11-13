@@ -92,7 +92,7 @@ function Projects($q, rest, User, Notification) {
                 Notification.showError('API Error', err);
             })
             .then(function () {
-                P.create.showDlg = false; // UX: or not hide?
+                P.create.showDlg = false;
                 P.create.title = '';
             });
     }
@@ -108,15 +108,17 @@ function Projects($q, rest, User, Notification) {
             });
     }
 
-    function updateProject(id, key, data) {
-        var ctl = P.current.project[key];
+    function updateProject(id, data) {
 
         return rest.update('projects', id, data)
             .success(function (res) {
                 var data = wrapAndFlattenModel(res.result);
-                ctl.value = data[key].value;
-                ctl.default = false;
-                ctl.ok = true;
+                angular.forEach(data, function (item) {
+                   var ctl =  P.current.project[item.key];
+                    ctl.value = item.value;
+                    ctl.default = false;
+                    ctl.ok = true;
+                });
             })
             .error(function () {
                 var err = 'Failed to update project ' + id;

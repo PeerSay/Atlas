@@ -38,15 +38,18 @@ function RestApi(app) {
     function readUser(req, res, next) {
         var email = req.user.email;
 
-        console.log('[API] Read user [%s]', email);
+        console.log('[API] Reading user[%s]', email);
 
-        User.findOne({email: email}, 'id -_id email name projects.title projects._ref projects._stub', function (err, user) {
+        User.findOne({email: email}, 'id -_id email name projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return notFound(res, email);
             }
 
-            res.json({ result: user });
+            var result = user.toJSON({ transform: xformUser });
+            console.log('[API] Reading user[%s] result:', email, result);
+
+            return res.json({ result: result });
         });
     }
 
@@ -68,7 +71,10 @@ function RestApi(app) {
             Project.createByUser(data, user, function (err, stubPrj) {
                 if (err) { return next(err); }
 
-                res.json({ result: stubPrj }); // stub is enough for create
+                var result = stubPrj.toJSON({ transform: xformStubPrj}); // stub is enough for create
+                console.log('[API] Creating project result:', result);
+
+                return res.json({ result: result });
             });
         });
     }
@@ -89,10 +95,10 @@ function RestApi(app) {
             Project.removeByUser(project_id, user, function (err) {
                 if (err) { return next(err); }
 
-                res.json({ result: {
-                    id: project_id,
-                    removed: true
-                }});
+                var result = { id: project_id, removed: true };
+                console.log('[API] Removing project[%s] result:', project_id, result);
+
+                return res.json({ result: result});
             });
         });
     }
@@ -110,13 +116,16 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findOne({_id: project_id}, '-_id -__v -collaborators', function (err, prj) {
+            Project.findOne({_id: project_id}, '-_id -id -__v -collaborators', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
                 }
 
-                res.json({ result: prj });
+                var result = _.omit(prj.toJSON(), 'id'); // id=null returned despite '-id'
+                console.log('[API] Reading project[%s] result:', project_id, result);
+
+                return res.json({ result: result });
             });
         });
     }
@@ -140,24 +149,42 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findOne({_id: project_id}, function (err, prj) {
+            Project.findOne({_id: project_id}, select, function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
                 }
 
+                // update
                 prj.set(path, new_value);
 
                 prj.save(function (err, data) {
                     if (err) { return next(err); }
 
-                    var result = _.pick(prj, select);
-                    res.json({ result: result });
+                    var result = _.pick(data.toJSON(), select);
+                    console.log('[API] Updating project[%s] result:', project_id, result);
+
+                    return res.json({ result: result });
                 });
             });
         });
     }
 
+    // Transforms
+
+    function xformStubPrj(doc, ret) {
+        ret.id = ret._ref;
+        delete ret._ref;
+        delete ret._id;
+        return ret;
+    }
+
+    function xformUser(doc, ret) {
+        if (typeof doc.ownerDocument === 'function') { // this is sub doc
+            return xformStubPrj(doc, ret);
+        }
+        return ret;
+    }
 
     // Validation
     function logApi(req, res, next) {

@@ -48,7 +48,6 @@ var projectSchema = new Schema({
     ]
 });
 projectSchema.set('toJSON', { virtuals: true });
-projectSchema.set('toObject', { virtuals: true });
 
 
 projectSchema.virtual('duration.days').get(function () {
@@ -66,16 +65,19 @@ projectSchema.statics.createByUser = function (project, user, next) {
         if (err) { return next(err); }
 
         // Create stub sub-doc
-        var stubPrj = {
+        var subDoc = {
             title: prj.title,
             _ref: prj._id
         };
-        user.projects.push(stubPrj); // save() is required for sub-doc!
+        user.projects.push(subDoc); // save() is required for sub-doc!
 
         user.save(function (err, user) {
             if (err) { return next(err); }
 
-            next(null, stubPrj); // return stub
+            var stub = _.find(user.projects, {_ref: prj._id});
+            var stubDoc = user.projects.id(stub._id); // we get _id only after creation
+
+            next(null, stubDoc);
         });
     });
 

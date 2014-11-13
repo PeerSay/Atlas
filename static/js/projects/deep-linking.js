@@ -37,15 +37,21 @@ angular.module('peersay')
 
 DeepLinking.$inject = ['$location', '$rootScope', 'Storage'];
 function DeepLinking($location, $rootScope, Storage) {
-    var namespace;
+    var namespace, paths;
+
     $location.load = load;
     $location.unload = unload;
     $location.add = add;
     $location.remove = remove;
     $location.overwrite = overwrite; // replace exists
 
-    function load(nspace) {
-        namespace = nspace;
+    $rootScope.$on('$routeUpdate', function () {
+        load(namespace, paths);
+    });
+
+    function load(_namespace, _paths) {
+        namespace = _namespace;
+        paths = _paths;
 
         var search = $location.search();
         if (Object.keys(search).length) {
@@ -55,15 +61,18 @@ function DeepLinking($location, $rootScope, Storage) {
             search = restore();
             if (Object.keys(search).length) {
                 $location
-                    .skipReload()
                     .search(search)
                     .replace(); // prevent Back btn after load
             }
         }
         //console.log('>> Loaded search for [%s]', namespace, search);
 
-        angular.forEach(search, function (v, k) {
-            $rootScope.$emit('replace:' + k, v.split(','));
+        angular.forEach(paths, function (path) {
+            var val = search[path];
+            val = val ? val.split(',') : [null];
+
+            // TODO: emit only on change
+            $rootScope.$emit('replace:' + path, val);
         });
     }
 
@@ -87,7 +96,6 @@ function DeepLinking($location, $rootScope, Storage) {
             arr.push(val);
 
             $location
-                .skipReload()
                 .search(key, arr.join(','));
 
             $rootScope.$emit('add:' + key, [val]);
@@ -102,7 +110,6 @@ function DeepLinking($location, $rootScope, Storage) {
         arr.splice(arr.indexOf(val), 1);
 
         $location
-            .skipReload()
             .search(key, arr.join(',') || null);
 
         $rootScope.$emit('remove:' + key, val);
@@ -112,7 +119,6 @@ function DeepLinking($location, $rootScope, Storage) {
 
     function overwrite(key, val) {
         $location
-            .skipReload()
             .search(key, val);
 
         $rootScope.$emit('replace:' + key, [val]); // arr to unify with event sent on load

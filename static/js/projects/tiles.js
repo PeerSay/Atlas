@@ -118,11 +118,11 @@ function Tiles($rootScope, DeepLinking) {
         });
         // Modes deep-linking
         $rootScope.$on('replace:mode', function (evt, vals) {
-            T.viewMode.value = vals[0]; // must be 1 item
+            T.viewMode.value = vals[0] || 'norm'; // must be 1 item
         });
         // Full view deep-linking
         $rootScope.$on('replace:dlg', function (evt, arr) {
-            var vals = arr[0];  // comes as ['dlg-ctrl'] or [null]
+            var vals = arr[0];  // comes as ['dlg-ctl'] or [null]
             if (!vals) {
                 T.fullView.dlg = null;
                 T.fullView.control = null;
@@ -141,7 +141,7 @@ function Tiles($rootScope, DeepLinking) {
             T.checklist.tiles.push(tile);
         });
         T.checklist.current = T.checklist.tiles[0]; //TODO
-        DeepLinking.load(nspace);
+        DeepLinking.load(nspace, ['tile', 'mode', 'dlg']);
     }
 
     function unload() {

@@ -18,21 +18,19 @@ function psTileDialog(Tiles) {
                 show: false
             });
 
-            $el.on('hide.bs.modal', function () {
+            $el.on('hidden.bs.modal', function () {
+                // need to toggle off only on manual close, not on navigation
+                if (!scope.dlg) { return;}
+
                 // digest for $search change
                 scope.$apply(function () {
                     Tiles.toggleFullView(false);
                 });
             });
 
-            //console.log('>>Init dialog: ', scope.dlg);
-
             scope.$watch('toggle.dlg', function (newVal, oldVal) {
-                //console.log('>>Modal evt watch: [%s]->[%s]', oldVal, newVal);
-
-                if (scope.dlg === newVal) {
-                    $el.modal('show');
-                }
+                var on = (scope.dlg === newVal) ? 'show'  : 'hide';
+                $el.modal(on);
             }, true);
         }
     };

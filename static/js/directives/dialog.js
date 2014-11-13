@@ -11,6 +11,9 @@ function psTileDialog(Tiles) {
             dlg: '=psDlgUri'
         },
         link: function (scope, element) {
+            // Hack to prevent focus which breaks auto-show input-edits feature - no effect
+            //$().modal.Constructor.prototype.enforceFocus = function () {};
+
             var $el = $(element).modal({
                 show: false
             });
@@ -22,8 +25,12 @@ function psTileDialog(Tiles) {
                 });
             });
 
-            scope.$watch('toggle', function (newVal) {
-                if (scope.dlg === newVal.dlg) {
+            //console.log('>>Init dialog: ', scope.dlg);
+
+            scope.$watch('toggle.dlg', function (newVal, oldVal) {
+                //console.log('>>Modal evt watch: [%s]->[%s]', oldVal, newVal);
+
+                if (scope.dlg === newVal) {
                     $el.modal('show');
                 }
             }, true);

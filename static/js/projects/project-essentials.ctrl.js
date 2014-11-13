@@ -64,16 +64,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     }
 
     function toggleEditInline(ctl, on) {
-        if(on && m.curEdit) {
-            toggle(m.curEdit, false); // only 1 can be edited at a time
-        }
-        toggle(ctl, on);
-        m.curEdit = ctl;
-
-        function toggle(ctl, on) {
-            ctl.editValue = on ? ctl.value: '';
-            ctl.edit = on;
-        }
+        Tiles.toggleFullView(true, m.tile.uri, on ? ctl.key : null);
     }
 
     function saveEditInline(ctl) {

@@ -130,9 +130,7 @@ function Tiles($rootScope, DeepLinking) {
             else {
                 vals = vals.split('-');
                 T.fullView.dlg = vals[0];
-                if (vals[1]) {
-                    T.fullView.control = vals[1];
-                }
+                T.fullView.control = vals[1] || null;
             }
         });
     }

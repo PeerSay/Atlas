@@ -3,6 +3,7 @@
         <div class="panel-heading">
             <h3 class="panel-title">Project Checklist</h3>
 
+            <!--Menu-->
             <div class="btn-menu-wrap top">
                 <div class="btn-group menu">
                     <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
@@ -25,39 +26,39 @@
         </div>
 
         <div class="panel-body">
-            <div class="view-minimal" ng-show="m.tileView === 'min'">
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-                        <span class="sr-only">60% Complete</span>
-                    </div>
+            <div class="view-mode" ng-class="m.viewMode.value">
+                <div class="tile-section">
+                    <ps-progress valuenow="m.progressTotal()" style="'success'"></ps-progress>
                 </div>
 
-                <p>
+                <div class="tile-section min">
                     Current Step:
                     <a href
-                        data-toggle="modal"
-                        data-target="#{{m.curTile.name}}-full-dlg"
-                        ng-click="m.toggleTile(m.curTile, true)">{{m.curTile.title}}</a>
-                </p>
-            </div>
+                            data-toggle="modal"
+                            data-target="#{{m.checklist.current.name}}-full-dlg"
+                            ng-click="m.toggleTile(m.checklist.current, true)"
+                            >{{m.checklist.current.title}}</a>
 
-            <div class="view-normal" ng-show="m.tileView === 'norm'">
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-                        <span class="sr-only">60% Complete</span>
-                    </div>
                 </div>
 
-                <ul class="list-group">
-                    <li class="list-group-item" ng-repeat="tile in m.tiles">
-                        <span class="badge">{{tile.progress}}</span>
-                        <input type="checkbox" ng-model="tile.show">
-                        <a href data-toggle="modal"
-                                data-target="#{{tile.name}}-full-dlg"
-                                ng-click="m.toggleTile(tile, true)"
-                                >{{tile.title}}</a>
-                    </li>
-                </ul>
+                <div class="tile-section norm">
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="tile in m.checklist.tiles"
+                                ng-mouseover="tile.highlight = true"
+                                ng-mouseleave="tile.highlight = false"
+                                >
+                        <span class="badge score no-select"
+                                ng-class="m.tileProgressClass(tile)"
+                                ng-click="m.setTileProgress(tile, $event)">{{m.tileProgressLabel(tile)}}</span>
+                            <input type="checkbox"
+                                    ng-model="tile.show"
+                                    ng-click="m.toggleTile(tile)">
+                            <a href
+                                    ng-click="m.showFullView(tile)"
+                                    >{{tile.title}}</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

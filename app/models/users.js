@@ -3,7 +3,9 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var util = require('../../app/util');
 var config = require('../../app/config');
-var Project = require('../../app/models/projects').ProjectModel;
+var projects = require('../../app/models/projects');
+var Project = projects.ProjectModel;
+var projectStubSchema = projects.projectStubSchema;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000; // TODO - test
@@ -23,12 +25,6 @@ Settings
 
 // Schemas
 //
-
-var projectStubSchema = new Schema({
-    id: { type: Number },
-    title: { type: String, required: true },
-    _ref: { type: Schema.ObjectId, ref: 'Project' }
-});
 
 var userSchema = new Schema({
     id: { type: Number, unique: true },
@@ -166,36 +162,6 @@ userSchema.statics.updatePassword = function (email, password, cb) {
         user.save(function (err, updatedUser) {
             if (err) { return cb(err); }
             cb(null, updatedUser);
-        });
-    });
-};
-
-
-userSchema.methods.createProject = function (project, cb) {
-    var user = this;
-    Project.createByUser(project, user, function (err, stubPrj) {
-        if (err) return cb(err);
-
-        user.save(function (err, user) {
-            if (err) { return cb(err); }
-            cb(null, stubPrj); // stub is enough for create
-        });
-    });
-};
-
-
-userSchema.methods.removeProject = function (stub_id, cb) {
-    var user = this;
-    Project.removeByUser(stub_id, user, function (err) {
-        if (err) { return cb(err); }
-
-        user.save(function (err) {
-            if (err) { return cb(err); }
-
-            cb(null, {
-                id: stub_id,
-                removed: true
-            });
         });
     });
 };

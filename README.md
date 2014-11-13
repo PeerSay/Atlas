@@ -56,4 +56,10 @@ When feature branch should be shared between developers:
     5. git checkout -t origin/feature-needs-2-devs // -t creates link
     6. git commit -a -m "local commit"
     7. git pull / git push // also works without params due to link
-    
+
+
+    Push to Heroku (staging server):
+    1. git checkout master
+    2. git merge dev
+    3. git push heroku master
+    4. GoTo http://peersay.herokuapp.com/  

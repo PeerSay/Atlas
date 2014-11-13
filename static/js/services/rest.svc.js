@@ -32,8 +32,8 @@ function restApi($http, $q) {
         return $http.get(url);
     }
 
-    function update(doc, data) {
-        var url = '/api/' + doc + '/' + data.id;
+    function update(doc, id, data) {
+        var url = '/api/' + doc + '/' + id;
         return $http.put(url, data);
     }
 

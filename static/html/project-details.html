@@ -10,11 +10,12 @@
 </div>
 
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
-    <div class="row">
+    <!--Title / edit-->
+    <div class="row" ng-controller="ProjectTitleCtrl as m">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <h3 class="page-title pull-left project-title" ng-show="!m.editTitle.show">
                 <span class="glyphicon glyphicon-dashboard"></span>
-                <a href ng-click="m.toggleEditTitleDlg(true)">{{m.project.title}}</a>
+                <a href ng-click="m.toggleEditTitleDlg(true)">{{m.title.value}}</a>
                 <span class="glyphicon glyphicon-edit hover-edit"></span>
             </h3>
         </div>
@@ -27,7 +28,8 @@
                 </div>
                 <button class="btn btn-success"
                         ng-disabled="m.form.$invalid"
-                        ng-click="m.updateProjectTitle()">Save</button>
+                        ng-click="m.updateProjectTitle()">Save
+                </button>
                 <button type="button" class="btn close" ng-click="m.toggleEditTitleDlg(false)">
                     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                 </button>
@@ -35,13 +37,13 @@
         </div>
     </div>
 
+    <!--Page buttons-->
     <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <button type="button" class="btn btn-default pull-right head hint" ng-click="m.toggleTileView()">
+            <button type="button" class="btn btn-default pull-right head hint"
+                    ng-click="m.toggleViewMode()">
                 <span class="tooltip" data-toggle="tooltip" title="Toggle View" ps-tooltip></span>
-                    <span aria-hidden="true" class="glyphicon"
-                            ng-class="{'glyphicon-zoom-out': m.tileView === 'norm',
-                            'glyphicon-zoom-in': m.tileView === 'min'}"></span>
+                <span aria-hidden="true" class="glyphicon" ng-class="m.viewModeBtnClass()"></span>
             </button>
 
             <button type="button" class="btn btn-default pull-right head hint">
@@ -69,13 +71,17 @@
         </div>
     </div>
 
+    <!--All Tiles-->
     <div class="row">
+        <!--Project Checklist-->
         <div ng-include="'/html/project-checklist.html'"></div>
-        <div ng-repeat="tile in m.tiles">
+        <!--Others-->
+        <div ng-repeat="tile in m.visible.tiles">
             <div ng-include="tile.html"></div>
         </div>
     </div>
 
+    <!--DBG-->
     <div class="row debug">
         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-repeat="it in m.dbg">
             <div class="col">{{it}}</div>

@@ -1,3 +1,4 @@
+@import "util.less";
 @import "common.less";
 
 /*
@@ -143,7 +144,7 @@ body {
     text-decoration: none;
   }
 
-  &.new {
+  &.create-new {
     background: rgba(0, 0, 0, 0.2);
     color: #ddd;
     box-shadow: none;
@@ -155,13 +156,156 @@ body {
     }
   }
 
+  /*Min/norm view*/
+  .tile-section {
+    &.norm, &.min {
+      overflow: hidden;
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      /*transition: all .3s ease;*/
+    }
+  }
+
+  .view-mode.norm {
+    height: auto;
+    .tile-section.norm {
+      opacity: 1;
+      margin-bottom: 20px;
+      height: auto;
+    }
+  }
+  .view-mode.min {
+    height: 70px;
+    .tile-section.min {
+      opacity: 1;
+      margin-bottom: 20px;
+      height: auto;
+    }
+  }
+
+
+  /* Checklist badges with score */
+  .badge.score {
+    .round(38px);
+    margin-top: -8px;
+    padding: 0;
+    cursor: pointer;
+    .progress(0);
+    &.progress-0 { .progress(0); }
+    &.progress-20 { .progress(20); }
+    &.progress-40 { .progress(40); }
+    &.progress-60 { .progress(60); }
+    &.progress-80 { .progress(80); }
+    &.progress-100 { .progress(100); }
+  }
+
+  /* Tiles highlight */
+  transition: border-color .3s;
+  &>.panel-heading {
+    transition: all .3s;
+  }
+}
+
+/* Tile section - may be inside tile or dlg*/
+.tile-section {
+  margin-bottom: 20px;
+  &>* {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    margin: 0 0 10px;
+    border-bottom: 1px solid #ccc;
+    &>a {
+      display: inline-block;
+      min-width: 40%;
+      position: relative;
+      bottom: -1px;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-bottom: 0;
+      border-radius: 4px 4px 0 0;
+      background: #fff;
+    }
+  }
+
+  .section-list {
+    &>div {
+      padding: 0 10px;
+    }
+    .li {
+      margin-bottom: 3px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+  }
+
+  /* Edit fields table */
   .table {
     td {
+      display: inline-block;
+      width: 30%;
       border: none;
       padding: 2px;
     }
+    td+td {
+      width: 50%;
+    }
+    td+td+td {
+      width: 20%;
+    }
+  }
+
+  .row.ctl {
+    margin-bottom: 4px;
+  }
+
+  .row.inline-edit{
+    &.edit {
+      padding: 5px 0 10px;
+      background-color: #F9F7D0;
+      border-radius: 3px;
+
+      .title {
+        font-weight: bold;
+      }
+    }
+
+    .compact-form {
+      position: relative;
+      .form-group {
+        margin-bottom: 10px;
+        textarea {
+          font-size: 16px;
+          height: 36px;
+          max-height: 60px;
+        }
+      }
+      .close {
+        float: none;
+        margin-left: 10px;
+        font-size: 30px;
+      }
+    }
+  }
+
+  .btn.edit {
+    padding: 0 12px;
+    max-width: 90%;
+    .ellipsis();
+  }
+
+  /* Edit status badges*/
+  .badge {
+    background-color: #999;
+    &.empty { background-color: hsv(10, 50%, 72%); }
+    &.ok { background-color: hsv(120, 50%, 72%); }
   }
 }
+
+
 
 .panel {
   &.dialog {
@@ -217,10 +361,6 @@ body {
 
 .tile-container {
   position: relative;
-
-  .view-minimal {
-    height: 70px;
-  }
 
   .btn-menu-wrap {
     position: absolute;

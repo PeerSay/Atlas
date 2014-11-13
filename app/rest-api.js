@@ -3,6 +3,7 @@ var jsonParser = require('body-parser').json();
 
 // App dependencies
 var User = require('../app/models/users').UserModel;
+var Project = require('../app/models/projects').ProjectModel;
 
 
 // util - TODO
@@ -18,6 +19,7 @@ function RestApi(app) {
         // validation & logging
         app.use('/api/*', logApi, validateAccept);
         app.post('/api/*', jsonParser, validateBody);
+        app.put('/api/*', jsonParser, validateBody);
         app.use(/\/user|\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
 
         // user
@@ -25,6 +27,8 @@ function RestApi(app) {
 
         // projects
         app.post('/api/projects', createProject);
+        app.get('/api/projects/:id', readProject);
+        app.put('/api/projects/:id', updateProject);
         app.delete('/api/projects/:id', removeProject);
         return U;
     }
@@ -36,7 +40,7 @@ function RestApi(app) {
 
         console.log('[API] Read user [%s]', email);
 
-        User.findOne({email: email}, 'id -_id email name projects.id projects.title', function (err, user) {
+        User.findOne({email: email}, 'id -_id email name projects.title projects._ref projects._stub', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return notFound(res, email);
@@ -49,7 +53,7 @@ function RestApi(app) {
     // Projects
     //
     function createProject(req, res, next) {
-        var project = req.body;
+        var data = req.body;
         var user = req.user;
         var email = user.email;
 
@@ -61,19 +65,20 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            user.createProject(project, function (err, prj) {
+            Project.createByUser(data, user, function (err, stubPrj) {
                 if (err) { return next(err); }
-                res.json({ result: prj });
+
+                res.json({ result: stubPrj }); // stub is enough for create
             });
         });
     }
 
-    function removeProject(req, res) {
-        var project_id = Number(req.params.id);
+    function removeProject(req, res, next) {
+        var project_id = req.params.id;
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Removing project for user=[%s]', email);
+        console.log('[API] Removing project[%s] for user=[%s]', project_id, email);
 
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
@@ -81,12 +86,78 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            user.removeProject(project_id, function (err, result) {
+            Project.removeByUser(project_id, user, function (err) {
                 if (err) { return next(err); }
-                res.json({ result: result });
+
+                res.json({ result: {
+                    id: project_id,
+                    removed: true
+                }});
             });
         });
     }
+
+    function readProject(req, res, next) {
+        var project_id = req.params.id;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Reading project[%s] for user=[%s]', project_id, email);
+
+        User.findOne({email: email}, 'projects', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
+
+            Project.findOne({_id: project_id}, '-_id -__v -collaborators', function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return notFound(res, project_id);
+                }
+
+                res.json({ result: prj });
+            });
+        });
+    }
+
+    function updateProject(req, res, next) {
+        var project_id = req.params.id;
+        var new_data = req.body;
+        var user = req.user;
+        var email = user.email;
+
+        // Allow only one field update per op
+        var path = Object.keys(new_data)[0];
+        var new_value = new_data[path];
+        var select = path.split('.')[0]; // to return full object after update
+
+        console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(new_data));
+
+        User.findOne({email: email}, 'projects', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
+
+            Project.findOne({_id: project_id}, function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return notFound(res, project_id);
+                }
+
+                prj.set(path, new_value);
+
+                prj.save(function (err, data) {
+                    if (err) { return next(err); }
+
+                    var result = _.pick(prj, select);
+                    res.json({ result: result });
+                });
+            });
+        });
+    }
+
 
     // Validation
     function logApi(req, res, next) {
@@ -94,7 +165,7 @@ function RestApi(app) {
         next();
     }
 
-    function ensureAuthorized(reg, res, next) {
+    function ensureAuthorized(req, res, next) {
         if (!req.user) {
             return notAuthorized(res);
         }

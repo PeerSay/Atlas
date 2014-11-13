@@ -4,123 +4,101 @@ angular.module('peersay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
 
-ProjectDetailsCtrl.$inject = ['Projects', '$routeParams'];
-function ProjectDetailsCtrl(Projects, $routeParams) {
+ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Projects', 'Tiles'];
+function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     var m = this;
-    var id = Number($routeParams.projectId);
 
+    m.projectId = $routeParams.projectId;
     m.project = {};
-    m.tileView = 'norm';
-    m.tileBtnClass = {
-        'glyphicon-zoom-out': m.tileView === 'norm',
-        'glyphicon-zoom-in': m.tileView === 'min'
-    };
-    m.toggleTileView = toggleTileView;
-    m.tiles = [
-        {
-            name: 'essentials',
-            title: 'Project Essentials',
-            progress: '1/10',
-            show: true,
-            html: '/html/project-essentials.html'
-        },
-        {
-            name: 'evaluation',
-            title: 'Evaluation Requirements',
-            progress: '1/10',
-            show: false,
-            html: '/html/project-todo.html'
-        },
-        {
-            name: 'vendor-input',
-            title: 'Vendor Input',
-            progress: '1/10',
-            show: false,
-            html: '/html/project-todo.html'
-        },
-        {
-            name: 'shortlists',
-            title: 'Shortlists',
-            progress: '1/10',
-            show: false,
-            html: '/html/project-todo.html'
-        },
-        {
-            name: 'pocs',
-            title: 'POCs',
-            progress: '1/10',
-            show: false,
-            html: '/html/project-todo.html'
-        },
-        {
-            name: 'vendor-ref',
-            title: 'Vendor Reference',
-            progress: '1/10',
-            show: false,
-            html: '/html/project-todo.html'
-        },
-        {
-            name: 'debrief',
-            title: 'Audit / Debrief',
-            progress: '1/10',
-            show: false,
-            html: '/html/project-todo.html'
-        }
-    ];
-    m.curTile = m.tiles[0];
-    m.toggleTile = toggleTile;
-    // Title
-    m.editTitle = {
-        show: false,
-        value: ''
-    };
-    m.toggleEditTitleDlg = toggleEditTitleDlg;
-    m.updateProjectTitle = updateProjectTitle;
+    // Toggle view mode
+    m.viewMode = Tiles.viewMode;
+    m.toggleViewMode = Tiles.toggleViewMode.bind(Tiles);
+    m.viewModeBtnClass = viewModeBtnClass;
+    // Tiles
+    m.visible = Tiles.visible;
+    // Checklist
+    m.checklist = Tiles.checklist;
+    m.toggleTile = Tiles.toggleTile.bind(Tiles);
+    // Tiles progress
+    m.progressTotal = progressTotal;
+    m.tileProgressLabel = tileProgressLabel;
+    m.tileProgressClass = tileProgressClass;
+    m.setTileProgress = setTileProgress;
+    // Full view
+    m.showFullView = showFullView;
+
     // xxx
     m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    getProject();
+    activate();
 
-    function getProject() {
-        Projects
-            .getProjects()
-            .success(function () {
-                m.project = findBy('id')(Projects.projects, id)[0];
-                m.project.duration = '6 months';
-                m.project.budget = '$50k';
+    function activate() {
+        readProject();
+
+        Tiles.load('project-' + m.projectId);
+        $scope.$on('$destroy', function () {
+            Tiles.unload();
+        });
+    }
+
+    function readProject() {
+        Projects.readProject(m.projectId)
+            .then(function (res) {
+                m.project = res;
             });
     }
 
-    function toggleTileView() {
-        m.tileView = (m.tileView === 'norm') ? 'min' : 'norm';
+    function tileProgressLabel(tile) {
+        return tile.progress.total ?
+            [tile.progress.value, tile.progress.total].join('/') :
+            '';
     }
 
-    function toggleTile(tile, on) {
-        tile.show = (arguments.length > 1) ? on : !tile.show;
+    function tileProgressClass(tile) {
+        var value = tile.progress.value;
+        var total = tile.progress.total;
+        var part = value / total * 100;
+        var in_range = $.map([0, 20, 40, 60, 80, 100], function (v) {
+            if (part <= v) { return v; }
+            return null;
+        })[0];
+        //console.log('>>After: next: %s, part: %s, in_range: ', value, part, in_range);
+
+        return 'progress-' + in_range;
     }
 
-    function toggleEditTitleDlg(on) {
-        if (on) {
-            m.editTitle.value = m.project.title;
+    function setTileProgress(tile, $event) {
+        var dir = $event.altKey ? -1 : 1;
+        var progress = tile.progress;
+        var total = progress.total;
+        //console.log('>>Before: %s of %s', progress.value, total);
+
+        var next = progress.value + dir;
+        if (next < 0) {
+            next = total;
         }
-        m.editTitle.show = on;
+        next = next % (total + 1);
+
+        progress.value = next;
+        Tiles.setProgress(tile, progress);
     }
 
-    function updateProjectTitle() {
-        Projects.updateProject(m.project)
-            .then(function () {
-                m.project.title = m.editTitle.value;
-            })
-            .finally(function () {
-                m.editTitle.show = false;
-            });
+    function progressTotal() {
+        var total = Tiles.progressTotal;
+        var val = total.max ? total.current / total.max * 100 : 0;
+        return Math.floor(val + 0.5);
     }
 
-    function findBy(key) {
-        return function (arr, val) {
-            return $.map(arr, function (p) {
-                return (p[key] !== val) ? null : p;
-            });
+    function viewModeBtnClass() {
+        return {
+            'glyphicon-zoom-out': m.viewMode.value === 'norm',
+            'glyphicon-zoom-in': m.viewMode.value === 'min'
         };
+    }
+
+    function showFullView(tile) {
+        tile.show = true;
+        Tiles.toggleTile(tile); // otherwise dialog html is not rendered
+        Tiles.toggleFullView(true, tile.uri);
     }
 }

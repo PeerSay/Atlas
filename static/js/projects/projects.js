@@ -3,29 +3,79 @@
 angular.module('peersay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['restApi', 'User', 'Notification'];
-function Projects(rest, User, Notification) {
+Projects.$inject = ['$q', 'restApi', 'User', 'Notification'];
+function Projects($q, rest, User, Notification) {
     var P = {};
+    var cache = {};
 
-    //P.user = Users.user;
     P.projects = [];
+    P.current = {
+        project: null
+    };
     P.create = {
         showDlg: false,
         title: ''
     };
-    P.getProjects = getProjects;
+    P.getProjectStubs = getProjectStubs;
+    P.readProject = readProject;
     P.toggleCreateDlg = toggleCreateDlg;
     P.createProject = createProject;
     P.removeProject = removeProject;
     P.updateProject = updateProject;
 
 
-    function getProjects() {
+    function getProjectStubs() {
         return User.getUser()
             .success(function () {
                 P.projects = User.user.projects;
-                P.projects.user = User.user; // XXX why?
             });
+    }
+
+    function readProject(id) {
+        var cached_prj = cache[id];
+        if (cached_prj) {
+            return cached_prj.promise; // TODO: invalidate cache, when?
+        }
+
+        var deferred = cache[id] = $q.defer();
+
+        rest.read('projects', id)
+            .success(function (data) {
+                P.current.project = wrapAndFlattenModel(data.result);
+                //console.log('>> Wrapped model', P.current.project);
+                cache[id].resolve(P.current.project);
+            })
+            .error(function () {
+                var err = 'Failed to read project ' + id;
+                Notification.showError('API Error', err);
+                cache[id].reject(err);
+            });
+
+        return deferred.promise;
+    }
+
+    function wrapAndFlattenModel(data, prefix) {
+        var result = {};
+        var defaults = data.defaults; // TODO
+        delete data.defaults;
+
+        angular.forEach(data, function (val, key) {
+            if (angular.isObject(val)) {
+                angular.extend(result, wrapAndFlattenModel(val, key));
+            }
+            else {
+                var full_key = prefix ? [prefix, key].join('.') : key;
+                result[full_key] = {
+                    key: full_key,
+                    value: val,
+                    'default': true,
+                    empty: false,
+                    ok: false
+                };
+            }
+        });
+
+        return result;
     }
 
     function toggleCreateDlg(on) {
@@ -38,7 +88,8 @@ function Projects(rest, User, Notification) {
                 P.projects.push(data.result);
             })
             .error(function () {
-                console.log('TODO: handle createProject API error');
+                var err = 'Failed to create project';
+                Notification.showError('API Error', err);
             })
             .then(function () {
                 P.create.showDlg = false; // UX: or not hide?
@@ -49,29 +100,43 @@ function Projects(rest, User, Notification) {
     function removeProject(id) {
         return rest.remove('projects', id)
             .success(function (data) {
-                P.projects.splice(getIdxbyId(data.result.id), 1);
+                P.projects.splice(getIdxById(data.result.id), 1);
             })
             .error(function () {
-                console.log('TODO: handle createProject API error');
+                var err = 'Failed to remove project ' + id;
+                Notification.showError('API Error', err);
             });
     }
 
-    function updateProject(project) {
-        return rest.update('projects', project)
+    function updateProject(id, key, data) {
+        var ctl = P.current.project[key];
+
+        return rest.update('projects', id, data)
+            .success(function (res) {
+                var data = wrapAndFlattenModel(res.result);
+                ctl.value = data[key].value;
+                ctl.default = false;
+                ctl.ok = true;
+            })
             .error(function () {
-                Notification.showError('API Error', 'Pretending there\'s no internet, in fact this API is not implemented :)');
+                var err = 'Failed to update project ' + id;
+                Notification.showError('API Error', err);
             });
     }
 
-    function getIdxbyId(id) {
-        var res = P.projects.length; // out-of-bounds
-        $.each(P.projects, function (i, v) {
-            if (v.id === id) {
-                res = i;
-                return false;
-            }
-        });
-        return res;
+    function getIdxById(id) {
+        var prj = findBy('_ref')(P.projects, id)[0];
+        var idx = P.projects.indexOf(prj);
+        return idx < 0 ? P.projects.length : idx
+    }
+
+
+    function findBy(key) {
+        return function (arr, val) {
+            return $.map(arr, function (obj) {
+                return (obj[key] !== val) ? null : obj;
+            });
+        };
     }
 
     return P;

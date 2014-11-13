@@ -35,7 +35,8 @@ function config($routeProvider, $locationProvider) {
             controllerAs: 'm'
         })
         .when('/projects/:projectId', {
-            templateUrl: '/html/project-details.html'
+            templateUrl: '/html/project-details.html',
+            reloadOnSearch: false
         })
         .otherwise({
             redirectTo: '/not-implemented'

@@ -1,14 +1,43 @@
-<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 tile-container" ng-show="tile.show">
-    <div class="panel panel-default tile">
+<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 tile-container" ng-controller="ProjectTODOCtrl as cm">
+    <div class="panel panel-default tile"
+            ng-class="{'panel-primary': tile.highlight}"
+            ng-mouseover="tile.highlight = true"
+            ng-mouseleave="tile.highlight = false"
+            >
         <div class="panel-heading">
-            <h3 class="panel-title">{{tile.title}}</h3>
+            <h3 class="panel-title">{{cm.tile.title}}</h3>
         </div>
         <div class="panel-body">
-            <div class="view-minimal" ng-show="m.tileView === 'min'">
-                TODO - minimal
+            <div class="view-mode" ng-class="m.viewMode.value">
+                <div class="tile-section norm">
+                    TODO - normal
+                </div>
+                <div class="tile-section min">
+                    TODO - minimal
+                </div>
             </div>
-            <div class="view-normal" ng-show="m.tileView === 'norm'">
-                TODO - normal
+        </div>
+    </div>
+
+    <!--Full view-->
+    <div class="modal fade" tabindex="-1" role="dialog"
+            ps-tile-dialog
+            ps-dlg-uri="tile.uri"
+            ps-toggle="cm.fullView">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title">{{tile.title}}</h4>
+                </div>
+                <div class="modal-body">
+                    TODO
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary pull-right" data-dismiss="modal">Done</button>
+                </div>
             </div>
         </div>
     </div>

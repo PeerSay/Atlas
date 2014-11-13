@@ -56,7 +56,7 @@ function Projects($q, rest, User, Notification) {
 
     function wrapAndFlattenModel(data, prefix) {
         var result = {};
-        var defaults = data.defaults;
+        var defaults = data.defaults; // TODO
         delete data.defaults;
 
         angular.forEach(data, function (val, key) {
@@ -64,7 +64,7 @@ function Projects($q, rest, User, Notification) {
                 angular.extend(result, wrapAndFlattenModel(val, key));
             }
             else {
-                var full_key = prefix ? [prefix, key].join('_') : key;
+                var full_key = prefix ? [prefix, key].join('.') : key;
                 result[full_key] = {
                     key: full_key,
                     value: val,
@@ -108,8 +108,16 @@ function Projects($q, rest, User, Notification) {
             });
     }
 
-    function updateProject(id, data) {
+    function updateProject(id, key, data) {
+        var ctl = P.current.project[key];
+
         return rest.update('projects', id, data)
+            .success(function (res) {
+                var data = wrapAndFlattenModel(res.result);
+                ctl.value = data[key].value;
+                ctl.default = false;
+                ctl.ok = true;
+            })
             .error(function () {
                 var err = 'Failed to update project ' + id;
                 Notification.showError('API Error', err);

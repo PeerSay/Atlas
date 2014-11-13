@@ -127,6 +127,11 @@ function RestApi(app) {
         var user = req.user;
         var email = user.email;
 
+        // Allow only one field update per op
+        var path = Object.keys(new_data)[0];
+        var new_value = new_data[path];
+        var select = path.split('.')[0]; // to return full object after update
+
         console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(new_data));
 
         User.findOne({email: email}, 'projects', function (err, user) {
@@ -135,20 +140,19 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            var select = Object.keys(new_data).join(' ');
-            Project.findOne({_id: project_id}, select, function (err, prj) {
+            Project.findOne({_id: project_id}, function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
                 }
 
-                _.extend(prj, new_data); // cannot use findAndUpdate as it bypasses pre hooks
+                prj.set(path, new_value);
 
-                prj.save(function (err) {
+                prj.save(function (err, data) {
                     if (err) { return next(err); }
 
-                    var picked = _.pick(prj, _.keys(new_data));
-                    res.json({ result: picked });
+                    var result = _.pick(prj, select);
+                    res.json({ result: result });
                 });
             });
         });

@@ -48,6 +48,7 @@ var projectSchema = new Schema({
     ]
 });
 projectSchema.set('toJSON', { virtuals: true });
+projectSchema.set('toObject', { virtuals: true });
 
 
 projectSchema.virtual('duration.days').get(function () {

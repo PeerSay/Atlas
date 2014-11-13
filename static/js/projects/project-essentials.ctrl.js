@@ -13,9 +13,9 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     // Editable fields
     m.title = {};
     m.budget = {};
-    m.duration_days = {};
-    m.duration_startedAt = {};
-    m.duration_finishedAt = {};
+    m['duration.days'] = {};
+    m['duration.startedAt'] = {};
+    m['duration.finishedAt'] = {};
     m.domain = {};
     m.curEdit = null;
     // Full view
@@ -32,11 +32,11 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
             .then(function (res) {
                 m.title = res.title;
                 m.budget = res.budget;
-                m.duration_startedAt = res.duration_startedAt;
-                m.duration_finishedAt = res.duration_finishedAt;
-                m.duration_days = res.duration_days;
+                m['duration.startedAt'] = res['duration.startedAt'];
+                m['duration.finishedAt'] = res['duration.finishedAt'];
+                m['duration.days'] = res['duration.days'];
 
-                m.progress = getProgress(['title', 'budget', 'duration_startedAt', 'duration_finishedAt', 'domain']);
+                m.progress = getProgress(['title', 'budget', 'duration.days', 'domain']);
                 Tiles.setProgress(m.tile, m.progress);
             });
 
@@ -71,12 +71,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         var data = {};
         data[ctl.key] = ctl.editValue;
 
-        Projects.updateProject(m.projectId, data)
-            .success(function (res) {
-                ctl.value = res.result.title;
-                ctl.ok = true; // TODO
-                ctl.default = false;
-            })
+        Projects.updateProject(m.projectId, ctl.key, data)
             .finally(function () {
                 toggleEditInline(ctl, false);
             });
@@ -86,10 +81,10 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         switch(ctl.key) {
             case 'budget':
                 return $filter('currency')(ctl.value, '$', 0);
-            case 'duration_startedAt':
-            case 'duration_finishedAt':
+            case 'duration.startedAt':
+            case 'duration.finishedAt':
                 return shortDate(ctl.value);
-            case 'duration_days':
+            case 'duration.days':
                 return ctl.value + ' days';
             default:
                 return ctl.value;

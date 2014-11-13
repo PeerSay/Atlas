@@ -32,8 +32,8 @@
             <div class="view-mode" ng-class="m.viewMode.value">
                 <div class="tile-section">
                     <ps-tile-control ps-control="cm.title" title="Title"></ps-tile-control>
-                    <ps-tile-control ps-control="cm.duration_days" title="Duration"
-                            toggle-edit="duration_startedAt"></ps-tile-control>
+                    <ps-tile-control ps-control="cm['duration.days']" title="Duration"
+                            toggle-edit="duration.startedAt"></ps-tile-control>
                     <ps-tile-control ps-control="cm.budget" title="Budget"></ps-tile-control>
                 </div>
 
@@ -94,7 +94,7 @@
                                     ps-control="cm.title"
                                     ps-toggle="cm.fullView"></ps-inline-edit>
                             <ps-inline-edit type="date" title="Kick off"
-                                    ps-control="cm.duration_startedAt"
+                                    ps-control="cm['duration.startedAt']"
                                     ps-toggle="cm.fullView"></ps-inline-edit>
                             <ps-inline-edit type="text" title="Budget"
                                     ps-control="cm.budget"
@@ -106,7 +106,7 @@
                                     ps-control="cm.domain"
                                     ps-toggle="cm.fullView"></ps-inline-edit>
                             <ps-inline-edit type="date" title="Finish date"
-                                    ps-control="cm.duration_finishedAt"
+                                    ps-control="cm['duration.finishedAt']"
                                     ps-toggle="cm.fullView"></ps-inline-edit>
                         </div>
                     </div>

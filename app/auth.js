@@ -172,7 +172,7 @@ function Auth(app) {
             };
             loginUser(req, login, function (err) {
                 if (err) { return next(err); }
-                
+
                 var enterUrl = req.session.attemptedUrl || '/projects';
                 req.session.attemptedUrl = null;
                 return res.redirect(enterUrl);

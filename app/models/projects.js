@@ -114,7 +114,7 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
         .exec(function (err, prj) {
             if (err) { return next(err); }
 
-            _.each(prj.collaborators, function (user) {
+            _.each(prj && prj.collaborators, function (user) {
                 var stub_prj = _.find(user.projects, {_ref: id});
 
                 stub_prj.title = project.title;

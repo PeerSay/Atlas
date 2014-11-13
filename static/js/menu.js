@@ -32,7 +32,8 @@ function MenuCtrl(Location, Menu, User, Projects) {
     function logout () {
         User.logout()
             .success(function () {
-                Location.path('/auth/login').replace();
+                Location.url('/auth/login')
+                    .replace();
             });
     }
 

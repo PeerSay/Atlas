@@ -172,7 +172,10 @@ function Auth(app) {
             };
             loginUser(req, login, function (err) {
                 if (err) { return next(err); }
-                return res.redirect('/projects');
+                
+                var enterUrl = req.session.attemptedUrl || '/projects';
+                req.session.attemptedUrl = null;
+                return res.redirect(enterUrl);
             });
         })(req, res, next);
     }
@@ -228,7 +231,10 @@ function Auth(app) {
             };
             loginUser(req, login, function (err) {
                 if (err) { return next(err); }
-                return res.redirect('/projects');
+
+                var enterUrl = req.session.attemptedUrl || '/projects';
+                req.session.attemptedUrl = null;
+                return res.redirect(enterUrl);
             });
 
         })(req, res, next);
@@ -345,7 +351,7 @@ function Auth(app) {
     // Statics
     //
     function sendAppEntry(req, res) {
-        var AUTH_RE = /\/auth\/(login|signup)/; // skip auth pages if user is logged in
+        var AUTH_RE = /\/auth\//; // skip auth pages if user is logged in
         if (AUTH_RE.test(req.path) && req.isAuthenticated()) {
             return res.redirect('/projects');
         }
@@ -360,6 +366,7 @@ function Auth(app) {
         if (req.isAuthenticated()) {
             return next();
         }
+        req.session.attemptedUrl = req.url;
         res.redirect('/auth/login');
     }
 

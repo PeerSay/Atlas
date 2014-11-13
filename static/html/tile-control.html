@@ -1,0 +1,16 @@
+<div class="row ctl">
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        {{title}}:
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <a class="btn edit" href
+                ng-class="{'btn-primary': !ctl.ok, 'btn-default': ctl.ok}"
+                ng-click="ctl.showFullView()"
+                >{{ctl.displayValue(ctl)}}</a>
+    </div>
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+        <span class="badge" ng-show="ctl.default">Guess</span>
+        <span class="badge empty" ng-show="ctl.empty">Missed</span>
+        <span class="badge ok" ng-show="ctl.ok">OK</span>
+    </div>
+</div>

@@ -31,38 +31,10 @@
         <div class="panel-body view">
             <div class="view-mode" ng-class="m.viewMode.value">
                 <div class="tile-section">
-                    <table class="table">
-                        <tr>
-                            <td>Title:</td>
-                            <td><a class="btn edit" href="#"
-                                    ng-class="{'btn-primary': !cm.title.ok, 'btn-default': cm.title.ok}"
-                                    ng-click="cm.showFullView('title')"
-                                    >{{cm.title.value}}</a></td>
-                            <td>
-                                <span class="badge" ng-show="cm.title.default">Guess</span>
-                                <span class="badge empty" ng-show="cm.title.empty">Missed</span>
-                                <span class="badge ok" ng-show="cm.title.ok">OK</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Duration:</td>
-                            <td><a class="btn btn-primary edit" href="#">{{cm.duration_days.value}} days</a></td>
-                            <td>
-                                <span class="badge" ng-show="cm.duration_days.default">Guess</span>
-                                <span class="badge empty" ng-show="cm.duration_days.empty">Missed</span>
-                                <span class="badge ok" ng-show="cm.duration_days.ok">OK</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Budget:</td>
-                            <td><a class="btn btn-primary edit" href="#">${{cm.budget.value}}</a></td>
-                            <td>
-                                <span class="badge" ng-show="cm.budget.default">Guess</span>
-                                <span class="badge empty" ng-show="cm.budget.empty">Missed</span>
-                                <span class="badge ok" ng-show="cm.budget.ok">OK</span>
-                            </td>
-                        </tr>
-                    </table>
+                    <ps-tile-control ps-control="cm.title" title="Title"></ps-tile-control>
+                    <ps-tile-control ps-control="cm.duration_days" title="Duration"
+                            toggle-edit="duration_startedAt"></ps-tile-control>
+                    <ps-tile-control ps-control="cm.budget" title="Budget"></ps-tile-control>
                 </div>
 
                 <!--TODO: Vendors-->

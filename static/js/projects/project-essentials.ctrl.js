@@ -89,6 +89,8 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
             case 'duration_startedAt':
             case 'duration_finishedAt':
                 return shortDate(ctl.value);
+            case 'duration_days':
+                return ctl.value + ' days';
             default:
                 return ctl.value;
         }

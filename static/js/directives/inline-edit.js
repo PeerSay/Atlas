@@ -13,8 +13,8 @@ function psInlineEdit() {
             type: '@'
         },
         link: function (scope, element) {
-            var parent = scope.$parent.cm;
             var ctl = scope.ctl;
+            var parent = scope.$parent.cm;
             var $modal_el = $(element).parents('.modal');
 
             $modal_el

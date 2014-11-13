@@ -10,11 +10,21 @@
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
         <form name="cm.form" class="compact-form" ng-show="ctl.edit">
-            <div class="form-group">
+            <!--Text-->
+            <div class="form-group" ng-if="type==='text'">
                 <textarea class="form-control vert" ng-model="ctl.editValue"
                         required
                         ps-focus-on="ctl.edit"></textarea>
             </div>
+            <!--Date-->
+            <div class="form-group" ng-if="type==='date'">
+                <div class="input-group date js-date">
+                    <input type="text" class="form-control" ng-model="ctl.editValue"/>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                </div>
+            </div>
+            <!--Number-->
+
             <button class="btn btn-success"
                     ng-disabled="cm.form.$invalid"
                     ng-click="ctl.saveEdit(ctl)">Save

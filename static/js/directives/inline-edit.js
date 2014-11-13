@@ -8,22 +8,43 @@ function psInlineEdit() {
         templateUrl: 'html/inline-edit.html',
         scope: {
             ctl: '=psControl',
-            title: '@'
+            title: '@',
+            type: '@'
         },
         link: function (scope, element) {
             //console.log('>>>', scope.ctl);
             var parent = scope.$parent.cm;
-            var $modal_el = $(element).parents('.modal');
 
-            // Hide edit on dlg close
-            $modal_el.on('hidden.bs.modal', hide);
+            $(function () {
+                var $modal_el = $(element).parents('.modal');
+                $modal_el
+                    .on('hidden.bs.modal', onHide)
+                    .on('shown.bs.modal', onShow);
+            });
 
             scope.ctl.toggleEdit = parent.toggleEditInline.bind(parent);
             scope.ctl.saveEdit = parent.saveEditInline.bind(parent);
             scope.ctl.displayValue = parent.displayValue.bind(parent);
 
-            function hide() {
+            function onHide() {
+                // Hide edit on dlg close
                 scope.ctl.toggleEdit(scope.ctl, false);
+            }
+
+            function onShow() {
+                if (scope.type === 'date') {
+                    var $el = element.find('.js-date')
+                        .datetimepicker()
+                        .on('dp.change', function (e) {
+                            scope.$apply(function () {
+                                scope.ctl.editValue = e.date._d; // XXX: internal?
+                            });
+                        });
+
+                    // init
+                    var date = new Date(scope.ctl.value);
+                    $el.data("DateTimePicker").setDate(date);
+                }
             }
         }
     };

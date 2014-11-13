@@ -69,11 +69,11 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         }
         toggle(ctl, on);
         m.curEdit = ctl;
-    }
 
-    function toggle(ctl, on) {
-        ctl.editValue = on ? ctl.value: '';
-        ctl.edit = on;
+        function toggle(ctl, on) {
+            ctl.editValue = on ? ctl.value: '';
+            ctl.edit = on;
+        }
     }
 
     function saveEditInline(ctl) {

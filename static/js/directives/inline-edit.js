@@ -17,23 +17,24 @@ function psInlineEdit() {
             var parent = scope.$parent.cm;
             var $modal_el = $(element).parents('.modal');
 
+            scope.edit = {
+                value: '',
+                show: false
+            };
+            scope.toggleEdit = parent.toggleEditInline.bind(parent);
+            scope.saveEdit = parent.saveEditInline.bind(parent);
+            scope.displayValue = parent.displayValue.bind(parent);
+
+            scope.$watch('toggle.control', function (newVal) {
+                toggle(ctl.key === newVal);
+            });
+
             $modal_el
                 .on('shown.bs.modal', onShow);
 
-            ctl.toggleEdit = parent.toggleEditInline.bind(parent);
-            ctl.saveEdit = parent.saveEditInline.bind(parent);
-            ctl.displayValue = parent.displayValue.bind(parent);
-
-            scope.$watch('toggle.control', function (newVal) {
-                //console.log('>>Event for uri change', newVal);
-
-                var on = (ctl.key === newVal);
-                toggle(on);
-            }, true);
-
             function toggle(on) {
-                ctl.editValue = on ? ctl.value: '';
-                ctl.edit = on;
+                scope.edit.value = on ? ctl.value: '';
+                scope.edit.show = on;
             }
 
             function onShow() {
@@ -42,7 +43,7 @@ function psInlineEdit() {
                         .datetimepicker()
                         .on('dp.change', function (e) {
                             scope.$apply(function () {
-                                ctl.editValue = e.date._d; // XXX: internal?
+                                scope.edit.value = e.date._d; // XXX: internal?
                             });
                         });
 

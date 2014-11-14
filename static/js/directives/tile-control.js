@@ -15,9 +15,9 @@ function psTileControl() {
             var ctl = scope.ctl;
             var parent = scope.$parent.cm;
 
-            ctl.displayValue = parent.displayValue.bind(parent);
-            ctl.showFullView = showFullView;
-            
+            scope.displayValue = parent.displayValue.bind(parent);
+            scope.showFullView = showFullView;
+
             function showFullView() {
                 parent.showFullView(scope.toggleEdit || ctl.key);
             }

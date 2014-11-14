@@ -5,8 +5,8 @@
     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
         <a class="btn edit" href
                 ng-class="{'btn-default': ctl.status === 'ok', 'btn-primary': ctl.status !== 'ok'}"
-                ng-click="ctl.showFullView()"
-                >{{ctl.displayValue(ctl)}}</a>
+                ng-click="showFullView()"
+                >{{displayValue(ctl)}}</a>
     </div>
     <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
         <span class="badge" ng-show="ctl.status === 'default'">Guess</span>

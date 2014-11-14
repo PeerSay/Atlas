@@ -79,9 +79,9 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         Tiles.toggleFullView(true, m.tile.uri, on ? ctl.key : null);
     }
 
-    function saveEditInline(ctl) {
+    function saveEditInline(ctl, value) {
         var data = {};
-        data[ctl.key] = ctl.editValue;
+        data[ctl.key] = value;
 
         Projects.updateProject(m.projectId, data)
             .success(function () {
@@ -108,7 +108,6 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         function shortDate(val) {
             var date = new Date(val);
             return date.toDateString();
-
         }
     }
 }

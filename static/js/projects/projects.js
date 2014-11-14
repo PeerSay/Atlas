@@ -42,7 +42,6 @@ function Projects($q, rest, User, Notification) {
         rest.read('projects', id)
             .success(function (data) {
                 P.current.project = wrapAndFlattenModel(data.result);
-                //console.log('>> Wrapped model', P.current.project);
                 cache[id].resolve(P.current.project);
             })
             .error(function () {

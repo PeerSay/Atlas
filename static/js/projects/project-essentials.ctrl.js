@@ -33,7 +33,8 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         Projects.readProject(m.projectId)
             .then(function (res) {
                 angular.forEach(m.fields, function (fld, key) {
-                    m.fields[key] = res[key] || missingField(key)
+                    m.fields[key] = res[key] || missingField(key);
+                    res[key] = m.fields[key]; // add missing field which Projects knows not about
                 });
 
                 setProgress();

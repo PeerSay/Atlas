@@ -17,7 +17,7 @@ function psTileControl() {
 
             ctl.displayValue = parent.displayValue.bind(parent);
             ctl.showFullView = showFullView;
-
+            
             function showFullView() {
                 parent.showFullView(scope.toggleEdit || ctl.key);
             }

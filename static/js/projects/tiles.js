@@ -105,7 +105,7 @@ function Tiles($rootScope, DeepLinking) {
         $rootScope.$on('replace:tile', function (evt, vals) {
             T.visible.tiles = [];
             angular.forEach(vals, function (uri) {
-                addTile(uri);
+                uri && addTile(uri);
             });
         });
         $rootScope.$on('add:tile', function (evt, vals) {

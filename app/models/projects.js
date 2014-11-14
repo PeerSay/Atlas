@@ -44,7 +44,10 @@ var projectSchema = new Schema({
     },
     budget: {type: Number, default: 1000},
     collaborators: [
-        { type: Schema.ObjectId, ref: 'User' }
+        {type: Schema.ObjectId, ref: 'User'}
+    ],
+    defaults: [
+        {type: String}
     ]
 });
 projectSchema.set('toJSON', { virtuals: true });
@@ -54,6 +57,10 @@ projectSchema.virtual('duration.days').get(function () {
     var dur = this.duration;
     var diff = dur.finishedAt - dur.startedAt;
     return Math.floor(diff / DAY + 0.5);
+});
+
+projectSchema.path('defaults').default(function () {
+    return ['title', 'budget', 'duration'];
 });
 
 
@@ -127,6 +134,33 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
 
             next();
         });
+});
+
+
+projectSchema.pre('save', function ensureDefaults(next) {
+    var project = this;
+    var defaults = project.defaults; // must be selected to present!
+
+    if (project.isNew) {
+        if (project.title !== defaultProject.title) {
+            project.defaults = _.without(defaults, 'title');
+        }
+        return next();
+    }
+
+    if (defaults && project.isModified('title')) {
+        project.defaults = _.without(defaults, 'title');
+    }
+
+    if (defaults && project.isModified('budget')) {
+        project.defaults = _.without(defaults, 'budget');
+    }
+
+    if (defaults && project.isModified('duration')) {
+        project.defaults = _.without(defaults, 'duration');
+    }
+
+    return next();
 });
 
 // Model

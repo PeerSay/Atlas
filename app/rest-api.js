@@ -132,16 +132,11 @@ function RestApi(app) {
 
     function updateProject(req, res, next) {
         var project_id = req.params.id;
-        var new_data = req.body;
+        var data = req.body;
         var user = req.user;
         var email = user.email;
 
-        // Allow only one field update per op
-        var path = Object.keys(new_data)[0];
-        var new_value = new_data[path];
-        var select = path.split('.')[0]; // to return full object after update
-
-        console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(new_data));
+        console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
@@ -149,7 +144,12 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findOne({_id: project_id}, select, function (err, prj) {
+            var path = _.keys(data)[0]; // allow only one field update per op!
+            var new_value = data[path];
+            var select = path.split('.')[0]; // to select full object and return after update (e.g. duration)
+            var select_full = select + ' defaults'; // to update defaults in pre-save
+
+            Project.findOne({_id: project_id}, select_full, function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
@@ -157,6 +157,7 @@ function RestApi(app) {
 
                 // update
                 prj.set(path, new_value);
+                prj.markModified(path); // ensure pre-save hook removes default even if value is not changed
 
                 prj.save(function (err, data) {
                     if (err) { return next(err); }

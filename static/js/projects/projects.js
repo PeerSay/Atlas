@@ -56,26 +56,31 @@ function Projects($q, rest, User, Notification) {
 
     function wrapAndFlattenModel(data, prefix) {
         var result = {};
-        var defaults = data.defaults; // TODO
+        var defaults = angular.copy(data.defaults || []);
         delete data.defaults;
 
         angular.forEach(data, function (val, key) {
             if (angular.isObject(val)) {
+                val.defaults = defaults;
                 angular.extend(result, wrapAndFlattenModel(val, key));
             }
             else {
-                var full_key = prefix ? [prefix, key].join('.') : key;
-                result[full_key] = {
-                    key: full_key,
+                var dotted_key = prefix ? [prefix, key].join('.') : key;
+                result[dotted_key] = {
+                    key: dotted_key,
                     value: val,
-                    'default': true,
-                    empty: false,
-                    ok: false
+                    status: getStatus(prefix || key, val, defaults)
                 };
             }
         });
 
         return result;
+
+        function getStatus(key, val, defaults) {
+            if (!val) { return 'empty'; }
+            if (defaults && defaults.indexOf(key) >= 0) { return 'default'; }
+            return 'ok';
+        }
     }
 
     function toggleCreateDlg(on) {
@@ -109,15 +114,13 @@ function Projects($q, rest, User, Notification) {
     }
 
     function updateProject(id, data) {
-
         return rest.update('projects', id, data)
             .success(function (res) {
                 var data = wrapAndFlattenModel(res.result);
                 angular.forEach(data, function (item) {
-                   var ctl =  P.current.project[item.key];
+                    var ctl = P.current.project[item.key];
                     ctl.value = item.value;
-                    ctl.default = false;
-                    ctl.ok = true;
+                    ctl.status = 'ok'; // ok if update is successful
                 });
             })
             .error(function () {

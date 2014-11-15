@@ -10,7 +10,8 @@ function psInlineEdit() {
             toggle: '=psToggle',
             ctl: '=psControl',
             title: '@',
-            type: '@'
+            type: '@',
+            required: '@'
         },
         link: function (scope, element) {
             var ctl = scope.ctl;
@@ -19,7 +20,8 @@ function psInlineEdit() {
 
             scope.edit = {
                 value: '',
-                show: false
+                show: false,
+                required: (scope.required !== 'false')
             };
             scope.toggleEdit = parent.toggleEditInline.bind(parent);
             scope.saveEdit = parent.saveEditInline.bind(parent);

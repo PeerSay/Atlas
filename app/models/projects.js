@@ -24,7 +24,7 @@ var UIDCHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 var projectStubSchema = new Schema({
     title: { type: String, required: true },
-    _stub: {type: Boolean, default: true },
+    _stub: { type: Boolean, default: true },
     _ref: { type: ShortId, ref: 'Project' }
 });
 
@@ -36,18 +36,18 @@ var projectSchema = new Schema({
         alphabet: UIDCHARS,
         retries: 5
     },
-    title: {type: String, required: true },
-    domain: {type: String},
+    title: { type: String, required: true },
+    domain: { type: String },
     duration: {
-        startedAt: {type: Date, default: Date.now()},
-        finishedAt: {type: Date, default: Date.now() + MONTH}
+        startedAt: { type: Date, default: Date.now(), required: true },
+        finishedAt: { type: Date, default: Date.now() + MONTH, required: true }
     },
-    budget: {type: Number, default: 1000, min: 0},
+    budget: { type: Number, default: 1000, min: 0 },
     collaborators: [
-        {type: Schema.ObjectId, ref: 'User'}
+        { type: Schema.ObjectId, ref: 'User' }
     ],
     defaults: [
-        {type: String}
+        { type: String }
     ]
 });
 projectSchema.set('toJSON', { virtuals: true });
@@ -159,6 +159,20 @@ projectSchema.pre('save', function ensureDefaults(next) {
 
     if (defaults && project.isModified('duration')) {
         project.defaults = _.without(defaults, 'duration');
+    }
+
+    return next();
+});
+
+
+projectSchema.pre('save', function validateDuration(next) {
+    var project = this;
+
+    if (project.isModified('duration')) {
+        var duration = project.duration;
+        if (duration.finishedAt - duration.startedAt < 0) {
+            return next(new Error('startedAt < finishedAt'));
+        }
     }
 
     return next();

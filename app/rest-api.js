@@ -117,7 +117,7 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findOne({_id: project_id}, '-_id -id -__v -collaborators', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
@@ -223,7 +223,9 @@ function RestApi(app) {
         var errors = {
             ValidationError: function () {
                 var key = Object.keys(err.errors)[0];
-                var msg = [key, err.errors[key].type].join(' ');
+                var error = err.errors[key];
+                var message = error && error.message;
+                var msg = message || [key, error.type].join(' ');
                 return msg;
             },
             MongoError: function () {
@@ -233,16 +235,23 @@ function RestApi(app) {
                     return msg;
                 }
                 else {
-                    return 'db validation';
+                    return 'MongoError code ' + err.code;
                 }
             },
             CastError: function () {
                 var msg = util.format('Cannot cast [%s] to type [%s]', err.value, err.type);
                 return msg;
+            },
+            'default': function () {
+                return util.format('Model error:', err.message);
             }
         };
 
-        return notValid(res, errors[err.name]());
+        var error = errors[err.name] || errors.default;
+        var error_msg = error();
+        console.log('[API] Model error:', error_msg);
+
+        return notValid(res, error_msg);
     }
 
     function notAuthorized(res) {

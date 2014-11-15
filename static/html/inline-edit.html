@@ -6,7 +6,7 @@
                 ng-click="toggleEdit(ctl, true)">{{displayValue(ctl)}}</a>
         <a href class="btn btn-default edit"
                 ng-show="!ctl.value"
-                ng-click="toggleEdit(ctl, true)">Add</a>
+                ng-click="toggleEdit(ctl, true)">Set</a>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
         <form name="form" class="compact-form" ng-show="edit.show">
@@ -14,14 +14,15 @@
             <div class="form-group" ng-if="type==='text'">
                 <textarea class="form-control vert"
                         ng-model="edit.value"
-                        required
+                        ng-required="edit.required"
                         ps-focus-on="edit.show"></textarea>
             </div>
             <!--Date-->
             <div class="form-group" ng-if="type==='date'">
                 <div class="input-group date js-date">
                     <input type="text" class="form-control"
-                            ng-model="edit.value"/>
+                            ng-model="edit.value"
+                            ng-required="edit.required"/>
                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                 </div>
             </div>
@@ -32,15 +33,15 @@
                     <div ng-message="number">Number required!</div>
                     <div ng-message="min">Positive number required!</div>
                 </div>
-                <input type="number" class="form-control vert"
-                        name="number"
+                <input type="number" name="number" class="form-control"
                         ng-model="edit.value"
                         ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
                         min="0"
-                        required
+                        ng-required="edit.required"
                         ps-focus-on="edit.show"/>
             </div>
 
+            <!--Submit/Cancel-->
             <button class="btn btn-success"
                     ng-disabled="form.$invalid"
                     ng-click="saveEdit(ctl, edit.value)">Save

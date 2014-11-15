@@ -19,8 +19,12 @@
             </div>
             <!--Date-->
             <div class="form-group" ng-if="type==='date'">
+                <div class="inline-hint" ng-messages="form.date.$error" ng-show="form.date.$touched">
+                    <div ng-message="required">Required!</div>
+                    <div ng-message="date">Date required!</div>
+                </div>
                 <div class="input-group date js-date">
-                    <input type="text" class="form-control"
+                    <input type="text" name="date" class="form-control"
                             ng-model="edit.value"
                             ng-required="edit.required"/>
                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>

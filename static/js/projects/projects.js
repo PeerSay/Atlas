@@ -119,7 +119,7 @@ function Projects($q, rest, User, Notification) {
                 angular.forEach(data, function (item) {
                     var ctl = P.current.project[item.key];
                     ctl.value = item.value;
-                    ctl.status = 'ok'; // ok if update is successful
+                    ctl.status = item.value ? 'ok' : 'missing'; // ok unless empty
                 });
             })
             .error(function () {

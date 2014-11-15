@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var util = require('util');
 var jsonParser = require('body-parser').json();
 
 // App dependencies
@@ -160,7 +161,7 @@ function RestApi(app) {
                 prj.markModified(path); // ensure pre-save hook removes default even if value is not changed
 
                 prj.save(function (err, data) {
-                    if (err) { return next(err); }
+                    if (err) { return modelError(res, err); }
 
                     var result = _.pick(data.toJSON(), select);
                     console.log('[API] Updating project[%s] result:', project_id, result);
@@ -234,6 +235,10 @@ function RestApi(app) {
                 else {
                     return 'db validation';
                 }
+            },
+            CastError: function () {
+                var msg = util.format('Cannot cast [%s] to type [%s]', err.value, err.type);
+                return msg;
             }
         };
 

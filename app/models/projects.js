@@ -42,7 +42,7 @@ var projectSchema = new Schema({
         startedAt: {type: Date, default: Date.now()},
         finishedAt: {type: Date, default: Date.now() + MONTH}
     },
-    budget: {type: Number, default: 1000},
+    budget: {type: Number, default: 1000, min: 0},
     collaborators: [
         {type: Schema.ObjectId, ref: 'User'}
     ],
@@ -58,6 +58,7 @@ projectSchema.virtual('duration.days').get(function () {
     var diff = dur.finishedAt - dur.startedAt;
     return Math.floor(diff / DAY + 0.5);
 });
+
 
 projectSchema.path('defaults').default(function () {
     return ['title', 'budget', 'duration'];

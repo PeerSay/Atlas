@@ -12,18 +12,34 @@
         <form name="form" class="compact-form" ng-show="edit.show">
             <!--Text-->
             <div class="form-group" ng-if="type==='text'">
-                <textarea class="form-control vert" ng-model="edit.value"
+                <textarea class="form-control vert"
+                        ng-model="edit.value"
                         required
                         ps-focus-on="edit.show"></textarea>
             </div>
             <!--Date-->
             <div class="form-group" ng-if="type==='date'">
                 <div class="input-group date js-date">
-                    <input type="text" class="form-control" ng-model="edit.value"/>
+                    <input type="text" class="form-control"
+                            ng-model="edit.value"/>
                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                 </div>
             </div>
             <!--Number-->
+            <div class="form-group" ng-if="type==='number'">
+                <div class="inline-hint" ng-messages="form.number.$error" ng-show="form.number.$touched">
+                    <div ng-message="required">Required!</div>
+                    <div ng-message="number">Number required!</div>
+                    <div ng-message="min">Positive number required!</div>
+                </div>
+                <input type="number" class="form-control vert"
+                        name="number"
+                        ng-model="edit.value"
+                        ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
+                        min="0"
+                        required
+                        ps-focus-on="edit.show"/>
+            </div>
 
             <button class="btn btn-success"
                     ng-disabled="form.$invalid"

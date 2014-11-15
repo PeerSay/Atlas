@@ -11,16 +11,18 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     m.projectId = $scope.$parent.m.projectId;
     m.progress = {};
     // Editable fields
-    m.title = {};
-    m.budget = {};
-    m['duration.days'] = {};
-    m['duration.startedAt'] = {};
-    m['duration.finishedAt'] = {};
-    m.domain = {};
-    m.curEdit = null;
+    m.fields = {
+        title: {},
+        budget: {},
+        'duration.days': {},
+        'duration.startedAt': {},
+        'duration.finishedAt': {},
+        domain: {}
+    };
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
+    // Inline edits
     m.toggleEditInline = toggleEditInline;
     m.saveEditInline = saveEditInline;
     m.displayValue = displayValue;
@@ -30,14 +32,12 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     function activate() {
         Projects.readProject(m.projectId)
             .then(function (res) {
-                m.title = res.title;
-                m.budget = res.budget;
-                m['duration.startedAt'] = res['duration.startedAt'];
-                m['duration.finishedAt'] = res['duration.finishedAt'];
-                m['duration.days'] = res['duration.days'];
+                angular.forEach(m.fields, function (fld, key) {
+                    // ensure missing fields are added to Projects obj
+                    m.fields[key] = res[key] = res[key] || missingField(key);
+                });
 
-                m.progress = getProgress(['title', 'budget', 'duration.days', 'domain']);
-                Tiles.setProgress(m.tile, m.progress);
+                setProgress();
             });
 
         $scope.$on('$destroy', function () {
@@ -46,12 +46,25 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         });
     }
 
+    function missingField(key) {
+        return {
+            key: key,
+            value: '',
+            status: 'missing'
+        };
+    }
+
+    function setProgress() {
+        m.progress = getProgress(['title', 'budget', 'duration.days', 'domain']);
+        Tiles.setProgress(m.tile, m.progress);
+    }
+
     function getProgress(fields) {
         var progress = { value: 0, total: 0 };
 
         angular.forEach(fields, function (fld) {
             progress.total++;
-            if (m[fld].ok) {
+            if (m.fields[fld].status === 'ok') {
                 progress.value++;
             }
         });
@@ -67,18 +80,21 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         Tiles.toggleFullView(true, m.tile.uri, on ? ctl.key : null);
     }
 
-    function saveEditInline(ctl) {
+    function saveEditInline(ctl, value) {
         var data = {};
-        data[ctl.key] = ctl.editValue;
+        data[ctl.key] = value;
 
-        Projects.updateProject(m.projectId, ctl.key, data)
+        Projects.updateProject(m.projectId, data)
+            .success(function () {
+                setProgress();
+            })
             .finally(function () {
                 toggleEditInline(ctl, false);
             });
     }
 
     function displayValue(ctl) {
-        switch(ctl.key) {
+        switch (ctl.key) {
             case 'budget':
                 return $filter('currency')(ctl.value, '$', 0);
             case 'duration.startedAt':
@@ -93,7 +109,6 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         function shortDate(val) {
             var date = new Date(val);
             return date.toDateString();
-
         }
     }
 }

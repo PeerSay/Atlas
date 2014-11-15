@@ -1,36 +1,57 @@
-<div class="row inline-edit" ng-class="{'edit': ctl.edit}">
+<div class="row inline-edit" ng-class="{'edit': edit.show}">
     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 title text-nowrap">{{title}}:</div>
-    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" ng-show="!ctl.edit">
+    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" ng-show="!edit.show">
         <a href
                 ng-show="ctl.value"
-                ng-click="ctl.toggleEdit(ctl, true)">{{ctl.displayValue(ctl)}}</a>
+                ng-click="toggleEdit(ctl, true)">{{displayValue(ctl)}}</a>
         <a href class="btn btn-default edit"
                 ng-show="!ctl.value"
-                ng-click="ctl.toggleEdit(ctl, true)">Add</a>
+                ng-click="toggleEdit(ctl, true)">Set</a>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        <form name="cm.form" class="compact-form" ng-show="ctl.edit">
+        <form name="form" class="compact-form" ng-show="edit.show">
             <!--Text-->
             <div class="form-group" ng-if="type==='text'">
-                <textarea class="form-control vert" ng-model="ctl.editValue"
-                        required
-                        ps-focus-on="ctl.edit"></textarea>
+                <textarea class="form-control vert"
+                        ng-model="edit.value"
+                        ng-required="edit.required"
+                        ps-focus-on="edit.show"></textarea>
             </div>
             <!--Date-->
             <div class="form-group" ng-if="type==='date'">
+                <div class="inline-hint" ng-messages="form.date.$error" ng-show="form.date.$touched">
+                    <div ng-message="required">Required!</div>
+                    <div ng-message="date">Date required!</div>
+                </div>
                 <div class="input-group date js-date">
-                    <input type="text" class="form-control" ng-model="ctl.editValue"/>
+                    <input type="text" name="date" class="form-control"
+                            ng-model="edit.value"
+                            ng-required="edit.required"/>
                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                 </div>
             </div>
             <!--Number-->
+            <div class="form-group" ng-if="type==='number'">
+                <div class="inline-hint" ng-messages="form.number.$error" ng-show="form.number.$touched">
+                    <div ng-message="required">Required!</div>
+                    <div ng-message="number">Number required!</div>
+                    <div ng-message="min">Positive number required!</div>
+                </div>
+                <input type="number" name="number" class="form-control"
+                        ng-model="edit.value"
+                        ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
+                        min="0"
+                        ng-required="edit.required"
+                        ps-focus-on="edit.show"/>
+            </div>
 
+            <!--Submit/Cancel-->
             <button class="btn btn-success"
-                    ng-disabled="cm.form.$invalid"
-                    ng-click="ctl.saveEdit(ctl)">Save
+                    ng-disabled="form.$invalid"
+                    ng-click="saveEdit(ctl, edit.value)">Save
             </button>
             <button type="button" class="btn close"
-                    ng-click="ctl.toggleEdit(ctl, false)">
+                    ng-click="toggleEdit(ctl, false)">
                 <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
             </button>
         </form>

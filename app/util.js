@@ -40,9 +40,18 @@ function genRestorePwdKey() {
     return Math.random().toString(36).substring(9);
 }
 
+// Credit: http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
+// @unused
+function isValidDate(d) {
+    if (Object.prototype.toString.call(d) !== "[object Date]")
+        return false;
+    return !isNaN(d.getTime());
+}
+
 
 module.exports = {
     hasher: hasher,
     randomBase64: randomBase64,
-    genRestorePwdKey: genRestorePwdKey
+    genRestorePwdKey: genRestorePwdKey,
+    isValidDate: isValidDate
 };

@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var util = require('util');
 var jsonParser = require('body-parser').json();
 
 // App dependencies
@@ -38,15 +39,18 @@ function RestApi(app) {
     function readUser(req, res, next) {
         var email = req.user.email;
 
-        console.log('[API] Read user [%s]', email);
+        console.log('[API] Reading user[%s]', email);
 
-        User.findOne({email: email}, 'id -_id email name projects.title projects._ref projects._stub', function (err, user) {
+        User.findOne({email: email}, 'id -_id email name projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return notFound(res, email);
             }
 
-            res.json({ result: user });
+            var result = user.toJSON({ transform: xformUser });
+            console.log('[API] Reading user[%s] result:', email, result);
+
+            return res.json({ result: result });
         });
     }
 
@@ -68,7 +72,10 @@ function RestApi(app) {
             Project.createByUser(data, user, function (err, stubPrj) {
                 if (err) { return next(err); }
 
-                res.json({ result: stubPrj }); // stub is enough for create
+                var result = stubPrj.toJSON({ transform: xformStubPrj}); // stub is enough for create
+                console.log('[API] Creating project result:', result);
+
+                return res.json({ result: result });
             });
         });
     }
@@ -89,10 +96,10 @@ function RestApi(app) {
             Project.removeByUser(project_id, user, function (err) {
                 if (err) { return next(err); }
 
-                res.json({ result: {
-                    id: project_id,
-                    removed: true
-                }});
+                var result = { id: project_id, removed: true };
+                console.log('[API] Removing project[%s] result:', project_id, result);
+
+                return res.json({ result: result});
             });
         });
     }
@@ -110,29 +117,27 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findOne({_id: project_id}, '-_id -__v -collaborators', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
                 }
 
-                res.json({ result: prj });
+                var result = _.omit(prj.toJSON(), 'id'); // id=null returned despite '-id'
+                console.log('[API] Reading project[%s] result:', project_id, result);
+
+                return res.json({ result: result });
             });
         });
     }
 
     function updateProject(req, res, next) {
         var project_id = req.params.id;
-        var new_data = req.body;
+        var data = req.body;
         var user = req.user;
         var email = user.email;
 
-        // Allow only one field update per op
-        var path = Object.keys(new_data)[0];
-        var new_value = new_data[path];
-        var select = path.split('.')[0]; // to return full object after update
-
-        console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(new_data));
+        console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
@@ -140,24 +145,48 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findOne({_id: project_id}, function (err, prj) {
+            var path = _.keys(data)[0]; // allow only one field update per op!
+            var new_value = data[path];
+            var select = path.split('.')[0]; // to select full object and return after update (e.g. duration)
+            var select_full = select + ' defaults'; // to update defaults in pre-save
+
+            Project.findOne({_id: project_id}, select_full, function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
                 }
 
+                // update
                 prj.set(path, new_value);
+                prj.markModified(path); // ensure pre-save hook removes default even if value is not changed
 
                 prj.save(function (err, data) {
-                    if (err) { return next(err); }
+                    if (err) { return modelError(res, err); }
 
-                    var result = _.pick(prj, select);
-                    res.json({ result: result });
+                    var result = _.pick(data.toJSON(), select);
+                    console.log('[API] Updating project[%s] result:', project_id, result);
+
+                    return res.json({ result: result });
                 });
             });
         });
     }
 
+    // Transforms
+
+    function xformStubPrj(doc, ret) {
+        ret.id = ret._ref;
+        delete ret._ref;
+        delete ret._id;
+        return ret;
+    }
+
+    function xformUser(doc, ret) {
+        if (typeof doc.ownerDocument === 'function') { // this is sub doc
+            return xformStubPrj(doc, ret);
+        }
+        return ret;
+    }
 
     // Validation
     function logApi(req, res, next) {
@@ -194,7 +223,9 @@ function RestApi(app) {
         var errors = {
             ValidationError: function () {
                 var key = Object.keys(err.errors)[0];
-                var msg = [key, err.errors[key].type].join(' ');
+                var error = err.errors[key];
+                var message = error && error.message;
+                var msg = message || [key, error.type].join(' ');
                 return msg;
             },
             MongoError: function () {
@@ -204,12 +235,23 @@ function RestApi(app) {
                     return msg;
                 }
                 else {
-                    return 'db validation';
+                    return 'MongoError code ' + err.code;
                 }
+            },
+            CastError: function () {
+                var msg = util.format('Cannot cast [%s] to type [%s]', err.value, err.type);
+                return msg;
+            },
+            'default': function () {
+                return util.format('Model error:', err.message);
             }
         };
 
-        return notValid(res, errors[err.name]());
+        var error = errors[err.name] || errors.default;
+        var error_msg = error();
+        console.log('[API] Model error:', error_msg);
+
+        return notValid(res, error_msg);
     }
 
     function notAuthorized(res) {

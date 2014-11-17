@@ -20,7 +20,7 @@ function Tiles($rootScope, DeepLinking) {
             uri: 'ev',
             name: 'evaluation',
             title: 'Evaluation Requirements',
-            html: '/html/project-todo.html',
+            html: '/html/project-evaluation-requirements.html',
             progress: {},
             show: false
         },

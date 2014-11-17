@@ -1,3 +1,3 @@
 /*global angular:true*/
 
-angular.module('peersay', ['ngRoute', 'ngMessages']);
+angular.module('peersay', ['ngRoute', 'ngMessages', 'ngTable']);

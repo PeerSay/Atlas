@@ -52,6 +52,9 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         getData: function ($defer, params) {
             var filter = params.filter();
             var filtered = $filter('filter')(m.criteria, filter);
+
+            //console.log('>>Data reloaded', filtered);
+
             $defer.resolve(filtered);
         }
     };
@@ -68,6 +71,15 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     }, angular.extend(tableSettings, {groupBy: 'group'}));
 
     m.reloadTables = reloadTables;
+    m.criteriaKeyPressed = criteriaKeyPressed;
+
+    // Groups
+    m.groups = [
+        null,
+        'Network',
+        'Storage'
+    ];
+    m.selectGroup = selectGroup;
 
     activate();
 
@@ -83,8 +95,59 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         Tiles.toggleFullView(true, m.tile.uri, control);
     }
 
-    function reloadTables () {
+    function reloadTables() {
         m.reqTableParams.reload();
         m.optTableParams.reload();
+    }
+
+    function nextCriteria(criteria) {
+        return find(m.criteria, function (crit) {
+            var ok = (crit.table === criteria.table && crit.id > criteria.id);
+            return ok ? crit : null;
+        })[0];
+    }
+
+    function addCriteriaLike(crit) {
+        var id = m.criteria[m.criteria.length - 1].id + 1;
+        var cr = {
+            id: id,
+            name: '',
+            description: '',
+            table: crit.table,
+            group: crit.group,
+            edit: crit.edit
+        };
+
+        console.log('>> Add new', cr);
+        m.criteria.push(cr);
+        reloadTables();
+    }
+
+    function criteriaKeyPressed(criteria, evt) {
+        console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
+        if (evt.keyCode === 13) {
+            var next = nextCriteria(criteria);
+            console.log('>>Next criteria', next);
+
+            if (next) {
+                next.edit = criteria.edit;
+            } else {
+                addCriteriaLike(criteria);
+            }
+            criteria.edit = false;
+        }
+
+    }
+
+    function selectGroup(criteria, group) {
+        criteria.group = group;
+        reloadTables();
+    }
+
+    // TODO: to util
+    function find(arr, func) {
+        return $.map(arr, function (obj) {
+            return func(obj);
+        });
     }
 }

@@ -7,17 +7,14 @@ function psTablePopover() {
         restrict: 'E',
         templateUrl: 'html/table-popover.html',
         transclude: true,
-        scope: {
-            title: '@',
-            criteria: '='
-        },
         link: function (scope, element) {
             var $form = element.find('.js-form');
-            var parentSel = '#popover-' + scope.criteria.id;
+            var $td = $form.parents('td');
+            var $table = $form.parents('table');
 
             var $el = element.find('button').popover({
-                container: parentSel,
-                viewport: $form.parents('.table'),
+                container: $td,
+                viewport: $table,
                 trigger: 'click',
                 html: true,
                 content: function () {
@@ -31,15 +28,14 @@ function psTablePopover() {
                 });
             });*/
 
-            scope.$watch('criteria.advanced', function (newVal) {
+            /*scope.$watch('criteria.advanced', function (newVal) {
                 $el.popover(newVal ? 'show' : 'hide');
-            });
+            });*/
 
 
             // Clean-up
             element.on('$destroy', function () {
-                console.log('>> Destroyed', parentSel);
-                $el.off('hide.bs.popover');
+                //$el.off('hide.bs.popover');
             });
         }
     };

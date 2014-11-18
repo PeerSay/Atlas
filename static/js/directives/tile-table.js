@@ -7,7 +7,8 @@ function psTileTable() {
         restrict: 'E',
         templateUrl: 'html/tile-table.html',
         scope: {
-            tableParams: '=psTableParams'
+            tableParams: '=psTableParams',
+            ctl: '=ctl'
         }
     };
 }

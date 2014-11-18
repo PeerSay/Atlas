@@ -6,19 +6,23 @@ psFocusOn.$inject = ['$timeout'];
 function psFocusOn($timeout) {
     return {
         restrict: 'A',
-        scope: {
-            toggle: '=psFocusOn'
-        },
-        link: function (scope, element) {
+        link: function (scope, element, attr) {
             var el = element.get(0);
-            scope.$watch('toggle', function (val) {
-                if (el && val) {
-                    el.select();
-                    // Has troubles without timeout:
-                    // http://stackoverflow.com/questions/17599504/why-focus-on-textbox-is-not-set-inside-a-twitter-bootstrap-modal-popup-by-angu
+
+            scope.$watch(attr.psFocusOn, function (newVal) {
+                if (newVal) {
+                    // Need to prevent $apply re-enter
                     $timeout(function () {
+                        // Need to re-eval - see this:
+                        //  https://docs.angularjs.org/error/$rootScope/inprog?p0=$digest
+                        if (scope.$eval(attr.psFocusOn)) {
+                            el.focus();
+                            if (attr.psSelect) {
+                                el.select();
+                            }
+                        }
                         el.focus();
-                    }, 200);
+                    }, 0, false);
                 }
             });
         }

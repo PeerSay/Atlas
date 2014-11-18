@@ -17,18 +17,28 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     // Tables
     m.criteria = [
         {
+            id: 1,
             name: "Initial Capacity",
             description: '12TB Basic (end of 2015)',
             table: 'required',
             group: null
         },
         {
+            id: 2,
+            name: "Initial Capacity",
+            description: '12TB Basic (end of 2015)',
+            table: 'required',
+            group: null
+        },
+        {
+            id: 3,
             name: "Scale Up Growth",
             description: 'Another 10 TB',
             table: 'optional',
             group: null
         },
         {
+            id: 4,
             name: "Network Connections",
             description: 'NAS / ISCSI',
             table: 'optional',
@@ -48,7 +58,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     m.normTableParams = new ngTableParams({
         count: 10
     }, tableSettings);
-    m.mustTableParams = new ngTableParams({
+    m.reqTableParams = new ngTableParams({
         count: 10,
         filter: { table: 'required' }
     }, angular.extend(tableSettings, {groupBy: 'group'}));
@@ -56,6 +66,8 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         count: 10,
         filter: { table: 'optional' }
     }, angular.extend(tableSettings, {groupBy: 'group'}));
+
+    m.reloadTables = reloadTables;
 
     activate();
 
@@ -69,5 +81,10 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
     function showFullView(control) {
         Tiles.toggleFullView(true, m.tile.uri, control);
+    }
+
+    function reloadTables () {
+        m.reqTableParams.reload();
+        m.optTableParams.reload();
     }
 }

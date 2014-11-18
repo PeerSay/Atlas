@@ -29,7 +29,7 @@
             ps-tile-dialog
             ps-dlg-uri="tile.uri"
             ps-toggle="cm.fullView">
-        <div class="modal-dialog">
+        <div class="modal-dialog" id="js-modal-{{tile.uri}}">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">
@@ -39,41 +39,11 @@
                 </div>
                 <div class="modal-body border">
                     <div class="tile-section border">
-                        <table ng-table="cm.mustTableParams" class="table">
-                            <tbody ng-repeat="group in $groups">
-                            <tr class="ng-table-group" ng-show="group.value">
-                                <td colspan="{{$columns.length}}">
-                                    <a href ng-click="group.$hideRows = !group.$hideRows">
-                                        <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
-                                        <strong>{{ group.value }}</strong>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data">
-                                <td data-title="'Must have Criteria'">{{criteria.name}}</td>
-                                <td data-title="'Description'">{{criteria.description}}</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <ps-tile-table ps-table-params="cm.reqTableParams"></ps-tile-table>
                     </div>
 
                     <div class="tile-section border">
-                        <table ng-table="cm.optTableParams" class="table">
-                            <tbody ng-repeat="group in $groups">
-                            <tr class="ng-table-group" ng-show="group.value">
-                                <td colspan="{{$columns.length}}">
-                                    <a href ng-click="group.$hideRows = !group.$hideRows">
-                                        <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
-                                        <strong>{{ group.value }}</strong>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data">
-                                <td data-title="'Optional Criteria'">{{criteria.name}}</td>
-                                <td data-title="'Description'">{{criteria.description}}</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <ps-tile-table ps-table-params="cm.optTableParams"></ps-tile-table>
                     </div>
                 </div>
                 <div class="modal-footer">

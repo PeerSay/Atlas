@@ -253,6 +253,7 @@ body {
   }
 
   .table {
+    margin-bottom: 0;
     th {
       background: #f5f5f5;
       text-align: left;
@@ -262,9 +263,53 @@ body {
       border-left: 1px solid #ddd;
       width: 60%;
     }
+
     .ng-table-group td {
       background: #f5f5f5;
       padding: 3px 8px;
+    }
+    tr.editable {
+      td {
+        padding: 1px;
+        & > input {
+          padding: 7px;
+          width: 100%;
+          border: none;
+          &:active, &:focus {
+            background-color: #f9f7d0;
+          }
+        }
+
+        .test {
+          position: absolute;
+          width: 94.4%;
+          padding: 8px;
+          margin-top: 3px;
+          background: #f9f7d0;
+          border: #ddd;
+          border-radius: 0 0 3px 3px;
+          box-shadow: 1px 1px 5px rgba(0,0,0,.5);
+        }
+      }
+    }
+
+    .colored {
+      background-color: #f9f7d0;
+    }
+
+    /*Popover controls*/
+    .popover-form {
+      .list-group-item {
+        padding: 6px;
+
+        .create-new {
+          color: #bbb;
+          font-style: italic;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
     }
   }
   /*Hide pagination*/

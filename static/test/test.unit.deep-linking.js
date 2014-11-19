@@ -33,7 +33,7 @@ describe('Client - unit', function () {
 
                 sinon.stub(Storage, 'get', function () {});
                 sinon.stub(Storage, 'set', function () {});
-            })
+            });
         });
 
         afterEach(function () {

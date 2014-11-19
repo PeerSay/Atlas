@@ -169,7 +169,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
         if (evt.keyCode === 8) {
             if (criteria.edit === 'description' && criteria.description === '') {
-                criteria.edit = 'name'
+                criteria.edit = 'name';
             }
             else if (criteria.edit === 'name' && criteria.name === '') {
                 removeCriteria(criteria);

@@ -1,0 +1,12 @@
+<button type="button" class="btn btn-default"
+        data-toggle="popover"
+        data-placement="bottom">
+    <span class="glyphicon glyphicon-cog"></span>
+</button>
+<!--
+Form content is transcluded here then moved on popover() init
+Note: this technique requires a patch in Bootstrap.js code!
+Reason: on show() it called clear() which removed Angular ng-click listeners,
+causing bad navigation instead of actions on list-group
+-->
+<div class="js-form" ng-transclude hidden></div>

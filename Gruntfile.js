@@ -24,10 +24,10 @@ module.exports = function (grunt) {
                 },
                 files: ['Gruntfile.js', 'static/**/*.*']
             },
-            karma: {
-                files: ['static/js/**/*.js', 'static/test/**/*.js'],
-                tasks: ['karma:unit:run']
-            },
+            //karma: {
+            //    files: ['static/js/**/*.js', 'static/test/**/*.js'],
+            //    tasks: ['karma:unit:run']
+            //},
             css: {
                 files: ['static/css/**/*.less'],
                 tasks: ['less']

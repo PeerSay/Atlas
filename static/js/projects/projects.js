@@ -131,7 +131,7 @@ function Projects($q, rest, User, Notification) {
     function getIdxById(id) {
         var prj = findBy('id')(P.projects, id)[0];
         var idx = P.projects.indexOf(prj);
-        return idx < 0 ? P.projects.length : idx
+        return idx < 0 ? P.projects.length : idx;
     }
 
 

@@ -20,7 +20,7 @@ function Tiles($rootScope, DeepLinking) {
             uri: 'ev',
             name: 'evaluation',
             title: 'Evaluation Requirements',
-            html: '/html/project-todo.html',
+            html: '/html/project-evaluation-requirements.html',
             progress: {},
             show: false
         },
@@ -105,7 +105,7 @@ function Tiles($rootScope, DeepLinking) {
         $rootScope.$on('replace:tile', function (evt, vals) {
             T.visible.tiles = [];
             angular.forEach(vals, function (uri) {
-                uri && addTile(uri);
+                if (uri) { addTile(uri); }
             });
         });
         $rootScope.$on('add:tile', function (evt, vals) {

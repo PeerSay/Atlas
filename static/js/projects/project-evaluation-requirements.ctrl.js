@@ -80,6 +80,14 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         'Storage'
     ];
     m.selectGroup = selectGroup;
+    m.newGroup = {
+        edit: false,
+        value: ''
+    };
+    m.groupKeyPressed = groupKeyPressed;
+
+    //popover
+    m.popoverOn = null;
 
     activate();
 
@@ -92,10 +100,12 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     }
 
     function showFullView(control) {
+        m.popoverOn = null;
         Tiles.toggleFullView(true, m.tile.uri, control);
     }
 
     function reloadTables() {
+        m.popoverOn = null;
         m.reqTableParams.reload();
         m.optTableParams.reload();
     }
@@ -124,11 +134,10 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     }
 
     function criteriaKeyPressed(criteria, evt) {
-        console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
+        //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
+
         if (evt.keyCode === 13) {
             var next = nextCriteria(criteria);
-            console.log('>>Next criteria', next);
-
             if (next) {
                 next.edit = criteria.edit;
             } else {
@@ -136,7 +145,24 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             }
             criteria.edit = false;
         }
+    }
 
+    function groupKeyPressed(criteria, evt) {
+        //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.newGroup, evt.keyCode);
+
+        if (evt.keyCode === 13) {
+            if (criteria.newGroup.value) {
+                criteria.group = criteria.newGroup.value;
+                m.groups.push(criteria.group);
+                reloadTables();
+            }
+            criteria.newGroup = {};
+            return;
+        }
+        if (evt.keyCode === 27) {
+            criteria.newGroup = {};
+            return evt.preventDefault();
+        }
     }
 
     function selectGroup(criteria, group) {

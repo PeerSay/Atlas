@@ -1,8 +1,15 @@
 <table class="table" ng-table="tableParams">
+    <thead>
+    <tr>
+        <th>{{::titles[0]}}</th>
+        <th>{{::titles[1]}}</th>
+        <th></th>
+    </tr>
+    </thead>
     <tbody ng-repeat="group in $groups">
     <!--Group raw-->
     <tr class="ng-table-group" ng-show="group.value">
-        <td colspan="{{$columns.length}}">
+        <td colspan="3">
             <a href ng-click="group.$hideRows = !group.$hideRows">
                 <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                 {{group.value}}
@@ -10,7 +17,7 @@
         </td>
     </tr>
     <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable">
-        <td data-title="'Must have Criteria'">
+        <td>
             <input type="text"
                     ng-model="criteria.name"
                     ng-focus="criteria.edit = 'name'; ctl.popoverOn = null;"
@@ -20,7 +27,7 @@
                     ps-focus-on="criteria.edit === 'name'"
                     />
         </td>
-        <td data-title="'Description'" class="editable">
+        <td>
             <input type="text"
                     ng-model="criteria.description"
                     ng-focus="criteria.edit = 'description'; ctl.popoverOn = null;"
@@ -65,8 +72,8 @@
                                         ng-keypress="ctl.groupKeyPressed(criteria, $event)"
                                         ng-keydown="ctl.groupKeyPressed(criteria, $event)">
                             </a>
-                            <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>
                         </div>
+                        <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>
                     </div>
                 </form>
             </ps-table-popover>

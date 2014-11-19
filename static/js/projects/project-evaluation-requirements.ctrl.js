@@ -25,8 +25,8 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         },
         {
             id: 2,
-            name: "Initial Capacity",
-            description: '12TB Basic (end of 2015)',
+            name: "Support Level",
+            description: 'NBD / Global',
             table: 'required',
             group: null
         },
@@ -61,6 +61,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     m.normTableParams = new ngTableParams({
         count: 10
     }, tableSettings);
+
     m.reqTableParams = new ngTableParams({
         count: 10,
         filter: { table: 'required' }
@@ -117,6 +118,14 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         })[0];
     }
 
+    function prevCriteria(criteria) {
+        var arr = find(m.criteria, function (crit) {
+            var ok = (crit.table === criteria.table && crit.id < criteria.id);
+            return ok ? crit : null;
+        });
+        return arr[arr.length - 1];
+    }
+
     function addCriteriaLike(crit) {
         var id = m.criteria[m.criteria.length - 1].id + 1;
         var cr = {
@@ -133,6 +142,17 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         reloadTables();
     }
 
+    function removeCriteria(crit) {
+        var prev = prevCriteria(crit);
+        if (prev) {
+            prev.edit = 'name';
+        }
+
+        var idx = m.criteria.indexOf(crit);
+        m.criteria.splice(idx, 1);
+        reloadTables();
+    }
+
     function criteriaKeyPressed(criteria, evt) {
         //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
 
@@ -144,6 +164,17 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
                 addCriteriaLike(criteria);
             }
             criteria.edit = false;
+            return;
+        }
+
+        if (evt.keyCode === 8) {
+            if (criteria.edit === 'description' && criteria.description === '') {
+                criteria.edit = 'name'
+            }
+            else if (criteria.edit === 'name' && criteria.name === '') {
+                removeCriteria(criteria);
+                return evt.preventDefault();
+            }
         }
     }
 

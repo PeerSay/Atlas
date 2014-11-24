@@ -1,11 +1,12 @@
 angular.module('peersay')
     .controller('ProjectEvaluationRequirementsCtrl', ProjectEvaluationRequirementsCtrl);
 
-ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'ngTableParams'];
-function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams) {
+ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'ngTableParams', 'Projects'];
+function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams, Projects) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
+    m.projectId = $scope.$parent.m.projectId;
     m.progress = {
         value: 0,
         total: 1
@@ -13,9 +14,9 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
-
     // Tables
-    m.criteria = [
+    m.criteria = [];
+    m.criteria2 = [
         {
             id: 1,
             name: "Initial Capacity",
@@ -45,7 +46,6 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             group: 'Network'
         }
     ];
-
     var tableSettings = {
         counts: [],
         total: 0,
@@ -53,27 +53,31 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             var filter = params.filter();
             var filtered = $filter('filter')(m.criteria, filter);
 
+            if (!filtered.length) {
+                filtered.push({
+                    id: 5,
+                    name: '',
+                    description: '',
+                    table: 'required',
+                    group: null,
+                    edit: 'name'
+                });
+                filtered.empty = true; // XXX?
+            }
+
             //console.log('>>Data reloaded', filtered);
 
             $defer.resolve(filtered);
         }
     };
-    m.normTableParams = new ngTableParams({
-        count: 10
-    }, tableSettings);
-
-    m.reqTableParams = new ngTableParams({
+    m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
+    m.fullTableParams = new ngTableParams({
         count: 10,
         filter: { table: 'required' }
     }, angular.extend(tableSettings, {groupBy: 'group'}));
-    m.optTableParams = new ngTableParams({
-        count: 10,
-        filter: { table: 'optional' }
-    }, angular.extend(tableSettings, {groupBy: 'group'}));
-
+    //
     m.reloadTables = reloadTables;
     m.criteriaKeyPressed = criteriaKeyPressed;
-
     // Groups
     m.groups = [
         null,
@@ -90,9 +94,15 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     //popover
     m.popoverOn = null;
 
+
     activate();
 
     function activate() {
+        Projects.readProjectCriteria(m.projectId)
+            .then(function (res) {
+                m.criteria = res.criteria;
+            });
+
         Tiles.setProgress(m.tile, m.progress);
         $scope.$on('$destroy', function () {
             m.progress = { value: 0, total: 0 };
@@ -107,8 +117,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
     function reloadTables() {
         m.popoverOn = null;
-        m.reqTableParams.reload();
-        m.optTableParams.reload();
+        m.fullTableParams.reload();
     }
 
     function nextCriteria(criteria) {

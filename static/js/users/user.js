@@ -12,7 +12,7 @@ function User($http, rest, Storage) {
     U.logout = logout;
 
     function getUser() {
-        return rest.readAll('user')
+        return rest.readAll(['user'])
             .success(function (res) {
                 U.user = Storage.set('user', res.result);
             })

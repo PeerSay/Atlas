@@ -10,6 +10,9 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
     m.progress = {};
+    // Full view
+    m.fullView = Tiles.fullView;
+    m.showFullView = showFullView;
     // Editable fields
     m.fields = {
         title: {},
@@ -19,22 +22,20 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         'duration.finishedAt': {},
         domain: {}
     };
-    // Full view
-    m.fullView = Tiles.fullView;
-    m.showFullView = showFullView;
     // Inline edits
     m.toggleEditInline = toggleEditInline;
-    m.saveEditInline = saveEditInline;
+    m.saveEditInline = updateProject;
     m.displayValue = displayValue;
 
     activate();
 
     function activate() {
         Projects.readProject(m.projectId)
-            .then(function (res) {
+            .then(function () {
+                var prj  = Projects.current.project;
                 angular.forEach(m.fields, function (fld, key) {
                     // ensure missing fields are added to Projects obj
-                    m.fields[key] = res[key] = res[key] || missingField(key);
+                    m.fields[key] = prj[key] = prj[key] || missingField(key);
                 });
 
                 setProgress();
@@ -80,7 +81,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         Tiles.toggleFullView(true, m.tile.uri, on ? ctl.key : null);
     }
 
-    function saveEditInline(ctl, value) {
+    function updateProject(ctl, value) {
         var data = {};
         data[ctl.key] = value;
 

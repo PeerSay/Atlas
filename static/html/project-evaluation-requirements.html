@@ -12,8 +12,11 @@
             <div class="view-mode" ng-class="m.viewMode.value">
                 <div class="tile-section norm border">
                     <table ng-table="cm.normTableParams" class="table">
-                        <tr ng-repeat="criteria in $data">
+                        <tr ng-repeat="criteria in $data" ng-show="!$data.empty">
                             <td data-title="'Criteria'">{{criteria.name}}</td>
+                        </tr>
+                        <tr ng-show="$data.empty">
+                            <td><em>Click to add</em></td>
                         </tr>
                     </table>
                 </div>
@@ -41,16 +44,9 @@
                 <div class="modal-body border">
                     <div class="tile-section border">
                         <ps-tile-table
-                                ps-table-params="cm.reqTableParams"
+                                ps-table-params="cm.fullTableParams"
                                 data-ctl="cm"
-                                data-titles="['Must have Criteria', 'Description']"></ps-tile-table>
-                    </div>
-
-                    <div class="tile-section border">
-                        <ps-tile-table
-                                ps-table-params="cm.optTableParams"
-                                data-ctl="cm"
-                                data-titles="['Optional Criteria', 'Description']"></ps-tile-table>
+                                data-titles="['Criteria', 'Description']"></ps-tile-table>
                     </div>
                 </div>
                 <div class="modal-footer">

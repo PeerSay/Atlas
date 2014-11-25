@@ -8,7 +8,8 @@ function psTileDialog(Tiles) {
         restrict: 'A',
         scope: {
             toggle: '=psToggle',
-            dlg: '=psDlgUri'
+            dlg: '=psDlgUri',
+            onShow: '=psOnShow'
         },
         link: function (scope, element) {
             // Hack to prevent focus which breaks auto-show input-edits feature - no effect
@@ -28,10 +29,19 @@ function psTileDialog(Tiles) {
                 });
             });
 
-            scope.$watch('toggle.dlg', function (newVal, oldVal) {
+            $el.on('shown.bs.modal', function () {
+                scope.onShow();
+            });
+
+            scope.$watch('toggle.dlg', function (newVal) {
                 var on = (scope.dlg === newVal) ? 'show'  : 'hide';
                 $el.modal(on);
             }, true);
+
+            // Clean-up
+            element.on('$destroy', function () {
+                $el.off('shown.bs.modal hidden.bs.modal');
+            });
         }
     };
 }

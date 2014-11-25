@@ -12,10 +12,10 @@
             <div class="view-mode" ng-class="m.viewMode.value">
                 <div class="tile-section norm border">
                     <table ng-table="cm.normTableParams" class="table">
-                        <tr ng-repeat="criteria in $data" ng-show="!$data.empty">
+                        <tr ng-repeat="criteria in $data" ng-show="$data.length">
                             <td data-title="'Criteria'">{{criteria.name}}</td>
                         </tr>
-                        <tr ng-show="$data.empty">
+                        <tr ng-show="!$data.length">
                             <td><em>Click to add</em></td>
                         </tr>
                     </table>
@@ -32,7 +32,8 @@
     <div class="modal fade" tabindex="-1" role="dialog"
             ps-tile-dialog
             ps-dlg-uri="tile.uri"
-            ps-toggle="cm.fullView">
+            ps-toggle="cm.fullView"
+            ps-on-show="cm.onFullView">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -41,7 +42,7 @@
                     </button>
                     <h4 class="modal-title">{{tile.title}}</h4>
                 </div>
-                <div class="modal-body border">
+                <div class="modal-body">
                     <div class="tile-section border">
                         <ps-tile-table
                                 ps-table-params="cm.fullTableParams"

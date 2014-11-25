@@ -14,32 +14,29 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
+    m.onFullView = onFullView;
     // Tables
     m.criteria = [];
     m.criteria2 = [
         {
-            id: 1,
             name: "Initial Capacity",
             description: '12TB Basic (end of 2015)',
             table: 'required',
             group: null
         },
         {
-            id: 2,
             name: "Support Level",
             description: 'NBD / Global',
             table: 'required',
             group: null
         },
         {
-            id: 3,
             name: "Scale Up Growth",
             description: 'Another 10 TB',
             table: 'optional',
             group: null
         },
         {
-            id: 4,
             name: "Network Connections",
             description: 'NAS / ISCSI',
             table: 'optional',
@@ -49,32 +46,20 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     var tableSettings = {
         counts: [],
         total: 0,
-        getData: function ($defer, params) {
-            var filter = params.filter();
-            var filtered = $filter('filter')(m.criteria, filter);
+        getData: function ($defer) {
+            //var filter = params.filter();
+            //var filtered = $filter('filter')(m.criteria, filter);
 
-            if (!filtered.length) {
-                filtered.push({
-                    id: 5,
-                    name: '',
-                    description: '',
-                    table: 'required',
-                    group: null,
-                    edit: 'name'
-                });
-                filtered.empty = true; // XXX?
-            }
+            console.log('>>Data reloaded', m.criteria);
 
-            //console.log('>>Data reloaded', filtered);
-
-            $defer.resolve(filtered);
+            $defer.resolve(m.criteria);
         }
     };
     m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
-    m.fullTableParams = new ngTableParams({
-        count: 10,
-        filter: { table: 'required' }
-    }, angular.extend(tableSettings, {groupBy: 'group'}));
+    m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
+        groupBy: function (item) {
+            return item.group;
+        }}));
     //
     m.reloadTables = reloadTables;
     m.criteriaKeyPressed = criteriaKeyPressed;
@@ -90,8 +75,10 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         value: ''
     };
     m.groupKeyPressed = groupKeyPressed;
+    // Grouping
 
-    //popover
+
+    // Popover
     m.popoverOn = null;
 
 
@@ -103,7 +90,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
                 m.criteria = res.criteria;
             });
 
-        Tiles.setProgress(m.tile, m.progress);
+        Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
         $scope.$on('$destroy', function () {
             m.progress = { value: 0, total: 0 };
             Tiles.setProgress(m.tile, m.progress);
@@ -115,40 +102,43 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         Tiles.toggleFullView(true, m.tile.uri, control);
     }
 
+    function onFullView() {
+        if (!m.criteria.length) {
+            var added = addCriteriaLike(null);
+            added.edit = 'name'; // invite to edit
+        }
+
+        reloadTables();
+    }
+
     function reloadTables() {
         m.popoverOn = null;
+        m.normTableParams.reload();
         m.fullTableParams.reload();
     }
 
     function nextCriteria(criteria) {
-        return find(m.criteria, function (crit) {
-            var ok = (crit.table === criteria.table && crit.id > criteria.id);
-            return ok ? crit : null;
-        })[0];
+        var idx = m.criteria.indexOf(criteria);
+        return m.criteria[idx + 1];
     }
 
     function prevCriteria(criteria) {
-        var arr = find(m.criteria, function (crit) {
-            var ok = (crit.table === criteria.table && crit.id < criteria.id);
-            return ok ? crit : null;
-        });
-        return arr[arr.length - 1];
+        var idx = m.criteria.indexOf(criteria);
+        return m.criteria[idx - 1];
     }
 
     function addCriteriaLike(crit) {
-        var id = m.criteria[m.criteria.length - 1].id + 1;
-        var cr = {
-            id: id,
+        var added = {
             name: '',
             description: '',
-            table: crit.table,
-            group: crit.group,
-            edit: crit.edit
+            table: crit ? crit.table : 'required',
+            group: crit ? crit.group : null,
+            edit: crit  ? crit.edit : null
         };
 
-        console.log('>> Add new', cr);
-        m.criteria.push(cr);
+        m.criteria.push(added);
         reloadTables();
+        return added;
     }
 
     function removeCriteria(crit) {
@@ -158,8 +148,9 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         }
 
         var idx = m.criteria.indexOf(crit);
-        m.criteria.splice(idx, 1);
+        var removed = m.criteria.splice(idx, 1);
         reloadTables();
+        return removed;
     }
 
     function criteriaKeyPressed(criteria, evt) {
@@ -208,12 +199,5 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     function selectGroup(criteria, group) {
         criteria.group = group;
         reloadTables();
-    }
-
-    // TODO: to util
-    function find(arr, func) {
-        return $.map(arr, function (obj) {
-            return func(obj);
-        });
     }
 }

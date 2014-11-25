@@ -30,6 +30,7 @@ function psTablePopover($timeout, $compile) {
                 // otherwise click will negate the effect
                 $timeout(function () {
                     scope.$apply(function () {
+                        scope.show = true;
                         scope.ctl.popoverOn = scope.criteria;
                     });
                 }, 100, false);
@@ -47,7 +48,7 @@ function psTablePopover($timeout, $compile) {
                 scope.show = (newVal === scope.criteria);
                 $el.popover(scope.show ? 'show' : 'hide');
 
-                if(!scope.show) {
+                if (!scope.show) {
                     scope.criteria.newGroup = {}; //hide edit too
                 }
             });

@@ -3,7 +3,33 @@
     <tr>
         <th>{{::titles[0]}}</th>
         <th>{{::titles[1]}}</th>
-        <th></th>
+        <th class="table-menu">
+            <ps-table-th-popover>
+                <form class="popover-form">
+                    <div class="form-group">
+                        <label class="checkbox-ext no-select text-nowrap">
+                            <input type="checkbox"
+                                    ng-model="ctl.compactTable">
+                            Compact view
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sort by:</label>
+                        <div class="list-group">
+                            <a href class="list-group-item"
+                                    ng-repeat="sort in ctl.sortByOptions"
+                                    ng-class="{'active': sort === ctl.sortBy}"
+                                    ng-click="ctl.selectSortBy(sort)">
+                                <span class="glyphicon glyphicon-ok" ng-show="sort === ctl.sortBy"></span>
+                                {{sort || 'None'}}
+                            </a>
+                        </div>
+                        <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>
+                    </div>
+                </form>
+            </ps-table-th-popover>
+        </th>
     </tr>
     </thead>
     <tbody ng-repeat="group in $groups">

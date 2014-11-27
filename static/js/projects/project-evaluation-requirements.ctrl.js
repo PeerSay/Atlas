@@ -50,7 +50,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             //var filter = params.filter();
             //var filtered = $filter('filter')(m.criteria, filter);
 
-            console.log('>>Data reloaded', m.criteria);
+            //console.log('>>Data reloaded', m.criteria);
 
             $defer.resolve(m.criteria);
         }
@@ -81,6 +81,15 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     // Popover
     m.popoverOn = null;
 
+    // Table manu
+    m.compactTable = true;
+    m.sortByOptions = [
+        null,
+        'Group',
+        'Priority'
+    ];
+    m.sortBy = null;
+    m.selectSortBy = selectSortBy;
 
     activate();
 
@@ -199,5 +208,9 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     function selectGroup(criteria, group) {
         criteria.group = group;
         reloadTables();
+    }
+
+    function selectSortBy(sort) {
+        m.sortBy = sort;
     }
 }

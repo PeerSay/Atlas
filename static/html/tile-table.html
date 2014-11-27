@@ -22,8 +22,8 @@
         </th>
         <th ng-if="!ctl.compactTable"
                 class="sortable"
-                ng-class="ctl.tableSortClass(tableParams, 'table')"
-                ng-click="ctl.tableSortClick(tableParams, 'table')"
+                ng-class="ctl.tableSortClass(tableParams, 'priority')"
+                ng-click="ctl.tableSortClick(tableParams, 'priority')"
                 >
             <div>{{::titles[3]}}</div>
         </th>
@@ -46,7 +46,7 @@
                                     ng-repeat="opt in ctl.groupByOptions"
                                     ng-class="{'active': opt === ctl.groupBy}"
                                     ng-click="ctl.selectGroupBy(opt)">
-                                {{opt || 'None'}}
+                                {{opt || 'none' | capitalize}}
                             </a>
                         </div>
                         <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>
@@ -92,7 +92,7 @@
                 sortable="'group'">{{criteria.group}}</td>
         <td class="static"
                 ng-if="!ctl.compactTable"
-                sortable="'table'">{{criteria.table}}</td>
+                sortable="'priority'">{{criteria.priority}}</td>
         <!--Settings Popover-->
         <td>
             <ps-table-popover>
@@ -100,7 +100,7 @@
                     <div class="form-group">
                         <label class="checkbox-ext no-select text-nowrap block">
                             <input type="checkbox"
-                                    ng-model="criteria.table"
+                                    ng-model="criteria.priority"
                                     ng-true-value="'required'"
                                     ng-false-value="'optional'"
                                     ng-click="ctl.reloadTables()">

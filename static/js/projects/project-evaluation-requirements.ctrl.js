@@ -21,25 +21,25 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         {
             name: "Initial Capacity",
             description: '12TB Basic (end of 2015)',
-            table: 'required',
+            priority: 'required',
             group: null
         },
         {
             name: "Support Level",
             description: 'NBD / Global',
-            table: 'required',
+            priority: 'required',
             group: null
         },
         {
             name: "Scale Up Growth",
             description: 'Another 10 TB',
-            table: 'optional',
+            priority: 'optional',
             group: null
         },
         {
             name: "Network Connections",
             description: 'NAS / ISCSI',
-            table: 'optional',
+            priority: 'optional',
             group: 'Network'
         }
     ];
@@ -95,7 +95,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         null,
         'name',
         'group',
-        'table'
+        'priority'
     ];
     m.groupBy = 'group';
     m.selectGroupBy = selectGroupBy;
@@ -149,7 +149,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         var added = {
             name: '',
             description: '',
-            table: crit ? crit.table : 'required',
+            priority: crit ? crit.priority : 'required',
             group: crit ? crit.group : null,
             edit: crit  ? crit.edit : null
         };

@@ -15,8 +15,10 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
     m.onFullView = onFullView;
-    // Tables
+
+    // Data
     m.criteria = [];
+    m.groups = [];
     m.criteria2 = [
         {
             name: "Initial Capacity",
@@ -28,7 +30,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             name: "Support Level",
             description: 'NBD / Global',
             priority: 'required',
-            group: null
+            group: 'Storage'
         },
         {
             name: "Scale Up Growth",
@@ -43,54 +45,21 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             group: 'Network'
         }
     ];
+
     var tableSettings = {
         counts: [],
         total: 0,
-        getData: function ($defer, params) {
-            //var filter = params.filter();
-            //var filtered = $filter('filter')(m.criteria, filter);
-
-            //console.log('>>Data reloaded', m.criteria);
-
-            var orderedData = params.sorting() ?
-                $filter('orderBy')(m.criteria, params.orderBy()) :
-                m.criteria;
-
-            $defer.resolve(orderedData);
-        }
+        getData: tableGetData
     };
     m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
     m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
-        groupBy: function (item) {
-            if (m.groupBy === 'name') {
-                return item.name[0];
-            }
-            return item[m.groupBy];
-        }}));
-    //
-    m.reloadTables = reloadTables;
-    m.criteriaKeyPressed = criteriaKeyPressed;
-    // Groups
-    m.groups = [
-        null,
-        'Network',
-        'Storage'
-    ];
-    m.selectGroup = selectGroup;
-    m.newGroup = {
-        edit: false,
-        value: ''
-    };
-    m.groupKeyPressed = groupKeyPressed;
-    // Sorting
-    m.tableSortClass = tableSortClass;
-    m.tableSortClick = tableSortClick;
-
-    // Popover
-    m.popoverOn = null;
-
-    // Table menu
+        groupBy: tableGroupBy
+    }));
+    // General
     m.compactTable = true;
+    m.popoverOn = null;
+    m.reloadTables = reloadTables;
+    // Grouping
     m.groupByOptions = [
         null,
         'name',
@@ -99,6 +68,19 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     ];
     m.groupBy = 'group';
     m.selectGroupBy = selectGroupBy;
+    // Sorting
+    m.tableSortClass = tableSortClass;
+    m.tableSortClick = tableSortClick;
+    // Edit groups
+    m.selectGroup = selectGroup;
+    m.newGroup = {
+        edit: false,
+        value: ''
+    };
+    m.groupKeyPressed = groupKeyPressed;
+    // Edit cell
+    m.criteriaKeyPressed = criteriaKeyPressed;
+
 
     activate();
 
@@ -106,6 +88,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         Projects.readProjectCriteria(m.projectId)
             .then(function (res) {
                 m.criteria = m.criteria2;
+                m.groups = [].concat(null, getGroups());
             });
 
         Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
@@ -125,16 +108,68 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             var added = addCriteriaLike(null);
             added.edit = 'name'; // invite to edit
         }
-
         reloadTables();
     }
 
+    // Init
+    //
     function reloadTables() {
-        m.popoverOn = null;
+        m.popoverOn = null; // hide popover
         m.normTableParams.reload();
         m.fullTableParams.reload();
     }
 
+    function getGroups() {
+        var groups = [];
+        var found = {};
+        angular.forEach(m.criteria, function (crit) {
+            if (crit.group && !found[crit.group]) {
+                found[crit.group] = true;
+                groups.push(crit.group);
+            }
+        });
+        return groups;
+    }
+
+    function tableGetData($defer, params) {
+        //console.log('>>Data reloaded', m.criteria);
+
+        var orderedData = params.sorting() ?
+            $filter('orderBy')(m.criteria, params.orderBy()) :
+            m.criteria;
+
+        $defer.resolve(orderedData);
+    }
+
+    function tableGroupBy(item) {
+        if (m.groupBy === 'name') {
+            return item.name[0];
+        }
+        return item[m.groupBy];
+    }
+
+    // Grouping / sorting
+    //
+    function selectGroupBy(by) {
+        m.groupBy = by;
+        reloadTables();
+    }
+
+    function tableSortClass(tableParams, by) {
+        return {
+            'sort-asc': tableParams.isSortBy(by, 'asc'),
+            'sort-desc': tableParams.isSortBy(by, 'desc')
+        };
+    }
+
+    function tableSortClick(tableParams, by) {
+        var sortOrder = {};
+        sortOrder[by] = tableParams.isSortBy(by, 'asc') ? 'desc' : 'asc';
+        tableParams.sorting(sortOrder);
+    }
+
+    // Edit
+    //
     function nextCriteria(criteria) {
         var idx = m.criteria.indexOf(criteria);
         return m.criteria[idx + 1];
@@ -151,7 +186,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             description: '',
             priority: crit ? crit.priority : 'required',
             group: crit ? crit.group : null,
-            edit: crit  ? crit.edit : null
+            edit: crit ? crit.edit : null
         };
 
         m.criteria.push(added);
@@ -217,23 +252,5 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     function selectGroup(criteria, group) {
         criteria.group = group;
         reloadTables();
-    }
-
-    function selectGroupBy(by) {
-        m.groupBy = by;
-        reloadTables();
-    }
-
-    function tableSortClass(tableParams, by) {
-        return {
-            'sort-asc': tableParams.isSortBy(by, 'asc'),
-            'sort-desc': tableParams.isSortBy(by, 'desc')
-        };
-    }
-
-    function tableSortClick(tableParams, by) {
-        var sortOrder = {};
-        sortOrder[by] = tableParams.isSortBy(by, 'asc') ? 'desc' : 'asc';
-        tableParams.sorting(sortOrder);
     }
 }

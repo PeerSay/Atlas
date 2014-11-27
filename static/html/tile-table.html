@@ -1,28 +1,52 @@
 <table class="table" ng-table="tableParams">
     <thead>
     <tr>
-        <th>{{::titles[0]}}</th>
-        <th>{{::titles[1]}}</th>
+        <th class="sortable"
+                ng-class="ctl.tableSortClass(tableParams, 'name')"
+                ng-click="ctl.tableSortClick(tableParams, 'name')"
+                >
+            <div>{{::titles[0]}}</div>
+        </th>
+        <th class="sortable"
+                ng-class="ctl.tableSortClass(tableParams, 'description')"
+                ng-click="ctl.tableSortClick(tableParams, 'description')"
+                >
+            <div>{{::titles[1]}}</div>
+        </th>
+        <th ng-if="!ctl.compactTable"
+                class="sortable"
+                ng-class="ctl.tableSortClass(tableParams, 'group')"
+                ng-click="ctl.tableSortClick(tableParams, 'group')"
+                >
+            <div>{{::titles[2]}}</div>
+        </th>
+        <th ng-if="!ctl.compactTable"
+                class="sortable"
+                ng-class="ctl.tableSortClass(tableParams, 'table')"
+                ng-click="ctl.tableSortClick(tableParams, 'table')"
+                >
+            <div>{{::titles[3]}}</div>
+        </th>
         <th class="table-menu">
             <ps-table-th-popover>
                 <form class="popover-form">
                     <div class="form-group">
-                        <label class="checkbox-ext no-select text-nowrap">
+                        <label class="checkbox-ext no-select text-nowrap block">
                             <input type="checkbox"
-                                    ng-model="ctl.compactTable">
+                                    ng-model="ctl.compactTable"
+                                    ng-click="ctl.reloadTables()">
                             Compact view
                         </label>
                     </div>
 
                     <div class="form-group">
-                        <label>Sort by:</label>
+                        <label>Group by:</label>
                         <div class="list-group">
                             <a href class="list-group-item"
-                                    ng-repeat="sort in ctl.sortByOptions"
-                                    ng-class="{'active': sort === ctl.sortBy}"
-                                    ng-click="ctl.selectSortBy(sort)">
-                                <span class="glyphicon glyphicon-ok" ng-show="sort === ctl.sortBy"></span>
-                                {{sort || 'None'}}
+                                    ng-repeat="opt in ctl.groupByOptions"
+                                    ng-class="{'active': opt === ctl.groupBy}"
+                                    ng-click="ctl.selectGroupBy(opt)">
+                                {{opt || 'None'}}
                             </a>
                         </div>
                         <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>
@@ -35,7 +59,7 @@
     <tbody ng-repeat="group in $groups">
     <!--Group raw-->
     <tr class="ng-table-group" ng-show="group.value">
-        <td colspan="3">
+        <td colspan="{{cm.compactTable ? 3 : 5}}">
             <a href ng-click="group.$hideRows = !group.$hideRows">
                 <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                 {{group.value}}
@@ -43,7 +67,7 @@
         </td>
     </tr>
     <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable">
-        <td>
+        <td sortable="'name'">
             <input type="text"
                     ng-model="criteria.name"
                     ng-focus="criteria.edit = 'name'; ctl.popoverOn = null;"
@@ -53,7 +77,7 @@
                     ps-focus-on="criteria.edit === 'name'"
                     />
         </td>
-        <td>
+        <td sortable="'description'">
             <input type="text"
                     ng-model="criteria.description"
                     ng-focus="criteria.edit = 'description'; ctl.popoverOn = null;"
@@ -63,12 +87,14 @@
                     ps-focus-on="criteria.edit === 'description'"
                     />
         </td>
+        <td ng-if="!ctl.compactTable" sortable="'group'">{{criteria.group}}</td>
+        <td ng-if="!ctl.compactTable" sortable="'table'">{{criteria.table}}</td>
         <!--Settings Popover-->
         <td>
             <ps-table-popover>
                 <form class="popover-form">
                     <div class="form-group">
-                        <label class="checkbox-ext no-select text-nowrap">
+                        <label class="checkbox-ext no-select text-nowrap block">
                             <input type="checkbox"
                                     ng-model="criteria.table"
                                     ng-true-value="'required'"

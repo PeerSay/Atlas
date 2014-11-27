@@ -34,7 +34,7 @@
             ps-dlg-uri="tile.uri"
             ps-toggle="cm.fullView"
             ps-on-show="cm.onFullView">
-        <div class="modal-dialog">
+        <div class="modal-dialog" ng-class="{'modal-lg': !cm.compactTable}">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">
@@ -47,7 +47,7 @@
                         <ps-tile-table
                                 ps-table-params="cm.fullTableParams"
                                 data-ctl="cm"
-                                data-titles="['Criteria', 'Description']"></ps-tile-table>
+                                data-titles="['Criteria', 'Description', 'Group', 'Priority']"></ps-tile-table>
                     </div>
                 </div>
                 <div class="modal-footer">

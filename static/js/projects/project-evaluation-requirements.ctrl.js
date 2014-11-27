@@ -46,19 +46,26 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     var tableSettings = {
         counts: [],
         total: 0,
-        getData: function ($defer) {
+        getData: function ($defer, params) {
             //var filter = params.filter();
             //var filtered = $filter('filter')(m.criteria, filter);
 
             //console.log('>>Data reloaded', m.criteria);
 
-            $defer.resolve(m.criteria);
+            var orderedData = params.sorting() ?
+                $filter('orderBy')(m.criteria, params.orderBy()) :
+                m.criteria;
+
+            $defer.resolve(orderedData);
         }
     };
     m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
     m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
         groupBy: function (item) {
-            return item.group;
+            if (m.groupBy === 'name') {
+                return item.name[0];
+            }
+            return item[m.groupBy];
         }}));
     //
     m.reloadTables = reloadTables;
@@ -75,28 +82,30 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         value: ''
     };
     m.groupKeyPressed = groupKeyPressed;
-    // Grouping
-
+    // Sorting
+    m.tableSortClass = tableSortClass;
+    m.tableSortClick = tableSortClick;
 
     // Popover
     m.popoverOn = null;
 
-    // Table manu
+    // Table menu
     m.compactTable = true;
-    m.sortByOptions = [
+    m.groupByOptions = [
         null,
-        'Group',
-        'Priority'
+        'name',
+        'group',
+        'table'
     ];
-    m.sortBy = null;
-    m.selectSortBy = selectSortBy;
+    m.groupBy = 'group';
+    m.selectGroupBy = selectGroupBy;
 
     activate();
 
     function activate() {
         Projects.readProjectCriteria(m.projectId)
             .then(function (res) {
-                m.criteria = res.criteria;
+                m.criteria = m.criteria2;
             });
 
         Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
@@ -210,7 +219,21 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         reloadTables();
     }
 
-    function selectSortBy(sort) {
-        m.sortBy = sort;
+    function selectGroupBy(by) {
+        m.groupBy = by;
+        reloadTables();
+    }
+
+    function tableSortClass(tableParams, by) {
+        return {
+            'sort-asc': tableParams.isSortBy(by, 'asc'),
+            'sort-desc': tableParams.isSortBy(by, 'desc')
+        };
+    }
+
+    function tableSortClick(tableParams, by) {
+        var sortOrder = {};
+        sortOrder[by] = tableParams.isSortBy(by, 'asc') ? 'desc' : 'asc';
+        tableParams.sorting(sortOrder);
     }
 }

@@ -87,8 +87,12 @@
                     ps-focus-on="criteria.edit === 'description'"
                     />
         </td>
-        <td ng-if="!ctl.compactTable" sortable="'group'">{{criteria.group}}</td>
-        <td ng-if="!ctl.compactTable" sortable="'table'">{{criteria.table}}</td>
+        <td class="static"
+                ng-if="!ctl.compactTable"
+                sortable="'group'">{{criteria.group}}</td>
+        <td class="static"
+                ng-if="!ctl.compactTable"
+                sortable="'table'">{{criteria.table}}</td>
         <!--Settings Popover-->
         <td>
             <ps-table-popover>

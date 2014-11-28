@@ -40,7 +40,7 @@
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
-                    <h4 class="modal-title">{{tile.title}}</h4>
+                    <h4 class="modal-title">{{tile.title}} <small>Saving...</small></h4>
                 </div>
                 <div class="modal-body">
                     <div class="tile-section border">
@@ -48,6 +48,18 @@
                                 ps-table-params="cm.fullTableParams"
                                 data-ctl="cm"
                                 data-titles="['Criteria', 'Description', 'Group', 'Priority']"></ps-tile-table>
+                    </div>
+
+                    <div class="tile-section">
+                        <table class="table dbg">
+                            <tr ng-repeat="crit in cm.criteria" ng-class="{'bold': !!crit.edit}">
+                                <td>{{cm.criteria.indexOf(crit)}}</td>
+                                <td>{{crit.name}}</td>
+                                <td>{{crit.description}}</td>
+                                <td>{{crit.group}}</td>
+                                <td>{{crit.priority}}</td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
                 <div class="modal-footer">

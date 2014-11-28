@@ -87,7 +87,8 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     function activate() {
         Projects.readProjectCriteria(m.projectId)
             .then(function (res) {
-                m.criteria = m.criteria2;
+                //m.criteria = m.criteria2;
+                m.criteria = res.criteria;
                 m.groups = [].concat(null, getGroups());
             });
 
@@ -132,13 +133,17 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     }
 
     function tableGetData($defer, params) {
-        //console.log('>>Data reloaded', m.criteria);
+        var orderByArr = params.orderBy();
+        var orderBy = orderByArr[0];
+        var orderByGroup = m.groupBy &&
+            orderBy ? m.groupBy !== orderBy.substring(1) : true;
+        if (orderByGroup) {
+            orderByArr.unshift(m.groupBy);
+        }
+        //console.log('>>Data reload, orderBy, groupBy', orderByArr, m.groupBy);
 
-        var orderedData = params.sorting() ?
-            $filter('orderBy')(m.criteria, params.orderBy()) :
-            m.criteria;
-
-        $defer.resolve(orderedData);
+        m.criteria = $filter('orderBy')(m.criteria, orderByArr);
+        $defer.resolve(m.criteria);
     }
 
     function tableGroupBy(item) {
@@ -170,9 +175,21 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
     // Edit
     //
-    function nextCriteria(criteria) {
-        var idx = m.criteria.indexOf(criteria);
-        return m.criteria[idx + 1];
+    function nextCriteriaLike(criteria) {
+        var criteriaIdx = m.criteria.indexOf(criteria);
+        var alike = $.map(m.criteria, function (crit, idx) {
+            if (idx > criteriaIdx
+                && crit.group === criteria.group
+                && crit.priority === criteria.priority) {
+                return crit;
+            } else {
+                return null
+            }
+        });
+
+        //console.log('>>all alike', alike);
+
+        return alike[0];
     }
 
     function prevCriteria(criteria) {
@@ -184,12 +201,20 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         var added = {
             name: '',
             description: '',
-            priority: crit ? crit.priority : 'required',
             group: crit ? crit.group : null,
+            priority: crit ? crit.priority : 'required',
             edit: crit ? crit.edit : null
         };
 
-        m.criteria.push(added);
+        //console.log('>>added', added);
+
+        if (crit) {
+            var idx = m.criteria.indexOf(crit);
+            m.criteria.splice(idx+1, 0, added);
+        }
+        else {
+            m.criteria.push(added);
+        }
         reloadTables();
         return added;
     }
@@ -210,14 +235,15 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
 
         if (evt.keyCode === 13) {
-            var next = nextCriteria(criteria);
+            var next = nextCriteriaLike(criteria);
+            //console.log('>> next', next);
+
             if (next) {
                 next.edit = criteria.edit;
             } else {
                 addCriteriaLike(criteria);
             }
-            criteria.edit = false;
-            return;
+            return evt.preventDefault();
         }
 
         if (evt.keyCode === 8) {

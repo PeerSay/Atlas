@@ -22,6 +22,7 @@ function Projects($q, rest, User, Notification) {
     P.getProjectStubs = getProjectStubs;
     P.readProject = readProject;
     P.readProjectCriteria = readProjectCriteria;
+    P.updateProjectCriteria = updateProjectCriteria;
     P.createProject = createProject;
     P.removeProject = removeProject;
     P.updateProject = updateProject;
@@ -32,17 +33,6 @@ function Projects($q, rest, User, Notification) {
             .success(function () {
                 P.projects = User.user.projects;
             });
-    }
-
-    function readProject(id) {
-        return read(['projects', id])
-            .then(function (res) {
-                P.current.project = wrapAndFlattenModel(res);
-            });
-    }
-
-    function readProjectCriteria(id) {
-        return read(['projects', id, 'criteria']);
     }
 
     function read(params) {
@@ -104,6 +94,14 @@ function Projects($q, rest, User, Notification) {
         P.create.showDlg = on;
     }
 
+
+    function readProject(id) {
+        return read(['projects', id])
+            .then(function (res) {
+                P.current.project = wrapAndFlattenModel(res);
+            });
+    }
+
     function createProject() {
         return rest.create(['projects'], {title: P.create.title})
             .success(function (data) {
@@ -131,7 +129,8 @@ function Projects($q, rest, User, Notification) {
     }
 
     function updateProject(id, data) {
-        return rest.update(['projects', id], data)
+        var params = ['projects', id];
+        return rest.update(params, data)
             .success(function (res) {
                 var prj = wrapAndFlattenModel(res.result);
                 angular.forEach(prj, function (item) {
@@ -140,7 +139,7 @@ function Projects($q, rest, User, Notification) {
                     ctl.status = item.value ? 'ok' : 'missing'; // ok unless empty
                 });
 
-                invalidateCache(['projects', id]);
+                invalidateCache(params);
             })
             .error(function () {
                 var err = 'Failed to update project ' + id;
@@ -148,6 +147,27 @@ function Projects($q, rest, User, Notification) {
             });
     }
 
+    // Criteria
+    //
+    function readProjectCriteria(id) {
+        return read(['projects', id, 'criteria']);
+    }
+
+    function updateProjectCriteria(id, data) {
+        var params = ['projects', id, 'criteria'];
+        return rest.update(params, data)
+            .success(function () {
+                invalidateCache(params);
+            })
+            .error(function () {
+                var err = 'Failed to update project ' + id;
+                Notification.showError('API Error', err);
+            });
+    }
+
+
+    // Util
+    //
     function getIdxById(id) {
         var prj = findBy('id')(P.projects, id)[0];
         var idx = P.projects.indexOf(prj);

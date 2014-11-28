@@ -58,6 +58,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     // General
     m.compactTable = true;
     m.popoverOn = null;
+    m.savingData = false;
     m.reloadTables = reloadTables;
     // Grouping
     m.groupByOptions = [
@@ -85,12 +86,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     activate();
 
     function activate() {
-        Projects.readProjectCriteria(m.projectId)
-            .then(function (res) {
-                //m.criteria = m.criteria2;
-                m.criteria = res.criteria;
-                m.groups = [].concat(null, getGroups());
-            });
+        readCriteria();
 
         Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
         $scope.$on('$destroy', function () {
@@ -109,15 +105,28 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             var added = addCriteriaLike(null);
             added.edit = 'name'; // invite to edit
         }
+
+        // This triggers the focus on first element
         reloadTables();
     }
 
-    // Init
+    // Data
     //
-    function reloadTables() {
-        m.popoverOn = null; // hide popover
-        m.normTableParams.reload();
-        m.fullTableParams.reload();
+    function readCriteria() {
+        Projects.readProjectCriteria(m.projectId)
+            .then(function (res) {
+                //m.criteria = m.criteria2;
+                m.criteria = res.criteria;
+                m.groups = [].concat(null, getGroups());
+            });
+    }
+
+    function updateCriteria() {
+        m.savingData = true;
+        Projects.updateProjectCriteria(m.projectId, m.criteria)
+            .finally(function () {
+                m.savingData = false;
+            });
     }
 
     function getGroups() {
@@ -130,6 +139,14 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             }
         });
         return groups;
+    }
+
+    // Ng-table handling
+    //
+    function reloadTables() {
+        m.popoverOn = null; // hide popover
+        m.normTableParams.reload();
+        m.fullTableParams.reload();
     }
 
     function tableGetData($defer, params) {

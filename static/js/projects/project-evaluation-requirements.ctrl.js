@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectEvaluationRequirementsCtrl', ProjectEvaluationRequirementsCtrl);
 
-ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'ngTableParams', 'Projects'];
-function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams, Projects) {
+ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', 'Tiles', 'ngTableParams', 'Projects'];
+function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, Tiles, ngTableParams, Projects) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -18,6 +18,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
     // Data
     m.criteria = [];
+    m.criteriaStr = null;
     m.groups = [];
     m.criteria2 = [
         {
@@ -60,6 +61,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     m.popoverOn = null;
     m.savingData = false;
     m.reloadTables = reloadTables;
+    m.updateCriteria = updateCriteria;
     // Grouping
     m.groupByOptions = [
         null,
@@ -73,7 +75,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
     m.tableSortClass = tableSortClass;
     m.tableSortClick = tableSortClick;
     // Edit groups
-    m.selectGroup = selectGroup;
+    m.setCriteriaGroup = setCriteriaGroup;
     m.newGroup = {
         edit: false,
         value: ''
@@ -117,16 +119,52 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             .then(function (res) {
                 //m.criteria = m.criteria2;
                 m.criteria = res.criteria;
+                m.criteriaStr = JSON.stringify({ criteria: m.criteria });
                 m.groups = [].concat(null, getGroups());
+                reloadTables(true);
             });
     }
 
     function updateCriteria() {
-        m.savingData = true;
-        Projects.updateProjectCriteria(m.projectId, m.criteria)
-            .finally(function () {
-                m.savingData = false;
+        var data = getCriteriaData();
+        if (data) {
+            m.savingData = true;
+            Projects.updateProjectCriteria(m.projectId, data)
+                .finally(function () {
+                    $timeout(function () {
+                        m.savingData = false;
+                    }, 200);
+                });
+        }
+    }
+
+    function getCriteriaData() {
+        var res = {criteria: []};
+        angular.forEach(pruneEmpty(m.criteria), function (crit) {
+            res.criteria.push({
+                name: crit.name,
+                description: crit.description,
+                priority: crit.priority,
+                group: crit.group
             });
+        });
+
+        var str = JSON.stringify(res);
+        if (m.criteriaStr === str) {
+            return null; // omit update of identical
+        } else {
+            m.criteriaStr = str;
+            return res;
+        }
+    }
+
+    function pruneEmpty(arr) {
+        return $.map(arr, function (crit) {
+            if (!crit.name && !crit.description) {
+                return null;
+            }
+            return crit;
+        });
     }
 
     function getGroups() {
@@ -143,10 +181,14 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
     // Ng-table handling
     //
-    function reloadTables() {
+    function reloadTables(save) {
         m.popoverOn = null; // hide popover
         m.normTableParams.reload();
         m.fullTableParams.reload();
+
+        if (save) {
+            updateCriteria();
+        }
     }
 
     function tableGetData($defer, params) {
@@ -227,12 +269,12 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
         if (crit) {
             var idx = m.criteria.indexOf(crit);
-            m.criteria.splice(idx+1, 0, added);
+            m.criteria.splice(idx + 1, 0, added);
         }
         else {
             m.criteria.push(added);
         }
-        reloadTables();
+        reloadTables(true);
         return added;
     }
 
@@ -244,7 +286,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
 
         var idx = m.criteria.indexOf(crit);
         var removed = m.criteria.splice(idx, 1);
-        reloadTables();
+        reloadTables(true);
         return removed;
     }
 
@@ -281,7 +323,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
             if (criteria.newGroup.value) {
                 criteria.group = criteria.newGroup.value;
                 m.groups.push(criteria.group);
-                reloadTables();
+                reloadTables(true);
             }
             criteria.newGroup = {};
             return;
@@ -292,8 +334,8 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, Tiles, ngTableParams
         }
     }
 
-    function selectGroup(criteria, group) {
+    function setCriteriaGroup(criteria, group) {
         criteria.group = group;
-        reloadTables();
+        reloadTables(true);
     }
 }

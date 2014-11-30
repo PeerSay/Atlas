@@ -53,7 +53,7 @@
                                 data-titles="['Criteria', 'Description', 'Group', 'Priority']"></ps-tile-table>
                     </div>
 
-                    <div class="tile-section">
+                    <div class="tile-section" hidden>
                         <table class="table dbg">
                             <tr ng-repeat="crit in cm.criteria" ng-class="{'bold': !!crit.edit}">
                                 <td>{{cm.criteria.indexOf(crit)}}</td>

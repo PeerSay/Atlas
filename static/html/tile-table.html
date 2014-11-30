@@ -71,7 +71,7 @@
             <input type="text"
                     ng-model="criteria.name"
                     ng-focus="criteria.edit = 'name'; ctl.popoverOn = null;"
-                    ng-blur="criteria.edit = false"
+                    ng-blur="criteria.edit = false; ctl.updateCriteria()"
                     ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"
                     ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
                     ps-focus-on="criteria.edit === 'name'"
@@ -81,7 +81,7 @@
             <input type="text"
                     ng-model="criteria.description"
                     ng-focus="criteria.edit = 'description'; ctl.popoverOn = null;"
-                    ng-blur="criteria.edit = false"
+                    ng-blur="criteria.edit = false; ctl.updateCriteria()"
                     ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"
                     ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
                     ps-focus-on="criteria.edit === 'description'"
@@ -103,7 +103,7 @@
                                     ng-model="criteria.priority"
                                     ng-true-value="'required'"
                                     ng-false-value="'optional'"
-                                    ng-click="ctl.reloadTables()">
+                                    ng-click="ctl.reloadTables(true)">
                             Required criteria
                         </label>
                     </div>
@@ -114,7 +114,7 @@
                             <a href class="list-group-item"
                                     ng-repeat="group in ctl.groups"
                                     ng-class="{'active': group === criteria.group}"
-                                    ng-click="ctl.selectGroup(criteria, group)">
+                                    ng-click="ctl.setCriteriaGroup(criteria, group)">
                                 <span class="glyphicon glyphicon-ok" ng-show="group === criteria.group"></span>
                                 {{group || 'None'}}
                             </a>

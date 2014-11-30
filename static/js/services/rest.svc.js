@@ -3,47 +3,30 @@
 angular.module('peersay')
     .factory('restApi', restApi);
 
-restApi.$inject = ['$http', '$q'];
+// General CRUD rule:
+// create → POST    /collection
+// read →   GET     /collection[/id]
+// update → PUT     /collection/id
+// patch →  PATCH   /collection/id
+// delete → DELETE  /collection/id
 
+restApi.$inject = ['$http', '$q'];
 function restApi($http, $q) {
     var service = {
-        readAll: readAll,
-        read: read,
-        update: update,
-        create: create,
-        remove: remove
+        readAll: request('get'),
+        read: request('get'),
+        update: request('put'),
+        create: request('post'),
+        remove: request('delete')
     };
     return service;
 
-    // General CRUD rule:
-    // create → POST    /collection
-    // read →   GET     /collection[/id]
-    // update → PUT     /collection/id
-    // patch →  PATCH   /collection/id
-    // delete → DELETE  /collection/id
+    function request(method) {
+        return function (params, data) {
+            params.unshift('/api');
+            var url = params.join('/');
 
-    function readAll(collection) {
-        var url = '/api/' + collection;
-        return $http.get(url);
-    }
-
-    function read(doc, id) {
-        var url = '/api/' + doc + '/' + id;
-        return $http.get(url);
-    }
-
-    function update(doc, id, data) {
-        var url = '/api/' + doc + '/' + id;
-        return $http.put(url, data);
-    }
-
-    function create (doc, data) {
-        var url = '/api/' + doc;
-        return $http.post(url, data);
-    }
-
-    function remove (doc, id) {
-        var url = '/api/' + doc + '/' + id;
-        return $http.delete(url);
+            return $http[method](url, data);
+        };
     }
 }

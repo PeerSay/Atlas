@@ -140,7 +140,7 @@ function Tiles($rootScope, DeepLinking) {
             tile.show = false;
             T.checklist.tiles.push(tile);
         });
-        T.checklist.current = T.checklist.tiles[0]; //TODO
+        T.checklist.current = T.checklist.tiles[0]; //TODO - select correct current
         DeepLinking.load(nspace, ['tile', 'mode', 'dlg']);
     }
 

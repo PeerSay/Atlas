@@ -29,8 +29,10 @@ function RestApi(app) {
         // projects
         app.post('/api/projects', createProject);
         app.get('/api/projects/:id', readProject);
-        app.put('/api/projects/:id', updateProject);
         app.delete('/api/projects/:id', removeProject);
+        app.put('/api/projects/:id', updateProject);
+        app.get('/api/projects/:id/criteria', readProjectCriteria);
+        app.put('/api/projects/:id/criteria', updateProjectCriteria);
         return U;
     }
 
@@ -117,13 +119,13 @@ function RestApi(app) {
                 return notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators -criteria', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return notFound(res, project_id);
                 }
 
-                var result = _.omit(prj.toJSON(), 'id'); // id=null returned despite '-id'
+                var result = prj.toJSON({ virtuals: true, transform: xformProject}); // virtuals give duration.days
                 console.log('[API] Reading project[%s] result:', project_id, result);
 
                 return res.json({ result: result });
@@ -172,6 +174,71 @@ function RestApi(app) {
         });
     }
 
+    // Criteria
+
+    function readProjectCriteria(req, res, next) {
+        var project_id = req.params.id;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Reading criteria of project[%s] for user=[%s]', project_id, email);
+
+        User.findOne({email: email}, 'projects.criteria', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
+
+            Project.findById(project_id, 'criteria', function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return notFound(res, project_id);
+                }
+
+
+                var result = prj.toJSON({ virtuals: false, transform: xformProjectCriteria});
+                console.log('[API] Reading criteria of project[%s] result:', project_id, result);
+
+                return res.json({ result: result });
+            });
+        });
+    }
+
+    function updateProjectCriteria(req, res, next) {
+        var project_id = req.params.id;
+        var data = req.body;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Updating criteria of project[%s] for user=[%s]', project_id, email);
+
+        User.findOne({email: email}, 'projects.criteria', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return notFound(res, email);
+            }
+
+            Project.findById(project_id, 'criteria', function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return notFound(res, project_id);
+                }
+
+                // Replace all
+                prj.criteria.splice.apply(prj.criteria, [].concat(0, prj.criteria.length, data.criteria));
+
+                prj.save(function (err) {
+                    if (err) { return modelError(res, err); }
+
+                    var result = true; // no need to send data back
+                    console.log('[API] Updating criteria of project[%s] result:', project_id, result);
+
+                    return res.json({ result: result });
+                });
+            });
+        });
+    }
+
     // Transforms
 
     function xformStubPrj(doc, ret) {
@@ -185,6 +252,16 @@ function RestApi(app) {
         if (typeof doc.ownerDocument === 'function') { // this is sub doc
             return xformStubPrj(doc, ret);
         }
+        return ret;
+    }
+
+    function xformProject(doc, ret) {
+        delete ret.id; // id=null returned despite '-id'
+        return ret;
+    }
+
+    function xformProjectCriteria(doc, ret) {
+        delete ret._id;
         return ret;
     }
 

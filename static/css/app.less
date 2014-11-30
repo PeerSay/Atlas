@@ -253,11 +253,40 @@ body {
   }
 
   .table {
+    &.dbg {
+      tr.bold {
+        td {
+          font-weight: bold;
+        }
+      }
+      td {
+        padding: 2px 8px;
+      }
+    }
+
     margin-bottom: 0;
     th {
       background: #f5f5f5;
       text-align: left;
       width: 40%;
+
+      &.table-menu {
+        padding: 0 0 0 2px;
+
+        .hamburger-icon {
+          display: inline-block;
+          .icon-bar {
+            display: block;
+            width: 12px;
+            height: 2px;
+            border-radius: 1px;
+            background: #000;
+            & + .icon-bar {
+              margin-top: 2px;
+            }
+          }
+        }
+      }
     }
     th + th, td + td {
       border-left: 1px solid #ddd;
@@ -279,6 +308,10 @@ body {
             background-color: #f9f7d0;
           }
         }
+        &.static {
+          padding: 8px;
+          background: #f5f5f5;
+        }
       }
     }
 
@@ -288,6 +321,8 @@ body {
 
     /*Popover controls*/
     .popover-form {
+      min-width: 160px;
+
       .list-group-item {
         padding: 4px 8px;
 

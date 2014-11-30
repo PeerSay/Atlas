@@ -48,6 +48,14 @@ var projectSchema = new Schema({
     ],
     defaults: [
         { type: String }
+    ],
+    criteria: [
+        {
+            name: { type: String, required: true, notEmpty: true },
+            description: {type: String },
+            group: { type: String },
+            priority: { type: String }
+        }
     ]
 });
 projectSchema.set('toJSON', { virtuals: true });

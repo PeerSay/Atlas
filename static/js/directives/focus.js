@@ -21,7 +21,6 @@ function psFocusOn($timeout) {
                                 el.select();
                             }
                         }
-                        el.focus();
                     }, 0, false);
                 }
             });

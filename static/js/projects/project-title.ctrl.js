@@ -21,8 +21,8 @@ function ProjectTitleCtrl($scope, Projects) {
 
     function activate() {
         Projects.readProject(m.projectId)
-            .then(function (res) {
-                m.title = res.title;
+            .then(function () {
+                m.title = Projects.current.project.title;
             });
     }
 
@@ -36,10 +36,8 @@ function ProjectTitleCtrl($scope, Projects) {
     function updateProjectTitle() {
         var title = m.editTitle.value.trim();
         Projects.updateProject(m.projectId, {title: title})
-            .success(function (res) {
-                m.title.value = res.result.title;
-                m.title.ok = true; // TODO
-                m.title.default = false;
+            .success(function () {
+                m.title = Projects.current.project.title;
             })
             .finally(function () {
                 m.editTitle.show = false;

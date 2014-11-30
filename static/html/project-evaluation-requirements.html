@@ -12,8 +12,11 @@
             <div class="view-mode" ng-class="m.viewMode.value">
                 <div class="tile-section norm border">
                     <table ng-table="cm.normTableParams" class="table">
-                        <tr ng-repeat="criteria in $data">
+                        <tr ng-repeat="criteria in $data" ng-show="$data.length">
                             <td data-title="'Criteria'">{{criteria.name}}</td>
+                        </tr>
+                        <tr ng-show="!$data.length">
+                            <td><em>Click to add</em></td>
                         </tr>
                     </table>
                 </div>
@@ -29,28 +32,37 @@
     <div class="modal fade" tabindex="-1" role="dialog"
             ps-tile-dialog
             ps-dlg-uri="tile.uri"
-            ps-toggle="cm.fullView">
-        <div class="modal-dialog">
+            ps-toggle="cm.fullView"
+            ps-on-show="cm.onFullView">
+        <div class="modal-dialog" ng-class="{'modal-lg': !cm.compactTable}">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
-                    <h4 class="modal-title">{{tile.title}}</h4>
+                    <h4 class="modal-title">
+                        {{tile.title}}
+                        <small ng-show="cm.savingData">Saving...</small>
+                    </h4>
                 </div>
-                <div class="modal-body border">
+                <div class="modal-body">
                     <div class="tile-section border">
                         <ps-tile-table
-                                ps-table-params="cm.reqTableParams"
+                                ps-table-params="cm.fullTableParams"
                                 data-ctl="cm"
-                                data-titles="['Must have Criteria', 'Description']"></ps-tile-table>
+                                data-titles="['Criteria', 'Description', 'Group', 'Priority']"></ps-tile-table>
                     </div>
 
-                    <div class="tile-section border">
-                        <ps-tile-table
-                                ps-table-params="cm.optTableParams"
-                                data-ctl="cm"
-                                data-titles="['Optional Criteria', 'Description']"></ps-tile-table>
+                    <div class="tile-section" hidden>
+                        <table class="table dbg">
+                            <tr ng-repeat="crit in cm.criteria" ng-class="{'bold': !!crit.edit}">
+                                <td>{{cm.criteria.indexOf(crit)}}</td>
+                                <td>{{crit.name}}</td>
+                                <td>{{crit.description}}</td>
+                                <td>{{crit.group}}</td>
+                                <td>{{crit.priority}}</td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
                 <div class="modal-footer">

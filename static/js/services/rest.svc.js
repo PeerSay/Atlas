@@ -27,6 +27,6 @@ function restApi($http, $q) {
             var url = params.join('/');
 
             return $http[method](url, data);
-        }
+        };
     }
 }

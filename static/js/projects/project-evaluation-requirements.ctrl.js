@@ -237,12 +237,12 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, Tiles, ngT
     function nextCriteriaLike(criteria) {
         var criteriaIdx = m.criteria.indexOf(criteria);
         var alike = $.map(m.criteria, function (crit, idx) {
-            if (idx > criteriaIdx
-                && crit.group === criteria.group
-                && crit.priority === criteria.priority) {
+            if (idx > criteriaIdx &&
+                crit.group === criteria.group &&
+                crit.priority === criteria.priority) {
                 return crit;
             } else {
-                return null
+                return null;
             }
         });
 

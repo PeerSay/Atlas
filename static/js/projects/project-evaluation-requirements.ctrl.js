@@ -322,7 +322,9 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, Tiles, ngT
         if (evt.keyCode === 13) {
             if (criteria.newGroup.value) {
                 criteria.group = criteria.newGroup.value;
-                m.groups.push(criteria.group);
+                if (m.groups.indexOf(criteria.group) < 0) {
+                    m.groups.push(criteria.group);
+                }
                 reloadTables(true);
             }
             criteria.newGroup = {};

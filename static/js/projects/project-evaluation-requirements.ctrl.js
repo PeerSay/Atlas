@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectEvaluationRequirementsCtrl', ProjectEvaluationRequirementsCtrl);
 
-ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', 'Tiles', 'ngTableParams', 'Projects'];
-function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, Tiles, ngTableParams, Projects) {
+ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Projects'];
+function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Projects) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -127,15 +127,18 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, Tiles, ngT
 
     function updateCriteria() {
         var data = getCriteriaData();
-        if (data) {
-            m.savingData = true;
-            Projects.updateProjectCriteria(m.projectId, data)
-                .finally(function () {
-                    $timeout(function () {
-                        m.savingData = false;
-                    }, 200);
-                });
-        }
+        if (!data) { return; } // unmodified
+
+        var delayPromise = $timeout(function () {}, 300, false);
+        var requestPromise = $q(function (resolve) {
+            Projects.updateProjectCriteria(m.projectId, data).finally(resolve);
+        });
+
+        m.savingData = true;
+        $q.all([delayPromise, requestPromise])
+            .then(function () {
+                m.savingData = false;
+            });
     }
 
     function getCriteriaData() {

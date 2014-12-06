@@ -29,7 +29,7 @@
     </div>
 
     <!--Full view-->
-    <div class="modal fade" tabindex="-1" role="dialog"
+    <div class="modal fade full-view" tabindex="-1" role="dialog"
             ps-tile-dialog
             ps-dlg-uri="tile.uri"
             ps-toggle="cm.fullView"
@@ -40,6 +40,10 @@
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
+                    <a class="btn btn-default export"
+                            ng-mousedown="csv.generate()"
+                            ng-href="{{ csv.link() }}"
+                            download="export.csv">Export</a>
                     <h4 class="modal-title">
                         {{tile.title}}
                         <small ng-show="cm.savingData">Saving...</small>
@@ -50,7 +54,8 @@
                         <ps-tile-table
                                 ps-table-params="cm.fullTableParams"
                                 data-ctl="cm"
-                                data-titles="['Criteria', 'Description', 'Group', 'Priority']"></ps-tile-table>
+                                data-titles="['Criteria', 'Description', 'Group', 'Priority']"
+                                ps-export-csv="csv"></ps-tile-table>
                     </div>
 
                     <div class="tile-section" hidden>

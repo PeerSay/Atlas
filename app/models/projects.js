@@ -96,7 +96,6 @@ projectSchema.statics.createByUser = function (project, user, next) {
             next(null, stubDoc);
         });
     });
-
 };
 
 

@@ -115,7 +115,11 @@ userSchema.statics.register = function (email, password, user_data, cb) {
 
         User.create(user_data, function (err, user) {
             if (err) { return cb(err); }
-            return cb(null, user, errors.AUTH_NEW_OK);
+
+            Project.createByUser(null/*default*/, user, function (err) {
+                if (err) { return cb(err); }
+                return cb(null, user, errors.AUTH_NEW_OK);
+            });
         })
     });
 };
@@ -173,9 +177,9 @@ userSchema.pre('save', function ensureId(next) {
 
     // ensure auto-increment of user.id
     Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
-        if (err) next(err);
-        user.id = settings.nextUserId;
+        if (err) { return next(err); }
 
+        user.id = settings.nextUserId;
         next();
     });
 });
@@ -189,7 +193,7 @@ userSchema.pre('save', function ensurePassword(next) {
 
     // hash the password
     util.hasher({plaintext: user.password, iterations: HASH_ITERS}, function (err, result) {
-        if (err) return next(err);
+        if (err) { return next(err); }
 
         // override the plaintext password with the hashed one + salt
         user.password = [result.key.toString('hex'), result.salt.toString('hex')].join('_');
@@ -208,21 +212,10 @@ userSchema.pre('save', function ensureValidEmail(next) {
     if (user.linkedIn || user.needVerify === false) { return next(); }
 
     util.randomBase64(64, function (err, str) {
-        if (err) return next(err);
+        if (err) { return next(err); }
 
         user.needVerify = str;
         user.markModified('needVerify'); // BUG: doesn't work?
-        next();
-    });
-});
-
-
-userSchema.pre('save', function ensureProject(next) {
-    var user = this;
-    if (!user.isNew) { return next(); }
-
-    Project.createByUser(null/*default*/, user, function (err) {
-        if (err) next(err);
         next();
     });
 });

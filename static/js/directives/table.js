@@ -5,7 +5,7 @@ angular
 function psTileTable() {
     return {
         restrict: 'E',
-        templateUrl: 'html/tile-table.html',
+        templateUrl: 'html/table.html',
         scope: {
             tableParams: '=psTableParams',
             ctl: '=',

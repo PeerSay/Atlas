@@ -78,7 +78,7 @@ describe('Auth', function () {
             .withArgs({email: 'a@a'})
             .callsArgWith(2, null, {email: 'a@a'});
 
-        it('should not crash server on bad params for begin', function (done) {
+        it.skip('should not crash server on bad params for begin', function (done) {
             request(app)
                 .post('/api/auth/restore')
                 .send({}) // <--

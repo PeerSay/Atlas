@@ -37,8 +37,8 @@ function Auth(app) {
         // restore
         app.get('/auth/restore', sendAppEntry);
         app.get('/auth/restore/complete', sendAppEntry); // ask for code and new password
-        app.post('/api/auth/restore', jsonParser, _.curry(validateAcceptAndBody)(restorePassword));
-        app.post('/api/auth/restore/complete', jsonParser, _.curry(validateAcceptAndBody)(restorePasswordComplete));
+        app.post('/api/auth/restore', jsonParser, restorePassword);
+        app.post('/api/auth/restore/complete', jsonParser, restorePasswordComplete);
 
         // logout
         app.post('/api/auth/logout', logout); // api call!
@@ -403,7 +403,7 @@ function Auth(app) {
     }
 
     function mailWelcomeAsync() {
-
+        //TODO
     }
 
     function mailRestoreAsync(data) {
@@ -415,66 +415,6 @@ function Auth(app) {
 
         mailer.send(data.email, tpl, locals); // async!
         // TODO: err handling
-    }
-
-
-    // TODO: move to proper place
-    function validateAcceptAndBody(func, req, res, next) {
-        if (!validateBody(req.body, res)) {
-            return;
-        }
-
-        validateAccept(func, req, res, next);
-    }
-
-    function validateBody(body, res) {
-        var ret = true;
-        if (isEmpty(body)) {
-            badRequest(res, 'No JSON');
-            ret = false;
-        }
-
-        return ret;
-    }
-
-    function validateAccept(func, req, res, next) {
-        console.log('[API] %s %s', req.method, req.url);
-        res.format({
-            json: function () {
-                func.call(U, req, res, next);
-            },
-            'default': function () {
-                notAcceptable(res);
-            }
-        });
-    }
-
-    function notAcceptable(res) {
-        return res
-            .status(406)
-            .send({error: 'Not Acceptable'});
-    }
-
-    function badRequest(res, msg) {
-        return res
-            .status(400)
-            .send({error: 'Bad request: ' + msg});
-    }
-
-    function notFound(res, msg) {
-        return res
-            .status(404)
-            .send({error: 'Not found: ' + msg});
-    }
-
-    function notValid(res, msg) {
-        return res
-            .status(409)
-            .send({error: 'Not valid: ' + msg});
-    }
-
-    function isEmpty(obj) {
-        return !Object.keys(obj).length;
     }
 
 

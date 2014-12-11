@@ -11,7 +11,7 @@ require('../app/api-validate')(app).setupRoutes();
 
 describe('REST API - Validation', function () {
 
-    describe('General API format & headres', function () {
+    describe('General API format & headers', function () {
         it('should return 406 on non-json Accept header', function (done) {
             request(app)
                 .get('/api/users')
@@ -76,6 +76,68 @@ describe('REST API - Validation', function () {
                 .get('/api/undefined') // <--
                 .set('Accept', 'application/json')
                 .expect(404, done);
+        });
+    });
+
+    describe('Auth API validation', function () {
+        it('should return 409 on no email param for /restore', function (done) {
+            request(app)
+                .post('/api/auth/restore')
+                .send({a: 1}) // <-- expected: {email: '...'}
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: email is required'}, done);
+        });
+
+        it('should return 409 on non-string param for /restore', function (done) {
+            request(app)
+                .post('/api/auth/restore')
+                .send({email: 123}) // <--
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: email must be a string'}, done);
+        });
+
+        it('should return 409 on non-email param for /restore', function (done) {
+            request(app)
+                .post('/api/auth/restore')
+                .send({email: 'abc'})// <--
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: email must be a valid email'}, done);
+        });
+
+        it('should return 409 on bad params for /restore/complete', function (done) {
+            request(app)
+                .post('/api/auth/restore/complete')
+                .send({code: 'aaaaaa'})// <-- expected: {code: '...', password: '...'}
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: password is required'}, done);
+        });
+
+        it('should return 409 on ill-formatted password for /restore/complete', function (done) {
+            request(app)
+                .post('/api/auth/restore/complete')
+                .send({code: 'aaa123', password: '123'}) // <-- min 6 chars pwd
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
+        });
+
+        it('should return 409 on ill-formatted code for /restore/complete', function (done) {
+            request(app)
+                .post('/api/auth/restore/complete')
+                .send({code: '-', password: '123123'}) // <-- alpha-num code
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: code must only contain alpha-numeric characters'}, done);
         });
     });
 });

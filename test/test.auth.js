@@ -78,16 +78,6 @@ describe('Auth', function () {
             .withArgs({email: 'a@a'})
             .callsArgWith(2, null, {email: 'a@a'});
 
-        it.skip('should not crash server on bad params for begin', function (done) {
-            request(app)
-                .post('/api/auth/restore')
-                .send({}) // <--
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
-                .expect(400)
-                .expect({error: 'Bad request: No JSON'}, done);
-        });
-
         it('should set session cookie on POST /api/auth/restore and return success json', function (done) {
             request(app)
                 .post('/api/auth/restore')
@@ -137,8 +127,6 @@ describe('Auth', function () {
                 .expect({result: {email: 'a@a', id: 1}}, done);
         });
 
-        it('should not crash server on bad params for complete');
-
         it('should fail restore begin on POST /api/auth/restore if user is not found by email', function (done) {
             User.findOne.restore();
             sinon.stub(User, 'findOne')
@@ -179,5 +167,4 @@ describe('Auth', function () {
                 .expect({error: 'no session'}, done);
         });
     });
-
 });

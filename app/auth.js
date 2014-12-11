@@ -286,7 +286,7 @@ function Auth(app) {
     // Restore
     //
     function restorePassword(req, res, next) {
-        var data = req.body; // TODO: validate params
+        var data = req.body;
 
         console.log('[AUTH] Restore for [%s]', data.email);
 
@@ -315,13 +315,14 @@ function Auth(app) {
     }
 
     function restorePasswordComplete(req, res, next) {
-        var data = req.body; // TODO: validate params
+        var data = req.body;
         var restore = req.session.restore;
 
         if (!restore) {
             console.log('[AUTH] Restore complete failed - no session');
             return res.json({error: 'no session'});
         }
+
         if (restore.code !== data.code) {
             console.log('[AUTH] Restore complete failed - invalid [%s] != [%s]', restore.code, data.code);
             return res.json({error: 'invalid code'});

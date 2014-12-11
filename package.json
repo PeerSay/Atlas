@@ -49,7 +49,6 @@
 
         "path": "~0.4.9",
         "lodash": "~2.4.1",
-
         "express": "~4.9.1",
         "compression": "~1.1.0",
         "body-parser": "~1.9.0",
@@ -59,14 +58,15 @@
         "passport": "~0.2.1",
         "passport-local": "~1.0.0",
         "passport-linkedin": "~0.1.3",
-
         "socket.io": "~1.1.0",
+
         "mongoose": "~3.8.17",
         "mongoose-shortid-nodeps": "~0.5.3",
 
         "nodemailer": "~1.3.0",
         "nodemailer-sendgrid-transport": "~0.1.0",
-        "swig": "~1.4.2"
+        "swig": "~1.4.2",
+        "joi": "~5.0.2"
     },
     "devDependencies": {
         "grunt-contrib-watch": "~0.6.1",
@@ -88,6 +88,7 @@
 
         "protractor": "~1.2.0",
         "grunt-protractor-runner": "~1.1.4",
+
         "sinon": "~1.10.3",
         "sinon-chai": "~2.6.0"
     }

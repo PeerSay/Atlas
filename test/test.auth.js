@@ -22,14 +22,17 @@ app.use(passport.initialize());
 app.use(passport.session());
 var agent = request.agent(app);
 
-// Dependencies to Mock
+// Mock config
+var testConfig = {web: {}, db: {}, email: {enable: false}};
+process.deploy = testConfig;
 var config = require('../app/config');
-var errors = require('../app/errors');
+
+// Dependencies to Mock
 var util = require('../app/util');
 var mailer = require('../app/email/mailer');
 var User = require('../app/models/users').UserModel;
 
-// Under test
+// --> Under test
 var Auth = require('../app/auth');
 var auth = Auth(app).setupRoutes();
 
@@ -68,14 +71,22 @@ describe('Auth', function () {
         it('should redirect to /projects upon successful login after activation');
     });
 
-    describe.only('Password Restore', function () {
+    describe('Password Restore', function () {
         var mailerStub = sinon.stub(mailer, 'send');
         var utilStub = sinon.stub(util, 'genRestorePwdKey').returns('123');
         var userFindOneStub = sinon.stub(User, 'findOne')
             .withArgs({email: 'a@a'})
             .callsArgWith(2, null, {email: 'a@a'});
 
-        it('should not crash server on bad params for begin');
+        it('should not crash server on bad params for begin', function (done) {
+            request(app)
+                .post('/api/auth/restore')
+                .send({}) // <--
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(400)
+                .expect({error: 'Bad request: No JSON'}, done);
+        });
 
         it('should set session cookie on POST /api/auth/restore and return success json', function (done) {
             request(app)

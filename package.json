@@ -8,10 +8,10 @@
 
         "test": "grunt test",
 
-        "prestage": "npm install",
-        "stage": "set _DEPLOY=stage && node server.js",
+        "prestage": "grunt prod",
+        "stage": "node server.js stage",
 
-        "dev": "set _DEPLOY=dev && nodemon --watch app server.js",
+        "dev": "nodemon --watch app server.js dev",
 
         "preupdate-webdriver": "npm install",
         "update-webdriver": "node node_modules/protractor/bin/webdriver-manager update",

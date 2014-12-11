@@ -13,10 +13,11 @@ var mailer = require('../app/email/mailer');
 var User = require('../app/models/users').UserModel;
 
 var constant = {
-    SESS_NORMAL: 1000*60*60*12, // 12h
-    SESS_LONG: 1000*60*60*24*14, // 14d
-    SESS_RESTORE: 1000*60*20 // 20min
+    SESS_NORMAL: 1000 * 60 * 60 * 12, // 12h
+    SESS_LONG: 1000 * 60 * 60 * 24 * 14, // 14d
+    SESS_RESTORE: 1000 * 60 * 20 // 20min
 };
+
 
 function Auth(app) {
     var U = {};
@@ -46,7 +47,7 @@ function Auth(app) {
         app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
         app.get('/auth/linkedin/callback', authenticateByLinkedIn); // redirect back from linkedin.com
 
-        // Entry point
+        // Private pages
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
         app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
@@ -273,7 +274,7 @@ function Auth(app) {
         var maxAge = options.longSession ?
             constant.SESS_LONG : constant.SESS_NORMAL;
 
-        console.log('[AUTH] Success - logging in [%s], for %sh', user.email, maxAge/(1000*60*60));
+        console.log('[AUTH] Success - logging in [%s], for %sh', user.email, maxAge / (1000 * 60 * 60));
 
         req.session.cookie.maxAge = maxAge;
         req.login(user, function (err) { // establish session...
@@ -356,9 +357,7 @@ function Auth(app) {
             return res.redirect('/projects');
         }
 
-        res.sendFile('app.html', {
-            root: app.config.web.static_dir
-        });
+        res.sendFile('app.html', { root: config.web.static_dir });
     }
 
 
@@ -481,7 +480,7 @@ function Auth(app) {
 
     U.setupRoutes = setupRoutes;
     return U;
-};
+}
 
 
 module.exports = Auth;

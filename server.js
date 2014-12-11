@@ -7,8 +7,11 @@ var MongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 var passport = require('passport');
 
-// App dependencies
+// Setup config
+process.deploy = process.argv[2];
 var config = require('./app/config');
+
+// App dependencies
 var Auth = require('./app/auth');
 var RestApi = require('./app/rest-api');
 
@@ -20,11 +23,10 @@ mongoose.connection.on('error', console.error.bind(console, 'connection error:')
 
 // App config
 var app = express();
-app.config = config;
 var http = require('http').Server(app);
 var sio = require('socket.io')(http);
 
-// Set options & middleware
+// Set web options & middleware
 app.disable('x-powered-by');
 app.use(compression());
 app.use(express.static(config.web.static_dir));
@@ -62,6 +64,7 @@ http.listen(config.web.port, function () {
 
 // Socket
 //
+/*
 sio.on('connection', function (socket) {
     console.log('[Sock] New socket: client.id=[%s]', socket.client.id);
 
@@ -77,3 +80,4 @@ var counter = 0;
 setInterval(function () {
     sio.to('room').emit('msg', {cnt: counter++});
 }, 2000);
+*/

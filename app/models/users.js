@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+
 var util = require('../../app/util');
 var config = require('../../app/config');
 var projects = require('../../app/models/projects');

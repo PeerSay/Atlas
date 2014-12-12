@@ -90,10 +90,10 @@ function Auth(app) {
         var data = req.body;
         var email = data.email;
         var password = data.password;
+        data.needVerify = true;
 
         console.log('[AUTH] Register-local attempt by [%s]', email);
 
-        data.needVerify = true;
         User.register(email, password, data, function (err, user, code) {
             if (err) return next(err); //TODO
 

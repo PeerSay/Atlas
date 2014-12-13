@@ -2,7 +2,6 @@ var should = require('chai').should();
 var util = require('../app/util');
 
 describe('Util', function () {
-
     describe('crypto', function () {
         var hash_salt_weak;
         var ITERS_STRONG = 100000;
@@ -78,8 +77,6 @@ describe('Util', function () {
        });
 
        it('should generate alpha-num random restore code', function () {
-           util.genRestorePwdKey.restore(); // remove stub
-
            var code = util.genRestorePwdKey();
            var code_re = /[\d\w]{8,11}/;
 

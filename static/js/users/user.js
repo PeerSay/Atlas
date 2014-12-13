@@ -23,7 +23,7 @@ function User($http, rest, Storage) {
 
 
     function logout() {
-        return $http.post('/api/auth/logout', {})
+        return $http.post('/api/auth/logout', {logout: true})
             .success(function () {
                 U.user = Storage.remove('user') || {};
             })

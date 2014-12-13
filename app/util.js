@@ -49,9 +49,14 @@ function isValidDate(d) {
 }
 
 
+function isEmptyObj(obj) {
+    return !Object.keys(obj).length;
+}
+
 module.exports = {
     hasher: hasher,
     randomBase64: randomBase64,
     genRestorePwdKey: genRestorePwdKey,
-    isValidDate: isValidDate
+    isValidDate: isValidDate,
+    isEmptyObj: isEmptyObj // TODO - test
 };

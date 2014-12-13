@@ -13,10 +13,11 @@ var mailer = require('../app/email/mailer');
 var User = require('../app/models/users').UserModel;
 
 var constant = {
-    SESS_NORMAL: 1000*60*60*12, // 12h
-    SESS_LONG: 1000*60*60*24*14, // 14d
-    SESS_RESTORE: 1000*60*20 // 20min
+    SESS_NORMAL: 1000 * 60 * 60 * 12, // 12h
+    SESS_LONG: 1000 * 60 * 60 * 24 * 14, // 14d
+    SESS_RESTORE: 1000 * 60 * 20 // 20min
 };
+
 
 function Auth(app) {
     var U = {};
@@ -36,8 +37,8 @@ function Auth(app) {
         // restore
         app.get('/auth/restore', sendAppEntry);
         app.get('/auth/restore/complete', sendAppEntry); // ask for code and new password
-        app.post('/api/auth/restore', jsonParser, _.curry(validateAcceptAndBody)(restorePassword));
-        app.post('/api/auth/restore/complete', jsonParser, _.curry(validateAcceptAndBody)(restorePasswordComplete));
+        app.post('/api/auth/restore', jsonParser, restorePassword);
+        app.post('/api/auth/restore/complete', jsonParser, restorePasswordComplete);
 
         // logout
         app.post('/api/auth/logout', logout); // api call!
@@ -46,7 +47,7 @@ function Auth(app) {
         app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
         app.get('/auth/linkedin/callback', authenticateByLinkedIn); // redirect back from linkedin.com
 
-        // Entry point
+        // Private pages
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
         app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
@@ -89,10 +90,10 @@ function Auth(app) {
         var data = req.body;
         var email = data.email;
         var password = data.password;
+        data.needVerify = true;
 
         console.log('[AUTH] Register-local attempt by [%s]', email);
 
-        data.needVerify = true;
         User.register(email, password, data, function (err, user, code) {
             if (err) return next(err); //TODO
 
@@ -273,7 +274,7 @@ function Auth(app) {
         var maxAge = options.longSession ?
             constant.SESS_LONG : constant.SESS_NORMAL;
 
-        console.log('[AUTH] Success - logging in [%s], for %sh', user.email, maxAge/(1000*60*60));
+        console.log('[AUTH] Success - logging in [%s], for %sh', user.email, maxAge / (1000 * 60 * 60));
 
         req.session.cookie.maxAge = maxAge;
         req.login(user, function (err) { // establish session...
@@ -285,7 +286,7 @@ function Auth(app) {
     // Restore
     //
     function restorePassword(req, res, next) {
-        var data = req.body; // TODO: validate params
+        var data = req.body;
 
         console.log('[AUTH] Restore for [%s]', data.email);
 
@@ -314,13 +315,14 @@ function Auth(app) {
     }
 
     function restorePasswordComplete(req, res, next) {
-        var data = req.body; // TODO: validate params
+        var data = req.body;
         var restore = req.session.restore;
 
         if (!restore) {
             console.log('[AUTH] Restore complete failed - no session');
             return res.json({error: 'no session'});
         }
+
         if (restore.code !== data.code) {
             console.log('[AUTH] Restore complete failed - invalid [%s] != [%s]', restore.code, data.code);
             return res.json({error: 'invalid code'});
@@ -356,9 +358,7 @@ function Auth(app) {
             return res.redirect('/projects');
         }
 
-        res.sendFile('app.html', {
-            root: app.config.web.static_dir
-        });
+        res.sendFile('app.html', { root: config.web.static_dir });
     }
 
 
@@ -404,7 +404,7 @@ function Auth(app) {
     }
 
     function mailWelcomeAsync() {
-
+        //TODO
     }
 
     function mailRestoreAsync(data) {
@@ -419,69 +419,9 @@ function Auth(app) {
     }
 
 
-    // TODO: move to proper place
-    function validateAcceptAndBody(func, req, res, next) {
-        if (!validateBody(req.body, res)) {
-            return;
-        }
-
-        validateAccept(func, req, res, next);
-    }
-
-    function validateBody(body, res) {
-        var ret = true;
-        if (isEmpty(body)) {
-            badRequest(res, 'No JSON');
-            ret = false;
-        }
-
-        return ret;
-    }
-
-    function validateAccept(func, req, res, next) {
-        console.log('[API] %s %s', req.method, req.url);
-        res.format({
-            json: function () {
-                func.call(U, req, res, next);
-            },
-            'default': function () {
-                notAcceptable(res);
-            }
-        });
-    }
-
-    function notAcceptable(res) {
-        return res
-            .status(406)
-            .send({error: 'Not Acceptable'});
-    }
-
-    function badRequest(res, msg) {
-        return res
-            .status(400)
-            .send({error: 'Bad request: ' + msg});
-    }
-
-    function notFound(res, msg) {
-        return res
-            .status(404)
-            .send({error: 'Not found: ' + msg});
-    }
-
-    function notValid(res, msg) {
-        return res
-            .status(409)
-            .send({error: 'Not valid: ' + msg});
-    }
-
-    function isEmpty(obj) {
-        return !Object.keys(obj).length;
-    }
-
-
     U.setupRoutes = setupRoutes;
     return U;
-};
+}
 
 
 module.exports = Auth;

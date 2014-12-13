@@ -3,36 +3,29 @@ var util = require('util');
 var jsonParser = require('body-parser').json();
 
 // App dependencies
+var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
-
-
-// util - TODO
-function isEmpty(obj) {
-    return !Object.keys(obj).length;
-}
 
 
 function RestApi(app) {
     var U = {};
 
     function setupRoutes() {
-        // validation & logging
-        app.use('/api/*', logApi, validateAccept);
-        app.post('/api/*', jsonParser, validateBody);
-        app.put('/api/*', jsonParser, validateBody);
+        // Logging & auth
+        app.use('/api/*', logApi);
         app.use(/\/user|\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
 
         // user
         app.get('/api/user', readUser);
 
         // projects
-        app.post('/api/projects', createProject);
+        app.post('/api/projects', jsonParser, createProject);
         app.get('/api/projects/:id', readProject);
         app.delete('/api/projects/:id', removeProject);
-        app.put('/api/projects/:id', updateProject);
+        app.put('/api/projects/:id', jsonParser, updateProject);
         app.get('/api/projects/:id/criteria', readProjectCriteria);
-        app.put('/api/projects/:id/criteria', updateProjectCriteria);
+        app.put('/api/projects/:id/criteria', jsonParser, updateProjectCriteria);
         return U;
     }
 
@@ -46,7 +39,7 @@ function RestApi(app) {
         User.findOne({email: email}, 'id -_id email name projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             var result = user.toJSON({ transform: xformUser });
@@ -68,7 +61,7 @@ function RestApi(app) {
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             Project.createByUser(data, user, function (err, stubPrj) {
@@ -92,7 +85,7 @@ function RestApi(app) {
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             Project.removeByUser(project_id, user, function (err) {
@@ -116,13 +109,13 @@ function RestApi(app) {
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             Project.findById(project_id, '-_id -id -__v -collaborators -criteria', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
-                    return notFound(res, project_id);
+                    return errRes.notFound(res, project_id);
                 }
 
                 var result = prj.toJSON({ virtuals: true, transform: xformProject}); // virtuals give duration.days
@@ -144,7 +137,7 @@ function RestApi(app) {
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             var path = _.keys(data)[0]; // allow only one field update per op!
@@ -155,7 +148,7 @@ function RestApi(app) {
             Project.findOne({_id: project_id}, select_full, function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
-                    return notFound(res, project_id);
+                    return errRes.notFound(res, project_id);
                 }
 
                 // update
@@ -186,13 +179,13 @@ function RestApi(app) {
         User.findOne({email: email}, 'projects.criteria', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             Project.findById(project_id, 'criteria', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
-                    return notFound(res, project_id);
+                    return errRes.notFound(res, project_id);
                 }
 
 
@@ -215,13 +208,13 @@ function RestApi(app) {
         User.findOne({email: email}, 'projects.criteria', function (err, user) {
             if (err) { return next(err); }
             if (!user) {
-                return notFound(res, email);
+                return errRes.notFound(res, email);
             }
 
             Project.findById(project_id, 'criteria', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
-                    return notFound(res, project_id);
+                    return errRes.notFound(res, project_id);
                 }
 
                 // Replace all
@@ -265,7 +258,7 @@ function RestApi(app) {
         return ret;
     }
 
-    // Validation
+    // Validation & logging
     function logApi(req, res, next) {
         console.log('[API] %s %s', req.method, req.originalUrl);
         next();
@@ -273,25 +266,7 @@ function RestApi(app) {
 
     function ensureAuthorized(req, res, next) {
         if (!req.user) {
-            return notAuthorized(res);
-        }
-        next();
-    }
-
-    function validateAccept(req, res, next) {
-        res.format({
-            json: function () {
-                next();
-            },
-            'default': function () {
-                notAcceptable(res);
-            }
-        });
-    }
-
-    function validateBody(reg, res, next) {
-        if (isEmpty(reg.body)) {
-            badRequest(res, 'No JSON'); // TODO: post({}) should be OK
+            return errRes.notAuthorized(res);
         }
         next();
     }
@@ -328,39 +303,8 @@ function RestApi(app) {
         var error_msg = error();
         console.log('[API] Model error:', error_msg);
 
-        return notValid(res, error_msg);
+        return errRes.notValid(res, error_msg);
     }
-
-    function notAuthorized(res) {
-        return res
-            .status(401)
-            .send({error: 'Not Authorized'});
-    }
-
-    function notAcceptable(res) {
-        return res
-            .status(406)
-            .send({error: 'Not Acceptable'});
-    }
-
-    function badRequest(res, msg) {
-        return res
-            .status(400)
-            .send({error: 'Bad request: ' + msg});
-    }
-
-    function notFound(res, msg) {
-        return res
-            .status(404)
-            .send({error: 'Not found: ' + msg});
-    }
-
-    function notValid(res, msg) {
-        return res
-            .status(409)
-            .send({error: 'Not valid: ' + msg});
-    }
-
 
     U.setupRoutes = setupRoutes;
     return U;

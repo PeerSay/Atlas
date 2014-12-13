@@ -74,7 +74,7 @@ describe('Client - unit', function () {
                 done();
             });
 
-            DeepLinking.load('namespace');
+            DeepLinking.load('namespace', ['tile']);
             DeepLinking.url().should.be.equal('/?tile=xy,ab');
             spy.callCount.should.be.equal(1);
         });

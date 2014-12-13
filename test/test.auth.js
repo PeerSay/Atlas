@@ -22,14 +22,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 var agent = request.agent(app);
 
-// Dependencies to Mock
+// Mock config
+process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
 var config = require('../app/config');
-var errors = require('../app/errors');
+
+// Dependencies to Mock
 var util = require('../app/util');
 var mailer = require('../app/email/mailer');
 var User = require('../app/models/users').UserModel;
 
-// Under test
+// --> Under test
 var Auth = require('../app/auth');
 var auth = Auth(app).setupRoutes();
 
@@ -68,14 +70,21 @@ describe('Auth', function () {
         it('should redirect to /projects upon successful login after activation');
     });
 
-    describe.only('Password Restore', function () {
-        var mailerStub = sinon.stub(mailer, 'send');
-        var utilStub = sinon.stub(util, 'genRestorePwdKey').returns('123');
-        var userFindOneStub = sinon.stub(User, 'findOne')
-            .withArgs({email: 'a@a'})
-            .callsArgWith(2, null, {email: 'a@a'});
+    describe('Password Restore', function () {
+        var mailerStub, utilStub, userFindOneStub;
 
-        it('should not crash server on bad params for begin');
+        before(function () {
+            mailerStub = sinon.stub(mailer, 'send');
+            utilStub = sinon.stub(util, 'genRestorePwdKey').returns('123');
+            userFindOneStub = sinon.stub(User, 'findOne')
+                .withArgs({email: 'a@a'})
+                .callsArgWith(2, null, {email: 'a@a'});
+        });
+        after(function () {
+            mailer.send.restore();
+            util.genRestorePwdKey.restore();
+            User.findOne.restore();
+        });
 
         it('should set session cookie on POST /api/auth/restore and return success json', function (done) {
             request(app)
@@ -126,8 +135,6 @@ describe('Auth', function () {
                 .expect({result: {email: 'a@a', id: 1}}, done);
         });
 
-        it('should not crash server on bad params for complete');
-
         it('should fail restore begin on POST /api/auth/restore if user is not found by email', function (done) {
             User.findOne.restore();
             sinon.stub(User, 'findOne')
@@ -168,5 +175,4 @@ describe('Auth', function () {
                 .expect({error: 'no session'}, done);
         });
     });
-
 });

@@ -3,9 +3,9 @@ var mongoose = require('mongoose');
 
 
 // Mock config
-var testConfig = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
-process.deploy = testConfig;
+process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
 var config = require('../app/config');
+
 
 // Dependencies to Mock
 var errors = require('../app/errors');
@@ -16,16 +16,31 @@ var Project = require('../app/models/projects').ProjectModel;
 
 // --> Connect to test DB
 var DB_URL = 'mongodb://localhost/peersay_test';
-mongoose.connect(DB_URL/*, {server: {socketOptions: {keepAlive: 1}}}*/);
-mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
+mongoose.connection.on('error', console.error.bind(console, 'connection error in project-model:'));
 
 
 describe('Project Model', function () {
+    before(function (done) {
+        mongoose.connect(DB_URL, done);
+    });
+    after(function (done) {
+        mongoose.connection.db.dropDatabase(function(){
+            mongoose.connection.close(function(){
+                done();
+            });
+        });
+    });
+
 
     describe('CRUD', function () {
         var firstProjectId;
 
         before(function (done) {
+            // Ensure initial id=1
+            Settings.remove().exec();
+            Settings.findOneAndUpdate({}, {}, {upsert: true}).exec();
+
+            //ensure user registered
             var data = {
                 email: 'some@email.com',
                 password: '1',

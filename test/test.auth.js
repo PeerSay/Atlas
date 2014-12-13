@@ -23,8 +23,7 @@ app.use(passport.session());
 var agent = request.agent(app);
 
 // Mock config
-var testConfig = {web: {}, db: {}, email: {enable: false}};
-process.deploy = testConfig;
+process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
 var config = require('../app/config');
 
 // Dependencies to Mock
@@ -72,11 +71,20 @@ describe('Auth', function () {
     });
 
     describe('Password Restore', function () {
-        var mailerStub = sinon.stub(mailer, 'send');
-        var utilStub = sinon.stub(util, 'genRestorePwdKey').returns('123');
-        var userFindOneStub = sinon.stub(User, 'findOne')
-            .withArgs({email: 'a@a'})
-            .callsArgWith(2, null, {email: 'a@a'});
+        var mailerStub, utilStub, userFindOneStub;
+
+        before(function () {
+            mailerStub = sinon.stub(mailer, 'send');
+            utilStub = sinon.stub(util, 'genRestorePwdKey').returns('123');
+            userFindOneStub = sinon.stub(User, 'findOne')
+                .withArgs({email: 'a@a'})
+                .callsArgWith(2, null, {email: 'a@a'});
+        });
+        after(function () {
+            mailer.send.restore();
+            util.genRestorePwdKey.restore();
+            User.findOne.restore();
+        });
 
         it('should set session cookie on POST /api/auth/restore and return success json', function (done) {
             request(app)

@@ -1,7 +1,5 @@
 var should = require('chai').should();
-//var _ = require('lodash');
 var mongoose = require('mongoose');
-
 
 // Mock config
 var testConfig = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
@@ -13,7 +11,6 @@ var errors = require('../app/errors');
 var user = require('../app/models/users');
 var User = user.UserModel;
 var Settings = user.SettingsModel;
-var Project = require('../app/models/projects').ProjectModel;
 
 // --> Connect to test DB
 var DB_URL = 'mongodb://localhost/peersay_test';

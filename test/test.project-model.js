@@ -1,5 +1,4 @@
 var should = require('chai').should();
-//var _ = require('lodash');
 var mongoose = require('mongoose');
 
 
@@ -22,95 +21,96 @@ mongoose.connection.on('error', console.error.bind(console, 'connection error:')
 
 
 describe('Project Model', function () {
-    var curUser = null;
-
-    beforeEach(function (done) {
-        // Ensure one entry exists
-        var curUser = new User({name: 'me', email: 'some@email.com', password: '1'})
-            .save(done);
-    });
-
-    afterEach(function (done) {
-        User.remove({}, function () {
-            Project.remove({}, done);
-        });
-        curUser = null;
-        //done();
-    });
 
     describe('CRUD', function () {
+        var firstProjectId;
 
-        it('should have project stub created by default', function (done) {
-            User
-                .findByEmail('some@email.com')
+        before(function (done) {
+            var data = {
+                email: 'some@email.com',
+                password: '1',
+                needVerify: false
+            };
+            User.register(data.email, data.password, data, function (err, doc) {
+                firstProjectId = doc.projects[0]._ref;
+                done();
+            });
+        });
+        after(function (done) {
+            User.remove({}, function () {
+                Project.remove({}, done);
+            });
+        });
+
+        it('User should have project stub created by default', function (done) {
+            var userQ = User.findByEmail('some@email.com');
+            userQ.exec(function (err, user) {
+                should.not.exist(err);
+                user.projects.should.be.an('array');
+
+                var stubPrj = user.projects[0];
+                stubPrj.should.be.an('object');
+                stubPrj.should.have.property('_ref').be.a('string');
+                stubPrj.should.have.property('_stub').equal(true);
+                stubPrj.should.have.property('title').equal('Welcome Project');
+                done();
+            });
+        });
+
+        it('User should populate full Project form stub, which has collaborator set', function (done) {
+            var userQ = User.findByEmail('some@email.com');
+            userQ
+                .populate('projects._ref') // <--
                 .exec(function (err, user) {
                     should.not.exist(err);
 
-                    user.projects[0].should.be.an('object');
-                    user.projects[0].should.have.property('id').equal(1);
-                    user.projects[0].should.have.property('title').equal('Welcome Project'); // XXX
+                    var project = user.projects[0]._ref;
+                    project.title.should.be.equal('Welcome Project');
+                    project.collaborators[0].should.be.deep.equal(user._id);
+                    project.criteria.should.be.an('array');
                     done();
                 });
         });
 
-        it('should populate full Project form stub, which has collaborator set', function (done) {
-            User
-                .findByEmail('some@email.com')
-                .populate('projects._ref')
-                .exec(function (err, user) {
+        it('Project should create new project by user and population should work', function (done) {
+            var userQ = User.findByEmail('some@email.com');
+            userQ.exec(function (err, user) {
+                Project.createByUser({ title: 'xyz' }, user, function (err, prjStub) {
                     should.not.exist(err);
-                    var project = user.projects[0];
-                    project._ref.collaborators[0].should.be.deep.equal(user._id);
-                    done();
+                    prjStub.should.have.property('title').equal('xyz');
+
+                    userQ
+                        .populate('projects._ref')
+                        .exec(function (err, popUser) {
+                            should.not.exist(err);
+
+                            var project = popUser.projects[1]._ref; // 2nd project for this user
+                            project.title.should.be.equal('xyz');
+                            project.collaborators[0].should.be.deep.equal(popUser._id);
+                            project.criteria.should.be.an('array');
+                            done();
+                        });
                 });
+            });
         });
 
-        it('should create project by user', function (done) {
-            User
-                .findByEmail('some@email.com')
-                .exec(function (err, user) {
+        it('Project should remove project by user', function (done) {
+            var userQ = User.findByEmail('some@email.com');
+            userQ.exec(function (err, user) {
+                Project.removeByUser(firstProjectId, user, function (err/*, prj*/) {
                     should.not.exist(err);
 
-                    user.createProject({
-                        title: 'xyz'
-                    }, function (err, prj) {
-                        should.not.exist(err);
-                        prj.should.have.property('title').equal('xyz');
-
-                        User
-                            .findByEmail(user.email)
-                            .populate('projects._ref')
-                            .exec(function (err, user) {
-                                should.not.exist(err);
-
-                                var project = user.projects[1];
-                                project.should.have.property('id').equal(2);
-                                project._ref.collaborators[0].should.be.deep.equal(user._id);
-                                done();
-                            });
-                    });
+                    userQ
+                        .populate('projects._ref')
+                        .exec(function (err, popUser) {
+                            should.not.exist(err);
+                            should.not.exist(popUser.projects[1]);
+                            done();
+                        });
                 });
+            });
         });
 
-        it('should remove project by id', function (done) {
-            User
-                .findByEmail('some@email.com')
-                .exec(function (err, user) {
-                    should.not.exist(err);
-
-                    user.removeProject(1, function (err, prj) {
-                        should.not.exist(err);
-
-                        User
-                            .findByEmail(user.email)
-                            .populate('projects._ref')
-                            .exec(function (err, user) {
-                                should.not.exist(err);
-                                should.not.exist(user.projects[1]);
-                                done();
-                            });
-                    });
-                });
-        });
+        it('Project should be removed from collaborators stubs as well');
     });
 });

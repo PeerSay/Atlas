@@ -51,7 +51,7 @@ var projectSchema = new Schema({
     ],
     criteria: [
         {
-            name: { type: String, required: true, notEmpty: true },
+            name: { type: String },
             description: {type: String },
             group: { type: String },
             priority: { type: String }

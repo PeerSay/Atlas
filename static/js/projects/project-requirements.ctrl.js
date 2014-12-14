@@ -15,38 +15,11 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
     m.onFullView = onFullView;
-
     // Data
     m.criteria = [];
     m.criteriaStr = null;
     m.groups = [];
-    m.criteria2 = [
-        {
-            name: "Initial Capacity",
-            description: '12TB Basic (end of 2015)',
-            priority: 'required',
-            group: null
-        },
-        {
-            name: "Support Level",
-            description: 'NBD / Global',
-            priority: 'required',
-            group: 'Storage'
-        },
-        {
-            name: "Scale Up Growth",
-            description: 'Another 10 TB',
-            priority: 'optional',
-            group: null
-        },
-        {
-            name: "Network Connections",
-            description: 'NAS / ISCSI',
-            priority: 'optional',
-            group: 'Network'
-        }
-    ];
-
+    // Table settings
     var tableSettings = {
         counts: [],
         total: 0,

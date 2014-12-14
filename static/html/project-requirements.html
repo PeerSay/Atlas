@@ -13,10 +13,19 @@
                 <div class="tile-section norm border">
                     <table ng-table="cm.normTableParams" class="table">
                         <tr ng-repeat="criteria in $data" ng-show="$data.length">
-                            <td data-title="'Criteria'">{{criteria.name}}</td>
+                            <td data-title="'Criteria'">
+                                <span ng-if="criteria.name">{{criteria.name}}</span>
+                                <span ng-if="!criteria.name" class="attention">
+                                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                                    No name?
+                                </span>
+                            </td>
+                            <td data-title="cm.groupByTitle()" ng-show="cm.groupByTitle()">
+                                {{criteria[cm.groupBy]}}
+                            </td>
                         </tr>
                         <tr ng-show="!$data.length">
-                            <td><em>Click to add</em></td>
+                            <td class="attention">Click to add</td>
                         </tr>
                     </table>
                 </div>

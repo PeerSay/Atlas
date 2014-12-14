@@ -43,6 +43,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         'priority'
     ];
     m.groupBy = 'group';
+    m.groupByTitle = groupByTitle;
     m.selectGroupBy = selectGroupBy;
     // Sorting
     m.tableSortClass = tableSortClass;
@@ -190,6 +191,12 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     // Grouping / sorting
     //
+    function groupByTitle() {
+        var title = $filter('capitalize')(m.groupBy || 'name'); // null/name => hide column
+        var hide = (title === 'Name' || !m.criteria.length);
+        return hide ? null : title;
+    }
+
     function selectGroupBy(by) {
         m.groupBy = by;
         reloadTables();

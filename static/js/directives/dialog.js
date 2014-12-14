@@ -16,6 +16,7 @@ function psTileDialog(Tiles) {
             //$().modal.Constructor.prototype.enforceFocus = function () {};
 
             var $el = $(element).modal({
+                backdrop: 'static',
                 show: false
             });
 

@@ -1,8 +1,8 @@
 angular.module('peersay')
-    .controller('ProjectEvaluationRequirementsCtrl', ProjectEvaluationRequirementsCtrl);
+    .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectEvaluationRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Projects'];
-function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Projects) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Projects'];
+function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Projects) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -57,7 +57,7 @@ function ProjectEvaluationRequirementsCtrl($scope, $filter, $timeout, $q, Tiles,
         groupBy: tableGroupBy
     }));
     // General
-    m.compactTable = true;
+    m.compactTable = false;
     m.popoverOn = null;
     m.savingData = false;
     m.reloadTables = reloadTables;

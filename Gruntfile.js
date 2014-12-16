@@ -55,7 +55,9 @@ module.exports = function (grunt) {
                     'bower_components/angular-route/angular-route.js',
                     'bower_components/angular-messages/angular-messages.js',
                     'bower_components/angular-mocks/angular-mocks.js',
+                    'bower_components/angular-sanitize/angular-sanitize.js',
                     'bower_components/ng-table/ng-table.min.js',
+                    'bower_components/angular-elastic/elastic.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],

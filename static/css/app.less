@@ -305,12 +305,16 @@ body {
     tr.editable {
       td {
         padding: 1px;
-        & > input {
+        & > textarea {
           padding: 7px;
           width: 100%;
+          height: 34px;
           border: none;
+          .box-shadow(none);
           &:active, &:focus {
             background-color: #f9f7d0;
+            outline: 0;
+            .box-shadow(~"inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)");
           }
         }
         &.static {

@@ -68,24 +68,26 @@
     </tr>
     <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable">
         <td sortable="'name'">
-            <input type="text"
+            <textarea class="form-control noresize"
+                    msd-elastic
                     ng-model="criteria.name"
                     ng-focus="criteria.edit = 'name'; ctl.popoverOn = null;"
                     ng-blur="criteria.edit = false; ctl.updateCriteria()"
-                    ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"
-                    ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
                     ps-focus-on="criteria.edit === 'name'"
-                    />
+                    ></textarea>
         </td>
         <td sortable="'description'">
-            <input type="text"
+            <textarea class="form-control noresize"
+                    msd-elastic
                     ng-model="criteria.description"
                     ng-focus="criteria.edit = 'description'; ctl.popoverOn = null;"
                     ng-blur="criteria.edit = false; ctl.updateCriteria()"
-                    ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"
-                    ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
                     ps-focus-on="criteria.edit === 'description'"
-                    />
+                    ></textarea>
+<!--
+            ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"
+            ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
+-->
         </td>
         <td class="static"
                 ng-if="!ctl.compactTable"

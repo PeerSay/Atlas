@@ -14,7 +14,7 @@
                     <table ng-table="cm.normTableParams" class="table">
                         <tr ng-repeat="criteria in $data" ng-show="$data.length">
                             <td data-title="'Criteria'">
-                                <span ng-if="criteria.name">{{criteria.name}}</span>
+                                <span ng-if="criteria.name" ng-bind-html="cm.multiLine(criteria.name)"></span>
                                 <span ng-if="!criteria.name" class="attention">
                                     <span class="glyphicon glyphicon-exclamation-sign"></span>
                                     No name?
@@ -71,8 +71,8 @@
                         <table class="table dbg">
                             <tr ng-repeat="crit in cm.criteria" ng-class="{'bold': !!crit.edit}">
                                 <td>{{cm.criteria.indexOf(crit)}}</td>
-                                <td>{{crit.name}}</td>
-                                <td>{{crit.description}}</td>
+                                <td ng-bind-html="cm.multiLine(crit.name)"></td>
+                                <td ng-bind-html="cm.multiLine(crit.description)"></td>
                                 <td>{{crit.group}}</td>
                                 <td>{{crit.priority}}</td>
                             </tr>

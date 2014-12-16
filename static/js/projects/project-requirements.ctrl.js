@@ -57,7 +57,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.groupKeyPressed = groupKeyPressed;
     // Edit cell
     m.criteriaKeyPressed = criteriaKeyPressed;
-    m.multiLine = multiLine;
 
 
     activate();
@@ -323,9 +322,5 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     function setCriteriaGroup(criteria, group) {
         criteria.group = group;
         reloadTables(true);
-    }
-
-    function multiLine(val) {
-        return val.replace(/\n/g, '<br>');
     }
 }

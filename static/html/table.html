@@ -67,7 +67,7 @@
         </td>
     </tr>
     <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable">
-        <td sortable="'name'">
+        <td sortable="'name'" ng-class="{'edited': criteria.edit === 'name'}">
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.name"
@@ -76,7 +76,7 @@
                     ps-focus-on="criteria.edit === 'name'"
                     ></textarea>
         </td>
-        <td sortable="'description'">
+        <td sortable="'description'" ng-class="{'edited': criteria.edit === 'description'}">
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.description"

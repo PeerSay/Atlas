@@ -74,7 +74,9 @@
             </a>
         </td>
     </tr>
-    <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable">
+    <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable"
+            context-menu="ctl.setCriteriaOfMenu(criteria)"
+            data-target="context-menu">
         <td sortable="'name'" ng-class="{'edited': criteria.edit === 'name'}">
             <textarea class="form-control noresize"
                     msd-elastic
@@ -91,6 +93,7 @@
                     ng-focus="criteria.edit = 'description'; ctl.popoverOn = null;"
                     ng-blur="criteria.edit = false; ctl.updateCriteria()"
                     ps-focus-on="criteria.edit === 'description'"
+                    ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
                     ></textarea>
 <!--
             ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"

@@ -58,6 +58,11 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.groupDone = groupDone;
     // Edit cell
     m.criteriaKeyPressed = criteriaKeyPressed;
+    // Menu
+    m.criteriaOfMenu = null;
+    m.setCriteriaOfMenu = setCriteriaOfMenu;
+    m.menuAddCriteria = menuAddCriteria;
+    m.menuRemoveCriteria = menuRemoveCriteria;
 
 
     activate();
@@ -229,15 +234,9 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
                 return null;
             }
         });
-
         //console.log('>>all alike', alike);
 
         return alike[0];
-    }
-
-    function prevCriteria(criteria) {
-        var idx = m.criteria.indexOf(criteria);
-        return m.criteria[idx - 1];
     }
 
     function addCriteriaLike(crit) {
@@ -246,10 +245,9 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             description: '',
             group: crit ? crit.group : null,
             priority: crit ? crit.priority : 'required',
-            edit: crit ? crit.edit : null
+            edit: 'name'
         };
-
-        //console.log('>>added', added);
+        //console.log('>>adding', added);
 
         if (crit) {
             var idx = m.criteria.indexOf(crit);
@@ -263,11 +261,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     }
 
     function removeCriteria(crit) {
-        var prev = prevCriteria(crit);
-        if (prev) {
-            prev.edit = 'name';
-        }
-
         var idx = m.criteria.indexOf(crit);
         var removed = m.criteria.splice(idx, 1);
         reloadTables(true);
@@ -277,26 +270,13 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     function criteriaKeyPressed(criteria, evt) {
         //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
 
-        if (evt.keyCode === 13) {
+        if (evt.keyCode === 9) { // TAB
             var next = nextCriteriaLike(criteria);
-            //console.log('>> next', next);
-
-            if (next) {
-                next.edit = criteria.edit;
-            } else {
+            //console.log('>>next', next);
+            if (!next) {
                 addCriteriaLike(criteria);
             }
-            return evt.preventDefault();
-        }
-
-        if (evt.keyCode === 8) {
-            if (criteria.edit === 'description' && criteria.description === '') {
-                criteria.edit = 'name';
-            }
-            else if (criteria.edit === 'name' && criteria.name === '') {
-                removeCriteria(criteria);
-                return evt.preventDefault();
-            }
+            //return evt.preventDefault();
         }
     }
 
@@ -328,5 +308,40 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     function setCriteriaGroup(criteria, group) {
         criteria.group = group;
         reloadTables(true);
+    }
+
+    // Menu
+    //
+    function setCriteriaOfMenu(criteria) {
+        // cannot pass as param to add/remove call because
+        // a) menu position is broken when placed inside ps-table
+        // b) would require new menu elem for every table row
+        m.criteriaOfMenu = criteria;
+    }
+
+    function menuAddCriteria() {
+        if (!m.criteriaOfMenu) { return; }
+
+        // delay to allow context-menu event handler to close menu,
+        // otherwise it remains open
+        $timeout(function () {
+            // find last criteria in group
+            var prev = m.criteriaOfMenu, next;
+            while (next = nextCriteriaLike(prev)) {
+                prev = next;
+            }
+
+            addCriteriaLike(prev);
+            m.criteriaOfMenu = null;
+        }, 0, false);
+    }
+
+    function menuRemoveCriteria() {
+        if (!m.criteriaOfMenu) { return; }
+
+        $timeout(function () {
+            removeCriteria(m.criteriaOfMenu);
+            m.criteriaOfMenu = null;
+        }, 0, false);
     }
 }

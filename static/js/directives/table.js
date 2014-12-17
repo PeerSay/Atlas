@@ -1,8 +1,8 @@
 angular
     .module('peersay')
-    .directive('psTileTable', psTileTable);
+    .directive('psTable', psTable);
 
-function psTileTable() {
+function psTable() {
     return {
         restrict: 'E',
         templateUrl: 'html/table.html',

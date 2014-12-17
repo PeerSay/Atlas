@@ -28,7 +28,15 @@
             <div>{{::titles[3]}}</div>
         </th>
         <th class="table-menu">
-            <ps-table-th-popover>
+            <ps-table-popover
+                    ps-cont-selector="th"
+                    ps-id="table"
+                    ps-popover-on="ctl.popoverOn">
+                <span class="popover-icon hamburger-icon">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </span>
                 <form class="popover-form">
                     <div class="form-group">
                         <label class="checkbox-ext no-select text-nowrap block">
@@ -52,7 +60,7 @@
                         <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>
                     </div>
                 </form>
-            </ps-table-th-popover>
+            </ps-table-popover>
         </th>
     </tr>
     </thead>
@@ -60,7 +68,7 @@
     <!--Group raw-->
     <tr class="ng-table-group" ng-show="group.value">
         <td colspan="{{cm.compactTable ? 3 : 5}}">
-            <a href ng-click="group.$hideRows = !group.$hideRows">
+            <a href ng-click="group.$hideRows = !group.$hideRows" tabindex="-1">
                 <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                 {{group.value}}
             </a>
@@ -97,7 +105,13 @@
                 sortable="'priority'">{{criteria.priority}}</td>
         <!--Settings Popover-->
         <td>
-            <ps-table-popover>
+            <ps-table-popover
+                    ps-cont-selector="td"
+                    ps-id="{{group.value + '_crit_' + $index}}"
+                    ps-popover-on="ctl.popoverOn"
+                    ps-allow-hide="!criteria.newGroup.show"
+                    >
+                <span class="popover-icon glyphicon glyphicon-cog"></span>
                 <form class="popover-form">
                     <div class="form-group">
                         <label class="checkbox-ext no-select text-nowrap block">
@@ -128,7 +142,8 @@
                                         ng-show="criteria.newGroup.show"
                                         ps-focus-on="criteria.newGroup.show"
                                         ng-keypress="ctl.groupKeyPressed(criteria, $event)"
-                                        ng-keydown="ctl.groupKeyPressed(criteria, $event)">
+                                        ng-keydown="ctl.groupKeyPressed(criteria, $event)"
+                                        ng-blur="ctl.groupDone(criteria)">
                             </a>
                         </div>
                         <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>

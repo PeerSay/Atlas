@@ -55,6 +55,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         value: ''
     };
     m.groupKeyPressed = groupKeyPressed;
+    m.groupDone = groupDone;
     // Edit cell
     m.criteriaKeyPressed = criteriaKeyPressed;
 
@@ -310,13 +311,18 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
                 }
                 reloadTables(true);
             }
-            criteria.newGroup = {};
+            groupDone(criteria);
             return;
         }
         if (evt.keyCode === 27) {
-            criteria.newGroup = {};
+            groupDone(criteria);
             return evt.preventDefault();
         }
+    }
+
+    function groupDone(criteria) {
+        criteria.newGroup = {};
+        m.popoverOn = null;
     }
 
     function setCriteriaGroup(criteria, group) {

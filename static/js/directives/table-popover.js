@@ -7,55 +7,83 @@ function psTablePopover($timeout) {
     return {
         restrict: 'E',
         templateUrl: 'html/table-popover.html',
+        replace: true,
         transclude: true,
-        link: function (scope, element) {
-            var $form = element.find('.js-form');
-            var $cont = $form.parents('td');
-            var $table = $form.parents('table');
-            var $el = element.find('button').popover({
-                container: $cont,
-                viewport: $table,
-                trigger: 'manual',
-                html: true,
-                content: function () {
-                    // Transcluded (by directive) elements are reused due to jQ append()
-                    // A better way would probably be calling transcludeFn
-                    return $form.removeAttr('hidden');
+        scope: {
+            popoverOn: '=psPopoverOn',
+            allowHide: '&psAllowHide'
+        },
+        link: function (scope, element, attrs, ctrls, transcludeFn) {
+            // Using transcludeFn option, because we need to replace 2 els in template:
+            // icon and form. ngTransclude allows to replace only one.
+            //
+            transcludeFn(function (clone) {
+                if (!element.parent().length) {
+                    // XXX - unclear why it is called second time when directive is inside <th>!
+                    return;
                 }
-            });
-            scope.show = false;
 
-            $el.on('focusin', function () {
-                // Delaying so that it comes after click if it's focus on click (not on tab),
-                // otherwise click will negate the effect
-                $timeout(function () {
-                    scope.$apply(function () {
-                        scope.show = true;
-                        scope.ctl.popoverOn = scope.criteria;
-                    });
-                }, 100, false);
-            });
+                var id = attrs.psId;
+                var manualHide = false;
+                var $tIcon = clone.filter('.popover-icon');
+                var $tForm = clone.filter('form');
+                var $icon = element.find('.js-popover-icon');
+                var $cont = element.parents(attrs.psContSelector);
+                var $table = element.parents('table');
+                var $el = element.find('button');
 
-            $el.on('click', function () {
-                scope.$apply(function () {
-                    scope.show = !scope.show;
-                    scope.ctl.popoverOn = scope.show ? scope.criteria : null;
+                // insert icon
+                $icon.replaceWith($tIcon);
+
+                // init popover plugin
+                $el.popover({
+                    container: $cont,
+                    viewport: $table,
+                    trigger: 'focus',
+                    html: true,
+                    content: function () {
+                        // called on trigger
+                        return $tForm;
+                    }
                 });
-            });
 
-            scope.$watch('ctl.popoverOn', function (newVal) {
-                //console.log('>>[%s] ctl.popoverOn ', scope.criteria.name, newVal);
-                scope.show = (newVal === scope.criteria);
-                $el.popover(scope.show ? 'show' : 'hide');
+                scope.$watch('popoverOn', function (newVal) {
+                    if (newVal !== id) {
+                        hide();
+                    }
+                });
 
-                if (!scope.show) {
-                    scope.criteria.newGroup = {}; //hide edit too
+                $el.on('show.bs.popover', function () {
+                    scope.$apply(function () {
+                        scope.popoverOn = id;
+                    });
+                });
+
+                $el.on('hide.bs.popover', function (e) {
+                    if (manualHide) {
+                        manualHide = false;
+                        return;
+                    }
+
+                    // delay until it is clear that it is not a click on popover
+                    e.preventDefault();
+
+                    $timeout(function () {
+                        if (scope.allowHide() !== false) { // may be false, true & undefined
+                            hide();
+                        }
+                    }, 100, false);
+                });
+
+                function hide() {
+                    manualHide = true;
+                    $el.popover('hide');
                 }
-            });
 
-            // Clean-up
-            element.on('$destroy', function () {
-                $el.off('focusin click');
+                // Clean-up
+                element.on('$destroy', function () {
+                    $el.off('show.bs.popover hide.bs.popover');
+                });
             });
         }
     };

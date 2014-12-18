@@ -38,7 +38,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     // Grouping
     m.groupByOptions = [
         null,
-        'name',
         'group',
         'priority'
     ];
@@ -189,17 +188,14 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     }
 
     function tableGroupBy(item) {
-        if (m.groupBy === 'name') {
-            return item.name[0];
-        }
         return item[m.groupBy];
     }
 
     // Grouping / sorting
     //
     function groupByTitle() {
-        var title = $filter('capitalize')(m.groupBy || 'name'); // null/name => hide column
-        var hide = (title === 'Name' || !m.criteria.length);
+        var title = $filter('capitalize')(m.groupBy || 'null'); // null => hide column
+        var hide = (title === 'Null' || !m.criteria.length);
         return hide ? null : title;
     }
 
@@ -221,22 +217,55 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         tableParams.sorting(sortOrder);
     }
 
+    // Criteria group
+    function groupKeyPressed(criteria, evt) {
+        //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.newGroup, evt.keyCode);
+
+        if (evt.keyCode === 13) {
+            if (criteria.newGroup.value) {
+                criteria.group = criteria.newGroup.value;
+                if (m.groups.indexOf(criteria.group) < 0) {
+                    m.groups.push(criteria.group);
+                }
+                reloadTables(true);
+            }
+            groupDone(criteria);
+            return;
+        }
+        if (evt.keyCode === 27) {
+            groupDone(criteria);
+            return evt.preventDefault();
+        }
+    }
+
+    function groupDone(criteria) {
+        criteria.newGroup = {};
+        m.popoverOn = null;
+    }
+
+    function setCriteriaGroup(criteria, group) {
+        criteria.group = group;
+        reloadTables(true);
+    }
+
     // Edit
     //
     function nextCriteriaLike(criteria) {
         var criteriaIdx = m.criteria.indexOf(criteria);
-        var alike = $.map(m.criteria, function (crit, idx) {
-            if (idx > criteriaIdx &&
-                crit.group === criteria.group &&
-                crit.priority === criteria.priority) {
-                return crit;
-            } else {
-                return null;
-            }
-        });
-        //console.log('>>all alike', alike);
+        var next = m.criteria[criteriaIdx + 1];
+        if (!next) {
+            return null;
+        }
 
-        return alike[0];
+        var alike = false;
+        if (!m.groupBy) {
+            alike = (next.group === criteria.group &&
+                next.priority === criteria.priority);
+        } else {
+            alike = (next[m.groupBy] === criteria[m.groupBy]);
+        }
+
+        return alike ? next : null;
     }
 
     function addCriteriaLike(crit) {
@@ -278,36 +307,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             }
             //return evt.preventDefault();
         }
-    }
-
-    function groupKeyPressed(criteria, evt) {
-        //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.newGroup, evt.keyCode);
-
-        if (evt.keyCode === 13) {
-            if (criteria.newGroup.value) {
-                criteria.group = criteria.newGroup.value;
-                if (m.groups.indexOf(criteria.group) < 0) {
-                    m.groups.push(criteria.group);
-                }
-                reloadTables(true);
-            }
-            groupDone(criteria);
-            return;
-        }
-        if (evt.keyCode === 27) {
-            groupDone(criteria);
-            return evt.preventDefault();
-        }
-    }
-
-    function groupDone(criteria) {
-        criteria.newGroup = {};
-        m.popoverOn = null;
-    }
-
-    function setCriteriaGroup(criteria, group) {
-        criteria.group = group;
-        reloadTables(true);
     }
 
     // Menu

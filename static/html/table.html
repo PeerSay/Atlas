@@ -1,15 +1,19 @@
-<table class="table" ng-table="tableParams">
+<table class="table ng-table-resizable-columns"
+        ng-table="tableParams"
+        data-resizable-columns-id="psTable">
     <thead>
     <tr>
         <th class="sortable"
                 ng-class="ctl.tableSortClass(tableParams, 'name')"
                 ng-click="ctl.tableSortClick(tableParams, 'name')"
+                data-resizable-column-id="name"
                 >
             <div>{{::titles[0]}}</div>
         </th>
         <th class="sortable"
                 ng-class="ctl.tableSortClass(tableParams, 'description')"
                 ng-click="ctl.tableSortClick(tableParams, 'description')"
+                data-resizable-column-id="description"
                 >
             <div>{{::titles[1]}}</div>
         </th>

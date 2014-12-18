@@ -5,6 +5,7 @@ angular.module('peersay', [
     'ngMessages',
     'ngSanitize',
     'ngTable',
+    'ngTableResizableColumns',
     'monospaced.elastic',
     'ng-context-menu'
 ]);

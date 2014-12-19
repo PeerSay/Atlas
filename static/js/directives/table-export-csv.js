@@ -13,7 +13,7 @@ function psExportCsv($parse) {
         restrict: 'A',
         scope: false,
         link: function(scope, element, attrs) {
-            var titles = $parse(attrs.titles)(scope.$parent);
+            var titles = scope.$parent.cm.titles;
             var data = '';
             var values = [];
 

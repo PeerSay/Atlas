@@ -15,12 +15,16 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
     m.onFullView = onFullView;
-    // Data
+
+    // Data model
+    m.loaded = false;
     m.criteria = [];
     m.criteriaStr = null;
     m.groups = [];
+    m.updateModel = updateModel;
     // Table settings
     var tableSettings = {
+        //debugMode: true,
         counts: [],
         total: 0,
         getData: tableGetData
@@ -29,12 +33,12 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
         groupBy: tableGroupBy
     }));
+    m.reloadTables = reloadTables;
     // General
+    m.titles = ['Criteria', 'Description', 'Group', 'Priority'];
     m.compactTable = false;
     m.popoverOn = null;
     m.savingData = false;
-    m.reloadTables = reloadTables;
-    m.updateCriteria = updateCriteria;
     // Grouping
     m.groupByOptions = [
         null,
@@ -67,8 +71,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     activate();
 
     function activate() {
-        readCriteria();
-
         Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
         $scope.$on('$destroy', function () {
             m.progress = { value: 0, total: 0 };
@@ -82,74 +84,39 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     }
 
     function onFullView() {
-        if (!m.criteria.length) {
-            var added = addCriteriaLike(null);
-            added.edit = 'name'; // invite to edit
-        }
+        //console.log('>> onFullView');
 
-        // This triggers the focus on first element
-        reloadTables();
+        var focusCriteria = m.criteria[0]; //TODO
+        if (focusCriteria) {
+            focusCriteria.edit = 'name'; // invite to edit
+        }
     }
 
     // Data
     //
-    function readCriteria() {
-        Projects.readProjectCriteria(m.projectId)
+    function readModel() {
+        var loadedQ = $q(function (resolve) {
+            resolve();
+        });
+
+        // TODO - should be handled by cache in Projects, but now it gets off-sync
+        // due to empty rows.
+        return m.loaded ? loadedQ : Projects.readProjectCriteria(m.projectId)
             .then(function (res) {
-                //m.criteria = m.criteria2;
+                m.loaded = true;
                 m.criteria = res.criteria;
                 m.criteriaStr = JSON.stringify({ criteria: m.criteria });
-                m.groups = [].concat(null, getGroups());
-                reloadTables(true);
+
+                if (m.criteria.length) {
+                    m.groups = [].concat(null, findGroups());
+                } else {
+                    addCriteriaLike(null);
+                }
+                //console.log('>>> Loaded model', m.criteria);
             });
     }
 
-    function updateCriteria() {
-        var data = getCriteriaData();
-        if (!data) { return; } // unmodified
-
-        var delayPromise = $timeout(function () {}, 300, false);
-        var requestPromise = $q(function (resolve) {
-            Projects.updateProjectCriteria(m.projectId, data).finally(resolve);
-        });
-
-        m.savingData = true;
-        $q.all([delayPromise, requestPromise])
-            .then(function () {
-                m.savingData = false;
-            });
-    }
-
-    function getCriteriaData() {
-        var res = {criteria: []};
-        angular.forEach(pruneEmpty(m.criteria), function (crit) {
-            res.criteria.push({
-                name: crit.name,
-                description: crit.description,
-                priority: crit.priority,
-                group: crit.group
-            });
-        });
-
-        var str = JSON.stringify(res);
-        if (m.criteriaStr === str) {
-            return null; // omit update of identical
-        } else {
-            m.criteriaStr = str;
-            return res;
-        }
-    }
-
-    function pruneEmpty(arr) {
-        return $.map(arr, function (crit) {
-            if (!crit.name && !crit.description) {
-                return null;
-            }
-            return crit;
-        });
-    }
-
-    function getGroups() {
+    function findGroups() {
         var groups = [];
         var found = {};
         angular.forEach(m.criteria, function (crit) {
@@ -161,6 +128,50 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         return groups;
     }
 
+    function updateModel() {
+        var data = prepareModel();
+        if (!data) { return; } // unmodified
+
+        var delayPromise = $timeout(function () {}, 300, false);
+        var requestPromise = $q(function (resolve) {
+            Projects.updateProjectCriteria(m.projectId, data)
+                .finally(resolve);
+        });
+
+        m.savingData = true;
+        $q.all([delayPromise, requestPromise])
+            .then(function () {
+                m.savingData = false;
+            });
+    }
+
+    function prepareModel() {
+        var res = {criteria: []};
+        angular.forEach(pruneEmpty(m.criteria), function (crit) {
+            res.criteria.push({
+                name: crit.name,
+                description: crit.description,
+                priority: crit.priority,
+                group: crit.group
+            });
+        });
+
+        var str = JSON.stringify(res);
+        var changed = (m.criteriaStr !== str);
+        m.criteriaStr = str;
+
+        return changed ? res : null;
+    }
+
+    function pruneEmpty(arr) {
+        return $.map(arr, function (crit) {
+            if (!crit.name && !crit.description) {
+                return null;
+            }
+            return crit;
+        });
+    }
+
     // Ng-table handling
     //
     function reloadTables(save) {
@@ -169,7 +180,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         m.fullTableParams.reload();
 
         if (save) {
-            updateCriteria();
+            updateModel();
         }
     }
 
@@ -181,15 +192,19 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         if (orderByGroup) {
             orderByArr.unshift(m.groupBy);
         }
-        //console.log('>>Data reload, orderBy, groupBy', orderByArr, m.groupBy);
 
-        m.criteria = $filter('orderBy')(m.criteria, orderByArr);
-        $defer.resolve(m.criteria);
+        readModel()
+            .then(function () {
+                //console.log('>>Data reload, orderBy, groupBy', orderByArr, m.groupBy);
+                m.criteria = $filter('orderBy')(m.criteria, orderByArr);
+                $defer.resolve(m.criteria);
+            });
     }
 
     function tableGroupBy(item) {
         return item[m.groupBy];
     }
+
 
     // Grouping / sorting
     //
@@ -299,13 +314,14 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     function criteriaKeyPressed(criteria, evt) {
         //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
 
+        // TODO - filter out shift
         if (evt.keyCode === 9) { // TAB
             var next = nextCriteriaLike(criteria);
             //console.log('>>next', next);
             if (!next) {
                 addCriteriaLike(criteria);
+                return evt.preventDefault();
             }
-            //return evt.preventDefault();
         }
     }
 

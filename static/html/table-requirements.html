@@ -1,41 +1,41 @@
 <table class="table ng-table-resizable-columns"
-        ng-table="tableParams"
+        ng-table="cm.fullTableParams"
         data-resizable-columns-id="psTable">
     <thead>
     <tr>
         <th class="sortable"
-                ng-class="ctl.tableSortClass(tableParams, 'name')"
-                ng-click="ctl.tableSortClick(tableParams, 'name')"
+                ng-class="cm.tableSortClass(cm.fullTableParams, 'name')"
+                ng-click="cm.tableSortClick(cm.fullTableParams, 'name')"
                 data-resizable-column-id="name"
                 >
-            <div>{{::titles[0]}}</div>
+            <div>{{::cm.titles[0]}}</div>
         </th>
         <th class="sortable"
-                ng-class="ctl.tableSortClass(tableParams, 'description')"
-                ng-click="ctl.tableSortClick(tableParams, 'description')"
+                ng-class="cm.tableSortClass(cm.fullTableParams, 'description')"
+                ng-click="cm.tableSortClick(cm.fullTableParams, 'description')"
                 data-resizable-column-id="description"
                 >
-            <div>{{::titles[1]}}</div>
+            <div>{{::cm.titles[1]}}</div>
         </th>
-        <th ng-if="!ctl.compactTable"
+        <th ng-if="!cm.compactTable"
                 class="sortable"
-                ng-class="ctl.tableSortClass(tableParams, 'group')"
-                ng-click="ctl.tableSortClick(tableParams, 'group')"
+                ng-class="cm.tableSortClass(cm.fullTableParams, 'group')"
+                ng-click="cm.tableSortClick(cm.fullTableParams, 'group')"
                 >
-            <div>{{::titles[2]}}</div>
+            <div>{{::cm.titles[2]}}</div>
         </th>
-        <th ng-if="!ctl.compactTable"
+        <th ng-if="!cm.compactTable"
                 class="sortable"
-                ng-class="ctl.tableSortClass(tableParams, 'priority')"
-                ng-click="ctl.tableSortClick(tableParams, 'priority')"
+                ng-class="cm.tableSortClass(cm.fullTableParams, 'priority')"
+                ng-click="cm.tableSortClick(cm.fullTableParams, 'priority')"
                 >
-            <div>{{::titles[3]}}</div>
+            <div>{{::cm.titles[3]}}</div>
         </th>
         <th class="table-menu">
             <ps-table-popover
                     ps-cont-selector="th"
                     ps-id="table"
-                    ps-popover-on="ctl.popoverOn">
+                    ps-popover-on="cm.popoverOn">
                 <span class="popover-icon hamburger-icon">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -45,8 +45,8 @@
                     <div class="form-group">
                         <label class="checkbox-ext no-select text-nowrap block">
                             <input type="checkbox"
-                                    ng-model="ctl.compactTable"
-                                    ng-click="ctl.reloadTables()">
+                                    ng-model="cm.compactTable"
+                                    ng-click="cm.reloadTables()">
                             Compact view
                         </label>
                     </div>
@@ -55,9 +55,9 @@
                         <label>Group by:</label>
                         <div class="list-group">
                             <a href class="list-group-item"
-                                    ng-repeat="opt in ctl.groupByOptions"
-                                    ng-class="{'active': opt === ctl.groupBy}"
-                                    ng-click="ctl.selectGroupBy(opt)">
+                                    ng-repeat="opt in cm.groupByOptions"
+                                    ng-class="{'active': opt === cm.groupBy}"
+                                    ng-click="cm.selectGroupBy(opt)">
                                 {{opt || 'none' | capitalize}}
                             </a>
                         </div>
@@ -79,14 +79,14 @@
         </td>
     </tr>
     <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable"
-            context-menu="ctl.setCriteriaOfMenu(criteria)"
+            context-menu="cm.setCriteriaOfMenu(criteria)"
             data-target="context-menu">
         <td sortable="'name'" ng-class="{'edited': criteria.edit === 'name'}">
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.name"
-                    ng-focus="criteria.edit = 'name'; ctl.popoverOn = null;"
-                    ng-blur="criteria.edit = false; ctl.updateCriteria()"
+                    ng-focus="criteria.edit = 'name'; cm.popoverOn = null;"
+                    ng-blur="criteria.edit = false; cm.updateModel()"
                     ps-focus-on="criteria.edit === 'name'"
                     ></textarea>
         </td>
@@ -94,28 +94,24 @@
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.description"
-                    ng-focus="criteria.edit = 'description'; ctl.popoverOn = null;"
-                    ng-blur="criteria.edit = false; ctl.updateCriteria()"
+                    ng-focus="criteria.edit = 'description'; cm.popoverOn = null;"
+                    ng-blur="criteria.edit = false; cm.updateModel()"
                     ps-focus-on="criteria.edit === 'description'"
-                    ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
+                    ng-keydown="cm.criteriaKeyPressed(criteria, $event)"
                     ></textarea>
-<!--
-            ng-keypress="ctl.criteriaKeyPressed(criteria, $event)"
-            ng-keydown="ctl.criteriaKeyPressed(criteria, $event)"
--->
         </td>
         <td class="static"
-                ng-if="!ctl.compactTable"
+                ng-if="!cm.compactTable"
                 sortable="'group'">{{criteria.group}}</td>
         <td class="static"
-                ng-if="!ctl.compactTable"
+                ng-if="!cm.compactTable"
                 sortable="'priority'">{{criteria.priority}}</td>
         <!--Settings Popover-->
         <td>
             <ps-table-popover
                     ps-cont-selector="td"
                     ps-id="{{group.value + '_crit_' + $index}}"
-                    ps-popover-on="ctl.popoverOn"
+                    ps-popover-on="cm.popoverOn"
                     ps-allow-hide="!criteria.newGroup.show"
                     >
                 <span class="popover-icon glyphicon glyphicon-cog"></span>
@@ -126,7 +122,7 @@
                                     ng-model="criteria.priority"
                                     ng-true-value="'required'"
                                     ng-false-value="'optional'"
-                                    ng-click="ctl.reloadTables(true)">
+                                    ng-click="cm.reloadTables(true)">
                             Required criteria
                         </label>
                     </div>
@@ -135,9 +131,9 @@
                         <label>Select group:</label>
                         <div class="list-group">
                             <a href class="list-group-item"
-                                    ng-repeat="group in ctl.groups"
+                                    ng-repeat="group in cm.groups"
                                     ng-class="{'active': group === criteria.group}"
-                                    ng-click="ctl.setCriteriaGroup(criteria, group)">
+                                    ng-click="cm.setCriteriaGroup(criteria, group)">
                                 <span class="glyphicon glyphicon-ok" ng-show="group === criteria.group"></span>
                                 {{group || 'None'}}
                             </a>
@@ -148,9 +144,9 @@
                                         ng-model="criteria.newGroup.value"
                                         ng-show="criteria.newGroup.show"
                                         ps-focus-on="criteria.newGroup.show"
-                                        ng-keypress="ctl.groupKeyPressed(criteria, $event)"
-                                        ng-keydown="ctl.groupKeyPressed(criteria, $event)"
-                                        ng-blur="ctl.groupDone(criteria)">
+                                        ng-keypress="cm.groupKeyPressed(criteria, $event)"
+                                        ng-keydown="cm.groupKeyPressed(criteria, $event)"
+                                        ng-blur="cm.groupDone(criteria)">
                             </a>
                         </div>
                         <span class="hint" ng-show="criteria.newGroup.show">Press enter</span>

@@ -28,7 +28,7 @@ function Tiles($rootScope, DeepLinking) {
             uri: 'vi',
             name: 'vendor-input',
             title: 'Vendor Input',
-            html: '/html/project-todo.html',
+            html: '/html/project-vendors.html',
             progress: {},
             show: false
         },

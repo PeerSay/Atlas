@@ -60,12 +60,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="tile-section border">
-                        <ps-table
-                                ps-table-params="cm.fullTableParams"
-                                data-ctl="cm"
-                                data-titles="['Criteria', 'Description', 'Group', 'Priority']"
-                                ps-export-csv="csv"
-                                ></ps-table>
+                        <div ng-include="'html/table-requirements.html'" ps-export-csv="csv"></div>
                     </div>
 
                     <div class="tile-section" hidden>

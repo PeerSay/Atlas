@@ -31,9 +31,12 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     };
     m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
     m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
-        groupBy: tableGroupBy
+        groupBy: function(item) {
+            return item[m.groupBy];
+        }
     }));
     m.reloadTables = reloadTables;
+    m.isEmptyTable = isEmptyTable;
     // General
     m.titles = ['Criteria', 'Description', 'Group', 'Priority'];
     m.compactTable = false;
@@ -79,14 +82,18 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     }
 
     function showFullView(control) {
-        m.popoverOn = null;
         Tiles.toggleFullView(true, m.tile.uri, control);
     }
 
     function onFullView() {
         //console.log('>> onFullView');
+        autoFocus();
+    }
 
-        var focusCriteria = m.criteria[0]; //TODO
+    function autoFocus() {
+        var focusCriteria = m.criteria[0]; //TODO - get clicked criteria to focus
+        //console.log('>>autoFocus', focusCriteria);
+
         if (focusCriteria) {
             focusCriteria.edit = 'name'; // invite to edit
         }
@@ -175,7 +182,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     // Ng-table handling
     //
     function reloadTables(save) {
-        m.popoverOn = null; // hide popover
         m.normTableParams.reload();
         m.fullTableParams.reload();
 
@@ -197,20 +203,23 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             .then(function () {
                 //console.log('>>Data reload, orderBy, groupBy', orderByArr, m.groupBy);
                 m.criteria = $filter('orderBy')(m.criteria, orderByArr);
+                params.total(m.criteria.total);
                 $defer.resolve(m.criteria);
             });
     }
 
-    function tableGroupBy(item) {
-        return item[m.groupBy];
+    function isEmptyTable() {
+        var len = m.criteria.length;
+        var virtual = (len === 1 && m.criteria[0]);
+        var onlyVirtual = (virtual && !virtual.name && !virtual.description);
+        return !len || onlyVirtual;
     }
-
 
     // Grouping / sorting
     //
     function groupByTitle() {
         var title = $filter('capitalize')(m.groupBy || 'null'); // null => hide column
-        var hide = (title === 'Null' || !m.criteria.length);
+        var hide = (title === 'Null' || isEmptyTable());
         return hide ? null : title;
     }
 
@@ -308,6 +317,11 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         var idx = m.criteria.indexOf(crit);
         var removed = m.criteria.splice(idx, 1);
         reloadTables(true);
+
+        if (!m.criteria.length) {
+            addCriteriaLike(null); // never leave empty table
+            autoFocus();
+        }
         return removed;
     }
 

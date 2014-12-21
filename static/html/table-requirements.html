@@ -85,7 +85,7 @@
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.name"
-                    ng-focus="criteria.edit = 'name'; cm.popoverOn = null;"
+                    ng-focus="criteria.edit = 'name'"
                     ng-blur="criteria.edit = false; cm.updateModel()"
                     ps-focus-on="criteria.edit === 'name'"
                     ></textarea>
@@ -94,7 +94,7 @@
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.description"
-                    ng-focus="criteria.edit = 'description'; cm.popoverOn = null;"
+                    ng-focus="criteria.edit = 'description'"
                     ng-blur="criteria.edit = false; cm.updateModel()"
                     ps-focus-on="criteria.edit === 'description'"
                     ng-keydown="cm.criteriaKeyPressed(criteria, $event)"

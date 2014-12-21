@@ -12,7 +12,7 @@
             <div class="view-mode" ng-class="m.viewMode.value">
                 <div class="tile-section norm border">
                     <table ng-table="cm.normTableParams" class="table">
-                        <tr ng-repeat="criteria in $data" ng-show="$data.length">
+                        <tr ng-repeat="criteria in $data" ng-show="!cm.isEmptyTable()">
                             <td data-title="'Criteria'">
                                 <span ng-if="criteria.name" ng-bind-html="criteria.name | multiline"></span>
                                 <span ng-if="!criteria.name" class="attention">
@@ -24,7 +24,7 @@
                                 {{criteria[cm.groupBy]}}
                             </td>
                         </tr>
-                        <tr ng-show="!$data.length">
+                        <tr ng-show="cm.isEmptyTable()">
                             <td class="attention">Click to add</td>
                         </tr>
                     </table>

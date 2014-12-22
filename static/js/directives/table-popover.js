@@ -30,7 +30,7 @@ function psTablePopover($timeout) {
                 var $icon = element.find('.js-popover-icon');
                 var $cont = element.parents(attrs.psContSelector);
                 var $table = element.parents('table');
-                var $el = element.find('button');
+                var $el = element.find('.btn');
 
                 // insert icon
                 $icon.replaceWith($tIcon);

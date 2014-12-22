@@ -182,8 +182,8 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     // Ng-table handling
     //
     function reloadTables(save) {
-        m.normTableParams.reload();
         m.fullTableParams.reload();
+        m.normTableParams.reload();
 
         if (save) {
             updateModel();

@@ -6,31 +6,49 @@
     <thead>
     <tr>
         <th ng-repeat="col in view.columns"
-                ng-class="view.sortingClass(col)"
+                class="text"
+                ng-class="view.columnClass(col)"
                 ng-click="view.sortBy(col)"
                 ng-show="col.visible">
-            <div>{{col.title}}</div>
-            <!--TODO: control-->
+            <div ng-if="col.editable">
+                <a href tabindex="-1"
+                        ng-show="!col.edit.show"
+                        ng-click="col.edit.show = true">{{ col.title }}</a>
+                <input type="text" tabindex="-1"
+                        ng-show="col.edit.show"
+                        ng-model="col.edit.value"
+                        ng-blur="col.edit.show = false"
+                        ps-focus-on="col.edit.show === true"
+                        ps-select="true"
+                        />
+            </div>
+            <div ng-if="!col.editable">{{col.title}}</div>
         </th>
     </tr>
     </thead>
     <tbody ng-repeat="group in $groups">
     <tr class="ng-table-group" ng-show="group.value">
-        <td colspan="{{view.columns.length}}">
+        <td colspan="{{view.columns.length}}" class="group">
             <a href ng-click="group.$hideRows = !group.$hideRows" tabindex="-1">
                 <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                 {{group.value}}
             </a>
         </td>
     </tr>
-    <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-            context-menu="cm.setCriteriaOfMenu(criteria)"
-            data-target="context-menu">
+    <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
+            <!--context-menu="cm.setCriteriaOfMenu(criteria)"
+            data-target="context-menu">-->
         <td ng-repeat="col in view.columns"
                 ng-init="cell = row[col.field]"
                 ng-show="col.visible"
+                class="editable"
                 ng-class="cell.type">
             <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
+            <div ng-if="cell.type === 'number'">
+                <input type="number"
+                        ng-model="cell.value"
+                        />
+            </div>
             <div ng-if="!cell.type">{{ cell }}</div>
         </td>
     </tr>

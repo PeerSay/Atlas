@@ -77,20 +77,45 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
             field: 'priority',
             visible: false
         });
-        angular.forEach(model.vendors, function (vendor, i) {
+        angular.forEach(model.vendors, function (vendor) {
             data.columns.push({
                 title: vendor.title,
                 field: vendor.title,
                 visible: true,
-                isVendor: true
+                editable: true,
+                edit: {
+                    show: false,
+                    value: vendor.title
+                }
             });
+        });
+        // Last column is Add New
+        data.columns.push({
+            title: '...',
+            field: '--', // TODO: unique!
+            visible: true,
+            virtual: true,
+            editable: true,
+            edit: {
+                show: false,
+                value: ''
+            }
         });
         // Rows
         angular.forEach(model.criteria, function (criteria) {
             var row = {};
             angular.forEach(data.columns, function (col) {
-                if (col.isVendor) {
-                    row[col.field] = criteria.vendorsIndex[col.field];
+                if (col.virtual) {
+                    row[col.field] = {
+                        type: 'static',
+                        value: ''
+                    };
+                }
+                else if (col.editable) {
+                    row[col.field] = {
+                        type: 'number',
+                        value: criteria.vendorsIndex[col.field]
+                    };
                 }
                 else if (col.visible) {
                     row[col.field] = {

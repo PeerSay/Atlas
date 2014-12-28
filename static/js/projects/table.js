@@ -167,7 +167,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
 
             if (options.active) {
                 // expose to html
-                V.sortingClass = sortingClass;
                 V.sortBy = sortBy;
             }
 
@@ -177,15 +176,24 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
             return V;
         }
 
-        function sortingClass(col) {
+        function columnClass(col) {
+            var edited = col.edit && col.edit.show;
+            var sortable = !col.virtual && !edited;
+            // virtual is 'Add new' - not sortable
+            // hide when edit too
+
             return {
-                'sortable': true,
+                'sortable': sortable,
                 'sort-asc': V.tableParams.isSortBy(col.field, 'asc'),
-                'sort-desc': V.tableParams.isSortBy(col.field, 'desc')
+                'sort-desc': V.tableParams.isSortBy(col.field, 'desc'),
+                'editable': col.editable && edited,
+                'edited': edited
             };
         }
 
         function sortBy(col) {
+            if (col.edit.show) { return; }
+
             var order = {};
             order[col.field] = V.tableParams.isSortBy(col.field, 'asc') ? 'desc' : 'asc';
 
@@ -209,14 +217,19 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
             return $filter('orderBy')(arr, orderByArr);
         }
 
+        // Edit
+        function editCol(col, evt) {
+            col.edit.show = true;
+            col.edit.value = col.title;
+            return evt.preventDefault(); // XXX - don't work?
+        }
+
         // For html:
         //tableParams +
         //columns +
-        //sortingClass() +
-        //sortBy() +
-        //groupBy()
+        V.columnClass = columnClass;
+        V.editCol = editCol;
         V.groupBy = groupBy;
-        //
         // For ctrl:
         V.grouping = grouping;
         V.sorting = sorting;

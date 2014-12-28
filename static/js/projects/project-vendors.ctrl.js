@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectVendorsCtrl', ProjectVendorsCtrl);
 
-ProjectVendorsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Projects'];
-function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Projects) {
+ProjectVendorsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'Projects', 'Table'];
+function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Table) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -16,54 +16,121 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams,
     m.showFullView = showFullView;
     m.onFullView = onFullView;
 
-    // Data model
-    m.loaded = false;
-    m.criteria = [];
-    m.criteriaStr = null;
-    m.groups = [];
-    m.updateModel = updateModel;
-    // Table settings
-    var tableSettings = {
-        //debugMode: true,
-        counts: [],
-        total: 0,
-        getData: tableGetData
-    };
-    m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
-    m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
-        groupBy: function(item) {
-            return item[m.groupBy];
-        }
-    }));
-    m.reloadTables = reloadTables;
-    m.isEmptyTable = isEmptyTable;
-    // General
-    m.titles = ['Criteria', 'Description', 'Group', 'Priority'];
-    m.compactTable = false;
-    m.popoverOn = null;
-    m.savingData = false;
+
+    // Table views
+    m.normalTableView = Table.addView('vi-norm', toNormViewData) // req!
+        //.debug() // opt
+        .grouping() // xxx
+        .sorting({active: false})
+        .done();
+
+    m.fullTableView = Table.addView('vi-full', toFullViewData) // req!
+        //.debug() // opt
+        .grouping()
+        .sorting({active: true})
+        .done();
+
+    function toNormViewData(model) {
+        var data = {
+            columns: [],
+            rows: []
+        };
+        // Columns: Prod1, [Prod2, Prod3]
+        angular.forEach(model.vendors, function (vendor, i) {
+            data.columns.push({
+                title: vendor.title,
+                field: vendor.title,
+                visible: i < 3 // hide all but first 3; TODO - remove from arr?
+            });
+        });
+        // Rows
+        angular.forEach(model.criteria, function (criteria) {
+            var row = {};
+            angular.forEach(data.columns, function (col) {
+                row[col.field] = criteria.vendorsIndex[col.field];
+            });
+            data.rows.push(row);
+        });
+
+        return data;
+    }
+
+    function toFullViewData(model) {
+        var data = {
+            columns: [],
+            rows: []
+        };
+        // Columns: Prod1, [Prod2, Prod3]
+        data.columns.push({
+            title: 'Criteria',
+            field: 'name',
+            visible: true
+        });
+        // Group & priority are required for grouping to work (hidden)
+        data.columns.push({
+            title: '--',
+            field: 'group',
+            visible: false
+        });
+        data.columns.push({
+            title: '--',
+            field: 'priority',
+            visible: false
+        });
+        angular.forEach(model.vendors, function (vendor, i) {
+            data.columns.push({
+                title: vendor.title,
+                field: vendor.title,
+                visible: true,
+                isVendor: true
+            });
+        });
+        // Rows
+        angular.forEach(model.criteria, function (criteria) {
+            var row = {};
+            angular.forEach(data.columns, function (col) {
+                if (col.isVendor) {
+                    row[col.field] = criteria.vendorsIndex[col.field];
+                }
+                else if (col.visible) {
+                    row[col.field] = {
+                        type: 'static',
+                        value: criteria[col.field]
+                    };
+                }
+                else {
+                    row[col.field] = criteria[col.field];
+                }
+
+            });
+            data.rows.push(row);
+        });
+
+        return data;
+    }
+
     // Grouping
-    m.groupByOptions = [
-        null,
-        'group',
-        'priority'
-    ];
-    m.groupBy = 'group';
-    m.groupByTitle = groupByTitle;
-    m.selectGroupBy = selectGroupBy;
-    // Sorting
-    m.tableSortClass = tableSortClass;
-    m.tableSortClick = tableSortClick;
-    // Edit groups
-    m.setCriteriaGroup = setCriteriaGroup;
-    m.newGroup = {
-        edit: false,
-        value: ''
-    };
-    m.groupKeyPressed = groupKeyPressed;
-    m.groupDone = groupDone;
-    // Edit cell
-    m.criteriaKeyPressed = criteriaKeyPressed;
+    m.groupBy = Table.groupBy;
+
+
+    /////////////////////////////
+
+    //TODO:
+    // Model update+cache
+    //m.criteriaStr = null;
+    //m.updateModel = updateModel;
+    //m.savingData = false; // show indicator
+
+    // Handle virtual cells
+    //m.isEmptyTable = isEmptyTable;
+
+    //m.compactTable = false; // needed?
+
+    // Handle popover
+    //m.popoverOn = null;
+
+    // Editing cells
+    //m.criteriaKeyPressed = criteriaKeyPressed;
     // Menu
     m.criteriaOfMenu = null;
     m.setCriteriaOfMenu = setCriteriaOfMenu;
@@ -87,7 +154,7 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams,
 
     function onFullView() {
         //console.log('>> onFullView');
-        autoFocus();
+        //autoFocus();
     }
 
     function autoFocus() {
@@ -112,34 +179,122 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams,
             .then(function (res) {
                 m.loaded = true;
                 m.criteria = res.criteria;
+                // XXX
+                m.criteria[0].vendors = {
+                    'IBM': 1,
+                    'Some other': 22,
+                    'XP': 123
+                };
+
                 m.criteriaStr = JSON.stringify({ criteria: m.criteria });
 
                 if (m.criteria.length) {
-                    m.groups = [].concat(null, findGroups());
+                    m.vendors = findVendors();
                 } else {
-                    addCriteriaLike(null);
+                    m.vendors.push({
+                        title: '', // invite
+                        visible: true
+                    });
                 }
-                //console.log('>>> Loaded model', m.criteria);
+
+                console.log('>>> Loaded model', m.criteria, m.vendors);
+                buildModel();
+                console.log('>>> Built model', m.model);
+                console.log('>>> Built model str:\n', toString());
             });
     }
 
-    function findGroups() {
-        var groups = [];
+    function buildModel() {
+        // headers
+        m.model.headers = [];
+        m.model.headers.push({ title: 'Criteria' });
+        angular.forEach(m.vendors, function (vendor) {
+            m.model.headers.push({ title: vendor.title });
+        });
+
+        // rows
+        m.model.rows = [];
+        angular.forEach(m.criteria, function (criteria) {
+            var row = [];
+            row.push({
+                value: criteria.name,
+                static: true
+            });
+            angular.forEach(m.vendors, function (vendor) {
+                row.push({
+                    value: criteria.vendors[vendor.title] || '',
+                    editable: 'number'
+                });
+            });
+            m.model.rows.push(row);
+        });
+    }
+
+    function toString() {
+        var res = '';
+        var pads = [];
+        var arr = [];
+        arr.push(rowArr(m.model.headers, 'title'));
+
+        angular.forEach(m.model.rows, function (row) {
+            arr.push(rowArr(row, 'value'));
+        });
+
+        angular.forEach(arr, function (row, i) {
+            res += rowStr(row, i ? '-' : '=') + '\n';
+        });
+
+        function rowArr(arr, prop) {
+            return $.map(arr, function (obj, i) {
+                var str = obj[prop] + '';
+                pads[i] = Math.max(str.length, pads[i] || 0);
+                return str;
+            });
+        }
+
+        function rowStr(arr, delim) {
+            var res = $.map(arr, function (str, i) {
+                return str + times(' ', pads[i] - str.length);
+            }).join('|');
+            res += '\n' + times(delim, res.length);
+            return res;
+        }
+
+        function times(char, num) {
+            return Array(num + 1).join(char);
+        }
+
+        return res;
+    }
+
+    function findVendors() {
+        var vendors = [];
         var found = {};
         angular.forEach(m.criteria, function (crit) {
-            if (crit.group && !found[crit.group]) {
-                found[crit.group] = true;
-                groups.push(crit.group);
+            if (!crit.vendors) {
+                crit.vendors = {};
+                return;
             }
+            angular.forEach(crit.vendors, function (v, k) {
+                if (!found[k]) {
+                    found[k] = true;
+                    vendors.push({
+                        title: k,
+                        visible: true
+                    });
+                }
+            });
         });
-        return groups;
+        console.log('>> vendors', vendors);
+        return vendors;
     }
 
     function updateModel() {
         var data = prepareModel();
         if (!data) { return; } // unmodified
 
-        var delayPromise = $timeout(function () {}, 300, false);
+        var delayPromise = $timeout(function () {
+        }, 300, false);
         var requestPromise = $q(function (resolve) {
             Projects.updateProjectCriteria(m.projectId, data)
                 .finally(resolve);
@@ -221,11 +376,6 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams,
         var title = $filter('capitalize')(m.groupBy || 'null'); // null => hide column
         var hide = (title === 'Null' || isEmptyTable());
         return hide ? null : title;
-    }
-
-    function selectGroupBy(by) {
-        m.groupBy = by;
-        reloadTables();
     }
 
     function tableSortClass(tableParams, by) {

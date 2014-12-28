@@ -245,13 +245,13 @@ body {
     }
   }
 
-  /* Data table */
-  /*Table parent border*/
+  /* Table parent border */
   &.border {
     border: 1px solid #ddd;
     border-radius: 4px;
   }
 
+  /* Data table */
   .table {
     &.dbg {
       tr.bold {
@@ -268,29 +268,15 @@ body {
     th {
       background: #f5f5f5;
       text-align: left;
-      width: 40%;
+      /*width: 40%;*/
 
       &.table-menu {
         padding: 0 0 0 2px;
-
-        .hamburger-icon {
-          display: inline-block;
-          .icon-bar {
-            display: block;
-            width: 12px;
-            height: 2px;
-            border-radius: 1px;
-            background: #000;
-            & + .icon-bar {
-              margin-top: 2px;
-            }
-          }
-        }
       }
     }
     th + th, td + td {
       border-left: 1px solid #ddd;
-      width: 60%;
+      /*width: 60%;*/
     }
     td {
       &.attention, .attention {
@@ -302,57 +288,39 @@ body {
       background: #f5f5f5;
       padding: 3px 8px;
     }
-    tr.editable {
+    tr {
       td {
-        padding: 1px;
-        & > textarea {
-          padding: 7px;
-          width: 100%;
-          height: 34px;
-          border: none;
-          .box-shadow(none);
-          &:active, &:focus {
-            outline: 0;
-            background-color: #f9f7d0;
-          }
-        }
-        &.edited {
-          background-color: #f9f7d0;
-          .box-shadow(~"inset 0 0 1px rgba(0,0,0,.075), 1px 1px 5px rgba(102, 175, 233, .6)");
-        }
+        height: 36px;
         &.static {
-          padding: 8px;
           background: #f5f5f5;
         }
       }
-    }
 
-    .colored {
-      background-color: #f9f7d0;
-    }
-
-    /*Popover controls*/
-    .popover-form {
-      min-width: 160px;
-
-      .list-group-item {
-        padding: 4px 8px;
-
-        .create-new {
-          color: #bbb;
-          font-style: italic;
-          &:hover {
-            text-decoration: underline;
+      &.editable {
+        td {
+          padding: 1px;
+          & > textarea {
+            padding: 7px;
+            width: 100%;
+            height: 34px;
+            border: none;
+            .box-shadow(none);
+            &:active, &:focus {
+              outline: 0;
+              background-color: #f9f7d0;
+            }
+          }
+          &.edited {
+            background-color: #f9f7d0;
+            .box-shadow(~"inset 0 0 1px rgba(0,0,0,.075), 1px 1px 5px rgba(102, 175, 233, .6)");
           }
         }
       }
-      .hint {
-        float: right;
-        margin-top: -15px;
-        text-transform: uppercase;
-        font-size: 9px;
-        color: #bbb;
-      }
+    }
+
+
+    .colored {
+      background-color: #f9f7d0;
     }
   }
   /*Hide pagination*/
@@ -414,6 +382,44 @@ body {
   }
 }
 
+/*Popover controls*/
+.popover-form {
+  min-width: 160px;
+
+  .list-group-item {
+    padding: 4px 8px;
+
+    .create-new {
+      color: #bbb;
+      font-style: italic;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .hint {
+    float: right;
+    margin-top: -15px;
+    text-transform: uppercase;
+    font-size: 9px;
+    color: #bbb;
+  }
+}
+
+.hamburger-icon {
+  display: inline-block;
+  .icon-bar {
+    display: block;
+    width: 12px;
+    height: 2px;
+    border-radius: 1px;
+    background: #000;
+    & + .icon-bar {
+      margin-top: 2px;
+    }
+  }
+}
+
 /*Table resizable columns*/
 .rc-handle-container {
   position: relative;
@@ -454,10 +460,15 @@ table.rc-table-resizing {
 }
 
 .full-view {
-  .modal-header > .export {
+  .modal-header > .header-btn {
     float: right;
-    margin: -5px 30px 0 0;
-    padding: 5px 10px;
+    margin: -5px 5px 0 0;
+    &.last{
+      margin-right: 20px;
+    }
+    &.export {
+      padding: 6px 10px;
+    }
   }
 }
 

@@ -1,9 +1,19 @@
-<table class="table ng-table-resizable-columns"
-        ng-table="cm.fullTableParams"
-        data-resizable-columns-id="psTable">
+<table class="table"
+        ng-init="view = cm.normalView"
+        ng-table="cm.normalView.tableParams"
+        ng-class="{ 'ng-table-resizable-columns': false }"
+        ng-attr-data-resizable-columns-id="{{ false && 'psTable' }}"
+        >
     <thead>
     <tr>
-        <th class="sortable"
+        <th ng-repeat="col in view.columns"
+                ng-class="view.sortingClass(col)"
+                ng-click="view.sortBy(col)"
+                >
+            <div>{{col.title}}</div>
+            <!--TODO: control-->
+        </th>
+        <!--<th class="sortable"
                 ng-class="cm.tableSortClass(cm.fullTableParams, 'name')"
                 ng-click="cm.tableSortClick(cm.fullTableParams, 'name')"
                 data-resizable-column-id="name"
@@ -65,23 +75,25 @@
                     </div>
                 </form>
             </ps-table-popover>
-        </th>
+        </th>-->
     </tr>
     </thead>
     <tbody ng-repeat="group in $groups">
-    <!--Group raw-->
     <tr class="ng-table-group" ng-show="group.value">
-        <td colspan="{{cm.compactTable ? 3 : 5}}">
+        <td colspan="{{view.columns.length}}">
             <a href ng-click="group.$hideRows = !group.$hideRows" tabindex="-1">
                 <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                 {{group.value}}
             </a>
         </td>
     </tr>
-    <tr ng-hide="group.$hideRows" ng-repeat="criteria in group.data" class="editable"
+    <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
             context-menu="cm.setCriteriaOfMenu(criteria)"
             data-target="context-menu">
-        <td sortable="'name'" ng-class="{'edited': criteria.edit === 'name'}">
+        <td ng-repeat="col in view.columns">
+            {{ row[col.field] }}
+        </td>
+        <!--<td sortable="'name'" ng-class="{'edited': criteria.edit === 'name'}">
             <textarea class="form-control noresize"
                     msd-elastic
                     ng-model="criteria.name"
@@ -106,7 +118,7 @@
         <td class="static"
                 ng-if="!cm.compactTable"
                 sortable="'priority'">{{criteria.priority}}</td>
-        <!--Settings Popover-->
+        &lt;!&ndash;Settings Popover&ndash;&gt;
         <td>
             <ps-table-popover
                     ps-cont-selector="td"
@@ -153,7 +165,7 @@
                     </div>
                 </form>
             </ps-table-popover>
-        </td>
+        </td>-->
     </tr>
     </tbody>
 </table>

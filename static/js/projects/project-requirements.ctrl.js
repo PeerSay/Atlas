@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Projects'];
-function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Projects) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Table'];
+function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Table) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -17,7 +17,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.onFullView = onFullView;
 
     // Data model
-    m.loaded = false;
     m.criteria = [];
     m.criteriaStr = null;
     m.groups = [];
@@ -102,37 +101,17 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     // Data
     //
     function readModel() {
-        var loadedQ = $q(function (resolve) {
-            resolve();
-        });
-
-        // TODO - should be handled by cache in Projects, but now it gets off-sync
-        // due to empty rows.
-        return m.loaded ? loadedQ : Projects.readProjectCriteria(m.projectId)
+        return Table.readCriteria(m.projectId)
             .then(function (res) {
-                m.loaded = true;
                 m.criteria = res.criteria;
-                m.criteriaStr = JSON.stringify({ criteria: m.criteria });
+                m.criteriaStr = res.criteriaStr;
+                m.groups = res.groups;
 
-                if (m.criteria.length) {
-                    m.groups = [].concat(null, findGroups());
-                } else {
+                if (!m.criteria.length) {
                     addCriteriaLike(null);
                 }
                 //console.log('>>> Loaded model', m.criteria);
             });
-    }
-
-    function findGroups() {
-        var groups = [];
-        var found = {};
-        angular.forEach(m.criteria, function (crit) {
-            if (crit.group && !found[crit.group]) {
-                found[crit.group] = true;
-                groups.push(crit.group);
-            }
-        });
-        return groups;
     }
 
     function updateModel() {
@@ -141,7 +120,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
         var delayPromise = $timeout(function () {}, 300, false);
         var requestPromise = $q(function (resolve) {
-            Projects.updateProjectCriteria(m.projectId, data)
+            Table.updateCriteria(m.projectId, data)
                 .finally(resolve);
         });
 

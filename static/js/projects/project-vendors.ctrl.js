@@ -18,13 +18,13 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
 
 
     // Table views
-    m.normalTableView = Table.addView('vi-norm', toNormViewData) // req!
+    m.normalTableView = Table.addView(m.projectId, 'vi-norm', toNormViewData)
         //.debug() // opt
         .grouping() // xxx
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView('vi-full', toFullViewData) // req!
+    m.fullTableView = Table.addView(m.projectId, 'vi-full', toFullViewData)
         //.debug() // opt
         .grouping()
         .sorting({active: true})

@@ -88,6 +88,18 @@
     </div>
 </nav>
 
+<!--Notifications-->
+<div class="container-fluid" ng-controller="NotificationCtrl as m">
+    <div class="row">
+        <div class="alert alert-danger text-center notification hidden" role="alert" ng-show="m.error.show">
+            <button type="button" class="close" ng-click="m.hide()">
+                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+            </button>
+            <strong>{{m.error.title}}:</strong> {{m.error.msg}}
+        </div>
+    </div>
+</div>
+
 <div ng-view=""></div>
 
 <!--<script src="bower_components/socket.io-client/socket.io.min.js"></script>-->
@@ -122,7 +134,7 @@
 <script src="/js/projects/deep-linking.js"></script>
 <script src="/js/projects/capitalize.filter.js"></script>
 <script src="/js/projects/multiline.filter.js"></script>
-<script src="/js/services/rest.svc.js"></script>
+<script src="/js/services/backend.svc.js"></script>
 <script src="/js/services/storage.svc.js"></script>
 <script src="/js/directives/input-match.js"></script>
 <script src="/js/directives/header-menu.js"></script>

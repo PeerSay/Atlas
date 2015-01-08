@@ -3,65 +3,93 @@
 angular.module('peersay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['$q', 'restApi', 'User', 'Notification'];
-function Projects($q, rest, User, Notification) {
+Projects.$inject = ['Backend', 'User'];
+function Projects(Backend, User) {
     var P = {};
-    var cache = {};
 
+    // List
     P.projects = [];
-    P.current = {
-        project: null
-    };
-    // Create
     P.create = {
         showDlg: false,
         title: ''
     };
     P.toggleCreateDlg = toggleCreateDlg;
-    // REST
     P.getProjectStubs = getProjectStubs;
-    P.readProject = readProject;
-    P.readProjectCriteria = readProjectCriteria;
-    P.updateProjectCriteria = updateProjectCriteria;
     P.createProject = createProject;
     P.removeProject = removeProject;
+    // Details
+    P.current = {
+        project: null
+    };
+    P.readProject = readProject;
     P.updateProject = updateProject;
 
+    // Project list
+    //
+    function toggleCreateDlg(on) {
+        P.create.showDlg = on;
+    }
 
     function getProjectStubs() {
-        return User.getUser()
-            .success(function () {
-                P.projects = User.user.projects;
+        return User.readUser()
+            .then(function (user) {
+                return (P.projects = user.projects);
             });
     }
 
-    function read(params) {
-        var key = params.join('/');
-        var cached_prj = cache[key];
-        if (cached_prj) {
-            return cached_prj.promise;
-        }
-        var deferred = cache[key] = $q.defer();
-
-        rest.read(params)
-            .success(function (data) {
-                cache[key].resolve(data.result);
+    function createProject() {
+        return Backend.create(['projects'], { title: P.create.title })
+            .then(function (data) {
+                P.projects.push(data);
             })
-            .error(function () {
-                var err = 'Failed to read ' + key;
-                Notification.showError('API Error', err);
-                cache[key].reject(err);
+            .finally(function () {
+                P.create.showDlg = false;
+                P.create.title = '';
             });
-
-        return deferred.promise;
     }
 
-    function invalidateCache(params) {
-        var key = params.join('/');
-        delete cache[key];
+    function removeProject(id) {
+        return Backend.remove(['projects', id])
+            .then(function (data) {
+                P.projects.splice(getIdxById(data.id), 1);
+            });
     }
 
-    function wrapAndFlattenModel(data, prefix) {
+    // Project details
+    //
+
+    // Attaching transform middleware
+    Backend
+        .use('get', ['projects', '[^\/]*$'], transformProjectModel)
+        .use('put', ['projects', '[^\/]*$'], transformProjectModel);
+
+    function readProject(id) {
+        return Backend.read(['projects', id])
+            .then(function (res) {
+                return (P.current.project = res);
+            });
+    }
+
+    function updateProject(id, data) {
+        return Backend.update(['projects', id], data)
+            .then(function (res) {
+                // change status of updated field
+                angular.forEach(res, function (item) {
+                    var ctl = P.current.project[item.key];
+                    ctl.value = item.value;
+                    ctl.status = item.value ? 'ok' : 'missing'; // ok unless empty
+                });
+                return res;
+            });
+    }
+
+    // Called recursively for children properties
+    // Transforms { prop: val } to {
+    //   key: 'prop',
+    //   value: val,
+    //   status: 'ok|empty|missed'
+    // }
+    function transformProjectModel(data, prefix) {
         var result = {};
         var defaults = angular.copy(data.defaults || []);
         delete data.defaults;
@@ -69,7 +97,7 @@ function Projects($q, rest, User, Notification) {
         angular.forEach(data, function (val, key) {
             if (angular.isObject(val)) {
                 val.defaults = defaults;
-                angular.extend(result, wrapAndFlattenModel(val, key));
+                angular.extend(result, transformProjectModel(val, key));
             }
             else {
                 var dotted_key = prefix ? [prefix, key].join('.') : key;
@@ -89,82 +117,6 @@ function Projects($q, rest, User, Notification) {
             return 'ok';
         }
     }
-
-    function toggleCreateDlg(on) {
-        P.create.showDlg = on;
-    }
-
-
-    function readProject(id) {
-        return read(['projects', id])
-            .then(function (res) {
-                P.current.project = wrapAndFlattenModel(res);
-            });
-    }
-
-    function createProject() {
-        return rest.create(['projects'], {title: P.create.title})
-            .success(function (data) {
-                P.projects.push(data.result);
-            })
-            .error(function () {
-                var err = 'Failed to create project';
-                Notification.showError('API Error', err);
-            })
-            .then(function () {
-                P.create.showDlg = false;
-                P.create.title = '';
-            });
-    }
-
-    function removeProject(id) {
-        return rest.remove(['projects', id])
-            .success(function (data) {
-                P.projects.splice(getIdxById(data.result.id), 1);
-            })
-            .error(function () {
-                var err = 'Failed to remove project ' + id;
-                Notification.showError('API Error', err);
-            });
-    }
-
-    function updateProject(id, data) {
-        var params = ['projects', id];
-        return rest.update(params, data)
-            .success(function (res) {
-                var prj = wrapAndFlattenModel(res.result);
-                angular.forEach(prj, function (item) {
-                    var ctl = P.current.project[item.key];
-                    ctl.value = item.value;
-                    ctl.status = item.value ? 'ok' : 'missing'; // ok unless empty
-                });
-
-                invalidateCache(params);
-            })
-            .error(function () {
-                var err = 'Failed to update project ' + id;
-                Notification.showError('API Error', err);
-            });
-    }
-
-    // Criteria
-    //
-    function readProjectCriteria(id) {
-        return read(['projects', id, 'criteria']);
-    }
-
-    function updateProjectCriteria(id, data) {
-        var params = ['projects', id, 'criteria'];
-        return rest.update(params, data)
-            .success(function () {
-                invalidateCache(params);
-            })
-            .error(function () {
-                var err = 'Failed to update project ' + id;
-                Notification.showError('API Error', err);
-            });
-    }
-
 
     // Util
     //

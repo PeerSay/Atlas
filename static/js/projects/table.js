@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('Table', Table);
 
-Table.$inject = ['$q', '$rootScope', '$filter', 'ngTableParams', 'Projects'];
-function Table($q, $rootScope, $filter, ngTableParams, Projects) {
+Table.$inject = ['$q', '$rootScope', '$filter', 'ngTableParams', 'Backend'];
+function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     var T = {};
     var views = {};
     var model = {};
@@ -31,10 +31,18 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
             $rootScope.$emit('grouping', prop);
         }
     };
-    var loadQ = null;
+    // API
+    T.addView = addVIew;
+    T.toData = toData;
+    T.groupBy = groupBy;
+    T.sortBy = sortBy;
+    T.readCriteria = readCriteria;
+    T.updateCriteria = updateCriteria;
 
-    /** Creates & returns new view
-     *  toViewData must return data as:
+
+    /**
+     * Creates & returns new view
+     * Ctrl supplied toViewData must return data as:
      * {
      *  columns: [
      *   { title: 'Name', field: 'name'},
@@ -47,44 +55,63 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
      *  ]
      * }
      */
-    function addVIew(name, toViewData) {
+    function addVIew(id, name, toViewData) {
         views[name] = {
             toData: toViewData
         };
-        return TableView(name, T);
+        return TableView(id, name, T);
     }
 
-    function toData(name) {
-        //return views[name].toData(model);
-        var id = 'VsAG1Aqg'; // TODO
-        if (!loadQ) {
-            loadQ = $q.defer();
-
-            readModel(id)
-                .then(function () {
-                    loadQ.resolve(model);
-                });
-        }
-        return loadQ.promise;
-    }
-
-    /**
-     * CRUD operations
-     * */
-    function readModel(projectId) {
-        return Projects.readProjectCriteria(projectId)
-            .then(function (res) {
-                model.criteria = res.criteria;
-                // XXX - emul server data
-                model.criteria[0].vendors = [
-                    {title: 'IMB', value: 1},
-                    {title: 'Some other', value: 0},
-                    {title: 'XP', value: 123}
-                ];
-
-                model.criteriaStr = JSON.stringify({ criteria: model.criteria });
-                model.vendors = indexVendors(model.criteria);
+    function toData(projectId, name) {
+        return readCriteria(projectId)
+            .then(function (model) {
+                return views[name].toData(model)
             });
+    }
+
+    // CRUD operations
+    //
+
+    // Attaching transform middleware
+    Backend
+        .use('get', ['projects', '.*?', 'criteria'], transformCriteriaModel);
+
+    function readCriteria(id) {
+        return Backend.read(['projects', id, 'criteria'])
+            .then(function (res) {
+                return (model = res);
+            });
+    }
+
+    function updateCriteria(id, data) {
+        return Backend.update(['projects', id, 'criteria'], data); // TODO
+    }
+
+    function transformCriteriaModel(data) {
+        // Must have: data.criteria;
+        // XXX - emul server data
+        data.criteria[0].vendors = [
+            {title: 'IMB', value: 1},
+            {title: 'Some other', value: 0},
+            {title: 'XP', value: 123}
+        ];
+
+        data.criteriaStr = JSON.stringify({ criteria: data.criteria }); //TODO - need?
+        data.groups = findGroups(data.criteria);
+        data.vendors = indexVendors(data.criteria);
+        return data;
+
+        function findGroups(criteria) {
+            var groups = [];
+            var found = {};
+            angular.forEach(criteria, function (crit) {
+                if (crit.group && !found[crit.group]) {
+                    found[crit.group] = true;
+                    groups.push(crit.group);
+                }
+            });
+            return groups;
+        }
 
         function indexVendors(criteria) {
             var vendors = []; // all vendors
@@ -109,9 +136,11 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
     }
 
 
-    // Exposed via addVIew call
-    //
-    var TableView = function (name, svc) {
+    /**
+     * TableView class
+     * Exposed via addVIew call
+     */
+    var TableView = function (projectId, name, svc) {
         var V = {};
         var settings = {
             counts: [], // remove paging
@@ -135,13 +164,12 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
         function getData($defer, params) {
             console.log('>>>>>getData: name=%s, order=', name, params.orderBy());
 
-            svc.toData(name)
-                .then(function (model) {
-                    var data = views[name].toData(model);
-                    V.columns = data.columns;
+            svc.toData(projectId, name)
+                .then(function (data) {
+                    var rows = sort(data.rows, params.orderBy());
 
-                    data.rows = sort(data.rows, params.orderBy());
-                    $defer.resolve(data.rows);
+                    V.columns = data.columns;
+                    $defer.resolve(rows);
                 });
         }
 
@@ -178,7 +206,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
 
         function columnClass(col) {
             var edited = col.edit && col.edit.show;
-            var sortable = !col.virtual && !edited;
+            var sortable = V.sortBy && !col.virtual && !edited;
             // virtual is 'Add new' - not sortable
             // hide when edit too
 
@@ -238,10 +266,5 @@ function Table($q, $rootScope, $filter, ngTableParams, Projects) {
         return V;
     };
 
-    // API
-    T.addView = addVIew;
-    T.toData = toData;
-    T.groupBy = groupBy;
-    T.sortBy = sortBy;
     return T;
 }

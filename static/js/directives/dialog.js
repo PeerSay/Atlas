@@ -32,7 +32,9 @@ function psTileDialog(Tiles) {
 
             $el.on('shown.bs.modal', function () {
                 scope.$apply(function () {
-                    scope.onShow();
+                    if (scope.onShow) {
+                        scope.onShow();
+                    }
                 });
             });
 

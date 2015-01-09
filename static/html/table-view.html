@@ -10,7 +10,7 @@
                 ng-class="view.columnClass(col)"
                 ng-click="view.sortBy(col)"
                 ng-show="col.visible">
-            <div ng-if="col.editable">
+            <div ng-if="col.edit">
                 <a href tabindex="-1"
                         ng-show="!col.edit.show"
                         ng-click="view.editColumnCell(col)">{{ col.title }}</a>
@@ -23,7 +23,7 @@
                         ps-select="true"
                         />
             </div>
-            <div ng-if="!col.editable">{{col.title}}</div>
+            <div ng-if="!col.edit">{{col.title}}</div>
         </th>
     </tr>
     </thead>

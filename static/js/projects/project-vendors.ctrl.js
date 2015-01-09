@@ -64,7 +64,8 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
         data.columns.push({
             title: 'Criteria',
             field: 'name',
-            visible: true
+            visible: true,
+            sortable: true
         });
         // Group & priority are required for grouping to work (hidden)
         data.columns.push({
@@ -82,7 +83,7 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
                 title: vendor.title,
                 field: vendor.title,
                 visible: true,
-                editable: true,
+                sortable: true,
                 edit: {
                     show: false,
                     value: vendor.title
@@ -94,26 +95,26 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
             title: '...',
             field: '',
             visible: true,
-            virtual: true,
-            editable: true,
+            addNew: true,
             edit: {
                 show: false,
                 value: ''
             }
         });
+
         // Rows
         angular.forEach(model.criteria, function (crit) {
             var row = {};
             angular.forEach(data.columns, function (col) {
-                if (col.virtual) {
+                if (col.addNew) {
                     row[col.field] = {
                         type: 'static',
                         value: ''
                     };
                 }
-                else if (col.editable) {
+                else if (col.edit) {
                     row[col.field] = {
-                        criteria: crit,
+                        criteria: crit, // for save
                         field: col.field,
                         type: 'number',
                         value: (crit.vendorsIndex[col.field] || {}).value

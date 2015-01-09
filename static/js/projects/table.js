@@ -40,9 +40,9 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     // edit
     T.readCriteria = readCriteria;
     T.updateCriteria = updateCriteria;
-    T.saveColumn = saveColumn;
-    T.addColumn = addColumn;
-    T.saveCell = saveCell;
+    T.saveColumnModel = saveColumnModel;
+    T.addColumnModel = addColumnModel;
+    T.saveCellModel = saveCellModel;
 
     /**
      * Creates & returns new view
@@ -79,21 +79,29 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
     // CRUD operations
     //
-    function saveColumn(col) {
+    function saveColumnModel(col) {
         // col format: { title: 'IBM', field: 'IBM', visible: true, ...}
-        // col.title -- new value
-
-        // { "op": "replace", "path": "/criteria/vendors/12/title", "value": "foo" }
-        var patch = [];
         var newVal = col.title;
+        var oldVal = col.field;
+        var patch = [];
+
+        // update vendor in model.vendors
+        angular.forEach(model.vendors, function (vend) {
+            if (vend.title === oldVal) {
+                vend.title = newVal;
+            }
+        });
 
         // update vendor in every criteria
         angular.forEach(model.criteria, function (crit, i) {
-            var vendor = crit.vendorsIndex[col.field];
+            var vendor = crit.vendorsIndex[oldVal];
             var vendorIdx = crit.vendors.indexOf(vendor);
             if (vendor) {
                 // update model -- so that on next toData it is correctly read
                 vendor.title = newVal;
+                //update index:
+                crit.vendorsIndex[newVal] = vendor;
+                delete crit.vendorsIndex[oldVal];
 
                 // create patch for server
                 patch.push({
@@ -104,14 +112,16 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             }
         });
 
+        reload(); // !
+
         console.log('Save column: patch:', JSON.stringify(patch));
 
         // TODO - save to server
     }
 
-    function addColumn(newVal) {
-        var patch = [];
+    function addColumnModel(newVal) {
         var criteria = model.criteria[0];
+        var patch = [];
 
         // Add empty vendor to first criteria
         patch.push(addVendor(criteria, newVal, ''));
@@ -119,20 +129,19 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
         // TODO - save to server
 
-        //
+        // Update vendors model
         model.vendors.push({ title: newVal });
         reload();
     }
 
-    function saveCell(cell) {
+    function saveCellModel(cell) {
         // cell format: { field: 'IMB', type: 'number', value: '123' }
-        // value -- new value
-        var patch = [];
         var newVal = cell.value;
         var criteria = cell.criteria;
         var criteriaIdx = model.criteria.indexOf(criteria);
         var vendor = criteria.vendorsIndex[cell.field];
         var vendorIdx = criteria.vendors.indexOf(vendor);
+        var patch = [];
 
         if (vendor && vendor.value !== newVal) {
             vendor.value = newVal;
@@ -144,7 +153,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             });
             console.log('Save exist cell: patch:', JSON.stringify(patch));
         }
-        else if (!vendor && newVal) { // XXX - zero value!
+        else if (!vendor) {
             patch.push(addVendor(criteria, cell.field, newVal));
             console.log('Save new cell: patch:', JSON.stringify(patch));
         }
@@ -212,13 +221,14 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         }
 
         function indexVendors(criteria) {
+            // format: [ {title: 'IMB'}, ... ]
             var allVendors = [];
             var allIndex = {};
             angular.forEach(criteria, function (crit) {
-                // Index for fast access:
-                // [ {title: 'IMB', value: 1}, ...] -> {'IBM': <ref>, ...}
-                crit.vendorsIndex = {};
+                // vendors format:  [ {title: 'IMB', value: 1}, ...]
                 crit.vendors = crit.vendors || []; // may not exist
+                // Index for fast access: {'IBM': <ref-to-vendor>, ...}
+                crit.vendorsIndex = {};
 
                 angular.forEach(crit.vendors, function (vendor) {
                     crit.vendorsIndex[vendor.title] = vendor;
@@ -242,12 +252,12 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         var V = {};
         // For html:
         V.tableParams = null;
-        V.columns  = null;
+        V.columns = null;
         V.columnClass = columnClass;
         V.editColumnCell = editColumnCell;
         V.saveColumnCell = saveColumnCell;
-        V.addColumn = svc.addColumn.bind(svc);
-        V.saveCell = svc.saveCell.bind(svc);
+        V.addColumn = svc.addColumnModel.bind(svc);
+        V.saveCell = saveCell;
         V.groupBy = groupBy;
         // For ctrl:
         V.grouping = grouping;
@@ -324,16 +334,15 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
         function columnClass(col) {
             var edited = col.edit && col.edit.show;
-            var sortable = V.sortBy && !col.virtual && !edited;
-            // virtual is 'Add new' - not sortable
-            // hide when edit too
+            var sortable = V.sortBy && col.sortable && !edited;
 
             return {
                 'sortable': sortable,
                 'sort-asc': V.tableParams.isSortBy(col.field, 'asc'),
                 'sort-desc': V.tableParams.isSortBy(col.field, 'desc'),
-                'editable': col.editable && edited,
-                'edited': edited
+                'editable': !!col.edit,
+                'edited': edited,
+                'add-new': col.addNew && !edited
             };
         }
 
@@ -367,22 +376,29 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         // Edit
         function editColumnCell(col) {
             col.edit.show = true;
-            col.edit.value = !col.virtual ? col.title : ''; // virtual is AddNew
+            col.edit.value = !col.addNew ? col.title : '';
             //return evt.preventDefault(); // XXX - don't work?
         }
 
         function saveColumnCell(col) {
-            col.edit.show = false;
-            var isNew = (col.title === '...'  && !col.field);
+            var isAddNew = !!col.addNew;
+            var modified = isAddNew ? !!col.edit.value : (col.title !== col.edit.value);
 
-            if (isNew) {
-                if (col.edit.value) {
-                    svc.addColumn(col.edit.value);
-                }
+            col.edit.show = false;
+
+            if (isAddNew && modified) {
+                svc.addColumnModel(col.edit.value);
             }
-            else if (col.title !== col.edit.value) {
+            else if (modified) {
                 col.title = col.edit.value;
-                svc.saveColumn(col);
+                svc.saveColumnModel(col);
+            }
+        }
+
+        function saveCell(cell) {
+            var modified = !!cell.value; // TODO: 0 as value!
+            if (modified) {
+                svc.saveCellModel(cell);
             }
         }
 

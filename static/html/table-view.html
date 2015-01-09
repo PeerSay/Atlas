@@ -13,11 +13,12 @@
             <div ng-if="col.editable">
                 <a href tabindex="-1"
                         ng-show="!col.edit.show"
-                        ng-click="col.edit.show = true">{{ col.title }}</a>
+                        ng-click="view.editColumnCell(col)">{{ col.title }}</a>
+
                 <input type="text" tabindex="-1"
                         ng-show="col.edit.show"
                         ng-model="col.edit.value"
-                        ng-blur="col.edit.show = false"
+                        ng-blur="view.saveColumnCell(col)"
                         ps-focus-on="col.edit.show === true"
                         ps-select="true"
                         />
@@ -47,6 +48,7 @@
             <div ng-if="cell.type === 'number'">
                 <input type="number"
                         ng-model="cell.value"
+                        ng-blur="view.saveCell(cell)"
                         />
             </div>
             <div ng-if="!cell.type">{{ cell }}</div>

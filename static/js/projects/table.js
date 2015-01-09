@@ -36,9 +36,13 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     T.toData = toData;
     T.groupBy = groupBy;
     T.sortBy = sortBy;
+    T.reload = reload;
+    // edit
     T.readCriteria = readCriteria;
     T.updateCriteria = updateCriteria;
-
+    T.saveColumn = saveColumn;
+    T.addColumn = addColumn;
+    T.saveCell = saveCell;
 
     /**
      * Creates & returns new view
@@ -69,8 +73,101 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             });
     }
 
+    function reload() {
+        $rootScope.$emit('reload');
+    }
+
     // CRUD operations
     //
+    function saveColumn(col) {
+        // col format: { title: 'IBM', field: 'IBM', visible: true, ...}
+        // col.title -- new value
+
+        // { "op": "replace", "path": "/criteria/vendors/12/title", "value": "foo" }
+        var patch = [];
+        var newVal = col.title;
+
+        // update vendor in every criteria
+        angular.forEach(model.criteria, function (crit, i) {
+            var vendor = crit.vendorsIndex[col.field];
+            var vendorIdx = crit.vendors.indexOf(vendor);
+            if (vendor) {
+                // update model -- so that on next toData it is correctly read
+                vendor.title = newVal;
+
+                // create patch for server
+                patch.push({
+                    op: 'replace',
+                    path: ['/criteria', i, 'vendors', vendorIdx, 'title'].join('/'),
+                    value: newVal
+                });
+            }
+        });
+
+        console.log('Save column: patch:', JSON.stringify(patch));
+
+        // TODO - save to server
+    }
+
+    function addColumn(newVal) {
+        var patch = [];
+        var criteria = model.criteria[0];
+
+        // Add empty vendor to first criteria
+        patch.push(addVendor(criteria, newVal, ''));
+        console.log('Add column: patch:', JSON.stringify(patch));
+
+        // TODO - save to server
+
+        //
+        model.vendors.push({ title: newVal });
+        reload();
+    }
+
+    function saveCell(cell) {
+        // cell format: { field: 'IMB', type: 'number', value: '123' }
+        // value -- new value
+        var patch = [];
+        var newVal = cell.value;
+        var criteria = cell.criteria;
+        var criteriaIdx = model.criteria.indexOf(criteria);
+        var vendor = criteria.vendorsIndex[cell.field];
+        var vendorIdx = criteria.vendors.indexOf(vendor);
+
+        if (vendor && vendor.value !== newVal) {
+            vendor.value = newVal;
+
+            patch.push({
+                op: 'replace',
+                path: ['/criteria', criteriaIdx, 'vendors', vendorIdx, 'value'].join('/'),
+                value: newVal
+            });
+            console.log('Save exist cell: patch:', JSON.stringify(patch));
+        }
+        else if (!vendor && newVal) { // XXX - zero value!
+            patch.push(addVendor(criteria, cell.field, newVal));
+            console.log('Save new cell: patch:', JSON.stringify(patch));
+        }
+
+        // TODO - save to server
+    }
+
+    function addVendor(criteria, field, val) {
+        var criteriaIdx = model.criteria.indexOf(criteria);
+        var newVendor = {
+            title: field,
+            value: val
+        };
+        criteria.vendors.push(newVendor);
+        criteria.vendorsIndex[field] = newVendor;
+
+        // patch
+        return {
+            op: 'add',
+            path: ['/criteria', criteriaIdx, 'vendors', '-'].join('/'),
+            value: newVendor
+        };
+    }
 
     // Attaching transform middleware
     Backend
@@ -88,7 +185,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     }
 
     function transformCriteriaModel(data) {
-        // Must have: data.criteria;
+        // data format: data.criteria = [...];
+
         // XXX - emul server data
         data.criteria[0].vendors = [
             {title: 'IMB', value: 1},
@@ -114,24 +212,24 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         }
 
         function indexVendors(criteria) {
-            var vendors = []; // all vendors
-            var index = {};
+            var allVendors = [];
+            var allIndex = {};
             angular.forEach(criteria, function (crit) {
                 // Index for fast access:
-                // [ {title: 'IMB', value: 1}, ...] -> {'IBM': 1, ...}
+                // [ {title: 'IMB', value: 1}, ...] -> {'IBM': <ref>, ...}
                 crit.vendorsIndex = {};
                 crit.vendors = crit.vendors || []; // may not exist
 
                 angular.forEach(crit.vendors, function (vendor) {
-                    crit.vendorsIndex[vendor.title] = vendor.value;
+                    crit.vendorsIndex[vendor.title] = vendor;
 
-                    if (!index[vendor.title]) {
-                        index[vendor.title] = true;
-                        vendors.push({ title: vendor.title }); // TODO - order matters!
+                    if (!allIndex[vendor.title]) {
+                        allIndex[vendor.title] = true;
+                        allVendors.push({ title: vendor.title }); // TODO - order matters!
                     }
                 });
             });
-            return vendors;
+            return allVendors;
         }
     }
 
@@ -142,6 +240,22 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
      */
     var TableView = function (projectId, name, svc) {
         var V = {};
+        // For html:
+        V.tableParams = null;
+        V.columns  = null;
+        V.columnClass = columnClass;
+        V.editColumnCell = editColumnCell;
+        V.saveColumnCell = saveColumnCell;
+        V.addColumn = svc.addColumn.bind(svc);
+        V.saveCell = svc.saveCell.bind(svc);
+        V.groupBy = groupBy;
+        // For ctrl:
+        V.grouping = grouping;
+        V.sorting = sorting;
+        V.debug = debug;
+        V.done = done;
+
+        // ngTable params
         var settings = {
             counts: [], // remove paging
             defaultSort: 'asc' // DBG
@@ -158,6 +272,10 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         function done() {
             settings.getData = getData;
             V.tableParams = new ngTableParams(parameters, settings);
+
+            $rootScope.$on('reload', function () {
+                V.tableParams.reload();
+            });
             return V;
         }
 
@@ -220,7 +338,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         }
 
         function sortBy(col) {
-            if (col.edit.show) { return; }
+            var edited = col.edit && col.edit.show;
+            if (edited) { return; }
 
             var order = {};
             order[col.field] = V.tableParams.isSortBy(col.field, 'asc') ? 'desc' : 'asc';
@@ -246,23 +365,27 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         }
 
         // Edit
-        function editCol(col, evt) {
+        function editColumnCell(col) {
             col.edit.show = true;
-            col.edit.value = col.title;
-            return evt.preventDefault(); // XXX - don't work?
+            col.edit.value = !col.virtual ? col.title : ''; // virtual is AddNew
+            //return evt.preventDefault(); // XXX - don't work?
         }
 
-        // For html:
-        //tableParams +
-        //columns +
-        V.columnClass = columnClass;
-        V.editCol = editCol;
-        V.groupBy = groupBy;
-        // For ctrl:
-        V.grouping = grouping;
-        V.sorting = sorting;
-        V.debug = debug;
-        V.done = done;
+        function saveColumnCell(col) {
+            col.edit.show = false;
+            var isNew = (col.title === '...'  && !col.field);
+
+            if (isNew) {
+                if (col.edit.value) {
+                    svc.addColumn(col.edit.value);
+                }
+            }
+            else if (col.title !== col.edit.value) {
+                col.title = col.edit.value;
+                svc.saveColumn(col);
+            }
+        }
+
         return V;
     };
 

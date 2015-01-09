@@ -44,10 +44,10 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
             });
         });
         // Rows
-        angular.forEach(model.criteria, function (criteria) {
+        angular.forEach(model.criteria, function (crit) {
             var row = {};
             angular.forEach(data.columns, function (col) {
-                row[col.field] = criteria.vendorsIndex[col.field];
+                row[col.field] = (crit.vendorsIndex[col.field] || {}).value;
             });
             data.rows.push(row);
         });
@@ -92,7 +92,7 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
         // Last column is Add New
         data.columns.push({
             title: '...',
-            field: '--', // TODO: unique!
+            field: '',
             visible: true,
             virtual: true,
             editable: true,
@@ -102,7 +102,7 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
             }
         });
         // Rows
-        angular.forEach(model.criteria, function (criteria) {
+        angular.forEach(model.criteria, function (crit) {
             var row = {};
             angular.forEach(data.columns, function (col) {
                 if (col.virtual) {
@@ -113,18 +113,20 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
                 }
                 else if (col.editable) {
                     row[col.field] = {
+                        criteria: crit,
+                        field: col.field,
                         type: 'number',
-                        value: criteria.vendorsIndex[col.field]
+                        value: (crit.vendorsIndex[col.field] || {}).value
                     };
                 }
                 else if (col.visible) {
                     row[col.field] = {
                         type: 'static',
-                        value: criteria[col.field]
+                        value: crit[col.field]
                     };
                 }
                 else {
-                    row[col.field] = criteria[col.field];
+                    row[col.field] = crit[col.field];
                 }
 
             });

@@ -47,15 +47,6 @@
                         </span>
                         <form class="popover-form">
                             <div class="form-group">
-                                <label class="checkbox-ext no-select text-nowrap block">
-                                    <input type="checkbox"
-                                            ng-model="cm.compactTable"
-                                            ng-click="cm.reloadTables()">
-                                    Compact view
-                                </label>
-                            </div>
-
-                            <div class="form-group">
                                 <label>Group by:</label>
                                 <div class="list-group">
                                     <a href class="list-group-item"
@@ -80,18 +71,6 @@
                 <div class="modal-body">
                     <div class="tile-section border">
                         <ps-table-view ps-view="cm.fullTableView"></ps-table-view>
-                    </div>
-
-                    <div class="tile-section" hidden>
-                        <table class="table dbg">
-                            <tr ng-repeat="crit in cm.criteria" ng-class="{'bold': !!crit.edit}">
-                                <td>{{cm.criteria.indexOf(crit)}}</td>
-                                <td ng-bind-html="crit.name | multiline"></td>
-                                <td ng-bind-html="crit.description | multiline"></td>
-                                <td>{{crit.group}}</td>
-                                <td>{{crit.priority}}</td>
-                            </tr>
-                        </table>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -54,7 +54,13 @@ var projectSchema = new Schema({
             name: { type: String },
             description: {type: String },
             group: { type: String },
-            priority: { type: String }
+            priority: { type: String },
+            vendors: [
+                {
+                    title: { type: String },
+                    value: { type: String } // TODO - better name, other fields
+                }
+            ]
         }
     ]
 });

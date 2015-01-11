@@ -19,7 +19,8 @@ function Backend($http, $q, Notification) {
         read: request('get'),
         update: request('put'),
         create: request('post'),
-        remove: request('delete')
+        remove: request('delete'),
+        patch: request('patch')
     };
     var cache = {};
     var middleware = [];

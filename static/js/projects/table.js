@@ -79,11 +79,11 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
     // CRUD operations
     //
-    function saveColumnModel(col) {
+    function saveColumnModel(col, projectId) {
         // col format: { title: 'IBM', field: 'IBM', visible: true, ...}
         var newVal = col.title;
         var oldVal = col.field;
-        var patch = [];
+        var patches = [];
 
         // update vendor in model.vendors
         angular.forEach(model.vendors, function (vend) {
@@ -104,7 +104,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 delete crit.vendorsIndex[oldVal];
 
                 // create patch for server
-                patch.push({
+                patches.push({
                     op: 'replace',
                     path: ['/criteria', i, 'vendors', vendorIdx, 'title'].join('/'),
                     value: newVal
@@ -112,53 +112,56 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             }
         });
 
-        reload(); // !
+        console.log('Save column: patch:', JSON.stringify(patches));
+        if (patches.length) {
+            patchCriteria(projectId, patches);
+        }
 
-        console.log('Save column: patch:', JSON.stringify(patch));
-
-        // TODO - save to server
-    }
-
-    function addColumnModel(newVal) {
-        var criteria = model.criteria[0];
-        var patch = [];
-
-        // Add empty vendor to first criteria
-        patch.push(addVendor(criteria, newVal, ''));
-        console.log('Add column: patch:', JSON.stringify(patch));
-
-        // TODO - save to server
-
-        // Update vendors model
-        model.vendors.push({ title: newVal });
         reload();
     }
 
-    function saveCellModel(cell) {
+    function addColumnModel(newVal, projectId) {
+        var criteria = model.criteria[0];
+        var patches = [];
+
+        // Add empty vendor to first criteria
+        patches.push(addVendor(criteria, newVal, ''));
+        console.log('Add column: patch:', JSON.stringify(patches));
+
+        // Update vendors model
+        model.vendors.push({ title: newVal });
+
+        patchCriteria(projectId, patches);
+        reload();
+    }
+
+    function saveCellModel(cell, projectId) {
         // cell format: { field: 'IMB', type: 'number', value: '123' }
         var newVal = cell.value;
         var criteria = cell.criteria;
         var criteriaIdx = model.criteria.indexOf(criteria);
         var vendor = criteria.vendorsIndex[cell.field];
         var vendorIdx = criteria.vendors.indexOf(vendor);
-        var patch = [];
+        var patches = [];
 
         if (vendor && vendor.value !== newVal) {
             vendor.value = newVal;
 
-            patch.push({
+            patches.push({
                 op: 'replace',
                 path: ['/criteria', criteriaIdx, 'vendors', vendorIdx, 'value'].join('/'),
                 value: newVal
             });
-            console.log('Save exist cell: patch:', JSON.stringify(patch));
+            console.log('Save exist cell: patch:', JSON.stringify(patches));
         }
         else if (!vendor) {
-            patch.push(addVendor(criteria, cell.field, newVal));
-            console.log('Save new cell: patch:', JSON.stringify(patch));
+            patches.push(addVendor(criteria, cell.field, newVal));
+            console.log('Save new cell: patch:', JSON.stringify(patches));
         }
 
-        // TODO - save to server
+        if (patches.length) {
+            patchCriteria(projectId, patches);
+        }
     }
 
     function addVendor(criteria, field, val) {
@@ -193,16 +196,12 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         return Backend.update(['projects', id, 'criteria'], data); // TODO
     }
 
+    function patchCriteria(id, data) {
+        return Backend.patch(['projects', id, 'criteria'], data);
+    }
+
     function transformCriteriaModel(data) {
         // data format: data.criteria = [...];
-
-        // XXX - emul server data
-        data.criteria[0].vendors = [
-            {title: 'IMB', value: 1},
-            {title: 'Some other', value: 0},
-            {title: 'XP', value: 123}
-        ];
-
         data.criteriaStr = JSON.stringify({ criteria: data.criteria }); //TODO - need?
         data.groups = findGroups(data.criteria);
         data.vendors = indexVendors(data.criteria);
@@ -256,7 +255,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.columnClass = columnClass;
         V.editColumnCell = editColumnCell;
         V.saveColumnCell = saveColumnCell;
-        V.addColumn = svc.addColumnModel.bind(svc);
         V.saveCell = saveCell;
         // For ctrl:
         V.grouping = grouping;
@@ -348,7 +346,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 // TODO - fix Product names with space
                 orderBy = [orderBy + '.value'];
 
-                console.log('>>>>>sort by: ', orderBy);
+                //console.log('>>>>>sort by: ', orderBy);
             }
 
             // TODO - groups
@@ -393,18 +391,18 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             col.edit.show = false;
 
             if (isAddNew && modified) {
-                svc.addColumnModel(col.edit.value);
+                svc.addColumnModel(col.edit.value, projectId);
             }
             else if (modified) {
                 col.title = col.edit.value;
-                svc.saveColumnModel(col);
+                svc.saveColumnModel(col, projectId);
             }
         }
 
         function saveCell(cell) {
             var modified = !!cell.value; // TODO: 0 as value!
             if (modified) {
-                svc.saveCellModel(cell);
+                svc.saveCellModel(cell, projectId);
             }
         }
 

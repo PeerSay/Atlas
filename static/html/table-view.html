@@ -46,7 +46,7 @@
                 ng-class="cell.type">
             <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
             <div ng-if="cell.type === 'number'">
-                <input type="number"
+                <input type="text"
                         ng-model="cell.value"
                         ng-blur="view.saveCell(cell)"
                         />

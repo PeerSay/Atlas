@@ -138,7 +138,8 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
                 else if (col.visible) {
                     row[col.field] = {
                         type: 'static',
-                        value: crit[col.field]
+                        value: crit[col.field],
+                        noMenu: true
                     };
                 } else {
                     row[col.field] = {
@@ -155,6 +156,37 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
     // Grouping
     m.groupBy = Table.groupBy;
 
+    //Menu
+    m.menu = {
+        context: null,
+        view: m.fullTableView,
+        setContext: function (context) {
+            this.context = context;
+        },
+        addProduct: menuAddProduct,
+        removeProduct: menuRemoveProduct
+    };
+    m.fullTableView.menu = m.menu; // expose to Table directive
+
+    function menuAddProduct() {
+        var addCol = $.map(this.view.columns, function (col) {
+            return col.addNew ? col : null
+        })[0];
+        if (addCol) {
+            addCol.edit.show = true; // invite to edit
+        }
+    }
+
+    function menuRemoveProduct() {
+        var view = this.view;
+        var cell = this.context.cell;
+
+        // delay to allow context-menu event handler to close menu,
+        // otherwise it remains open
+        $timeout(function () {
+            view.removeColumn(cell);
+        }, 0, false);
+    }
 
     /////////////////////////////
 
@@ -175,10 +207,6 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
     // Editing cells
     //m.criteriaKeyPressed = criteriaKeyPressed;
     // Menu
-    m.criteriaOfMenu = null;
-    m.setCriteriaOfMenu = setCriteriaOfMenu;
-    m.menuAddCriteria = menuAddCriteria;
-    m.menuRemoveCriteria = menuRemoveCriteria;
 
 
     activate();

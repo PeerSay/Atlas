@@ -42,6 +42,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     T.updateCriteria = updateCriteria;
     T.saveColumnModel = saveColumnModel;
     T.addColumnModel = addColumnModel;
+    T.removeColumnModel = removeColumnModel;
     T.saveCellModel = saveCellModel;
 
     /**
@@ -112,7 +113,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             }
         });
 
-        console.log('Save column: patch:', JSON.stringify(patches));
+        console.log('Save column patch:', JSON.stringify(patches));
         if (patches.length) {
             patchCriteria(projectId, patches);
         }
@@ -126,7 +127,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
         // Add empty vendor to first criteria
         patches.push(addVendor(criteria, newVal, ''));
-        console.log('Add column: patch:', JSON.stringify(patches));
+        console.log('Add column patch:', JSON.stringify(patches));
 
         // Update vendors model
         model.vendors.push({ title: newVal });
@@ -152,11 +153,11 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 path: ['/criteria', criteriaIdx, 'vendors', vendorIdx, 'value'].join('/'),
                 value: newVal
             });
-            console.log('Save exist cell: patch:', JSON.stringify(patches));
+            console.log('Save exist cell patch:', JSON.stringify(patches));
         }
         else if (!vendor) {
             patches.push(addVendor(criteria, cell.field, newVal));
-            console.log('Save new cell: patch:', JSON.stringify(patches));
+            console.log('Save new cell patch:', JSON.stringify(patches));
         }
 
         if (patches.length) {
@@ -179,6 +180,34 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             path: ['/criteria', criteriaIdx, 'vendors', '-'].join('/'),
             value: newVendor
         };
+    }
+
+
+    function removeColumnModel(title, projectId) {
+        var patches = [];
+
+        // remove vendor from model.vendors
+        model.vendors = $.map(model.vendors, function (vend) {
+            return (vend.title === title) ? null : vend;
+        });
+
+        angular.forEach(model.criteria, function (crit, i) {
+            var vendor = crit.vendorsIndex[title];
+            var vendorIdx = crit.vendors.indexOf(vendor);
+            if (vendor) {
+                crit.vendors = crit.vendors.splice(vendorIdx, 1);
+                delete crit.vendorsIndex[title];
+
+                patches.push({
+                    op: 'remove',
+                    path: ['/criteria', i, 'vendors', vendorIdx].join('/')
+                });
+            }
+        });
+        console.log('Remove column patch:', JSON.stringify(patches));
+
+        patchCriteria(projectId, patches);
+        reload();
     }
 
     // Attaching transform middleware
@@ -255,6 +284,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.columnClass = columnClass;
         V.editColumnCell = editColumnCell;
         V.saveColumnCell = saveColumnCell;
+        V.removeColumn = removeColumn;
         V.saveCell = saveCell;
         // For ctrl:
         V.grouping = grouping;
@@ -404,6 +434,10 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             if (modified) {
                 svc.saveCellModel(cell, projectId);
             }
+        }
+
+        function removeColumn(cell) {
+            svc.removeColumnModel(cell.field, projectId);
         }
 
         return V;

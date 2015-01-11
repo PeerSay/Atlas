@@ -37,13 +37,14 @@
         </td>
     </tr>
     <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <!-- TODO context-menu="cm.setCriteriaOfMenu(criteria)"
-            data-target="context-menu">-->
         <td ng-repeat="col in view.columns"
                 ng-init="cell = row[col.field]"
                 ng-show="col.visible"
                 class="editable"
-                ng-class="cell.type">
+                ng-class="cell.type"
+                context-menu="view.menu.setContext({cell: cell})"
+                context-menu-disabled="!view.menu || cell.noMenu"
+                data-target="context-menu">
             <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
             <div ng-if="cell.type === 'number'">
                 <input type="text"

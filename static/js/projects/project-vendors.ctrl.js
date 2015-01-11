@@ -35,19 +35,34 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
             columns: [],
             rows: []
         };
-        // Columns: Prod1, [Prod2, Prod3]
+        // Columns: Criteria(hidden), Prod1, [Prod2, Prod3]
+        // Criteria is required for sorting (hidden)
+        data.columns.push({
+            title: '--',
+            field: 'name',
+            visible: false
+        });
         angular.forEach(model.vendors, function (vendor, i) {
             data.columns.push({
                 title: vendor.title,
                 field: vendor.title,
-                visible: i < 3 // hide all but first 3; TODO - remove from arr?
+                visible: i < 3, // hide all but first 3; TODO - remove from arr?
+                isVendor: true
             });
         });
         // Rows
         angular.forEach(model.criteria, function (crit) {
             var row = {};
             angular.forEach(data.columns, function (col) {
-                row[col.field] = (crit.vendorsIndex[col.field] || {}).value;
+                if (col.isVendor) {
+                    row[col.field] = {
+                        value: (crit.vendorsIndex[col.field] || {}).value
+                    };
+                } else {
+                    row[col.field] = {
+                        value: crit[col.field]
+                    };
+                }
             });
             data.rows.push(row);
         });
@@ -60,7 +75,7 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
             columns: [],
             rows: []
         };
-        // Columns: Prod1, [Prod2, Prod3]
+        // Columns: Ctireria, Prod1, [Prod2, Prod3]
         data.columns.push({
             title: 'Criteria',
             field: 'name',
@@ -93,7 +108,7 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
         // Last column is Add New
         data.columns.push({
             title: '...',
-            field: '',
+            field: '--',
             visible: true,
             addNew: true,
             edit: {
@@ -125,11 +140,11 @@ function ProjectVendorsCtrl($scope, $filter, $timeout, $q, Tiles, Projects, Tabl
                         type: 'static',
                         value: crit[col.field]
                     };
+                } else {
+                    row[col.field] = {
+                        value: crit[col.field]
+                    };
                 }
-                else {
-                    row[col.field] = crit[col.field];
-                }
-
             });
             data.rows.push(row);
         });

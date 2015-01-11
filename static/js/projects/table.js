@@ -258,7 +258,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.saveColumnCell = saveColumnCell;
         V.addColumn = svc.addColumnModel.bind(svc);
         V.saveCell = saveCell;
-        V.groupBy = groupBy;
         // For ctrl:
         V.grouping = grouping;
         V.sorting = sorting;
@@ -290,7 +289,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         }
 
         function getData($defer, params) {
-            console.log('>>>>>getData: name=%s, order=', name, params.orderBy());
+            //console.log('>>>>>getData: name=%s, order=', name, params.orderBy());
 
             svc.toData(projectId, name)
                 .then(function (data) {
@@ -304,17 +303,16 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         // Grouping
         function grouping() {
             settings.groupBy = function (item) {
-                return item[svc.groupBy.get()];
+                var cur = svc.groupBy.get();
+                var res = (item[cur] || {}).value;
+                //console.log('>>>>>groupBy [%s] returns: ', cur, res);
+                return res;
             };
 
             $rootScope.$on('grouping', function () {
                 V.tableParams.reload();
             });
             return V;
-        }
-
-        function groupBy(prop) {
-            svc.groupBy.set(prop);
         }
 
         // Sorting
@@ -332,6 +330,41 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             return V;
         }
 
+        function sortBy(col) {
+            var edited = col.edit && col.edit.show;
+            if (edited) { return; }
+
+            var order = {};
+            order[col.field] = V.tableParams.isSortBy(col.field, 'asc') ? 'desc' : 'asc';
+
+            svc.sortBy.set(order);
+        }
+
+        function sort(arr, orderByParam) {
+            //orderByArr format: ['+fld1', '-fld2']
+            //console.log('>>>>>sort: orderByParam:', orderByParam);
+            var orderBy = orderByParam[0];
+            if (orderBy) {
+                // TODO - fix Product names with space
+                orderBy = [orderBy + '.value'];
+
+                console.log('>>>>>sort by: ', orderBy);
+            }
+
+            // TODO - groups
+            /*if (settings.groupBy) {
+                // if grouped, sort by group first
+                var curGroupBy = svc.groupBy.get();
+                var sortedByGroup = orderBy && (orderBy.substring(1) === curGroupBy);
+                if (!sortedByGroup && curGroupBy) {
+                    orderByParam.unshift(curGroupBy);
+                }
+            }*/
+
+            return orderBy ? $filter('orderBy')(arr, orderBy) : arr;
+        }
+
+        // Class
         function columnClass(col) {
             var edited = col.edit && col.edit.show;
             var sortable = V.sortBy && col.sortable && !edited;
@@ -344,33 +377,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 'edited': edited,
                 'add-new': col.addNew && !edited
             };
-        }
-
-        function sortBy(col) {
-            var edited = col.edit && col.edit.show;
-            if (edited) { return; }
-
-            var order = {};
-            order[col.field] = V.tableParams.isSortBy(col.field, 'asc') ? 'desc' : 'asc';
-
-            svc.sortBy.set(order);
-        }
-
-        function sort(arr, orderByArr) {
-            //orderByArr format: ['+fld1', '-fld2']
-            //console.log('>>>>>sort: orderBy:', orderByArr);
-
-            if (settings.groupBy) {
-                // if grouped, sort by group first
-                var orderBy = orderByArr[0];
-                var curGroupBy = svc.groupBy.get();
-                var sortedByGroup = orderBy && (orderBy.substring(1) === curGroupBy);
-                if (!sortedByGroup && curGroupBy) {
-                    orderByArr.unshift(curGroupBy);
-                }
-            }
-
-            return $filter('orderBy')(arr, orderByArr);
         }
 
         // Edit

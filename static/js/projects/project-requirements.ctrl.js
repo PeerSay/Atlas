@@ -21,12 +21,12 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.compactTable = false;
     m.reloadTables = Table.reload.bind(Table);
 
-    m.normalTableView = Table.addView(m.projectId, 'ev-norm', toNormViewData)
+    m.normalTableView = Table.addView(m, 'ev-norm', toNormViewData)
         //.debug() // opt
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m.projectId, 'ev-full', toFullViewData)
+    m.fullTableView = Table.addView(m, 'ev-full', toFullViewData)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
@@ -71,7 +71,8 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     function toFullViewData(model) {
         var data = {
             columns: [],
-            rows: []
+            rows: [],
+            topics: model.topics // expose topics for Popover
         };
         // Columns: Criteria, Description, [Topic, Priority], <empty>
         data.columns.push({
@@ -111,24 +112,26 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         });
 
         // Rows
-        angular.forEach(model.criteria, function (crit) {
-            var row = getRow(crit);
+        angular.forEach(model.criteria, function (crit, i) {
+            var row = getRow(crit, i);
+            if (crit.justAdded) {
+                row.edit = 'name';
+                crit.justAdded = false;
+            }
             data.rows.push(row);
         });
 
         // Empty table -> invite to edit
         if (!model.criteria.length) {
-            var row = getRow(getCriteriaLike(null));
+            var row = getRow(Table.getModelLike(null));
             row.edit = 'name';
             data.rows.push(row);
         }
 
-        // Expose topics:
-        data.topics = model.topics;
         return data;
 
 
-        function getRow(crit) {
+        function getRow(crit, idx) {
             var row = {};
             angular.forEach(data.columns, function (col) {
                 var cell = row[col.field] = {};
@@ -138,6 +141,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
                 if (cell.type === 'multiline') {
                     cell.criteria = crit; // for save
                     cell.field = col.field;
+                    cell.inputId = col.field + idx;
                 }
                 else if (cell.type === 'popup') {
                     cell.criteria = crit;
@@ -168,10 +172,9 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     function menuAddCriteriaLike() {
         var view = this.view;
         var cell = this.context.cell;
-        var newCriteria = getCriteriaLike(cell.criteria);
 
         $timeout(function () {
-            view.addRow(cell, newCriteria);
+            view.addRowLike(cell);
         }, 0, false);
     }
 
@@ -184,32 +187,13 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         }, 0, false);
     }
 
-    function getCriteriaLike(crit) {
-        var criteria = {
-            name: '',
-            description: '',
-            group: crit ? crit.group : null,
-            priority: crit ? crit.priority : 'required',
-            vendors: []
-        };
-        return criteria;
-    }
 
     //////////////////////////////////////////////////////////
 
     // TODO
     //m.savingData = false;
-    //m.groupBy = 'group';
-    //m.groupByTitle = groupByTitle;
-
-    // Edit cell
-    m.criteriaKeyPressed = criteriaKeyPressed;
-    // Menu
-    //m.criteriaOfMenu = null;
-    //m.setCriteriaOfMenu = setCriteriaOfMenu;
-    //m.menuAddCriteria = menuAddCriteria;
-    //m.menuRemoveCriteria = menuRemoveCriteria;
-
+    //m.groupBy = 'group'; -> Topic
+    //m.groupByTitle = groupByTitle; -> Uppercase
 
     activate();
 
@@ -227,98 +211,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     function onFullView() {
         //console.log('>> onFullView');
-        //autoFocus();
-    }
-
-
-    // Edit
-    //
-    function nextCriteriaLike(criteria) {
-        var criteriaIdx = m.criteria.indexOf(criteria);
-        var next = m.criteria[criteriaIdx + 1];
-        if (!next) {
-            return null;
-        }
-
-        var alike = false;
-        if (!m.groupBy) {
-            alike = (next.group === criteria.group &&
-                next.priority === criteria.priority);
-        } else {
-            alike = (next[m.groupBy] === criteria[m.groupBy]);
-        }
-
-        return alike ? next : null;
-    }
-
-    function addCriteriaLike(crit) {
-        var added = {
-            name: '',
-            description: '',
-            group: crit ? crit.group : null,
-            priority: crit ? crit.priority : 'required',
-            edit: 'name'
-        };
-        //console.log('>>adding', added);
-
-        if (crit) {
-            var idx = m.criteria.indexOf(crit);
-            m.criteria.splice(idx + 1, 0, added);
-        }
-        else {
-            m.criteria.push(added);
-        }
-        reloadTables(true);
-        return added;
-    }
-
-
-    function criteriaKeyPressed(criteria, evt) {
-        //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);
-
-        // TODO - filter out shift
-        if (evt.keyCode === 9) { // TAB
-            var next = nextCriteriaLike(criteria);
-            //console.log('>>next', next);
-            if (!next) {
-                addCriteriaLike(criteria);
-                return evt.preventDefault();
-            }
-        }
-    }
-
-    // Menu
-    //
-    function setCriteriaOfMenu(criteria) {
-        // cannot pass as param to add/remove call because
-        // a) menu position is broken when placed inside ps-table
-        // b) would require new menu elem for every table row
-        m.criteriaOfMenu = criteria;
-    }
-
-    function menuAddCriteria() {
-        if (!m.criteriaOfMenu) { return; }
-
-        // delay to allow context-menu event handler to close menu,
-        // otherwise it remains open
-        $timeout(function () {
-            // find last criteria in group
-            var prev = m.criteriaOfMenu, next;
-            while (next = nextCriteriaLike(prev)) {
-                prev = next;
-            }
-
-            addCriteriaLike(prev);
-            m.criteriaOfMenu = null;
-        }, 0, false);
-    }
-
-    function menuRemoveCriteria2() {
-        if (!m.criteriaOfMenu) { return; }
-
-        $timeout(function () {
-            removeCriteria2(m.criteriaOfMenu);
-            m.criteriaOfMenu = null;
-        }, 0, false);
+        //TODO - autoFocus();
     }
 }

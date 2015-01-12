@@ -46,6 +46,10 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     T.saveCellModel = saveCellModel;
     T.removeRowModel = removeRowModel;
     T.addRowModel = addRowModel;
+    // traverse
+    T.getModelLike = getModelLike;
+    T.addRowModelLike = addRowModelLike;
+    T.nextRowModelLike = nextRowModelLike;
 
     /**
      * Creates & returns new view
@@ -62,11 +66,11 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
      *  ]
      * }
      */
-    function addVIew(id, name, toViewData) {
+    function addVIew(ctrl, name, toViewData) {
         views[name] = {
             toData: toViewData
         };
-        return TableView(id, name, T);
+        return TableView(ctrl, name, T);
     }
 
     function toData(projectId, name) {
@@ -77,10 +81,48 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     }
 
     function reload() {
+        console.log('>>Table reload!');
         $rootScope.$emit('reload');
     }
 
-    // CRUD operations
+    // Traversing
+    //
+
+    function getModelLike(crit) {
+        return {
+            name: '',
+            description: '',
+            group: crit ? crit.group : null,
+            priority: crit ? crit.priority : 'required',
+            vendors: []
+        };
+    }
+
+    function addRowModelLike(crit, projectId) {
+        var newCriteria = getModelLike(crit);
+        addRowModel(crit, newCriteria, projectId);
+    }
+
+    function nextRowModelLike(criteria) {
+        var criteriaIdx = model.criteria.indexOf(criteria);
+        var next = model.criteria[criteriaIdx + 1];
+        if (!next) {
+            return null;
+        }
+
+        var alike = false;
+        var groupedBy = T.groupBy.get();
+        if (!groupedBy) {
+            alike = (next.group === criteria.group &&
+                next.priority === criteria.priority);
+        } else {
+            alike = (next[groupedBy] === criteria[groupedBy]);
+        }
+
+        return alike ? next : null;
+    }
+
+    // Edit operations
     //
     function saveColumnModel(col, projectId) {
         // col format: { title: 'IBM', field: 'IBM', visible: true, ...}
@@ -161,7 +203,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         var patches = [];
 
         if (criteriaIdx >= 0) {
-            model.criteria.splice(criteriaIdx + 1, 0, newCriteria);
+            model.criteria.splice(criteriaIdx + 1, 0, newCriteria); // insert after
+            newCriteria.justAdded = true;
 
             patches.push({
                 op: 'add',
@@ -185,30 +228,33 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         var newVal = cell.value;
         var criteria = cell.criteria;
         var criteriaIdx = model.criteria.indexOf(criteria);
+        var needReload = false;
         var patches = [];
 
         if (!cell.isVendor) {
-            if (newVal !== criteria[cell.field]) {
-                criteria[cell.field] = newVal;
-
-                if (criteriaIdx >= 0) {
-                    patches.push({
-                        op: 'replace',
-                        path: ['/criteria', criteriaIdx, cell.field].join('/'),
-                        value: newVal
-                    });
-                }
-                else { // saving virtual cell
-                    model.criteria.push(criteria);
-
-                    patches.push({
-                        op: 'add',
-                        path: '/criteria/-',
-                        value: criteria
-                    });
-                }
-                console.log('Save non-vendor cell patch:', JSON.stringify(patches));
+            //update model
+            criteria[cell.field] = newVal;
+            if (/group|priority/.test(cell.field)){
+                needReload = true; // XXX
             }
+
+            if (criteriaIdx >= 0) {
+                patches.push({
+                    op: 'replace',
+                    path: ['/criteria', criteriaIdx, cell.field].join('/'),
+                    value: newVal
+                });
+            }
+            else { // saving virtual cell
+                model.criteria.push(criteria);
+
+                patches.push({
+                    op: 'add',
+                    path: '/criteria/-',
+                    value: criteria
+                });
+            }
+            console.log('Save non-vendor cell patch:', JSON.stringify(patches));
         }
         else {
             var vendor = criteria.vendorsIndex[cell.field];
@@ -227,13 +273,17 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 patches.push(addVendor(criteria, cell.field, newVal));
                 console.log('Save new cell patch:', JSON.stringify(patches));
             }
+            needReload = true; // XXX
         }
 
         if (patches.length) {
             patchCriteria(projectId, patches);
-            model.vendors = indexVendors(model.criteria);
-            model.topics = findTopics(model.criteria);
-            reload();
+
+            if (needReload) {
+                model.vendors = indexVendors(model.criteria);
+                model.topics = findTopics(model.criteria);
+                reload();
+            }
         }
     }
 
@@ -282,6 +332,9 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         reload();
     }
 
+    // CRUD
+    //
+
     // Attaching transform middleware
     Backend
         .use('get', ['projects', '.*?', 'criteria'], transformCriteriaModel);
@@ -303,7 +356,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
     function transformCriteriaModel(data) {
         // data format: data.criteria = [...];
-        data.criteriaStr = JSON.stringify({ criteria: data.criteria }); //TODO - need?
         data.topics = findTopics(data.criteria);
         data.vendors = indexVendors(data.criteria);
         return data;
@@ -348,9 +400,11 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
      * TableView class
      * Exposed via addVIew call
      */
-    var TableView = function (projectId, name, svc) {
+    var TableView = function (ctrl, name, svc) {
         var V = {};
+        var projectId = ctrl.projectId;
         // For html:
+        V.name = name;
         V.tableParams = null;
         V.columns = null;
         V.columnClass = columnClass;
@@ -359,8 +413,9 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.removeColumn = removeColumn;
         V.saveCell = saveCell;
         V.removeRow = removeRow;
-        V.addRow = addRow;
-        // Row menu
+        V.addRowLike = addRowLike;
+        V.addRowOnTab = addRowOnTab;
+        // Row popover
         V.popoverOn = null;
         V.topic = {
             options: [],
@@ -474,13 +529,13 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
             // TODO - groups
             /*if (settings.groupBy) {
-                // if grouped, sort by group first
-                var curGroupBy = svc.groupBy.get();
-                var sortedByGroup = orderBy && (orderBy.substring(1) === curGroupBy);
-                if (!sortedByGroup && curGroupBy) {
-                    orderByParam.unshift(curGroupBy);
-                }
-            }*/
+             // if grouped, sort by group first
+             var curGroupBy = svc.groupBy.get();
+             var sortedByGroup = orderBy && (orderBy.substring(1) === curGroupBy);
+             if (!sortedByGroup && curGroupBy) {
+             orderByParam.unshift(curGroupBy);
+             }
+             }*/
 
             return orderBy ? $filter('orderBy')(arr, orderBy) : arr;
         }
@@ -521,7 +576,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         function editColumnCell(col) {
             col.edit.show = true;
             col.edit.value = !col.addNew ? col.title : '';
-            //return evt.preventDefault(); // XXX - don't work?
         }
 
         function saveColumnCell(col) {
@@ -540,10 +594,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         }
 
         function saveCell(cell) {
-            var modified = !!cell.value; // TODO: 0 as value!
-            if (modified) {
-                svc.saveCellModel(cell, projectId);
-            }
+            svc.saveCellModel(cell, projectId);
         }
 
         function removeColumn(cell) {
@@ -554,8 +605,28 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             svc.removeRowModel(cell.criteria, projectId);
         }
 
-        function addRow(cell, newCriteria) {
-            svc.addRowModel(cell.criteria, newCriteria, projectId)
+        function addRowLike(cell) {
+            // find last criteria in group
+            var prev = cell.criteria, next;
+            while (next = svc.nextRowModelLike(prev)) {
+                prev = next;
+            }
+            svc.addRowModelLike(prev, projectId)
+        }
+
+        function addRowOnTab(cell) {
+            var res = false;
+            var lastCol = (cell.field === 'description');
+
+            if (lastCol) {
+                var criteria = cell.criteria;
+                var next = svc.nextRowModelLike(criteria);
+                if (!next) {
+                    svc.addRowModelLike(criteria, projectId);
+                    res = true;
+                }
+            }
+            return res;
         }
 
         return V;

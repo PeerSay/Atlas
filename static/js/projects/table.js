@@ -44,6 +44,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     T.addColumnModel = addColumnModel;
     T.removeColumnModel = removeColumnModel;
     T.saveCellModel = saveCellModel;
+    T.removeRowModel = removeRowModel;
+    T.addRowModel = addRowModel;
 
     /**
      * Creates & returns new view
@@ -136,32 +138,105 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         reload();
     }
 
+    function removeRowModel(crit, projectId) {
+        var criteriaIdx = model.criteria.indexOf(crit);
+        var patches = [];
+
+        //update model
+        model.criteria.splice(criteriaIdx, 1);
+        model.vendors = indexVendors(model.criteria);
+
+        patches.push({
+            op: 'remove',
+            path: ['/criteria', criteriaIdx].join('/')
+        });
+        console.log('Remove row patch:', JSON.stringify(patches));
+
+        patchCriteria(projectId, patches);
+        reload();
+    }
+
+    function addRowModel(criteria, newCriteria, projectId) {
+        var criteriaIdx = model.criteria.indexOf(criteria);
+        var patches = [];
+
+        if (criteriaIdx >= 0) {
+            model.criteria.splice(criteriaIdx + 1, 0, newCriteria);
+
+            patches.push({
+                op: 'add',
+                path: ['/criteria', criteriaIdx + 1].join('/'),
+                value: newCriteria
+            });
+
+            console.log('Adding row patch:', JSON.stringify(patches));
+        }
+        else {
+            console.log('Add row - unexpected criteriaIdx: ', criteriaIdx);
+        }
+
+        patchCriteria(projectId, patches);
+        model.vendors = indexVendors(model.criteria);
+        reload();
+    }
+
     function saveCellModel(cell, projectId) {
         // cell format: { field: 'IMB', type: 'number', value: '123' }
         var newVal = cell.value;
         var criteria = cell.criteria;
         var criteriaIdx = model.criteria.indexOf(criteria);
-        var vendor = criteria.vendorsIndex[cell.field];
-        var vendorIdx = criteria.vendors.indexOf(vendor);
         var patches = [];
+        var needReload = false;
 
-        if (vendor && vendor.value !== newVal) {
-            vendor.value = newVal;
+        if (!cell.isVendor) {
+            if (newVal !== criteria[cell.field]) {
+                criteria[cell.field] = newVal;
 
-            patches.push({
-                op: 'replace',
-                path: ['/criteria', criteriaIdx, 'vendors', vendorIdx, 'value'].join('/'),
-                value: newVal
-            });
-            console.log('Save exist cell patch:', JSON.stringify(patches));
+                if (criteriaIdx >= 0) {
+                    patches.push({
+                        op: 'replace',
+                        path: ['/criteria', criteriaIdx, cell.field].join('/'),
+                        value: newVal
+                    });
+                }
+                else { // saving virtual cell
+                    model.criteria.push(criteria);
+                    needReload = true;
+
+                    patches.push({
+                        op: 'add',
+                        path: '/criteria/-',
+                        value: criteria
+                    });
+                }
+                console.log('Save non-vendor cell patch:', JSON.stringify(patches));
+            }
         }
-        else if (!vendor) {
-            patches.push(addVendor(criteria, cell.field, newVal));
-            console.log('Save new cell patch:', JSON.stringify(patches));
+        else {
+            var vendor = criteria.vendorsIndex[cell.field];
+            var vendorIdx = criteria.vendors.indexOf(vendor);
+            if (vendor && vendor.value !== newVal) {
+                vendor.value = newVal;
+
+                patches.push({
+                    op: 'replace',
+                    path: ['/criteria', criteriaIdx, 'vendors', vendorIdx, 'value'].join('/'),
+                    value: newVal
+                });
+                console.log('Save exist cell patch:', JSON.stringify(patches));
+            }
+            else if (!vendor) {
+                patches.push(addVendor(criteria, cell.field, newVal));
+                console.log('Save new cell patch:', JSON.stringify(patches));
+            }
         }
 
         if (patches.length) {
             patchCriteria(projectId, patches);
+            if (needReload) {
+                model.vendors = indexVendors(model.criteria);
+                reload();
+            }
         }
     }
 
@@ -247,28 +322,28 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             });
             return groups;
         }
+    }
 
-        function indexVendors(criteria) {
-            // format: [ {title: 'IMB'}, ... ]
-            var allVendors = [];
-            var allIndex = {};
-            angular.forEach(criteria, function (crit) {
-                // vendors format:  [ {title: 'IMB', value: 1}, ...]
-                crit.vendors = crit.vendors || []; // may not exist
-                // Index for fast access: {'IBM': <ref-to-vendor>, ...}
-                crit.vendorsIndex = {};
+    function indexVendors(criteria) {
+        // format: [ {title: 'IMB'}, ... ]
+        var allVendors = [];
+        var allIndex = {};
+        angular.forEach(criteria, function (crit) {
+            // vendors format:  [ {title: 'IMB', value: 1}, ...]
+            crit.vendors = crit.vendors || []; // may not exist
+            // Index for fast access: {'IBM': <ref-to-vendor>, ...}
+            crit.vendorsIndex = {};
 
-                angular.forEach(crit.vendors, function (vendor) {
-                    crit.vendorsIndex[vendor.title] = vendor;
+            angular.forEach(crit.vendors, function (vendor) {
+                crit.vendorsIndex[vendor.title] = vendor;
 
-                    if (!allIndex[vendor.title]) {
-                        allIndex[vendor.title] = true;
-                        allVendors.push({ title: vendor.title }); // TODO - order matters!
-                    }
-                });
+                if (!allIndex[vendor.title]) {
+                    allIndex[vendor.title] = true;
+                    allVendors.push({ title: vendor.title }); // TODO - order matters!
+                }
             });
-            return allVendors;
-        }
+        });
+        return allVendors;
     }
 
 
@@ -286,6 +361,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.saveColumnCell = saveColumnCell;
         V.removeColumn = removeColumn;
         V.saveCell = saveCell;
+        V.removeRow = removeRow;
+        V.addRow = addRow;
         // For ctrl:
         V.grouping = grouping;
         V.sorting = sorting;
@@ -295,7 +372,10 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         // ngTable params
         var settings = {
             counts: [], // remove paging
-            defaultSort: 'asc' // DBG
+            defaultSort: 'asc', // XXX
+            groupBy: function () {
+                return null;
+            }
         };
         var parameters = {
             count: 2 // must be at least one prop different form defaults!
@@ -438,6 +518,14 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
         function removeColumn(cell) {
             svc.removeColumnModel(cell.field, projectId);
+        }
+
+        function removeRow(cell) {
+            svc.removeRowModel(cell.criteria, projectId);
+        }
+
+        function addRow(cell, newCriteria) {
+            svc.addRowModel(cell.criteria, newCriteria, projectId)
         }
 
         return V;

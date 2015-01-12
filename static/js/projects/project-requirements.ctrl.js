@@ -16,6 +16,181 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.showFullView = showFullView;
     m.onFullView = onFullView;
 
+    // Table views
+    m.groupBy = Table.groupBy;
+    m.compactTable = false;
+    m.reloadTables = Table.reload.bind(Table);
+
+    m.normalTableView = Table.addView(m.projectId, 'ev-norm', toNormViewData)
+        //.debug() // opt
+        .sorting({active: false})
+        .done();
+
+    m.fullTableView = Table.addView(m.projectId, 'ev-full', toFullViewData)
+        //.debug() // opt
+        .grouping()
+        .sorting({active: true})
+        .done();
+
+    function toNormViewData(model) {
+        var data = {
+            columns: [],
+            rows: []
+        };
+        // Columns: Criteria, [Topic|Priority]
+        data.columns.push({
+            title: 'Criteria',
+            field: 'name',
+            visible: true
+        });
+        data.columns.push({
+            title: 'Topic',
+            field: 'group',
+            visible: (m.groupBy.get() === 'group')
+        });
+        data.columns.push({
+            title: 'Priority',
+            field: 'priority',
+            visible: (m.groupBy.get() === 'priority')
+        });
+
+        // Rows
+        angular.forEach(model.criteria, function (crit) {
+            var row = {};
+            angular.forEach(data.columns, function (col) {
+                row[col.field] = {
+                    value: crit[col.field]
+                };
+            });
+            data.rows.push(row);
+        });
+
+        return data;
+    }
+
+    function toFullViewData(model) {
+        var data = {
+            columns: [],
+            rows: []
+        };
+        // Columns: Criteria, Description, [Topic, Priority], <empty>
+        data.columns.push({
+            title: 'Criteria',
+            field: 'name',
+            visible: true,
+            sortable: true,
+            cellType: 'multiline'
+        });
+        data.columns.push({
+            title: 'Description',
+            field: 'description',
+            visible: true,
+            sortable: true,
+            cellType: 'multiline'
+        });
+        data.columns.push({
+            title: 'Topic',
+            field: 'group',
+            visible: !m.compactTable,
+            sortable: true,
+            cellType: 'static'
+        });
+        data.columns.push({
+            title: 'Priority',
+            field: 'priority',
+            visible: !m.compactTable,
+            sortable: true,
+            cellType: 'static'
+        });
+        data.columns.push({
+            title: '--',
+            field: '',
+            visible: true,
+            sortable: false,
+            cellType: 'static'
+        });
+
+        // Rows
+        angular.forEach(model.criteria, function (crit) {
+            var row = {};
+            angular.forEach(data.columns, function (col) {
+                var cell = row[col.field] = {};
+                cell.type = col.cellType;
+                cell.value = crit[col.field] || '';
+
+                if (cell.type === 'multiline') {
+                    cell.criteria = crit; // for save
+                    cell.field = col.field;
+                }
+            });
+            data.rows.push(row);
+        });
+
+        // Empty table -> invite to edit
+        if (!model.criteria.length) {
+            var row = {};
+            var criteria = getCriteriaLike(null);
+            angular.forEach(data.columns, function (col) {
+                var cell = row[col.field] = {};
+                cell.type = col.cellType;
+                cell.value = criteria[col.field] || '';
+                row.edit = 'name';
+
+                if (cell.type === 'multiline') {
+                    cell.criteria = criteria; // for save
+                    cell.field = col.field;
+                }
+            });
+            data.rows.push(row);
+        }
+
+        return data;
+    }
+
+    //Menu
+    m.menu = {
+        context: null,
+        view: m.fullTableView,
+        setContext: function (context) {
+            this.context = context;
+        },
+        addCriteriaLike: menuAddCriteriaLike,
+        removeCriteria: menuRemoveCriteria
+    };
+    m.fullTableView.menu = m.menu; // expose to Table directive
+
+    function menuAddCriteriaLike() {
+        var view = this.view;
+        var cell = this.context.cell;
+        var newCriteria = getCriteriaLike(cell.criteria);
+
+        $timeout(function () {
+            view.addRow(cell, newCriteria);
+        }, 0, false);
+    }
+
+    function menuRemoveCriteria() {
+        var view = this.view;
+        var cell = this.context.cell;
+
+        $timeout(function () {
+            view.removeRow(cell);
+        }, 0, false);
+    }
+
+    function getCriteriaLike(crit) {
+        var criteria = {
+            name: '',
+            description: '',
+            group: crit ? crit.group : null,
+            priority: crit ? crit.priority : 'required',
+            vendors: []
+        };
+        return criteria;
+    }
+
+    //////////////////////////////////////////////////////////
+
     // Data model
     m.criteria = [];
     m.criteriaStr = null;
@@ -28,17 +203,16 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         total: 0,
         getData: tableGetData
     };
-    m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
-    m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
-        groupBy: function(item) {
-            return item[m.groupBy];
-        }
-    }));
-    m.reloadTables = reloadTables;
+    //m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
+    /*m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
+     groupBy: function (item) {
+     return item[m.groupBy];
+     }
+     }));*/
     m.isEmptyTable = isEmptyTable;
     // General
     m.titles = ['Criteria', 'Description', 'Group', 'Priority'];
-    m.compactTable = false;
+    //m.compactTable = false;
     m.popoverOn = null;
     m.savingData = false;
     // Grouping
@@ -47,7 +221,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         'group',
         'priority'
     ];
-    m.groupBy = 'group';
+    //m.groupBy = 'group';
     m.groupByTitle = groupByTitle;
     m.selectGroupBy = selectGroupBy;
     // Sorting
@@ -67,7 +241,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
     m.criteriaOfMenu = null;
     m.setCriteriaOfMenu = setCriteriaOfMenu;
     m.menuAddCriteria = menuAddCriteria;
-    m.menuRemoveCriteria = menuRemoveCriteria;
+    //m.menuRemoveCriteria = menuRemoveCriteria;
 
 
     activate();
@@ -86,7 +260,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     function onFullView() {
         //console.log('>> onFullView');
-        autoFocus();
+        //autoFocus();
     }
 
     function autoFocus() {
@@ -118,7 +292,8 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         var data = prepareModel();
         if (!data) { return; } // unmodified
 
-        var delayPromise = $timeout(function () {}, 300, false);
+        var delayPromise = $timeout(function () {
+        }, 300, false);
         var requestPromise = $q(function (resolve) {
             Table.updateCriteria(m.projectId, data)
                 .finally(resolve);
@@ -160,15 +335,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     // Ng-table handling
     //
-    function reloadTables(save) {
-        m.fullTableParams.reload();
-        m.normTableParams.reload();
-
-        if (save) {
-            updateModel();
-        }
-    }
-
     function tableGetData($defer, params) {
         var orderByArr = params.orderBy();
         var orderBy = orderByArr[0];
@@ -292,7 +458,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         return added;
     }
 
-    function removeCriteria(crit) {
+    function removeCriteria2(crit) {
         var idx = m.criteria.indexOf(crit);
         var removed = m.criteria.splice(idx, 1);
         reloadTables(true);
@@ -344,11 +510,11 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         }, 0, false);
     }
 
-    function menuRemoveCriteria() {
+    function menuRemoveCriteria2() {
         if (!m.criteriaOfMenu) { return; }
 
         $timeout(function () {
-            removeCriteria(m.criteriaOfMenu);
+            removeCriteria2(m.criteriaOfMenu);
             m.criteriaOfMenu = null;
         }, 0, false);
     }

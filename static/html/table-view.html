@@ -46,6 +46,14 @@
                 context-menu-disabled="!view.menu || cell.noMenu"
                 data-target="context-menu">
             <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
+            <div ng-if="cell.type === 'multiline'">
+                <textarea class="form-control noresize"
+                        msd-elastic
+                        ng-model="cell.value"
+                        ng-blur="view.saveCell(cell)"
+                        ps-focus-on="row.edit === cell.field"
+                        ></textarea>
+            </div>
             <div ng-if="cell.type === 'number'">
                 <input type="text"
                         ng-model="cell.value"

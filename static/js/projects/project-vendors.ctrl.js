@@ -17,9 +17,10 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     m.onFullView = onFullView;
 
     // Table views
+    m.groupBy = Table.groupBy;
+
     m.normalTableView = Table.addView(m.projectId, 'vi-norm', toNormViewData)
         //.debug() // opt
-        .grouping() // TODO - should be disabled
         .sorting({active: false})
         .done();
 
@@ -37,7 +38,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
         // Columns: Criteria(hidden), Prod1, [Prod2, Prod3]
         // Criteria is required for sorting (hidden)
         data.columns.push({
-            title: '--',
+            title: 'Criteria',
             field: 'name',
             visible: false
         });
@@ -130,6 +131,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                     row[col.field] = {
                         criteria: crit, // for save
                         field: col.field,
+                        isVendor: true,
                         type: 'number',
                         value: (crit.vendorsIndex[col.field] || {}).value
                     };
@@ -151,9 +153,6 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
 
         return data;
     }
-
-    // Grouping
-    m.groupBy = Table.groupBy;
 
     //Menu
     m.menu = {

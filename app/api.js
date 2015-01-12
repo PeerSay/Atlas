@@ -204,7 +204,7 @@ function RestApi(app) {
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Updating criteria of project[%s] for user=[%s]', project_id, email);
+        console.log('[API] Updating criteria of project[%s] for user=[%s], data=', project_id, email, data);
 
         User.findOne({email: email}, 'projects.criteria', function (err, user) {
             if (err) { return next(err); }

@@ -10,7 +10,12 @@
         </div>
         <div class="panel-body">
             <div class="view-mode" ng-class="m.viewMode.value">
+                <!--Normal view-->
                 <div class="tile-section norm border">
+                    <ps-table-view ps-view="cm.normalTableView"></ps-table-view>
+                </div>
+
+                <!--<div class="tile-section norm border">
                     <table ng-table="cm.normTableParams" class="table">
                         <tr ng-repeat="criteria in $data" ng-show="!cm.isEmptyTable()">
                             <td data-title="'Criteria'">
@@ -28,7 +33,9 @@
                             <td class="attention">Click to add</td>
                         </tr>
                     </table>
-                </div>
+                </div>-->
+
+                <!--Minimal view-->
                 <div class="tile-section min">
                     <div>TODO - minimal</div>
                     <div>How to select 2 rows?</div>
@@ -49,10 +56,44 @@
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
-                    <a class="btn btn-default export header-btn last"
+                    <!--Table menu / popover-->
+                    <ps-table-popover class="header-btn last"
+                            ps-cont-selector=".modal-header"
+                            ps-id="table"
+                            ps-popover-on="cm.popoverOn">
+                        <span class="popover-icon hamburger-icon">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </span>
+                        <form class="popover-form">
+                            <div class="form-group">
+                                <label class="checkbox-ext no-select text-nowrap block">
+                                    <input type="checkbox"
+                                            ng-model="cm.compactTable"
+                                            ng-click="cm.reloadTables()">
+                                    Compact view
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Group by:</label>
+                                <div class="list-group">
+                                    <a href class="list-group-item"
+                                            ng-repeat="opt in cm.groupBy.options"
+                                            ng-class="{'active': opt === cm.groupBy.current}"
+                                            ng-click="cm.groupBy.set(opt)">
+                                        {{opt || 'none' | capitalize}}
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </ps-table-popover>
+                    <a class="btn btn-default export header-btn"
                             ng-mousedown="csv.generate()"
                             ng-href="{{ csv.link() }}"
                             download="requirements.csv">Export</a>
+                    <!--TODO !!!-->
                     <h4 class="modal-title">
                         {{tile.title}}
                         <small ng-show="cm.savingData">Saving...</small>
@@ -60,19 +101,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="tile-section border">
-                        <div ng-include="'html/table-requirements.html'" ps-export-csv="csv"></div>
-                    </div>
-
-                    <div class="tile-section" hidden>
-                        <table class="table dbg">
-                            <tr ng-repeat="crit in cm.criteria" ng-class="{'bold': !!crit.edit}">
-                                <td>{{cm.criteria.indexOf(crit)}}</td>
-                                <td ng-bind-html="crit.name | multiline"></td>
-                                <td ng-bind-html="crit.description | multiline"></td>
-                                <td>{{crit.group}}</td>
-                                <td>{{crit.priority}}</td>
-                            </tr>
-                        </table>
+                        <ps-table-view ps-view="cm.fullTableView"></ps-table-view>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -87,11 +116,11 @@
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                 <li>
                     <a class="pointer" role="menuitem" tabindex="-1"
-                            ng-click="cm.menuAddCriteria()">Add criteria like this</a>
+                            ng-click="cm.menu.addCriteriaLike()">Add criteria like this</a>
                 </li>
                 <li>
                     <a class="pointer" role="menuitem" tabindex="-1"
-                            ng-click="cm.menuRemoveCriteria()">Remove criteria</a>
+                            ng-click="cm.menu.removeCriteria()">Remove criteria</a>
                 </li>
             </ul>
         </div>

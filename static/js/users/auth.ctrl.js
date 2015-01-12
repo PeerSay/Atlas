@@ -4,8 +4,8 @@ angular.module('peersay')
     .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['User', 'Location', '$http'];
-function AuthCtrl(User, Location, $http) {
+AuthCtrl.$inject = ['Location', '$http'];
+function AuthCtrl(Location, $http) {
     var m = this;
     m.error = {
         show: false,
@@ -71,7 +71,7 @@ function AuthCtrl(User, Location, $http) {
 
 
     function showErrorFromQs() {
-        var err = getValuefromQs('err');
+        var err = getValueFromQs('err');
         if (err) {
             m.error.msg = err;
             m.error.show = true;
@@ -79,13 +79,13 @@ function AuthCtrl(User, Location, $http) {
     }
 
     function getUserFromQs() {
-        var email = getValuefromQs('email');
+        var email = getValueFromQs('email');
         if (email) {
             m.user.email = email;
         }
     }
 
-    function getValuefromQs(key) {
+    function getValueFromQs(key) {
         var qs = Location.search();
         var value = qs && qs[key];
         if (value) {

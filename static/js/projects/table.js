@@ -186,7 +186,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         var criteria = cell.criteria;
         var criteriaIdx = model.criteria.indexOf(criteria);
         var patches = [];
-        var needReload = false;
 
         if (!cell.isVendor) {
             if (newVal !== criteria[cell.field]) {
@@ -201,7 +200,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 }
                 else { // saving virtual cell
                     model.criteria.push(criteria);
-                    needReload = true;
 
                     patches.push({
                         op: 'add',
@@ -233,10 +231,9 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
 
         if (patches.length) {
             patchCriteria(projectId, patches);
-            if (needReload) {
-                model.vendors = indexVendors(model.criteria);
-                reload();
-            }
+            model.vendors = indexVendors(model.criteria);
+            model.topics = findTopics(model.criteria);
+            reload();
         }
     }
 
@@ -307,21 +304,21 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     function transformCriteriaModel(data) {
         // data format: data.criteria = [...];
         data.criteriaStr = JSON.stringify({ criteria: data.criteria }); //TODO - need?
-        data.groups = findGroups(data.criteria);
+        data.topics = findTopics(data.criteria);
         data.vendors = indexVendors(data.criteria);
         return data;
+    }
 
-        function findGroups(criteria) {
-            var groups = [];
-            var found = {};
-            angular.forEach(criteria, function (crit) {
-                if (crit.group && !found[crit.group]) {
-                    found[crit.group] = true;
-                    groups.push(crit.group);
-                }
-            });
-            return groups;
-        }
+    function findTopics(criteria) {
+        var topics = [null];
+        var found = {};
+        angular.forEach(criteria, function (crit) {
+            if (crit.group && !found[crit.group]) {
+                found[crit.group] = true;
+                topics.push(crit.group);
+            }
+        });
+        return topics;
     }
 
     function indexVendors(criteria) {
@@ -363,6 +360,20 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.saveCell = saveCell;
         V.removeRow = removeRow;
         V.addRow = addRow;
+        // Row menu
+        V.popoverOn = null;
+        V.topic = {
+            options: [],
+            addNew: {
+                show: false,
+                value: ''
+            },
+            keyPressed: topicKeyPressed,
+            doneEdit: function () {
+                this.addNew = {};
+                V.popoverOn = null;
+            }
+        };
         // For ctrl:
         V.grouping = grouping;
         V.sorting = sorting;
@@ -404,6 +415,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                     var rows = sort(data.rows, params.orderBy());
 
                     V.columns = data.columns;
+                    V.topic.options = data.topics;
+
                     $defer.resolve(rows);
                 });
         }
@@ -485,6 +498,23 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 'edited': edited,
                 'add-new': col.addNew && !edited
             };
+        }
+
+        // Popover
+        function topicKeyPressed(cell, evt) {
+            if (evt.keyCode === 13) {
+                if (this.addNew.value) {
+                    cell.field = 'group';
+                    cell.value = this.addNew.value;
+                    saveCell(cell);
+                }
+                this.doneEdit();
+                return;
+            }
+            if (evt.keyCode === 27) {
+                this.doneEdit();
+                return evt.preventDefault();
+            }
         }
 
         // Edit

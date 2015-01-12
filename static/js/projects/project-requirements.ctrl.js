@@ -103,15 +103,32 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             cellType: 'static'
         });
         data.columns.push({
-            title: '--',
+            title: '',
             field: '',
             visible: true,
             sortable: false,
-            cellType: 'static'
+            cellType: 'popup'
         });
 
         // Rows
         angular.forEach(model.criteria, function (crit) {
+            var row = getRow(crit);
+            data.rows.push(row);
+        });
+
+        // Empty table -> invite to edit
+        if (!model.criteria.length) {
+            var row = getRow(getCriteriaLike(null));
+            row.edit = 'name';
+            data.rows.push(row);
+        }
+
+        // Expose topics:
+        data.topics = model.topics;
+        return data;
+
+
+        function getRow(crit) {
             var row = {};
             angular.forEach(data.columns, function (col) {
                 var cell = row[col.field] = {};
@@ -122,29 +139,18 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
                     cell.criteria = crit; // for save
                     cell.field = col.field;
                 }
-            });
-            data.rows.push(row);
-        });
-
-        // Empty table -> invite to edit
-        if (!model.criteria.length) {
-            var row = {};
-            var criteria = getCriteriaLike(null);
-            angular.forEach(data.columns, function (col) {
-                var cell = row[col.field] = {};
-                cell.type = col.cellType;
-                cell.value = criteria[col.field] || '';
-                row.edit = 'name';
-
-                if (cell.type === 'multiline') {
-                    cell.criteria = criteria; // for save
-                    cell.field = col.field;
+                else if (cell.type === 'popup') {
+                    cell.criteria = crit;
+                    cell.noMenu = true;
+                    cell.edit = {
+                        priority: crit.priority,
+                        topic: crit.group
+                    };
+                    // cell.field is set dynamically as popup manages several props
                 }
             });
-            data.rows.push(row);
+            return row;
         }
-
-        return data;
     }
 
     //Menu
@@ -191,56 +197,17 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     //////////////////////////////////////////////////////////
 
-    // Data model
-    m.criteria = [];
-    m.criteriaStr = null;
-    m.groups = [];
-    m.updateModel = updateModel;
-    // Table settings
-    var tableSettings = {
-        //debugMode: true,
-        counts: [],
-        total: 0,
-        getData: tableGetData
-    };
-    //m.normTableParams = new ngTableParams({ count: 10 }, tableSettings);
-    /*m.fullTableParams = new ngTableParams({ count: 10 }, angular.extend(tableSettings, {
-     groupBy: function (item) {
-     return item[m.groupBy];
-     }
-     }));*/
-    m.isEmptyTable = isEmptyTable;
-    // General
-    m.titles = ['Criteria', 'Description', 'Group', 'Priority'];
-    //m.compactTable = false;
-    m.popoverOn = null;
-    m.savingData = false;
-    // Grouping
-    m.groupByOptions = [
-        null,
-        'group',
-        'priority'
-    ];
+    // TODO
+    //m.savingData = false;
     //m.groupBy = 'group';
-    m.groupByTitle = groupByTitle;
-    m.selectGroupBy = selectGroupBy;
-    // Sorting
-    m.tableSortClass = tableSortClass;
-    m.tableSortClick = tableSortClick;
-    // Edit groups
-    m.setCriteriaGroup = setCriteriaGroup;
-    m.newGroup = {
-        edit: false,
-        value: ''
-    };
-    m.groupKeyPressed = groupKeyPressed;
-    m.groupDone = groupDone;
+    //m.groupByTitle = groupByTitle;
+
     // Edit cell
     m.criteriaKeyPressed = criteriaKeyPressed;
     // Menu
-    m.criteriaOfMenu = null;
-    m.setCriteriaOfMenu = setCriteriaOfMenu;
-    m.menuAddCriteria = menuAddCriteria;
+    //m.criteriaOfMenu = null;
+    //m.setCriteriaOfMenu = setCriteriaOfMenu;
+    //m.menuAddCriteria = menuAddCriteria;
     //m.menuRemoveCriteria = menuRemoveCriteria;
 
 
@@ -263,159 +230,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         //autoFocus();
     }
 
-    function autoFocus() {
-        var focusCriteria = m.criteria[0]; //TODO - get clicked criteria to focus
-        //console.log('>>autoFocus', focusCriteria);
-
-        if (focusCriteria) {
-            focusCriteria.edit = 'name'; // invite to edit
-        }
-    }
-
-    // Data
-    //
-    function readModel() {
-        return Table.readCriteria(m.projectId)
-            .then(function (res) {
-                m.criteria = res.criteria;
-                m.criteriaStr = res.criteriaStr;
-                m.groups = res.groups;
-
-                if (!m.criteria.length) {
-                    addCriteriaLike(null);
-                }
-                //console.log('>>> Loaded model', m.criteria);
-            });
-    }
-
-    function updateModel() {
-        var data = prepareModel();
-        if (!data) { return; } // unmodified
-
-        var delayPromise = $timeout(function () {
-        }, 300, false);
-        var requestPromise = $q(function (resolve) {
-            Table.updateCriteria(m.projectId, data)
-                .finally(resolve);
-        });
-
-        m.savingData = true;
-        $q.all([delayPromise, requestPromise])
-            .then(function () {
-                m.savingData = false;
-            });
-    }
-
-    function prepareModel() {
-        var res = {criteria: []};
-        angular.forEach(pruneEmpty(m.criteria), function (crit) {
-            res.criteria.push({
-                name: crit.name,
-                description: crit.description,
-                priority: crit.priority,
-                group: crit.group
-            });
-        });
-
-        var str = JSON.stringify(res);
-        var changed = (m.criteriaStr !== str);
-        m.criteriaStr = str;
-
-        return changed ? res : null;
-    }
-
-    function pruneEmpty(arr) {
-        return $.map(arr, function (crit) {
-            if (!crit.name && !crit.description) {
-                return null;
-            }
-            return crit;
-        });
-    }
-
-    // Ng-table handling
-    //
-    function tableGetData($defer, params) {
-        var orderByArr = params.orderBy();
-        var orderBy = orderByArr[0];
-        var orderByGroup = m.groupBy &&
-            orderBy ? m.groupBy !== orderBy.substring(1) : true;
-        if (orderByGroup) {
-            orderByArr.unshift(m.groupBy);
-        }
-
-        readModel()
-            .then(function () {
-                //console.log('>>Data reload, orderBy, groupBy', orderByArr, m.groupBy);
-                m.criteria = $filter('orderBy')(m.criteria, orderByArr);
-                params.total(m.criteria.total);
-                $defer.resolve(m.criteria);
-            });
-    }
-
-    function isEmptyTable() {
-        var len = m.criteria.length;
-        var virtual = (len === 1 && m.criteria[0]);
-        var onlyVirtual = (virtual && !virtual.name && !virtual.description);
-        return !len || onlyVirtual;
-    }
-
-    // Grouping / sorting
-    //
-    function groupByTitle() {
-        var title = $filter('capitalize')(m.groupBy || 'null'); // null => hide column
-        var hide = (title === 'Null' || isEmptyTable());
-        return hide ? null : title;
-    }
-
-    function selectGroupBy(by) {
-        m.groupBy = by;
-        reloadTables();
-    }
-
-    function tableSortClass(tableParams, by) {
-        return {
-            'sort-asc': tableParams.isSortBy(by, 'asc'),
-            'sort-desc': tableParams.isSortBy(by, 'desc')
-        };
-    }
-
-    function tableSortClick(tableParams, by) {
-        var sortOrder = {};
-        sortOrder[by] = tableParams.isSortBy(by, 'asc') ? 'desc' : 'asc';
-        tableParams.sorting(sortOrder);
-    }
-
-    // Criteria group
-    function groupKeyPressed(criteria, evt) {
-        //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.newGroup, evt.keyCode);
-
-        if (evt.keyCode === 13) {
-            if (criteria.newGroup.value) {
-                criteria.group = criteria.newGroup.value;
-                if (m.groups.indexOf(criteria.group) < 0) {
-                    m.groups.push(criteria.group);
-                }
-                reloadTables(true);
-            }
-            groupDone(criteria);
-            return;
-        }
-        if (evt.keyCode === 27) {
-            groupDone(criteria);
-            return evt.preventDefault();
-        }
-    }
-
-    function groupDone(criteria) {
-        criteria.newGroup = {};
-        m.popoverOn = null;
-    }
-
-    function setCriteriaGroup(criteria, group) {
-        criteria.group = group;
-        reloadTables(true);
-    }
 
     // Edit
     //
@@ -458,17 +272,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         return added;
     }
 
-    function removeCriteria2(crit) {
-        var idx = m.criteria.indexOf(crit);
-        var removed = m.criteria.splice(idx, 1);
-        reloadTables(true);
-
-        if (!m.criteria.length) {
-            addCriteriaLike(null); // never leave empty table
-            autoFocus();
-        }
-        return removed;
-    }
 
     function criteriaKeyPressed(criteria, evt) {
         //console.log('>>Key pressed for[%s] of [%s]', criteria.name, criteria.edit, evt.keyCode);

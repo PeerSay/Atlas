@@ -126,5 +126,9 @@
             </td>
         </tr>
         </tbody>
+        <!--Empty table row -->
+        <tr ng-show="!view.rows.length">
+            <td class="attention">Click to add</td>
+        </tr>
     </table>
 </ng-form>

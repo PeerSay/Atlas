@@ -35,12 +35,18 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
             columns: [],
             rows: []
         };
-        // Columns: Criteria(hidden), Prod1, [Prod2, Prod3]
+        // Columns: Criteria(hidden), Prod1, [Prod2, Prod3] | Products
         // Criteria is required for sorting (hidden)
         data.columns.push({
             title: 'Criteria',
             field: 'name',
             visible: false
+        });
+        // Artificial column to show empty table
+        data.columns.push({
+            title: 'Products',
+            field: '',
+            visible: !model.vendors.length
         });
         angular.forEach(model.vendors, function (vendor, i) {
             data.columns.push({

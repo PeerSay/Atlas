@@ -405,7 +405,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         // For html:
         V.name = name;
         V.tableParams = null;
-        V.columns = null;
+        V.columns = [];
+        V.rows = [];
         V.columnClass = columnClass;
         V.cellClass = cellClass;
         //Edit
@@ -471,6 +472,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                     var rows = sort(data.rows, params.orderBy());
 
                     V.columns = data.columns;
+                    V.rows = data.rows;
                     V.topic.options = data.topics;
 
                     $defer.resolve(rows);

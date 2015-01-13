@@ -163,6 +163,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     //Menu
     m.menu = {
+        id: 'er-context-menu',
         context: null,
         view: m.fullTableView,
         setContext: function (context) {

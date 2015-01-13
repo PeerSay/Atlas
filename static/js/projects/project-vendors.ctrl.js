@@ -160,6 +160,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
 
     //Menu
     m.menu = {
+        id: 'vi-context-menu',
         context: null,
         view: m.fullTableView,
         setContext: function (context) {

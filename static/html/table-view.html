@@ -42,10 +42,10 @@
                     ng-init="cell = row[col.field]"
                     ng-show="col.visible"
                     class="editable"
-                    ng-class="view.cellClass(cell)"><!--
+                    ng-class="view.cellClass(cell)"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
-                    data-target="context-menu">-->
+                    data-target="{{view.menu.id}}">
                 <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
                 <div ng-if="cell.type === 'multiline'">
                     <textarea class="form-control cell-input noresize"

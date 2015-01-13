@@ -58,7 +58,7 @@ function Projects(Backend, User) {
     // Project details
     //
 
-    // Attaching transform middleware
+    // Attaching transforms
     Backend
         .use('get', ['projects', '[^\/]*$'], transformProjectModel)
         .use('put', ['projects', '[^\/]*$'], transformProjectModel);

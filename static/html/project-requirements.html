@@ -14,27 +14,6 @@
                 <div class="tile-section norm border">
                     <ps-table-view ps-view="cm.normalTableView"></ps-table-view>
                 </div>
-
-                <!--<div class="tile-section norm border">
-                    <table ng-table="cm.normTableParams" class="table">
-                        <tr ng-repeat="criteria in $data" ng-show="!cm.isEmptyTable()">
-                            <td data-title="'Criteria'">
-                                <span ng-if="criteria.name" ng-bind-html="criteria.name | multiline"></span>
-                                <span ng-if="!criteria.name" class="attention">
-                                    <span class="glyphicon glyphicon-exclamation-sign"></span>
-                                    No name?
-                                </span>
-                            </td>
-                            <td data-title="cm.groupByTitle()" ng-show="cm.groupByTitle()">
-                                {{criteria[cm.groupBy]}}
-                            </td>
-                        </tr>
-                        <tr ng-show="cm.isEmptyTable()">
-                            <td class="attention">Click to add</td>
-                        </tr>
-                    </table>
-                </div>-->
-
                 <!--Minimal view-->
                 <div class="tile-section min">
                     <div>TODO - minimal</div>
@@ -83,7 +62,7 @@
                                             ng-repeat="opt in cm.groupBy.options"
                                             ng-class="{'active': opt === cm.groupBy.current}"
                                             ng-click="cm.groupBy.set(opt)">
-                                        {{opt || 'none' | capitalize}}
+                                        {{cm.groupBy.displayName(opt)}}
                                     </a>
                                 </div>
                             </div>

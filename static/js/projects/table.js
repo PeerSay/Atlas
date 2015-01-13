@@ -29,6 +29,13 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
             this.current = prop;
             //TODO: url
             $rootScope.$emit('grouping', prop);
+        },
+        displayName: function (prop) {
+            var name = {
+                'null': 'none',
+                'group': 'topic'
+            }[prop] || prop;
+            return $filter('capitalize')(name);
         }
     };
     // API
@@ -334,7 +341,7 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
     // CRUD
     //
 
-    // Attaching transform middleware
+    // Attaching transform
     Backend
         .use('get', ['projects', '.*?', 'criteria'], transformCriteriaModel);
 

@@ -47,33 +47,12 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <div class="input-group input-group-lg" ng-class="{
-                                    'has-success': m.form.pwd2.$valid,
-                                    'has-warning': m.form.pwd2.$touched && m.form.pwd2.$invalid}">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-                                <div class="hint" ng-messages="m.form.pwd2.$error" ng-class="{show: m.form.pwd2.$touched}">
-                                    <div ng-message="required">Required</div>
-                                    <div ng-message="minlength">6 chars or more</div>
-                                    <div ng-message="match">Don't match!</div>
-                                </div>
-                                <input type="password" id="password2" class="form-control" placeholder="Repeat password"
-                                        name="pwd2"
-                                        ng-model="m.passwordRepeat"
-                                        ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
-                                        ng-focus="m.form.pwd2.$setUntouched()"
-                                        minlength="6"
-                                        ps-match="m.user.password"
-                                        required>
-                            </div>
-                        </div>
-
                         <div class="pull-left">
                             Already have an account?<br>
                             <a href="/auth/login" >Login</a>
                         </div>
 
-                        <button class="btn btn-lg btn-success pull-right"
+                        <button class="btn btn-lg btn-primary pull-right"
                                ng-disabled="m.form.$invalid"
                                 >Signup
                         </button>
@@ -82,10 +61,10 @@
 
                 <ul class="list-group">
                     <li class="list-group-item linkedin-section">
-                        <h4 class="title-or">OR</h4>
-                        <h4 class="title">Have LinkedIn account?</h4>
-                        <a href="/auth/linkedin" target="_self"  class="btn btn-lg btn-success full-width">
-                            <span class="glyphicon glyphicon-link"></span>
+                        <h4 class="title-or text-center">OR</h4>
+                        <h4 class="title text-center">Have LinkedIn account?</h4>
+                        <a href="/auth/linkedin" target="_self"  class="btn btn-lg full-width btn-social btn-linkedin" style="text-align: center">
+                            <span class="fa fa-linkedin"></span>
                             Signup with LinkedIn
                         </a>
                     </li>

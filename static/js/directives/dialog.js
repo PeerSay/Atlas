@@ -31,7 +31,11 @@ function psTileDialog(Tiles) {
             });
 
             $el.on('shown.bs.modal', function () {
-                scope.onShow();
+                scope.$apply(function () {
+                    if (scope.onShow) {
+                        scope.onShow();
+                    }
+                });
             });
 
             scope.$watch('toggle.dlg', function (newVal) {

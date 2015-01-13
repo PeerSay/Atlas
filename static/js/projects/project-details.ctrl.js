@@ -9,7 +9,6 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     var m = this;
 
     m.projectId = $routeParams.projectId;
-    m.project = {};
     // Toggle view mode
     m.viewMode = Tiles.viewMode;
     m.toggleViewMode = Tiles.toggleViewMode.bind(Tiles);
@@ -33,25 +32,15 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
     activate();
 
     function activate() {
-        readProject();
-
         Tiles.load('project-' + m.projectId);
         $scope.$on('$destroy', function () {
             Tiles.unload();
         });
     }
 
-    function readProject() {
-        Projects.readProject(m.projectId)
-            .then(function (res) {
-                m.project = res;
-            });
-    }
-
     function tileProgressLabel(tile) {
         return tile.progress.total ?
-            [tile.progress.value, tile.progress.total].join('/') :
-            '';
+            [tile.progress.value, tile.progress.total].join('/') : '';
     }
 
     function tileProgressClass(tile) {

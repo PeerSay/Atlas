@@ -7,10 +7,12 @@
     <title>PeerSay - MVP - app</title>
     <base href="/">
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css">
     <!-- build:css css/app.css -->
     <link rel="stylesheet" href="/bower_components/bootstrap3-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/bower_components/ng-table/ng-table.min.css">
     <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/bower_components/bootstrap-social/bootstrap-social.css">
     <!-- endbuild -->
 
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
@@ -88,6 +90,18 @@
     </div>
 </nav>
 
+<!--Notifications-->
+<div class="container-fluid" ng-controller="NotificationCtrl as m">
+    <div class="row">
+        <div class="alert alert-danger text-center notification hidden" role="alert" ng-show="m.error.show">
+            <button type="button" class="close" ng-click="m.hide()">
+                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+            </button>
+            <strong>{{m.error.title}}:</strong> {{m.error.msg}}
+        </div>
+    </div>
+</div>
+
 <div ng-view=""></div>
 
 <!--<script src="bower_components/socket.io-client/socket.io.min.js"></script>-->
@@ -100,7 +114,7 @@
 <script src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
 <script src="/bower_components/moment/min/moment.min.js"></script>
 <script src="/bower_components/bootstrap3-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/bower_components/ng-table/ng-table.min.js"></script>
+<script src="/bower_components/ng-table/ng-table.js"></script>
 <script src="/bower_components/ng-table-resizable-columns/ng-table-resizable-columns.src.js"></script>
 <script src="/bower_components/angular-elastic/elastic.js"></script>
 <script src="/bower_components/ng-context-menu/dist/ng-context-menu.js"></script>
@@ -111,16 +125,18 @@
 <script src="/js/users/auth.ctrl.js"></script>
 <script src="/js/projects/projects.js"></script>
 <script src="/js/projects/tiles.js"></script>
+<script src="/js/projects/table.js"></script>
 <script src="/js/projects/project-list.ctrl.js"></script>
 <script src="/js/projects/project-details.ctrl.js"></script>
 <script src="/js/projects/project-title.ctrl.js"></script>
 <script src="/js/projects/project-essentials.ctrl.js"></script>
 <script src="/js/projects/project-requirements.ctrl.js"></script>
+<script src="/js/projects/project-vendors.ctrl.js"></script>
 <script src="/js/projects/project-todo.ctrl.js"></script>
 <script src="/js/projects/deep-linking.js"></script>
 <script src="/js/projects/capitalize.filter.js"></script>
 <script src="/js/projects/multiline.filter.js"></script>
-<script src="/js/services/rest.svc.js"></script>
+<script src="/js/services/backend.svc.js"></script>
 <script src="/js/services/storage.svc.js"></script>
 <script src="/js/directives/input-match.js"></script>
 <script src="/js/directives/header-menu.js"></script>
@@ -130,7 +146,7 @@
 <script src="/js/directives/progress.js"></script>
 <script src="/js/directives/inline-edit.js"></script>
 <script src="/js/directives/tile-control.js"></script>
-<script src="/js/directives/table.js"></script>
+<script src="/js/directives/table-view.js"></script>
 <script src="/js/directives/table-popover.js"></script>
 <script src="/js/directives/table-export-csv.js"></script>
 <script src="/js/routes.js"></script>

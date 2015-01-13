@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var util = require('util');
 var jsonParser = require('body-parser').json();
+var jsonpatch = require('json-patch');
 
 // App dependencies
 var errRes = require('../app/api-errors');
@@ -26,6 +27,7 @@ function RestApi(app) {
         app.put('/api/projects/:id', jsonParser, updateProject);
         app.get('/api/projects/:id/criteria', readProjectCriteria);
         app.put('/api/projects/:id/criteria', jsonParser, updateProjectCriteria);
+        app.patch('/api/projects/:id/criteria', jsonParser, patchProjectCriteria);
         return U;
     }
 
@@ -188,7 +190,6 @@ function RestApi(app) {
                     return errRes.notFound(res, project_id);
                 }
 
-
                 var result = prj.toJSON({ virtuals: false, transform: xformProjectCriteria});
                 console.log('[API] Reading criteria of project[%s] result:', project_id, result);
 
@@ -203,7 +204,7 @@ function RestApi(app) {
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Updating criteria of project[%s] for user=[%s]', project_id, email);
+        console.log('[API] Updating criteria of project[%s] for user=[%s], data=', project_id, email, data);
 
         User.findOne({email: email}, 'projects.criteria', function (err, user) {
             if (err) { return next(err); }
@@ -230,6 +231,64 @@ function RestApi(app) {
                 });
             });
         });
+    }
+
+    function patchProjectCriteria(req, res, next) {
+        var project_id = req.params.id;
+        var data = req.body;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Patching criteria of project[%s] for user=[%s]', project_id, email);
+
+        User.findOne({email: email}, 'projects.criteria', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return errRes.notFound(res, email);
+            }
+
+            Project.findById(project_id, 'criteria', function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return errRes.notFound(res, project_id);
+                }
+
+                // Patch
+                applyPatch(prj, data, function (err) {
+                    if (err) { return modelError(res, err); }
+
+                    prj.save(function (err) {
+                        if (err) { return modelError(res, err); }
+
+                        var result = true; // no need to send data back
+                        console.log('[API] Patched criteria of project[%s] result:', project_id, result);
+
+                        return res.json({ result: result });
+                    });
+                });
+            });
+        });
+    }
+
+    /**
+     * Patch format (see rfc6902):
+     * [
+     *  {"op":"replace", "path":"/criteria/0/vendors/0/value", "value":2},
+     *  {"op":"add", "path":"/criteria/1/vendors/-", "value":{"title":"IMB","value":1}},
+     *  ...
+     * ]
+     * */
+    function applyPatch(obj, patch, cb) {
+        console.log('[API] Applying patch: ', patch);
+        try {
+            jsonpatch.apply(obj, patch);
+        }
+        catch(e) {
+            console.log('[API] Patch exception: ', e);
+            return cb(e);
+        }
+
+        return cb(null, obj);
     }
 
     // Transforms
@@ -295,15 +354,15 @@ function RestApi(app) {
                 return msg;
             },
             'default': function () {
-                return util.format('Model error:', err.message);
+                return util.format('Exception: ', err.message);
             }
         };
 
         var error = errors[err.name] || errors.default;
-        var error_msg = error();
-        console.log('[API] Model error:', error_msg);
+        var errorMsg = error();
+        console.log('[API] Model error:', errorMsg);
 
-        return errRes.notValid(res, error_msg);
+        return errRes.notValid(res, errorMsg);
     }
 
     U.setupRoutes = setupRoutes;

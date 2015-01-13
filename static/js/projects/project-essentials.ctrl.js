@@ -31,11 +31,10 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
 
     function activate() {
         Projects.readProject(m.projectId)
-            .then(function () {
-                var prj  = Projects.current.project;
+            .then(function (project) {
                 angular.forEach(m.fields, function (fld, key) {
                     // ensure missing fields are added to Projects obj
-                    m.fields[key] = prj[key] = prj[key] || missingField(key);
+                    m.fields[key] = project[key] = project[key] || missingField(key);
                 });
 
                 setProgress();
@@ -86,7 +85,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
         data[ctl.key] = value;
 
         Projects.updateProject(m.projectId, data)
-            .success(function () {
+            .then(function () {
                 setProgress();
             })
             .finally(function () {

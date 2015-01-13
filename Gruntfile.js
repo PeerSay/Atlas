@@ -174,6 +174,8 @@ module.exports = function (grunt) {
                     'bower_components/bootstrap/dist/css/bootstrap.{css,min.css,min.css.map}',
                     'bower_components/bootstrap/dist/js/bootstrap.{js,min.js}',
                     'bower_components/bootstrap/dist/fonts/*.*',
+                    'bower_components/font-awesome/css/font-awesome.{css,min.css}',
+                    'bower_components/font-awesome/fonts/*.*',
                     'html/*.html'
                 ],
                 dest: 'dist/'

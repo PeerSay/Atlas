@@ -20,6 +20,7 @@
                             ng-show="col.edit.show"
                             ng-model="col.edit.value"
                             ng-blur="view.saveColumnCell(col)"
+                            ng-keydown="onColKeydown($event)"
                             ps-focus-on="col.edit.show === true"
                             ps-select="true"
                             />
@@ -121,7 +122,7 @@
                         </form>
                     </ps-table-popover>
                 </div>
-                <div ng-if="!cell.type">{{ cell.value }}</div>
+                <div ng-if="cell.type === 'ordinary'">{{ cell.value }}</div>
             </td>
         </tr>
         </tbody>

@@ -16,6 +16,7 @@ function psTableView($timeout) {
             scope.onKeydown = onKeydown;
             scope.onFocus = onFocus;
             scope.onBlur = onBlur;
+            scope.onColKeydown = onColKeydown;
 
             function onKeydown(cell, evt) {
                 var isTab = (evt.keyCode === 9) && !evt.shiftKey; // TAB w/o Shift
@@ -38,6 +39,16 @@ function psTableView($timeout) {
                     input.$setPristine();
                 }
                 cell.edited = false;
+            }
+
+            function onColKeydown(evt) {
+                var isEnter = (evt.keyCode === 13);
+                var el = evt.target;
+                if (isEnter) {
+                    $timeout(function () {
+                        el.blur(); // blur leads to column save
+                    }, 0, false);
+                }
             }
 
             // Clean-up

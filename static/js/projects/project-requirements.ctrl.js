@@ -48,12 +48,14 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         data.columns.push({
             title: 'Topic',
             field: 'group',
-            visible: (groupBy === 'group')
+            visible: (groupBy === 'group'),
+            cellType: 'ordinary'
         });
         data.columns.push({
             title: 'Priority',
             field: 'priority',
-            visible: (groupBy === 'priority')
+            visible: (groupBy === 'priority'),
+            cellType: 'ordinary'
         });
 
         // Rows

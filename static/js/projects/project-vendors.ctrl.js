@@ -47,21 +47,21 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                 title: vendor.title,
                 field: vendor.title,
                 visible: i < 3, // hide all but first 3; TODO - remove from arr?
-                isVendor: true
+                isVendor: true,
+                cellType: 'ordinary'
             });
         });
         // Rows
         angular.forEach(model.criteria, function (crit) {
             var row = {};
             angular.forEach(data.columns, function (col) {
+                var cell = row[col.field] = {
+                    type: col.cellType
+                };
                 if (col.isVendor) {
-                    row[col.field] = {
-                        value: (crit.vendorsIndex[col.field] || {}).value
-                    };
+                    cell.value = (crit.vendorsIndex[col.field] || {}).value;
                 } else {
-                    row[col.field] = {
-                        value: crit[col.field]
-                    };
+                    cell.value = crit[col.field];
                 }
             });
             data.rows.push(row);

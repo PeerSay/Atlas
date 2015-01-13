@@ -14,6 +14,7 @@ function psTableView($timeout) {
             var formModel = scope['form' + scope.view.name];
 
             scope.onKeydown = onKeydown;
+            scope.onFocus = onFocus;
             scope.onBlur = onBlur;
 
             function onKeydown(cell, evt) {
@@ -25,6 +26,10 @@ function psTableView($timeout) {
                 }
             }
 
+            function onFocus(cell) {
+                cell.edited = true;
+            }
+
             function onBlur(cell) {
                 var input = formModel[cell.inputId];
                 var modified = input.$dirty;
@@ -32,6 +37,7 @@ function psTableView($timeout) {
                     scope.view.saveCell(cell);
                     input.$setPristine();
                 }
+                cell.edited = false;
             }
 
             // Clean-up

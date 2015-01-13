@@ -37,21 +37,23 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             columns: [],
             rows: []
         };
+        var groupBy = m.groupBy.get();
         // Columns: Criteria, [Topic|Priority]
         data.columns.push({
             title: 'Criteria',
             field: 'name',
-            visible: true
+            visible: true,
+            cellType: 'html-multiline-noempty'
         });
         data.columns.push({
             title: 'Topic',
             field: 'group',
-            visible: (m.groupBy.get() === 'group')
+            visible: (groupBy === 'group')
         });
         data.columns.push({
             title: 'Priority',
             field: 'priority',
-            visible: (m.groupBy.get() === 'priority')
+            visible: (groupBy === 'priority')
         });
 
         // Rows
@@ -59,7 +61,9 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             var row = {};
             angular.forEach(data.columns, function (col) {
                 row[col.field] = {
-                    value: crit[col.field]
+                    value: crit[col.field],
+                    type: col.cellType,
+                    emptyValue: 'No name?'
                 };
             });
             data.rows.push(row);

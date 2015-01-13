@@ -273,7 +273,6 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 patches.push(addVendor(criteria, cell.field, newVal));
                 console.log('Save new cell patch:', JSON.stringify(patches));
             }
-            needReload = true; // XXX
         }
 
         if (patches.length) {
@@ -408,6 +407,8 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
         V.tableParams = null;
         V.columns = null;
         V.columnClass = columnClass;
+        V.cellClass = cellClass;
+        //Edit
         V.editColumnCell = editColumnCell;
         V.saveColumnCell = saveColumnCell;
         V.removeColumn = removeColumn;
@@ -553,6 +554,16 @@ function Table($q, $rootScope, $filter, ngTableParams, Backend) {
                 'edited': edited,
                 'add-new': col.addNew && !edited
             };
+        }
+
+        function cellClass(cell) {
+            var res =  {
+                edited: cell.edited
+            };
+            if (cell.type) {
+                res[cell.type] = true;
+            }
+            return res;
         }
 
         // Popover

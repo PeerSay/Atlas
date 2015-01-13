@@ -80,7 +80,8 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
             title: 'Criteria',
             field: 'name',
             visible: true,
-            sortable: true
+            sortable: true,
+            cellType: 'static'
         });
         // Group & priority are required for grouping to work (hidden)
         data.columns.push({
@@ -99,6 +100,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                 field: vendor.title,
                 visible: true,
                 sortable: true,
+                cellType: 'text',
                 edit: {
                     show: false,
                     value: vendor.title
@@ -111,6 +113,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
             field: '--',
             visible: true,
             addNew: true,
+            cellType: 'static',
             edit: {
                 show: false,
                 value: ''
@@ -118,27 +121,28 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
         });
 
         // Rows
-        angular.forEach(model.criteria, function (crit) {
+        angular.forEach(model.criteria, function (crit, idx) {
             var row = {};
             angular.forEach(data.columns, function (col) {
                 if (col.addNew) {
                     row[col.field] = {
-                        type: 'static',
+                        type: col.cellType,
                         value: ''
                     };
                 }
                 else if (col.edit) {
                     row[col.field] = {
+                        type: col.cellType,
+                        value: (crit.vendorsIndex[col.field] || {}).value,
+                        inputId: col.field + idx,
                         criteria: crit, // for save
                         field: col.field,
-                        isVendor: true,
-                        type: 'number',
-                        value: (crit.vendorsIndex[col.field] || {}).value
+                        isVendor: true
                     };
                 }
                 else if (col.visible) {
                     row[col.field] = {
-                        type: 'static',
+                        type: col.cellType,
                         value: crit[col.field],
                         noMenu: true
                     };

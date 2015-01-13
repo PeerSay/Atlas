@@ -16,7 +16,7 @@
                             ng-show="!col.edit.show"
                             ng-click="view.editColumnCell(col)">{{ col.title }}</a>
 
-                    <input type="text" tabindex="-1"
+                    <input type="text" tabindex="-1" class="form-control cell-input"
                             ng-show="col.edit.show"
                             ng-model="col.edit.value"
                             ng-blur="view.saveColumnCell(col)"
@@ -42,26 +42,37 @@
                     ng-init="cell = row[col.field]"
                     ng-show="col.visible"
                     class="editable"
-                    ng-class="cell.type"
+                    ng-class="view.cellClass(cell)"><!--
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
-                    data-target="context-menu">
+                    data-target="context-menu">-->
                 <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
                 <div ng-if="cell.type === 'multiline'">
-                    <textarea class="form-control noresize"
+                    <textarea class="form-control cell-input noresize"
                             name="{{cell.inputId}}"
                             msd-elastic
                             ng-model="cell.value"
+                            ng-focus="onFocus(cell)"
                             ng-blur="onBlur(cell)"
                             ng-keydown="onKeydown(cell, $event)"
                             ps-focus-on="row.edit === cell.field"
                             ></textarea>
                 </div>
-                <div ng-if="cell.type === 'number'">
-                    <input type="text"
+                <div ng-if="cell.type === 'text'">
+                    <input type="text" class="form-control cell-input"
+                            name="{{cell.inputId}}"
                             ng-model="cell.value"
+                            ng-focus="onFocus(cell)"
                             ng-blur="onBlur(cell)"
+                            ng-keydown="onKeydown(cell, $event)"
                             />
+                </div>
+                <div ng-if="cell.type === 'html-multiline-noempty'">
+                    <span ng-if="cell.value" ng-bind-html="cell.value | multiline"></span>
+                    <span ng-if="!cell.value" class="attention">
+                        <span class="glyphicon glyphicon-exclamation-sign"></span>
+                        {{cell.emptyValue}}
+                    </span>
                 </div>
                 <div ng-if="cell.type === 'popup'">
                     <ps-table-popover
@@ -71,6 +82,7 @@
                             ps-allow-hide="!view.topic.addNew.show"
                             >
                         <span class="popover-icon glyphicon glyphicon-cog"></span>
+
                         <form class="popover-form">
                             <div class="form-group">
                                 <label class="checkbox-ext no-select text-nowrap block">

@@ -21,6 +21,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
 
     m.normalTableView = Table.addView(m, 'vi-norm', toNormViewData)
         //.debug() // opt
+        .grouping()
         .sorting({active: false})
         .done();
 
@@ -35,7 +36,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
             columns: [],
             rows: []
         };
-        // Columns: Criteria(hidden), Prod1, [Prod2, Prod3] | Products
+        // Columns: Criteria(hidden), Prod1, [Prod2, Prod3] | Products?
         // Criteria is required for sorting (hidden)
         data.columns.push({
             title: 'Criteria',
@@ -57,6 +58,18 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                 cellType: 'ordinary'
             });
         });
+        // Artificial columns for grouping
+        data.columns.push({
+            title: '--',
+            field: 'group',
+            visible: false
+        });
+        data.columns.push({
+            title: '--',
+            field: 'priority',
+            visible: false
+        });
+
         // Rows
         angular.forEach(model.criteria, function (crit) {
             var row = {};

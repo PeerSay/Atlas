@@ -23,6 +23,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     m.normalTableView = Table.addView(m, 'ev-norm', toNormViewData)
         //.debug() // opt
+        .grouping()
         .sorting({active: false})
         .done();
 
@@ -37,7 +38,6 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
             columns: [],
             rows: []
         };
-        var groupBy = m.groupBy.get();
         // Columns: Criteria, [Topic|Priority]
         data.columns.push({
             title: 'Criteria',
@@ -48,14 +48,12 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         data.columns.push({
             title: 'Topic',
             field: 'group',
-            visible: (groupBy === 'group'),
-            cellType: 'ordinary'
+            visible: false
         });
         data.columns.push({
             title: 'Priority',
             field: 'priority',
-            visible: (groupBy === 'priority'),
-            cellType: 'ordinary'
+            visible: false
         });
 
         // Rows

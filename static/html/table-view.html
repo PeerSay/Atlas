@@ -50,9 +50,9 @@
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">
-                <div ng-if="!cell.editable" ng-init="val = cell.model.value">
-                    <span ng-if="val" ng-bind-html="cell.model.value | multiline"></span>
-                    <span ng-if="!val && cell.emptyValue" class="attention">
+                <div ng-if="!cell.editable">
+                    <span ng-if="cell.model.value" ng-bind-html="cell.model.value | multiline"></span>
+                    <span ng-if="!cell.model.value && cell.emptyValue" class="attention">
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
                         {{ ::cell.emptyValue }}
                     </span>

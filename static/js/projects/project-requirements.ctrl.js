@@ -40,7 +40,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
             columns: [],
             rows: []
         };
-        // todo:
+        // todo - in future:
         /*var data2 = TableModel.select([
             {
                 selector: { field: 'name' },

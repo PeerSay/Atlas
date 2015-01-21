@@ -91,6 +91,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
     }
 
     function patchCriteria(id, data) {
+        if (!data.length) { return; }
         return Backend.patch(['projects', id, 'criteria'], data);
     }
 

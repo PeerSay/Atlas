@@ -72,26 +72,32 @@ function TableModel() {
                 model.obj = crit;
                 model.key = key;
                 model.path = key;
+                model.op = 'replace';
             }
-            else if (vendor = crit._vendorsIndex[key]){
+            else if (vendor = crit._vendorsIndex[key]) {
                 vendorIdx = crit.vendors.indexOf(vendor);
                 model.obj = vendor;
                 model.key = 'value';
                 model.path = ['vendors', vendorIdx, 'value'].join('/');
+                model.op = 'replace';
             } else { // no vendor yet
                 model.obj = { title: key, value: '' };
                 model.key = 'value';
                 model.path = ['vendors', '-'].join('/');
+                model.op = 'add';
             }
 
             var value = model.obj[model.key];
             cell.id = [key, idx].join('_');
             cell.field = key;
             cell.value = value;
-            cell.path = ['/criteria', idx, model.path].join('/');
+            cell.patch = {
+                op: model.op,
+                path: ['/criteria', idx, model.path].join('/')
+            };
             cell.column = col;
             cell.criteria = crit;
-            cell.rowIdx =  function () {
+            cell.rowIdx = function () {
                 return M.model.rows.indexOf(row); // changes
             };
 
@@ -138,7 +144,9 @@ function TableModel() {
 
     function findTopics() {
         // TODO -- order of topics changes on cell.save() - as it's in column order (kinda bad)
-        var topicModel = selectColumns([{ field: 'group'}]);
+        var topicModel = selectColumns([
+            { field: 'group'}
+        ]);
         var topics = [null];
         var found = {};
         angular.forEach(topicModel.rows, function (row) {
@@ -231,13 +239,13 @@ function TableModel() {
 
         if (!cell.column.vendor) {
             patches.push({
-                op: 'replace',
-                path: cell.path,
+                op: cell.patch.op,
+                path: cell.patch.path,
                 value: newVal
             });
             console.log('Save non-vendor cell patch:', JSON.stringify(patches));
 
-            // Update model
+            // Update model - only when grouping can change
             if (/group|priority/.test(cell.field)) {
                 needReload = true;
                 M.topics.rebuild();
@@ -245,23 +253,36 @@ function TableModel() {
 
             // TODO - virtual cell (if any)
         }
-        else {
-            /*var vendor = criteria.vendorsIndex[cell.field];
-             var vendorIdx = criteria.vendors.indexOf(vendor);
-             if (vendor && vendor.value !== newVal) {
-             vendor.value = newVal;
+        else if (cell.patch.op === 'replace') { // existing vendor
+            patches.push({
+                op: cell.patch.op,
+                path: cell.patch.path,
+                value: newVal
+            });
+            console.log('Save existing vendor cell patch:', JSON.stringify(patches));
+        }
+        else { // new vendor
+            var newVendor = {
+                title: cell.field,
+                value: newVal
+            };
+            patches.push({
+                op: cell.patch.op,
+                path: cell.patch.path,
+                value: newVendor
+            });
+            console.log('Save new vendor cell patch:', JSON.stringify(patches));
 
-             patches.push({
-             op: 'replace',
-             path: ['/criteria', criteriaIdx, 'vendors', vendorIdx, 'value'].join('/'),
-             value: newVal
-             });
-             console.log('Save exist cell patch:', JSON.stringify(patches));
-             }
-             else if (!vendor) {
-             patches.push(addVendor(criteria, cell.field, newVal));
-             console.log('Save new cell patch:', JSON.stringify(patches));
-             }*/
+            // Update model
+            var criteria = cell.criteria;
+            criteria.vendors.push(newVendor);
+            criteria._vendorsIndex[cell.field] = newVendor;
+            var newPath = ['vendors', criteria.vendors.length - 1, 'value'].join('/');
+            cell.patch = {
+                op: 'replace',
+                path: cell.patch.path.replace('vendors/-', newPath)
+            };
+            //console.log('>>new patch', cell.patch.path);
         }
 
         return {
@@ -328,7 +349,7 @@ function TableModel() {
         };
     }
 
-    /*function saveColumnModel(col, projectId) {
+    function saveColumnModel(col, projectId) {
         // col format: { title: 'IBM', field: 'IBM', visible: true, ...}
         var newVal = col.title;
         var oldVal = col.field;
@@ -369,66 +390,68 @@ function TableModel() {
         reload();
     }
 
-    function addColumnModel(newVal, projectId) {
-        var criteria = model.criteria[0];
-        var patches = [];
+    /*
 
-        // Add empty vendor to first criteria
-        patches.push(addVendor(criteria, newVal, ''));
-        console.log('Add column patch:', JSON.stringify(patches));
+     function addColumnModel(newVal, projectId) {
+     var criteria = model.criteria[0];
+     var patches = [];
 
-        // Update vendors model
-        model.vendors.push({ title: newVal });
+     // Add empty vendor to first criteria
+     patches.push(addVendor(criteria, newVal, ''));
+     console.log('Add column patch:', JSON.stringify(patches));
 
-        patchCriteria(projectId, patches);
-        reload();
-    }
-*/
+     // Update vendors model
+     model.vendors.push({ title: newVal });
+
+     patchCriteria(projectId, patches);
+     reload();
+     }
+     */
 
 
     /*function addVendor(criteria, field, val) {
-        var criteriaIdx = model.criteria.indexOf(criteria);
-        var newVendor = {
-            title: field,
-            value: val
-        };
-        criteria.vendors.push(newVendor);
-        criteria.vendorsIndex[field] = newVendor;
+     var criteriaIdx = model.criteria.indexOf(criteria);
+     var newVendor = {
+     title: field,
+     value: val
+     };
+     criteria.vendors.push(newVendor);
+     criteria.vendorsIndex[field] = newVendor;
 
-        // patch
-        return {
-            op: 'add',
-            path: ['/criteria', criteriaIdx, 'vendors', '-'].join('/'),
-            value: newVendor
-        };
-    }
+     // patch
+     return {
+     op: 'add',
+     path: ['/criteria', criteriaIdx, 'vendors', '-'].join('/'),
+     value: newVendor
+     };
+     }
 
-    function removeColumnModel(title, projectId) {
-        var patches = [];
+     function removeColumnModel(title, projectId) {
+     var patches = [];
 
-        // remove vendor from model.vendors
-        model.vendors = $.map(model.vendors, function (vend) {
-            return (vend.title === title) ? null : vend;
-        });
+     // remove vendor from model.vendors
+     model.vendors = $.map(model.vendors, function (vend) {
+     return (vend.title === title) ? null : vend;
+     });
 
-        angular.forEach(model.criteria, function (crit, i) {
-            var vendor = crit.vendorsIndex[title];
-            var vendorIdx = crit.vendors.indexOf(vendor);
-            if (vendor) {
-                crit.vendors = crit.vendors.splice(vendorIdx, 1);
-                delete crit.vendorsIndex[title];
+     angular.forEach(model.criteria, function (crit, i) {
+     var vendor = crit.vendorsIndex[title];
+     var vendorIdx = crit.vendors.indexOf(vendor);
+     if (vendor) {
+     crit.vendors = crit.vendors.splice(vendorIdx, 1);
+     delete crit.vendorsIndex[title];
 
-                patches.push({
-                    op: 'remove',
-                    path: ['/criteria', i, 'vendors', vendorIdx].join('/')
-                });
-            }
-        });
-        console.log('Remove column patch:', JSON.stringify(patches));
+     patches.push({
+     op: 'remove',
+     path: ['/criteria', i, 'vendors', vendorIdx].join('/')
+     });
+     }
+     });
+     console.log('Remove column patch:', JSON.stringify(patches));
 
-        patchCriteria(projectId, patches);
-        reload();
-    }*/
+     patchCriteria(projectId, patches);
+     reload();
+     }*/
 
 
     return M;

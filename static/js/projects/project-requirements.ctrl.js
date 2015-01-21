@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$filter', '$timeout', '$q', 'Tiles', 'ngTableParams', 'Table'];
-function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTableParams, Table) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel'];
+function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -23,6 +23,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
 
     m.normalTableView = Table.addView(m, 'ev-norm', toNormViewData)
         //.debug() // opt
+        .grouping()
         .sorting({active: false})
         .done();
 
@@ -32,136 +33,132 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         .sorting({active: true})
         .done();
 
-    function toNormViewData(model) {
+    function toNormViewData() {
+        var groupBy = m.groupBy.get();
+        var model = TableModel.selectColumns([{ field: 'name' }, {field: groupBy}]);
         var data = {
             columns: [],
             rows: []
         };
-        var groupBy = m.groupBy.get();
-        // Columns: Criteria, [Topic|Priority]
-        data.columns.push({
-            title: 'Criteria',
-            field: 'name',
-            visible: true,
-            cellType: 'html-multiline-noempty'
-        });
-        data.columns.push({
-            title: 'Topic',
-            field: 'group',
-            visible: (groupBy === 'group'),
-            cellType: 'ordinary'
-        });
-        data.columns.push({
-            title: 'Priority',
-            field: 'priority',
-            visible: (groupBy === 'priority'),
-            cellType: 'ordinary'
+        // todo - in future:
+        /*var data2 = TableModel.select([
+            {
+                selector: { field: 'name' },
+                props: {
+                    visible: true
+                }
+            }, {
+                selector: {field: groupBy},
+                props: {
+                    visible: false
+                }
+            }
+        ]);*/
+
+        // Columns: Criteria, [Topic|Priority](hidden - need for grouping)
+        angular.forEach(model.columns, function (col) {
+            data.columns.push({
+                model: col,
+                visible: (col.field === 'name'),
+                editable: false,
+                sortable: false
+            })
         });
 
-        // Rows
-        angular.forEach(model.criteria, function (crit) {
-            var row = {};
-            angular.forEach(data.columns, function (col) {
-                row[col.field] = {
-                    value: crit[col.field],
-                    type: col.cellType,
+        //Rows
+        angular.forEach(model.rows, function (row) {
+            var resRow = [];
+            angular.forEach(row, function (cell, i) {
+                resRow.push({
+                    model: cell,
+                    visible: data.columns[i].visible,
+                    editable: false,
+                    type: 'ordinary',
                     emptyValue: 'No name?'
-                };
+                });
             });
-            data.rows.push(row);
+            data.rows.push(resRow);
         });
 
         return data;
     }
 
-    function toFullViewData(model) {
+    function toFullViewData() {
+        var model = TableModel.selectColumns([
+            { field: 'name' }, {field: 'description'}, {field: 'group'}, {field: 'priority'}
+        ]);
         var data = {
             columns: [],
-            rows: [],
-            topics: model.topics // expose topics for Popover
+            rows: []
         };
+
         // Columns: Criteria, Description, [Topic, Priority], <empty>
+        angular.forEach(model.columns, function (col) {
+            data.columns.push({
+                model: col,
+                visible: isVisibleCol(col),
+                editable: false,
+                sortable: true
+            })
+        });
+        // last is empty
         data.columns.push({
-            title: 'Criteria',
-            field: 'name',
+            model: {}, // TODO
             visible: true,
-            sortable: true,
-            cellType: 'multiline'
-        });
-        data.columns.push({
-            title: 'Description',
-            field: 'description',
-            visible: true,
-            sortable: true,
-            cellType: 'multiline'
-        });
-        data.columns.push({
-            title: 'Topic',
-            field: 'group',
-            visible: !m.compactTable,
-            sortable: true,
-            cellType: 'static'
-        });
-        data.columns.push({
-            title: 'Priority',
-            field: 'priority',
-            visible: !m.compactTable,
-            sortable: true,
-            cellType: 'static'
-        });
-        data.columns.push({
-            title: '',
-            field: '',
-            visible: true,
+            editable: false,
             sortable: false,
-            cellType: 'popup'
+            last: true
         });
 
-        // Rows
-        angular.forEach(model.criteria, function (crit, i) {
-            var row = getRow(crit, i);
-            if (crit.justAdded) {
-                row.edit = 'name';
-                crit.justAdded = false;
-            }
-            data.rows.push(row);
+        //Rows
+        angular.forEach(model.rows, function (row) {
+            var resRow = [];
+            angular.forEach(row, function (cell, i) {
+                resRow.push({
+                    model: cell,
+                    visible: data.columns[i].visible,
+                    editable: filter(/name|description/)(cell.field),
+                    type: cellType(cell.field)
+                });
+            });
+            // last row -- popoup
+            resRow.push({
+                model: {}, // not used view, but accessed by groupBy()
+                models: { //edits 2 models
+                    group: row[2],
+                    priority: row[3]
+                },
+                visible: true,
+                editable: true,
+                type: 'popup',
+                noMenu: true
+            });
+            data.rows.push(resRow);
         });
-
-        // Empty table -> invite to edit
-        if (!model.criteria.length) {
-            var row = getRow(Table.getModelLike(null));
-            row.edit = 'name';
-            data.rows.push(row);
-        }
 
         return data;
 
+        function isVisibleCol(col) {
+            if (!m.compactTable) { return true; }
+            return !filter(/group|priority/)(col.field); // hide group/priority in compact view
+        }
 
-        function getRow(crit, idx) {
-            var row = {};
-            angular.forEach(data.columns, function (col) {
-                var cell = row[col.field] = {};
-                cell.type = col.cellType;
-                cell.value = crit[col.field] || '';
+        function cellType(val) {
+            if (filter(/name|description/)(val)) {
+                return 'multiline';
+            }
+            if (filter(/group|priority/)(val)) {
+                return 'static';
+            }
+        }
 
-                if (cell.type === 'multiline') {
-                    cell.criteria = crit; // for save
-                    cell.field = col.field;
-                    cell.inputId = col.field + idx;
-                }
-                else if (cell.type === 'popup') {
-                    cell.criteria = crit;
-                    cell.noMenu = true;
-                    cell.edit = {
-                        priority: crit.priority,
-                        topic: crit.group
-                    };
-                    // cell.field is set dynamically as popup manages several props
-                }
-            });
-            return row;
+        function filter(re) {
+            return function (val) {
+                return re.test(val);
+            }
         }
     }
+
 
     //Menu
     m.menu = {
@@ -181,7 +178,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         var cell = this.context.cell;
 
         $timeout(function () {
-            view.addRowLike(cell);
+            view.addRowLike(cell.model);
         }, 0, false);
     }
 
@@ -190,7 +187,7 @@ function ProjectRequirementsCtrl($scope, $filter, $timeout, $q, Tiles, ngTablePa
         var cell = this.context.cell;
 
         $timeout(function () {
-            view.removeRow(cell);
+            view.removeRow(cell.model);
         }, 0, false);
     }
 

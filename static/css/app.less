@@ -249,6 +249,7 @@ body {
   &.border {
     border: 1px solid #ddd;
     border-radius: 4px;
+    overflow-x: auto; /* scroll for wide tables!*/
   }
 
   /* Data table */
@@ -315,11 +316,11 @@ body {
               padding: 7px;
             }
           }
-          &.add-new {
-            width: 34px;
-            text-align: center;
-            padding: 7px 5px;
-          }
+        }
+        &.last {
+          width: 36px;
+          text-align: center;
+          padding: 7px 5px;
         }
         &.sortable {
           padding: 7px;

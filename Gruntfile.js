@@ -88,7 +88,9 @@ module.exports = function (grunt) {
                     'bower_components/angular-mocks/angular-mocks.js',
                     'bower_components/angular-sanitize/angular-sanitize.js',
                     'bower_components/ng-table/ng-table.min.js',
+                    'bower_components/ng-table-resizable-columns/ng-table-resizable-columns.src.js',
                     'bower_components/angular-elastic/elastic.js',
+                    'bower_components/ng-context-menu/dist/ng-context-menu.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],

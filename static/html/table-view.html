@@ -1,4 +1,4 @@
-<ng-form name="form{{view.name}}">
+<ng-form name="form{{::view.name}}">
     <table class="table"
             ng-table="view.tableParams"
             ng-class="{ 'ng-table-resizable-columns': false }"
@@ -7,73 +7,68 @@
         <thead>
         <tr>
             <th ng-repeat="col in view.columns"
-                    class="text"
-                    ng-class="view.columnClass(col)"
+                    ng-class="view.runtimeColClass(col)"
+                    ng-show="::col.visible"
                     ng-click="view.sortBy(col)"
-                    ng-show="col.visible">
-                <div ng-if="col.edit">
+                    >
+                <div ng-if="!col.editable">{{ col.model.value }}</div>
+
+                <div ng-if="col.editable">
                     <a href tabindex="-1"
-                            ng-show="!col.edit.show"
-                            ng-click="view.editColumnCell(col)">{{ col.title }}</a>
+                            ng-show="!col.edited"
+                            ng-click="col.edited = true; $event.stopPropagation()"
+                            >{{ col.model.field }}</a>
 
                     <input type="text" tabindex="-1" class="form-control cell-input"
-                            ng-show="col.edit.show"
-                            ng-model="col.edit.value"
-                            ng-blur="view.saveColumnCell(col)"
+                            name="{{::col.model.id}}"
+                            ng-attr-placeholder="{{col.placeholder}}"
+                            ng-show="col.edited"
+                            ng-model="col.model.value"
+                            ng-blur="onColBlur(col)"
                             ng-keydown="onColKeydown($event)"
-                            ps-focus-on="col.edit.show === true"
+                            ps-focus-on="col.edited === true"
                             ps-select="true"
                             />
                 </div>
-                <div ng-if="!col.edit">{{col.title}}</div>
             </th>
         </tr>
         </thead>
         <tbody ng-repeat="group in $groups">
         <tr class="ng-table-group" ng-show="group.value">
             <td colspan="{{view.columns.length}}" class="group">
-                <a href ng-click="group.$hideRows = !group.$hideRows" tabindex="-1">
+                <a href ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()" tabindex="-1">
                     <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                     {{group.value}}
                 </a>
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <td ng-repeat="col in view.columns"
-                    ng-init="cell = row[col.field]"
-                    ng-show="col.visible"
+            <!--<td>{{ row | json }}</td>-->
+            <td ng-repeat="cell in row"
+                    ng-show="cell.visible"
                     class="editable"
                     ng-class="view.cellClass(cell)"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">
-                <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
-                <div ng-if="cell.type === 'multiline'">
-                    <textarea class="form-control cell-input noresize"
-                            name="{{cell.inputId}}"
-                            msd-elastic
-                            ng-model="cell.value"
-                            ng-focus="onFocus(cell)"
-                            ng-blur="onBlur(cell)"
-                            ng-keydown="onKeydown(cell, $event)"
-                            ps-focus-on="row.edit === cell.field"
-                            ></textarea>
-                </div>
-                <div ng-if="cell.type === 'text'">
-                    <input type="text" class="form-control cell-input"
-                            name="{{cell.inputId}}"
-                            ng-model="cell.value"
-                            ng-focus="onFocus(cell)"
-                            ng-blur="onBlur(cell)"
-                            ng-keydown="onKeydown(cell, $event)"
-                            />
-                </div>
-                <div ng-if="cell.type === 'html-multiline-noempty'">
-                    <span ng-if="cell.value" ng-bind-html="cell.value | multiline"></span>
-                    <span ng-if="!cell.value" class="attention">
+                <div ng-if="!cell.editable">
+                    <span ng-if="cell.model.value" ng-bind-html="cell.model.value | multiline"></span>
+                    <span ng-if="!cell.model.value && cell.emptyValue" class="attention">
                         <span class="glyphicon glyphicon-exclamation-sign"></span>
-                        {{cell.emptyValue}}
+                        {{ ::cell.emptyValue }}
                     </span>
+                </div>
+                <div ng-if="cell.editable && cell.type === 'multiline'">
+                    <textarea class="form-control cell-input noresize"
+                            name="{{::cell.model.id}}"
+                            msd-elastic
+                            ng-model="cell.model.value"
+                            ng-focus="onCellFocus(cell)"
+                            ng-blur="onCellBlur(cell)"
+                            ng-keydown="onCellKeydown(cell, $event)"
+                            ps-focus-on="false"
+                            ></textarea>
+                    <!--TODO: focusing-->
                 </div>
                 <div ng-if="cell.type === 'popup'">
                     <ps-table-popover
@@ -83,15 +78,14 @@
                             ps-allow-hide="!view.topic.addNew.show"
                             >
                         <span class="popover-icon glyphicon glyphicon-cog"></span>
-
                         <form class="popover-form">
                             <div class="form-group">
                                 <label class="checkbox-ext no-select text-nowrap block">
                                     <input type="checkbox"
-                                            ng-model="cell.edit.priority"
+                                            ng-model="cell.models.priority.value"
                                             ng-true-value="'required'"
                                             ng-false-value="'optional'"
-                                            ng-click="cell.field = 'priority'; cell.value = cell.edit.priority; view.saveCell(cell);">
+                                            ng-click="view.saveCell(cell.models.priority);">
                                     Required criteria
                                 </label>
                             </div>
@@ -100,10 +94,11 @@
                                 <label>Select topic:</label>
                                 <div class="list-group">
                                     <a href class="list-group-item"
-                                            ng-repeat="topic in view.topic.options"
-                                            ng-class="{'active': topic === cell.criteria.group}"
-                                            ng-click="cell.field = 'group'; cell.value = topic; view.saveCell(cell);">
-                                        <span class="glyphicon glyphicon-ok" ng-show="topic === cell.criteria.group"></span>
+                                            ng-repeat="topic in view.topic.options.all"
+                                            ng-init="active = (topic === cell.models.group.value)"
+                                            ng-class="{'active': active}"
+                                            ng-click="cell.models.group.value = topic; view.saveCell(cell.models.group);">
+                                        <span class="glyphicon glyphicon-ok" ng-show="active"></span>
                                         {{topic || 'None'}}
                                     </a>
                                     <a href class="list-group-item"
@@ -113,7 +108,7 @@
                                                 ng-model="view.topic.addNew.value"
                                                 ng-show="view.topic.addNew.show"
                                                 ps-focus-on="view.topic.addNew.show"
-                                                ng-keydown="view.topic.keyPressed(cell, $event)"
+                                                ng-keydown="view.topic.keyPressed(cell.models.group, $event)"
                                                 ng-blur="view.topic.doneEdit()">
                                     </a>
                                 </div>
@@ -122,7 +117,6 @@
                         </form>
                     </ps-table-popover>
                 </div>
-                <div ng-if="cell.type === 'ordinary'">{{ cell.value }}</div>
             </td>
         </tr>
         </tbody>

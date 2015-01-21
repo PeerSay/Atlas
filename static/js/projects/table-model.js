@@ -24,6 +24,7 @@ function TableModel() {
     M.addRowLike = addRowLike;
     M.removeRow = removeRow;
     M.saveColumn = saveColumn;
+    M.addColumn = addColumn;
     M.removeColumn = removeColumn;
 
     function buildModel(data) {
@@ -66,56 +67,51 @@ function TableModel() {
     function buildRow(crit, idx) {
         var row = [];
         angular.forEach(M.model.columns, function (col) {
-            var cell = {};
-            var key = col.field;
-            var vendor, vendorIdx;
-            var model = {};
-            if (!col.vendor) {
-                model.obj = crit;
-                model.key = key;
-                model.path = key;
-                model.op = 'replace';
-            }
-            else if (vendor = crit._vendorsIndex[key]) {
-                vendorIdx = crit.vendors.indexOf(vendor);
-                model.obj = vendor;
-                model.key = 'value';
-                model.path = ['vendors', vendorIdx, 'value'].join('/');
-                model.op = 'replace';
-            } else { // no vendor yet
-                model.obj = { title: key, value: '' };
-                model.key = 'value';
-                model.path = ['vendors', '-'].join('/');
-                model.op = 'add';
-            }
-
-            var value = model.obj[model.key];
-            cell.id = [key, idx].join('_');
-            cell.field = key;
-            cell.value = value;
-            cell.patch = {
-                op: model.op,
-                path: ['/criteria', idx, model.path].join('/')
-            };
-            cell.column = col;
-            cell.criteria = crit;
-            cell.rowIdx = function () {
-                return M.model.rows.indexOf(row); // changes
-            };
-
+            var cell = buildCell(col, row, idx, crit);
             row.push(cell);
         });
         return row;
     }
 
-    /*function indexBy(arr, field) {
-        var index = {};
-        angular.forEach(arr, function (obj) {
-            var key = obj[field];
-            index[key] = obj;
-       });
-        return index;
-    }*/
+    function buildCell(col, row, idx, crit) {
+        var cell = {};
+        var key = col.field;
+        var vendor, vendorIdx;
+        var model = {};
+        if (!col.vendor) {
+            model.obj = crit;
+            model.key = key;
+            model.path = key;
+            model.op = 'replace';
+        }
+        else if (vendor = crit._vendorsIndex[key]) {
+            vendorIdx = crit.vendors.indexOf(vendor);
+            model.obj = vendor;
+            model.key = 'value';
+            model.path = ['vendors', vendorIdx, 'value'].join('/');
+            model.op = 'replace';
+        } else { // no vendor yet
+            model.obj = { title: key, value: '' };
+            model.key = 'value';
+            model.path = ['vendors', '-'].join('/');
+            model.op = 'add';
+        }
+
+        var value = model.obj[model.key];
+        cell.id = [key, idx].join('_');
+        cell.field = key;
+        cell.value = value;
+        cell.patch = {
+            op: model.op,
+            path: ['/criteria', idx, model.path].join('/')
+        };
+        cell.column = col;
+        cell.criteria = crit;
+        cell.rowIdx = function () {
+            return M.model.rows.indexOf(row); // changes
+        };
+        return cell;
+    }
 
     function indexVendors(criteriaArr) {
         // criteriaArr format: [
@@ -391,6 +387,44 @@ function TableModel() {
         };
     }
 
+    function addColumn(newVal) {
+        var patches = [];
+        var newVendor = {
+            title: newVal,
+            value: ''
+        };
+
+        //add empty vendor to first criteria
+        patches.push({
+            op: 'add',
+            path: ['/criteria', 0, 'vendors', '-'].join('/'),
+            value: newVendor
+        });
+        console.log('Add column patch:', JSON.stringify(patches));
+
+        // Update vendors model
+        var criteria = M.model.rows[0][0].criteria;
+        criteria.vendors.push(newVendor);
+        criteria._vendorsIndex[newVal] = newVendor;
+        var col = {
+            id: ['col', M.model.columns.length+1].join('_'),
+            field: newVal,
+            value: newVal,
+            vendor: true
+        };
+        M.model.columns.push(col);
+
+        angular.forEach(M.model.rows, function (row, i) {
+            var cell = buildCell(col, row, i, criteria);
+            row.push(cell)
+        });
+
+        return {
+            patches: patches,
+            needReload: true
+        };
+    }
+
     function removeColumn(cell) {
         var patches = [];
         var key = cell.field;
@@ -423,45 +457,6 @@ function TableModel() {
             needReload: true
         };
     }
-
-    /*
-
-     function addColumnModel(newVal, projectId) {
-     var criteria = model.criteria[0];
-     var patches = [];
-
-     // Add empty vendor to first criteria
-     patches.push(addVendor(criteria, newVal, ''));
-     console.log('Add column patch:', JSON.stringify(patches));
-
-     // Update vendors model
-     model.vendors.push({ title: newVal });
-
-     patchCriteria(projectId, patches);
-     reload();
-     }
-     */
-
-
-    /*function addVendor(criteria, field, val) {
-     var criteriaIdx = model.criteria.indexOf(criteria);
-     var newVendor = {
-     title: field,
-     value: val
-     };
-     criteria.vendors.push(newVendor);
-     criteria.vendorsIndex[field] = newVendor;
-
-     // patch
-     return {
-     op: 'add',
-     path: ['/criteria', criteriaIdx, 'vendors', '-'].join('/'),
-     value: newVendor
-     };
-     }
-
-     */
-
 
     return M;
 }

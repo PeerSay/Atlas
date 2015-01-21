@@ -293,13 +293,12 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
 
         // Edit
         function saveColumnCell(model) {
-            var isAddNew = false;
-            var modified = true;
+            var isAddNew = (model.id === 'new');
             // TODO - validity
 
             var res;
-            if (isAddNew && modified) {
-                res = TableModel.addColumn(col.edit.value, projectId);
+            if (isAddNew) {
+                res = TableModel.addColumn(model.value);
             }
             else {
                 res = TableModel.saveColumn(model);

@@ -103,7 +103,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         });
         // last is empty
         data.columns.push({
-            model: { field: '...'},
+            model: { id: 'new', field: '...', value: ''},
             visible: true,
             editable: true,
             sortable: false,

@@ -28,8 +28,8 @@ function psTablePopover($timeout) {
                 var $tIcon = clone.filter('.popover-icon');
                 var $tForm = clone.filter('form');
                 var $icon = element.find('.js-popover-icon');
-                var $cont = element.parents(attrs.psContSelector);
-                var $table = element.parents('table');
+                var $container = element.parents(attrs.psContainer);
+                var $viewport = element.parents(attrs.psViewport);
                 var $el = element.find('.btn');
 
                 // insert icon
@@ -37,8 +37,8 @@ function psTablePopover($timeout) {
 
                 // init popover plugin
                 $el.popover({
-                    container: $cont,
-                    viewport: $table,
+                    container: $container,
+                    viewport: $viewport,
                     trigger: 'focus',
                     html: true,
                     content: function () {

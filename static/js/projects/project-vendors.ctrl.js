@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectVendorsCtrl', ProjectVendorsCtrl);
 
-ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table'];
-function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
+ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel'];
+function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -25,65 +25,111 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'vi-full', toFullViewData)
+    m.fullTableView = Table.addView(m, 'vi-full', toFullViewData2)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
 
-    function toNormViewData(model) {
+    function toNormViewData() {
+        var groupBy = m.groupBy.get();
+        var vendors = TableModel.selectColumns([{ vendor: true }], 3);
+        var group = TableModel.selectColumns([{ field: groupBy }]);
         var data = {
             columns: [],
             rows: []
         };
-        // Columns: Criteria(hidden), Prod1, [Prod2, Prod3] | Products?
-        // Criteria is required for sorting (hidden)
-        data.columns.push({
-            title: 'Criteria',
-            field: 'name',
-            visible: false
+
+        // Columns: Prod1, [Prod2, Prod3] | Products?
+        angular.forEach(vendors.columns, function (col) {
+            data.columns.push({
+                model: col,
+                visible: true,
+                editable: false,
+                sortable: false
+            })
+        });
+        // add grouping column
+        angular.forEach(group.columns, function (col) {
+            data.columns.push({
+                model: col,
+                visible: false,
+                editable: false,
+                sortable: false
+            })
         });
         // Artificial column to show empty table
         data.columns.push({
-            title: 'Products',
-            field: '',
-            visible: !model.vendors.length
-        });
-        angular.forEach(model.vendors, function (vendor, i) {
-            data.columns.push({
-                title: vendor.title,
-                field: vendor.title,
-                visible: i < 3, // hide all but first 3; TODO - remove from arr?
-                isVendor: true,
-                cellType: 'ordinary'
-            });
-        });
-        // Artificial columns for grouping
-        data.columns.push({
-            title: '--',
-            field: 'group',
-            visible: false
-        });
-        data.columns.push({
-            title: '--',
-            field: 'priority',
-            visible: false
+            model: { value: 'Products' },
+            visible: !vendors.columns.length,
+            editable: false,
+            sortable: false
         });
 
         // Rows
-        angular.forEach(model.criteria, function (crit) {
-            var row = {};
-            angular.forEach(data.columns, function (col) {
-                var cell = row[col.field] = {
-                    type: col.cellType
-                };
-                if (col.isVendor) {
-                    cell.value = (crit.vendorsIndex[col.field] || {}).value;
-                } else {
-                    cell.value = crit[col.field];
-                }
+        angular.forEach(vendors.rows, function (row, i) {
+            var fullRow = [].concat(row, group.rows[i]);
+            var resRow = [];
+            angular.forEach(fullRow, function (cell, j) {
+                resRow.push({
+                    model: cell,
+                    visible: data.columns[j].visible,
+                    editable: false,
+                    type: 'ordinary'
+                });
             });
-            data.rows.push(row);
+            data.rows.push(resRow);
+        });
+
+        return data;
+    }
+
+    function toFullViewData2() {
+        var groupBy = m.groupBy.get();
+        var model = TableModel.selectColumns([{ field: 'name' }, { field: groupBy }, { vendor: true }]);
+        var data = {
+            columns: [],
+            rows: []
+        };
+
+        // Columns: Criteria, {Group}(hidden), Prod1, [Prod2, Prod3], {AddNew}
+        angular.forEach(model.columns, function (col) {
+            data.columns.push({
+                model: col,
+                visible: (col.field !== groupBy),
+                editable: col.vendor,
+                sortable: true
+            })
+        });
+        // last is empty
+        data.columns.push({
+            model: { field: '...'},
+            visible: true,
+            editable: true,
+            sortable: false,
+            last: true,
+            placeholder: 'Add product...'
+        });
+
+        //Rows
+        angular.forEach(model.rows, function (row) {
+            var resRow = [];
+            angular.forEach(row, function (cell, i) {
+                resRow.push({
+                    model: cell,
+                    visible: data.columns[i].visible,
+                    editable: cell.column.vendor,
+                    type: !cell.column.vendor ? 'static' : 'multiline'
+                });
+            });
+            // last row -- popoup
+            resRow.push({
+                model: {},
+                visible: true,
+                editable: true, // TODO
+                type: 'popup'
+            });
+            data.rows.push(resRow);
         });
 
         return data;
@@ -132,9 +178,10 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
             field: '--',
             visible: true,
             addNew: true,
+            placeholder: 'Add new product',
             cellType: 'static',
             edit: {
-                show: false,
+                show: !model.vendors.length, // invite to edit
                 value: ''
             }
         });
@@ -188,7 +235,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
         addProduct: menuAddProduct,
         removeProduct: menuRemoveProduct
     };
-    m.fullTableView.menu = m.menu; // expose to Table directive
+    //m.fullTableView.menu = m.menu; // expose to Table directive
 
     function menuAddProduct() {
         var addCol = $.map(this.view.columns, function (col) {

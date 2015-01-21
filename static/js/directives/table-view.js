@@ -13,29 +13,29 @@ function psTableView($timeout) {
         link: function (scope, element, attrs, ctrls, transcludeFn) {
             var formModel = scope['form' + scope.view.name];
 
-            scope.onKeydown = onKeydown;
-            scope.onFocus = onFocus;
-            scope.onBlur = onBlur;
+            scope.onCellKeydown = onCellKeydown;
+            scope.onCellFocus = onCellFocus;
+            scope.onCellBlur = onCellBlur;
             scope.onColKeydown = onColKeydown;
 
-            function onKeydown(cell, evt) {
+            function onCellKeydown(cell, evt) {
                 var isTab = (evt.keyCode === 9) && !evt.shiftKey; // TAB w/o Shift
                 if (isTab) {
-                    if (scope.view.addRowOnTab(cell)) {
+                    if (scope.view.addRowOnTab(cell.model)) {
                         return evt.preventDefault();
                     }
                 }
             }
 
-            function onFocus(cell) {
+            function onCellFocus(cell) {
                 cell.edited = true;
             }
 
-            function onBlur(cell) {
-                var input = formModel[cell.inputId];
+            function onCellBlur(cell) {
+                var input = formModel[cell.model.id];
                 var modified = input.$dirty;
                 if (modified) {
-                    scope.view.saveCell(cell);
+                    scope.view.saveCell(cell.model);
                     input.$setPristine();
                 }
                 cell.edited = false;

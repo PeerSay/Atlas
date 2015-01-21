@@ -1,4 +1,4 @@
-<ng-form name="form{{view.name}}">
+<ng-form name="form{{::view.name}}">
     <table class="table"
             ng-table="view.tableParams"
             ng-class="{ 'ng-table-resizable-columns': false }"
@@ -7,25 +7,28 @@
         <thead>
         <tr>
             <th ng-repeat="col in view.columns"
-                    class="text"
-                    ng-class="view.columnClass(col)"
+                    ng-class="view.runtimeColClass(col)"
+                    ng-show="::col.visible"
                     ng-click="view.sortBy(col)"
-                    ng-show="col.visible">
-                <div ng-if="col.edit">
+                    >
+                <div ng-if="!col.editable">{{ col.model.value }}</div>
+
+                <div ng-if="col.editable">
                     <a href tabindex="-1"
-                            ng-show="!col.edit.show"
-                            ng-click="view.editColumnCell(col)">{{ col.title }}</a>
+                            ng-show="!col.edited"
+                            ng-click="col.edited = true; $event.stopPropagation()"
+                            >{{ col.model.field }}</a>
 
                     <input type="text" tabindex="-1" class="form-control cell-input"
-                            ng-show="col.edit.show"
-                            ng-model="col.edit.value"
-                            ng-blur="view.saveColumnCell(col)"
+                            ng-attr-placeholder="{{col.placeholder}}"
+                            ng-show="col.edited"
+                            ng-model="col.model.value"
+                            ng-blur="col.edited = false;"
                             ng-keydown="onColKeydown($event)"
-                            ps-focus-on="col.edit.show === true"
+                            ps-focus-on="col.edited === true"
                             ps-select="true"
                             />
                 </div>
-                <div ng-if="!col.edit">{{col.title}}</div>
             </th>
         </tr>
         </thead>
@@ -39,15 +42,82 @@
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <td ng-repeat="col in view.columns"
-                    ng-init="cell = row[col.field]"
-                    ng-show="col.visible"
+            <!--<td>{{ row | json }}</td>-->
+            <td ng-repeat="cell in row"
+                    ng-show="cell.visible"
                     class="editable"
                     ng-class="view.cellClass(cell)"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">
-                <div ng-if="cell.type === 'static'">{{ cell.value }}</div>
+                <div ng-if="!cell.editable" ng-init="val = cell.model.value">
+                    <span ng-if="val" ng-bind-html="cell.model.value | multiline"></span>
+                    <span ng-if="!val && cell.emptyValue" class="attention">
+                        <span class="glyphicon glyphicon-exclamation-sign"></span>
+                        {{ ::cell.emptyValue }}
+                    </span>
+                </div>
+                <div ng-if="cell.editable && cell.type === 'multiline'">
+                    <textarea class="form-control cell-input noresize"
+                            name="{{cell.model.id}}"
+                            msd-elastic
+                            ng-model="cell.model.value"
+                            ng-focus="onCellFocus(cell)"
+                            ng-blur="onCellBlur(cell)"
+                            ng-keydown="onCellKeydown(cell, $event)"
+                            ps-focus-on="false"
+                            ></textarea>
+                    <!--TODO: focusing-->
+                </div>
+                <div ng-if="cell.type === 'popup'">
+                    <ps-table-popover
+                            ps-cont-selector="td"
+                            ps-id="{{group.value + '_crit_' + $index}}"
+                            ps-popover-on="view.popoverOn"
+                            ps-allow-hide="!view.topic.addNew.show"
+                            >
+                        <span class="popover-icon glyphicon glyphicon-cog"></span>
+                        <form class="popover-form">
+                            <div class="form-group">
+                                <label class="checkbox-ext no-select text-nowrap block">
+                                    <input type="checkbox"
+                                            ng-model="cell.models.priority.value"
+                                            ng-true-value="'required'"
+                                            ng-false-value="'optional'"
+                                            ng-click="view.saveCell(cell.models.priority);">
+                                    Required criteria
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Select topic:</label>
+                                <div class="list-group">
+                                    <a href class="list-group-item"
+                                            ng-repeat="topic in view.topic.options.all"
+                                            ng-init="active = (topic === cell.models.group.value)"
+                                            ng-class="{'active': active}"
+                                            ng-click="cell.models.group.value = topic; view.saveCell(cell.models.group);">
+                                        <span class="glyphicon glyphicon-ok" ng-show="active"></span>
+                                        {{topic || 'None'}}
+                                    </a>
+                                    <a href class="list-group-item"
+                                            ng-click="view.topic.addNew.show = true">
+                                        <div class="create-new" ng-show="!view.topic.addNew.show">Create new...</div>
+                                        <input type="text" class="form-control" placeholder="Topic name"
+                                                ng-model="view.topic.addNew.value"
+                                                ng-show="view.topic.addNew.show"
+                                                ps-focus-on="view.topic.addNew.show"
+                                                ng-keydown="view.topic.keyPressed(cell.models.group, $event)"
+                                                ng-blur="view.topic.doneEdit()">
+                                    </a>
+                                </div>
+                                <span class="hint" ng-show="view.topic.addNew.show">Press enter</span>
+                            </div>
+                        </form>
+                    </ps-table-popover>
+                </div>
+
+                <!--<div ng-if="cell.type === 'static'">{{ cell.value }}</div>
                 <div ng-if="cell.type === 'multiline'">
                     <textarea class="form-control cell-input noresize"
                             name="{{cell.inputId}}"
@@ -123,7 +193,7 @@
                     </ps-table-popover>
                 </div>
                 <div ng-if="cell.type === 'ordinary'">{{ cell.value }}</div>
-            </td>
+            </td>-->
         </tr>
         </tbody>
         <!--Empty table row -->

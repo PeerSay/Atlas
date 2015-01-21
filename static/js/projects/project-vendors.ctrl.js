@@ -25,7 +25,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'vi-full', toFullViewData2)
+    m.fullTableView = Table.addView(m, 'vi-full', toFullViewData)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
@@ -84,7 +84,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         return data;
     }
 
-    function toFullViewData2() {
+    function toFullViewData() {
         var groupBy = m.groupBy.get();
         var model = TableModel.selectColumns([{ field: 'name' }, { field: groupBy }, { vendor: true }]);
         var data = {
@@ -122,12 +122,12 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
                     type: !cell.column.vendor ? 'static' : 'multiline'
                 });
             });
-            // last row -- popoup
+            // last row -- empty
             resRow.push({
                 model: {},
                 visible: true,
-                editable: true, // TODO
-                type: 'popup'
+                editable: false,
+                type: 'static'
             });
             data.rows.push(resRow);
         });
@@ -135,94 +135,6 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         return data;
     }
 
-    function toFullViewData(model) {
-        var data = {
-            columns: [],
-            rows: []
-        };
-        // Columns: Ctireria, Prod1, [Prod2, Prod3]
-        data.columns.push({
-            title: 'Criteria',
-            field: 'name',
-            visible: true,
-            sortable: true,
-            cellType: 'static'
-        });
-        // Group & priority are required for grouping to work (hidden)
-        data.columns.push({
-            title: '--',
-            field: 'group',
-            visible: false
-        });
-        data.columns.push({
-            title: '--',
-            field: 'priority',
-            visible: false
-        });
-        angular.forEach(model.vendors, function (vendor) {
-            data.columns.push({
-                title: vendor.title,
-                field: vendor.title,
-                visible: true,
-                sortable: true,
-                cellType: 'text',
-                edit: {
-                    show: false,
-                    value: vendor.title
-                }
-            });
-        });
-        // Last column is Add New
-        data.columns.push({
-            title: '...',
-            field: '--',
-            visible: true,
-            addNew: true,
-            placeholder: 'Add new product',
-            cellType: 'static',
-            edit: {
-                show: !model.vendors.length, // invite to edit
-                value: ''
-            }
-        });
-
-        // Rows
-        angular.forEach(model.criteria, function (crit, idx) {
-            var row = {};
-            angular.forEach(data.columns, function (col) {
-                if (col.addNew) {
-                    row[col.field] = {
-                        type: col.cellType,
-                        value: ''
-                    };
-                }
-                else if (col.edit) {
-                    row[col.field] = {
-                        type: col.cellType,
-                        value: (crit.vendorsIndex[col.field] || {}).value,
-                        inputId: col.field + idx,
-                        criteria: crit, // for save
-                        field: col.field,
-                        isVendor: true
-                    };
-                }
-                else if (col.visible) {
-                    row[col.field] = {
-                        type: col.cellType,
-                        value: crit[col.field],
-                        noMenu: true
-                    };
-                } else {
-                    row[col.field] = {
-                        value: crit[col.field]
-                    };
-                }
-            });
-            data.rows.push(row);
-        });
-
-        return data;
-    }
 
     //Menu
     m.menu = {
@@ -235,7 +147,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         addProduct: menuAddProduct,
         removeProduct: menuRemoveProduct
     };
-    //m.fullTableView.menu = m.menu; // expose to Table directive
+    m.fullTableView.menu = m.menu; // expose to Table directive
 
     function menuAddProduct() {
         var addCol = $.map(this.view.columns, function (col) {
@@ -253,7 +165,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         // delay to allow context-menu event handler to close menu,
         // otherwise it remains open
         $timeout(function () {
-            view.removeColumn(cell);
+            view.removeColumn(cell.model);
         }, 0, false);
     }
 

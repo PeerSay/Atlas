@@ -27,7 +27,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'ev-full', toFullViewData2)
+    m.fullTableView = Table.addView(m, 'ev-full', toFullViewData)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
@@ -83,7 +83,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         return data;
     }
 
-    function toFullViewData2() {
+    function toFullViewData() {
         var model = TableModel.selectColumns([
             { field: 'name' }, {field: 'description'}, {field: 'group'}, {field: 'priority'}
         ]);
@@ -159,94 +159,6 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         }
     }
 
-    function toFullViewData(model) {
-        var data = {
-            columns: [],
-            rows: [],
-            topics: model.topics // expose topics for Popover
-        };
-        // Columns: Criteria, Description, [Topic, Priority], <empty>
-        data.columns.push({
-            title: 'Criteria',
-            field: 'name',
-            visible: true,
-            sortable: true,
-            cellType: 'multiline'
-        });
-        data.columns.push({
-            title: 'Description',
-            field: 'description',
-            visible: true,
-            sortable: true,
-            cellType: 'multiline'
-        });
-        data.columns.push({
-            title: 'Topic',
-            field: 'group',
-            visible: !m.compactTable,
-            sortable: true,
-            cellType: 'static'
-        });
-        data.columns.push({
-            title: 'Priority',
-            field: 'priority',
-            visible: !m.compactTable,
-            sortable: true,
-            cellType: 'static'
-        });
-        data.columns.push({
-            title: '',
-            field: '',
-            visible: true,
-            sortable: false,
-            cellType: 'popup'
-        });
-
-        // Rows
-        angular.forEach(model.criteria, function (crit, i) {
-            var row = getRow(crit, i);
-            if (crit.justAdded) {
-                row.edit = 'name';
-                crit.justAdded = false;
-            }
-            data.rows.push(row);
-        });
-
-        // Empty table -> invite to edit
-        if (!model.criteria.length) {
-            var row = getRow(Table.getModelLike(null));
-            row.edit = 'name';
-            data.rows.push(row);
-        }
-
-        return data;
-
-
-        function getRow(crit, idx) {
-            var row = {};
-            angular.forEach(data.columns, function (col) {
-                var cell = row[col.field] = {};
-                cell.type = col.cellType;
-                cell.value = crit[col.field] || '';
-
-                if (cell.type === 'multiline') {
-                    cell.criteria = crit; // for save
-                    cell.field = col.field;
-                    cell.inputId = col.field + idx;
-                }
-                else if (cell.type === 'popup') {
-                    cell.criteria = crit;
-                    cell.noMenu = true;
-                    cell.edit = {
-                        priority: crit.priority,
-                        topic: crit.group
-                    };
-                    // cell.field is set dynamically as popup manages several props
-                }
-            });
-            return row;
-        }
-    }
 
     //Menu
     m.menu = {

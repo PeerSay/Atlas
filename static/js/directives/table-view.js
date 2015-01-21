@@ -17,6 +17,7 @@ function psTableView($timeout) {
             scope.onCellFocus = onCellFocus;
             scope.onCellBlur = onCellBlur;
             scope.onColKeydown = onColKeydown;
+            scope.onColBlur = onColBlur;
 
             function onCellKeydown(cell, evt) {
                 var isTab = (evt.keyCode === 9) && !evt.shiftKey; // TAB w/o Shift
@@ -32,13 +33,14 @@ function psTableView($timeout) {
             }
 
             function onCellBlur(cell) {
+                cell.edited = false;
+
                 var input = formModel[cell.model.id];
                 var modified = input.$dirty;
                 if (modified) {
                     scope.view.saveCell(cell.model);
                     input.$setPristine();
                 }
-                cell.edited = false;
             }
 
             function onColKeydown(evt) {
@@ -48,6 +50,17 @@ function psTableView($timeout) {
                     $timeout(function () {
                         el.blur(); // blur leads to column save
                     }, 0, false);
+                }
+            }
+
+            function onColBlur(col) {
+                col.edited = false;
+
+                var input = formModel[col.model.id];
+                var modified = input.$dirty;
+                if (modified) {
+                    scope.view.saveColumnCell(col.model);
+                    input.$setPristine();
                 }
             }
 

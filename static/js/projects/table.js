@@ -115,7 +115,6 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         V.runtimeColClass = runtimeColClass;
         V.cellClass = cellClass;
         //Edit
-        V.editColumnCell = editColumnCell;
         V.saveColumnCell = saveColumnCell;
         V.removeColumn = removeColumn;
         V.saveCell = saveCell;
@@ -293,23 +292,22 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         }
 
         // Edit
-        function editColumnCell(col) {
-            col.edit.show = true;
-            col.edit.value = !col.addNew ? col.title : '';
-        }
+        function saveColumnCell(model) {
+            var isAddNew = false;
+            var modified = true;
+            // TODO - validity
 
-        function saveColumnCell(col) {
-            var isAddNew = !!col.addNew;
-            var modified = isAddNew ? !!col.edit.value : (col.title !== col.edit.value);
-
-            col.edit.show = false;
-
+            var res;
             if (isAddNew && modified) {
-                svc.addColumnModel(col.edit.value, projectId);
+                res = TableModel.addColumn(col.edit.value, projectId);
             }
-            else if (modified) {
-                col.title = col.edit.value;
-                svc.saveColumnModel(col, projectId);
+            else {
+                res = TableModel.saveColumn(model);
+            }
+
+            svc.patchCriteria(projectId, res.patches);
+            if (res.needReload) {
+                svc.reload();
             }
         }
 
@@ -321,8 +319,10 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
             }
         }
 
-        function removeColumn(cell) {
-            svc.removeColumnModel(cell.field, projectId);
+        function removeColumn(model) {
+            var res = TableModel.removeColumn(model);
+            svc.patchCriteria(projectId, res.patches);
+            svc.reload();
         }
 
         function removeRow(model) {

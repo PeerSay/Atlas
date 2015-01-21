@@ -20,10 +20,11 @@
                             >{{ col.model.field }}</a>
 
                     <input type="text" tabindex="-1" class="form-control cell-input"
+                            name="{{::col.model.id}}"
                             ng-attr-placeholder="{{col.placeholder}}"
                             ng-show="col.edited"
                             ng-model="col.model.value"
-                            ng-blur="col.edited = false;"
+                            ng-blur="onColBlur(col)"
                             ng-keydown="onColKeydown($event)"
                             ps-focus-on="col.edited === true"
                             ps-select="true"
@@ -59,7 +60,7 @@
                 </div>
                 <div ng-if="cell.editable && cell.type === 'multiline'">
                     <textarea class="form-control cell-input noresize"
-                            name="{{cell.model.id}}"
+                            name="{{::cell.model.id}}"
                             msd-elastic
                             ng-model="cell.model.value"
                             ng-focus="onCellFocus(cell)"

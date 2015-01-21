@@ -23,6 +23,8 @@ function TableModel() {
     M.saveCell = saveCell;
     M.addRowLike = addRowLike;
     M.removeRow = removeRow;
+    M.saveColumn = saveColumn;
+    M.removeColumn = removeColumn;
 
     function buildModel(data) {
         // Server data format:
@@ -106,6 +108,15 @@ function TableModel() {
         return row;
     }
 
+    /*function indexBy(arr, field) {
+        var index = {};
+        angular.forEach(arr, function (obj) {
+            var key = obj[field];
+            index[key] = obj;
+       });
+        return index;
+    }*/
+
     function indexVendors(criteriaArr) {
         // criteriaArr format: [
         //  {
@@ -132,6 +143,7 @@ function TableModel() {
                     allIndex[key] = true;
                     // TODO - order matters!
                     allVendors.push({
+                        id: ['col', allVendors.length].join('_'),
                         field: key,
                         value: key,
                         vendor: true
@@ -327,7 +339,6 @@ function TableModel() {
         };
     }
 
-
     function removeRow(cell) {
         var rowIdx = cell.rowIdx();
         var patches = [];
@@ -349,31 +360,22 @@ function TableModel() {
         };
     }
 
-    function saveColumnModel(col, projectId) {
-        // col format: { title: 'IBM', field: 'IBM', visible: true, ...}
-        var newVal = col.title;
-        var oldVal = col.field;
+    function saveColumn(col) {
+        var newVal = col.value;
+        var key = col.field;
         var patches = [];
 
-        // update vendor in model.vendors
-        angular.forEach(model.vendors, function (vend) {
-            if (vend.title === oldVal) {
-                vend.title = newVal;
-            }
-        });
-
-        // update vendor in every criteria
-        angular.forEach(model.criteria, function (crit, i) {
-            var vendor = crit.vendorsIndex[oldVal];
+        angular.forEach(M.model.rows, function (row, i) {
+            var crit = row[0].criteria;
+            var vendor = crit._vendorsIndex[key];
             var vendorIdx = crit.vendors.indexOf(vendor);
-            if (vendor) {
-                // update model -- so that on next toData it is correctly read
+            if (vendor && vendorIdx >= 0) {
+                // update model
+                col.field = newVal;
                 vendor.title = newVal;
-                //update index:
-                crit.vendorsIndex[newVal] = vendor;
-                delete crit.vendorsIndex[oldVal];
+                crit._vendorsIndex[newVal] = vendor;
+                delete crit._vendorsIndex[key];
 
-                // create patch for server
                 patches.push({
                     op: 'replace',
                     path: ['/criteria', i, 'vendors', vendorIdx, 'title'].join('/'),
@@ -381,13 +383,45 @@ function TableModel() {
                 });
             }
         });
-
         console.log('Save column patch:', JSON.stringify(patches));
-        if (patches.length) {
-            patchCriteria(projectId, patches);
-        }
 
-        reload();
+        return {
+            patches: patches,
+            needReload: false // TODO
+        };
+    }
+
+    function removeColumn(cell) {
+        var patches = [];
+        var key = cell.field;
+        var col = cell.column;
+        var colIdx = M.model.columns.indexOf(col);
+
+        // update model & build patch
+        angular.forEach(M.model.rows, function (row, i) {
+            var crit = row[0].criteria;
+            var vendor = crit._vendorsIndex[key];
+            var vendorIdx = crit.vendors.indexOf(vendor);
+            // TODO - fix
+            if (vendor && vendorIdx >= 0) {
+                crit.vendors = crit.vendors.splice(vendorIdx, 1);
+                delete crit._vendorsIndex[key];
+
+                patches.push({
+                    op: 'remove',
+                    path: ['/criteria', i, 'vendors', vendorIdx].join('/')
+                });
+            }
+        });
+        console.log('Remove column patch:', JSON.stringify(patches));
+
+        // update model cont.
+        M.model.columns.splice(colIdx, 1);
+
+        return {
+            patches: patches,
+            needReload: true
+        };
     }
 
     /*
@@ -426,32 +460,7 @@ function TableModel() {
      };
      }
 
-     function removeColumnModel(title, projectId) {
-     var patches = [];
-
-     // remove vendor from model.vendors
-     model.vendors = $.map(model.vendors, function (vend) {
-     return (vend.title === title) ? null : vend;
-     });
-
-     angular.forEach(model.criteria, function (crit, i) {
-     var vendor = crit.vendorsIndex[title];
-     var vendorIdx = crit.vendors.indexOf(vendor);
-     if (vendor) {
-     crit.vendors = crit.vendors.splice(vendorIdx, 1);
-     delete crit.vendorsIndex[title];
-
-     patches.push({
-     op: 'remove',
-     path: ['/criteria', i, 'vendors', vendorIdx].join('/')
-     });
-     }
-     });
-     console.log('Remove column patch:', JSON.stringify(patches));
-
-     patchCriteria(projectId, patches);
-     reload();
-     }*/
+     */
 
 
     return M;

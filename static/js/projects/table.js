@@ -168,15 +168,13 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
             return V;
         }
 
-        function getData($defer, params) {
-            //console.log('>>>>>getData: name=%s, order=', name, params.orderBy());
-
+        function getData($defer) {
             svc.toData(projectId, name)
                 .then(function (data) {
-                    var rows = sort(data.rows, params.orderBy());
+                    var rows = sort(data.rows);
 
                     V.columns = data.columns;
-                    V.rows = data.rows;
+                    V.rows = rows; // TODO - revise
 
                     $defer.resolve(rows);
                 });
@@ -184,20 +182,22 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
 
         // Grouping
         function grouping() {
-            settings.groupBy = function (row) {
-                var cur = svc.groupBy.get();
-                var found = $.map(row, function (cell) {
-                    var model = cell.model;
-                    return (model.field === cur) ? model.value : null
-                })[0];
-                //console.log('>>>>>groupBy [%s] returns: %s, on', cur, found, row);
-                return found;
-            };
+            settings.groupBy = group;
 
             $rootScope.$on('grouping', function () {
                 V.tableParams.reload();
             });
             return V;
+        }
+
+        function group(row) {
+            var cur = svc.groupBy.get();
+            var found = $.map(row, function (cell) {
+                var model = cell.model;
+                return (model.field === cur) ? model.value : null
+            });
+            //console.log('>>>>>groupBy [%s] returns: %s, on', cur, found, row);
+            return found[0];
         }
 
         // Sorting
@@ -210,15 +210,12 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
             }
 
             $rootScope.$on('sorting', function (evt, order) {
-                V.tableParams.sorting(order);
+                V.tableParams.sorting(order); // causes reload if order differs
             });
             return V;
         }
 
         function sortBy(col) {
-            var edited = col.edit && col.edit.show;
-            if (edited) { return; } // TODO - remove
-
             var field = col.model.field;
             var order = {};
             order[field] = V.tableParams.isSortBy(field, 'asc') ? 'desc' : 'asc';
@@ -226,28 +223,30 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
             svc.sortBy.set(order);
         }
 
-        function sort(arr, orderByParam) {
-            //orderByArr format: ['+fld1', '-fld2']
-            //console.log('>>>>>sort: orderByParam:', orderByParam);
-            var orderBy = orderByParam[0];
-            if (orderBy) {
-                // TODO - fix Product names with space
-                orderBy = [orderBy + '.value'];
-
-                //console.log('>>>>>sort by: ', orderBy);
+        function sort(arr) {
+            // format: {'name': 'asc'|'desc'}
+            var orderBy = svc.sortBy.get();
+            var field  = Object.keys(orderBy)[0];
+            if (!field) {
+                return arr; // unsorted
             }
 
-            // TODO - groups
-            /*if (settings.groupBy) {
-             // if grouped, sort by group first
-             var curGroupBy = svc.groupBy.get();
-             var sortedByGroup = orderBy && (orderBy.substring(1) === curGroupBy);
-             if (!sortedByGroup && curGroupBy) {
-             orderByParam.unshift(curGroupBy);
-             }
-             }*/
+            var reverse = (orderBy[field] === 'desc');
+            var groupBy = svc.groupBy.get();
+            var sortArr = groupBy ? [sortFn(groupBy), sortFn(field)] : sortFn(field);
+            console.log('Sorting [%s] view [%s] by', name, orderBy[field], [groupBy, field]);
 
-            return orderBy ? $filter('orderBy')(arr, orderBy) : arr;
+            return $filter('orderBy')(arr, sortArr, reverse);
+
+            function sortFn(field) {
+                return function (row) {
+                    // TODO - perf
+                    var model = $.map(row, function (cell) {
+                        return (cell.model.field == field) ? cell.model : null
+                    })[0];
+                    return model ? model.value : ''; // some views may have no sorted fields
+                }
+            }
         }
 
         // Class

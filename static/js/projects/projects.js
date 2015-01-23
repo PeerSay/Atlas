@@ -90,6 +90,8 @@ function Projects(Backend, User) {
     //   status: 'ok|empty|missed'
     // }
     function transformProjectModel(data, prefix) {
+        if (!data) { return; } // POST returned error!
+
         var result = {};
         var defaults = angular.copy(data.defaults || []);
         delete data.defaults;

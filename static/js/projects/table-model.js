@@ -19,6 +19,7 @@ function TableModel() {
         }
     };
     M.nextRowLike = nextRowLike;
+    M.isUniqueCol = isUniqueCol;
     // Edit
     M.saveCell = saveCell;
     M.addRowLike = addRowLike;
@@ -237,6 +238,18 @@ function TableModel() {
         return alike ? row : null;
     }
 
+    function isUniqueCol(column, newValue) {
+        var res = true;
+        angular.forEach(model.columns, function (col) {
+            if (!col.vendor || col === column) { return; }
+
+            if (col.field === newValue) {
+                res = false;
+            }
+        });
+        return res;
+    }
+
     // Edits
     //
 
@@ -407,7 +420,7 @@ function TableModel() {
         criteria.vendors.push(newVendor);
         criteria._vendorsIndex[newVal] = newVendor;
         var col = {
-            id: ['col', M.model.columns.length+1].join('_'),
+            id: ['col', M.model.columns.length + 1].join('_'),
             field: newVal,
             value: newVal,
             vendor: true

@@ -115,6 +115,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         V.runtimeColClass = runtimeColClass;
         V.cellClass = cellClass;
         //Edit
+        V.validateColumnCell = validateColumnCell;
         V.saveColumnCell = saveColumnCell;
         V.removeColumn = removeColumn;
         V.saveCell = saveCell;
@@ -226,7 +227,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         function sort(arr) {
             // format: {'name': 'asc'|'desc'}
             var orderBy = svc.sortBy.get();
-            var field  = Object.keys(orderBy)[0];
+            var field = Object.keys(orderBy)[0];
             if (!field) {
                 return arr; // unsorted
             }
@@ -291,6 +292,18 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         }
 
         // Edit
+        //
+        function validateColumnCell(col) {
+            return function (newValue) {
+                var res = true;
+                if (col.edited) {
+                    res = TableModel.isUniqueCol(col.model, newValue);
+                }
+                //console.log('>> Validate col=[%s] val=[%s], res=', col.model.field, newValue, res);
+                return res;
+            };
+        }
+
         function saveColumnCell(model) {
             var isAddNew = (model.id === 'new');
             // TODO - validity

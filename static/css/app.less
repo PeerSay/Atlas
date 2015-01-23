@@ -71,7 +71,7 @@ body {
       position: absolute;
       left: 0;
       bottom: -8px;
-      border-top: 10px solid #FFFFBE;
+      border-top: 10px solid #FCF8E3;
       border-right: 10px solid transparent;
     }
     &:before {
@@ -267,6 +267,7 @@ body {
 
     margin-bottom: 0;
     th {
+      position: relative;
       background: #f5f5f5;
       text-align: left;
       /*width: 40%;*/
@@ -310,6 +311,9 @@ body {
           &.edited {
             background-color: #f9f7d0;
             .box-shadow(~"inset 0 0 1px rgba(0,0,0,.075), 1px 1px 5px rgba(102, 175, 233, .6)");
+            input.ng-dirty.ng-invalid {
+              background-color: #ffe5e5;
+            }
           }
           &.text {
             input {
@@ -417,6 +421,52 @@ body {
     background-color: #999;
     &.empty { background-color: hsv(10, 50%, 72%); }
     &.ok { background-color: hsv(120, 50%, 72%); }
+  }
+}
+
+/*Table header warning*/
+/*TODO - unify w/ auth warn*/
+.col-warn {
+  position: absolute;
+  top: 50px;
+  right: 3px;
+
+  opacity: 0;
+  transition: opacity .5s, top .3s;
+  &.ng-active.show {
+    opacity: 1;
+    top: 35px;
+  }
+  span {
+    display: block;
+  }
+
+  &.hint {
+    white-space: nowrap;
+    background: #FCF8E3;
+    padding: 2px 10px;
+    color: #CD5C5C;
+    border: 1px solid #EAB6B6;
+    font-weight: normal;
+    &:before, &:after {
+      content: "";
+      position: absolute;
+    }
+
+    &.hint-bottom {
+      border-radius: 5px 0 5px 5px;
+      &:before, &:after {
+        right: 0;
+        top: -7px;
+        border-bottom: 10px solid #FCF8E3;
+        border-left: 10px solid transparent;
+      }
+      &:before {
+        right: -1px;
+        top: -9px;
+        border-bottom: 9px solid #EAB6B6;
+      }
+    }
   }
 }
 

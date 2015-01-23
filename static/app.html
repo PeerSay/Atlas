@@ -93,7 +93,7 @@
 <!--Notifications-->
 <div class="container-fluid" ng-controller="NotificationCtrl as m">
     <div class="row">
-        <div class="alert alert-danger text-center notification hidden" role="alert" ng-show="m.error.show">
+        <div class="alert alert-danger text-center notification" role="alert" ng-show="m.error.show" ng-cloak>
             <button type="button" class="close" ng-click="m.hide()">
                 <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
             </button>
@@ -140,6 +140,7 @@
 <script src="/js/services/backend.svc.js"></script>
 <script src="/js/services/storage.svc.js"></script>
 <script src="/js/directives/input-match.js"></script>
+<script src="/js/directives/input-validate.js"></script>
 <script src="/js/directives/header-menu.js"></script>
 <script src="/js/directives/tooltip.js"></script>
 <script src="/js/directives/dialog.js"></script>

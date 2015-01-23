@@ -9,26 +9,35 @@
             <th ng-repeat="col in view.columns"
                     ng-class="view.runtimeColClass(col)"
                     ng-show="::col.visible"
-                    ng-click="view.sortBy(col)"
+                    ng-click="!col.edited && view.sortBy(col)"
                     >
                 <div ng-if="!col.editable">{{ col.model.value }}</div>
 
-                <div ng-if="col.editable">
+                <div ng-if="col.editable"
+                        ng-init="validateFn = view.validateColumnCell(col)"
+                        ><!--Bind col to prevent infinite $digest-->
                     <a href tabindex="-1"
                             ng-show="!col.edited"
                             ng-click="col.edited = true; $event.stopPropagation()"
                             >{{ col.model.field }}</a>
-
                     <input type="text" tabindex="-1" class="form-control cell-input"
                             name="{{::col.model.id}}"
-                            ng-attr-placeholder="{{col.placeholder}}"
                             ng-show="col.edited"
                             ng-model="col.model.value"
                             ng-blur="onColBlur(col)"
-                            ng-keydown="onColKeydown($event)"
+                            ng-keydown="onColKeydown(col, $event)"
                             ps-focus-on="col.edited === true"
                             ps-select="true"
+                            ng-attr-placeholder="{{::col.placeholder}}"
+
+                            ps-input-validate="validateFn"
+                            ps-allow-empty="col.last"
+                            ng-required="!col.last"
                             />
+                    <span class="col-warn hint hint-bottom" ng-messages="getInput(col).$error" ng-class="{show: getInput(col).$dirty}">
+                        <span ng-message="inputValidate">Must be unique!</span>
+                        <span ng-message="required">Not empty please!</span>
+                    </span>
                 </div>
             </th>
         </tr>

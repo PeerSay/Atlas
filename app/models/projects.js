@@ -57,7 +57,7 @@ var projectSchema = new Schema({
             priority: { type: String },
             vendors: [
                 {
-                    title: { type: String },
+                    title: { type: String, required: true },
                     value: { type: String } // TODO - better name, other fields
                 }
             ]

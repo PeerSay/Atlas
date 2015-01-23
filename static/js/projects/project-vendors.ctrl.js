@@ -144,30 +144,37 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         setContext: function (context) {
             this.context = context;
         },
-        addProduct: menuAddProduct,
-        removeProduct: menuRemoveProduct
+        enabled: menuItemEnabled,
+        doAction: menuDoAction
     };
     m.fullTableView.menu = m.menu; // expose to Table directive
 
-    function menuAddProduct() {
-        var addCol = $.map(this.view.columns, function (col) {
-            return col.addNew ? col : null
-        })[0];
-        if (addCol) {
-            addCol.edit.show = true; // invite to edit
-        }
-    }
+    function menuDoAction(action) {
+        if (!this.enabled(action)) { return; }
 
-    function menuRemoveProduct() {
         var view = this.view;
         var cell = this.context.cell;
 
-        // delay to allow context-menu event handler to close menu,
-        // otherwise it remains open
         $timeout(function () {
-            view.removeColumn(cell.model);
+            if (action === 'remove') {
+                view.removeColumn(cell.model);
+            }
+            else {
+                inviteToEdit(view);
+            }
         }, 0, false);
     }
+
+    function menuItemEnabled(item) {
+        return true;
+    }
+
+    function inviteToEdit(view) {
+        var addCol = view.columns[view.columns.length - 1]; //last
+        addCol.edited = true; // invite to edit
+    }
+
+
 
     /////////////////////////////
 
@@ -195,7 +202,9 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
     }
 
     function onFullView() {
-        //console.log('>> onFullView');
-        //TODO - invite to edit new Product if table is empty
+        var view = m.fullTableView;
+        if (view.rows.length === 1 &&  view.columns.length === 3) {
+            inviteToEdit(view);
+        }
     }
 }

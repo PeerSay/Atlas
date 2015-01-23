@@ -284,6 +284,12 @@ body {
       &.attention, .attention {
         font-style: italic;
         color: #999;
+        .clickable {
+          cursor: pointer;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
     }
     .ng-table-group td {

@@ -35,25 +35,28 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
 
     function toNormViewData() {
         var groupBy = m.groupBy.get();
-        var model = TableModel.selectColumns([{ field: 'name' }, {field: groupBy}]);
+        var model = TableModel.selectColumns([
+            { field: 'name' },
+            {field: groupBy}
+        ]);
         var data = {
             columns: [],
             rows: []
         };
         // todo - in future:
         /*var data2 = TableModel.select([
-            {
-                selector: { field: 'name' },
-                props: {
-                    visible: true
-                }
-            }, {
-                selector: {field: groupBy},
-                props: {
-                    visible: false
-                }
-            }
-        ]);*/
+         {
+         selector: { field: 'name' },
+         props: {
+         visible: true
+         }
+         }, {
+         selector: {field: groupBy},
+         props: {
+         visible: false
+         }
+         }
+         ]);*/
 
         // Columns: Criteria, [Topic|Priority](hidden - need for grouping)
         angular.forEach(model.columns, function (col) {
@@ -85,7 +88,10 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
 
     function toFullViewData() {
         var model = TableModel.selectColumns([
-            { field: 'name' }, {field: 'description'}, {field: 'group'}, {field: 'priority'}
+            { field: 'name' },
+            {field: 'description'},
+            {field: 'group'},
+            {field: 'priority'}
         ]);
         var data = {
             columns: [],
@@ -118,8 +124,10 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
                     model: cell,
                     visible: data.columns[i].visible,
                     editable: filter(/name|description/)(cell.field),
-                    type: cellType(cell.field)
+                    type: cellType(cell.field),
+                    justAdded: cell.justAdded
                 });
+                delete cell.justAdded;
             });
             // last row -- popoup
             resRow.push({
@@ -168,27 +176,35 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         setContext: function (context) {
             this.context = context;
         },
-        addCriteriaLike: menuAddCriteriaLike,
-        removeCriteria: menuRemoveCriteria
+        enabled: menuItemEnabled,
+        doAction: menuDoAction
     };
     m.fullTableView.menu = m.menu; // expose to Table directive
 
-    function menuAddCriteriaLike() {
+    function menuDoAction(action) {
+        if (!this.enabled(action)) { return; }
+
         var view = this.view;
         var cell = this.context.cell;
 
+        // delay to allow context-menu event handler to close menu,
+        // otherwise it remains open
         $timeout(function () {
-            view.addRowLike(cell.model);
+            if (action === 'remove') {
+                view.removeRow(cell.model);
+            }
+            else if (action === 'add') {
+                view.addRowLike(cell.model);
+            }
         }, 0, false);
+
     }
 
-    function menuRemoveCriteria() {
-        var view = this.view;
-        var cell = this.context.cell;
-
-        $timeout(function () {
-            view.removeRow(cell.model);
-        }, 0, false);
+    function menuItemEnabled(item) {
+        if (item === 'remove') {
+            return (this.view.rows <= 1);
+        }
+        return true;
     }
 
 
@@ -214,7 +230,9 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
     }
 
     function onFullView() {
-        //console.log('>> onFullView');
-        //TODO - autoFocus();
+        var rows = m.fullTableView.rows;
+        if (rows.length === 1) {
+            rows[0][0].justAdded = 1;
+        }
     }
 }

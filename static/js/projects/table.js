@@ -122,6 +122,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         V.removeRow = removeRow;
         V.addRowLike = addRowLike;
         V.addRowOnTab = addRowOnTab;
+        V.addEmptyRow = addEmptyRow;
         // Popover
         V.popoverOn = null;
         V.topic = {
@@ -235,7 +236,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
             var reverse = (orderBy[field] === 'desc');
             var groupBy = svc.groupBy.get();
             var sortArr = groupBy ? [sortFn(groupBy), sortFn(field)] : sortFn(field);
-            console.log('Sorting [%s] view [%s] by', name, orderBy[field], [groupBy, field]);
+            //console.log('Sorting [%s] view [%s] by', name, orderBy[field], [groupBy, field]);
 
             return $filter('orderBy')(arr, sortArr, reverse);
 
@@ -363,11 +364,17 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
                 if (!nextRow) {
                     var res = TableModel.addRowLike(model);
                     svc.patchCriteria(projectId, res.patches);
-                    reloadUnsorted();
+                    svc.reload();
                     added = true;
                 }
             }
             return added;
+        }
+
+        function addEmptyRow() {
+            var res = TableModel.addRowLike(null);
+            svc.patchCriteria(projectId, res.patches);
+            svc.reload();
         }
 
         function getAlikePredicate(model) {

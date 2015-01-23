@@ -65,10 +65,13 @@ function TableModel() {
         return model;
     }
 
-    function buildRow(crit, idx) {
+    function buildRow(crit, idx, justAdded) {
         var row = [];
         angular.forEach(M.model.columns, function (col) {
             var cell = buildCell(col, row, idx, crit);
+            if (justAdded && cell.field === 'name') {
+                cell.justAdded = true;
+            }
             row.push(cell);
         });
         return row;
@@ -313,10 +316,8 @@ function TableModel() {
     }
 
     function addRowLike(cell) {
-        var rowIdx = cell.rowIdx();
-        var row = M.model.rows[rowIdx];
-        var newIdx = rowIdx + 1;
-        var criteria = getCriteriaLike(row[0].criteria);
+        var newIdx = cell ? cell.rowIdx() + 1 : 0;
+        var criteria = getCriteriaLike(cell ? cell.criteria : null);
         var patches = [];
 
         // Make patch
@@ -329,7 +330,7 @@ function TableModel() {
 
         // Update model
         criteria._vendorsIndex = {};
-        var newRow = buildRow(criteria, newIdx);
+        var newRow = buildRow(criteria, newIdx, true);
         M.model.rows.splice(newIdx, 0, newRow);
 
         return {

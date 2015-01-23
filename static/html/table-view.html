@@ -75,9 +75,8 @@
                             ng-focus="onCellFocus(cell)"
                             ng-blur="onCellBlur(cell)"
                             ng-keydown="onCellKeydown(cell, $event)"
-                            ps-focus-on="false"
+                            ps-focus-on="cell.justAdded"
                             ></textarea>
-                    <!--TODO: focusing-->
                 </div>
                 <div ng-if="cell.type === 'popup'">
                     <ps-table-popover
@@ -132,7 +131,10 @@
         </tbody>
         <!--Empty table row -->
         <tr ng-show="!view.rows.length">
-            <td class="attention">Click to add</td>
+            <td class="attention">
+                <span class="clickable"
+                        ng-click="view.addEmptyRow()">Click to add</span>
+            </td>
         </tr>
     </table>
 </ng-form>

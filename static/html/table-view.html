@@ -52,11 +52,10 @@
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <!--<td>{{ row | json }}</td>-->
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
-                    class="editable"
-                    ng-class="view.cellClass(cell)"
+                    class="cell {{::cell.type}}"
+                    ng-class="{ 'edited': cell.edited }"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">

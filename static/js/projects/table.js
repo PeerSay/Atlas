@@ -113,7 +113,6 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         V.columns = [];
         V.rows = [];
         V.runtimeColClass = runtimeColClass;
-        V.cellClass = cellClass;
         //Edit
         V.validateColumnCell = validateColumnCell;
         V.saveColumnCell = saveColumnCell;
@@ -264,16 +263,6 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
                 'edited': edited,
                 'last': col.last && !edited
             };
-        }
-
-        function cellClass(cell) {
-            var res = {
-                edited: cell.edited
-            };
-            if (cell.type) {
-                res[cell.type] = true;
-            }
-            return res;
         }
 
         // Popover

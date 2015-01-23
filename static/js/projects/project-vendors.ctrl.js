@@ -166,26 +166,28 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
     }
 
     function menuItemEnabled(item) {
+        var cell = this.context && this.context.cell;
+        if (!cell) { return true; }
+
+        if (item === 'remove') {
+            if (!(cell.model.column && cell.model.column.vendor)) {
+                // disable remove on non-vendor columns
+                return false;
+            }
+        }
         return true;
     }
 
     function inviteToEdit(view) {
-        var addCol = view.columns[view.columns.length - 1]; //last
+        var addCol = view.columns[view.columns.length - 1]; //last is addNew
         addCol.edited = true; // invite to edit
     }
-
 
 
     /////////////////////////////
 
     //TODO:
     //m.savingData = false; // show indicator
-
-    // Handle popover
-    //m.popoverOn = null;
-
-    // Editing cells
-    //m.criteriaKeyPressed = criteriaKeyPressed;
 
     activate();
 

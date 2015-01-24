@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectVendorsCtrl', ProjectVendorsCtrl);
 
-ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel'];
-function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
+ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel', 'Util'];
+function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -41,7 +41,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         };
 
         // Columns: Prod1, [Prod2, Prod3] | Products?
-        angular.forEach(vendors.columns, function (col) {
+        _.forEach(vendors.columns, function (col) {
             data.columns.push({
                 model: col,
                 visible: true,
@@ -50,7 +50,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
             })
         });
         // add grouping column
-        angular.forEach(group.columns, function (col) {
+        _.forEach(group.columns, function (col) {
             data.columns.push({
                 model: col,
                 visible: false,
@@ -67,10 +67,10 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         });
 
         // Rows
-        angular.forEach(vendors.rows, function (row, i) {
+        _.forEach(vendors.rows, function (row, i) {
             var fullRow = [].concat(row, group.rows[i]);
             var resRow = [];
-            angular.forEach(fullRow, function (cell, j) {
+            _.forEach(fullRow, function (cell, j) {
                 resRow.push({
                     model: cell,
                     visible: data.columns[j].visible,
@@ -93,7 +93,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         };
 
         // Columns: Criteria, {Group}(hidden), Prod1, [Prod2, Prod3], {AddNew}
-        angular.forEach(model.columns, function (col) {
+        _.forEach(model.columns, function (col) {
             data.columns.push({
                 model: col,
                 visible: (col.field !== groupBy),
@@ -112,9 +112,9 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         });
 
         //Rows
-        angular.forEach(model.rows, function (row) {
+        _.forEach(model.rows, function (row) {
             var resRow = [];
-            angular.forEach(row, function (cell, i) {
+            _.forEach(row, function (cell, i) {
                 resRow.push({
                     model: cell,
                     visible: data.columns[i].visible,

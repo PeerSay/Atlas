@@ -4,8 +4,8 @@ angular.module('peersay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
 
-ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Projects', 'Tiles'];
-function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
+ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Tiles', 'Util'];
+function ProjectDetailsCtrl($scope, $routeParams, Tiles, _) {
     var m = this;
 
     m.projectId = $routeParams.projectId;
@@ -47,7 +47,7 @@ function ProjectDetailsCtrl($scope, $routeParams, Projects, Tiles) {
         var value = tile.progress.value;
         var total = tile.progress.total;
         var part = value / total * 100;
-        var in_range = $.map([0, 20, 40, 60, 80, 100], function (v) {
+        var in_range = _.map([0, 20, 40, 60, 80, 100], function (v) {
             if (part <= v) { return v; }
             return null;
         })[0];

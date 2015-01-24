@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel'];
-function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel', 'Util'];
+function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -59,7 +59,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
          ]);*/
 
         // Columns: Criteria, [Topic|Priority](hidden - need for grouping)
-        angular.forEach(model.columns, function (col) {
+        _.forEach(model.columns, function (col) {
             data.columns.push({
                 model: col,
                 visible: (col.field === 'name'),
@@ -69,9 +69,9 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         });
 
         //Rows
-        angular.forEach(model.rows, function (row) {
+        _.forEach(model.rows, function (row) {
             var resRow = [];
-            angular.forEach(row, function (cell, i) {
+            _.forEach(row, function (cell, i) {
                 resRow.push({
                     model: cell,
                     visible: data.columns[i].visible,
@@ -99,7 +99,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         };
 
         // Columns: Criteria, Description, [Topic, Priority], <empty>
-        angular.forEach(model.columns, function (col) {
+        _.forEach(model.columns, function (col) {
             data.columns.push({
                 model: col,
                 visible: isVisibleCol(col),
@@ -117,9 +117,9 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
         });
 
         //Rows
-        angular.forEach(model.rows, function (row) {
+        _.forEach(model.rows, function (row) {
             var resRow = [];
-            angular.forEach(row, function (cell, i) {
+            _.forEach(row, function (cell, i) {
                 resRow.push({
                     model: cell,
                     visible: data.columns[i].visible,
@@ -202,7 +202,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel) {
 
     function menuItemEnabled(item) {
         if (item === 'remove') {
-            return (this.view.rows <= 1);
+            return (this.view.rows.length > 1);
         }
         return true;
     }

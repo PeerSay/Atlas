@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('Table', Table);
 
-Table.$inject = ['$rootScope', '$filter', 'ngTableParams', 'Backend', 'TableModel'];
-function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
+Table.$inject = ['$rootScope', '$filter', 'ngTableParams', 'Backend', 'TableModel', 'Util'];
+function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     var T = {};
     var views = {};
     var model = {};
@@ -55,6 +55,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
      */
     function addVIew(ctrl, name, toViewData) {
         views[name] = {
+            //toData: _.timeIt('toData-' + name, toViewData, 1000)
             toData: toViewData
         };
         return TableView(ctrl, name, T);
@@ -113,6 +114,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         V.columns = [];
         V.rows = [];
         V.runtimeColClass = runtimeColClass;
+        //V.sort = _.timeIt('sort', sort, 1000);
+        V.sort = sort;
         //Edit
         V.validateColumnCell = validateColumnCell;
         V.saveColumnCell = saveColumnCell;
@@ -172,7 +175,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
         function getData($defer) {
             svc.toData(projectId, name)
                 .then(function (data) {
-                    var rows = sort(data.rows);
+                    var rows = V.sort(data.rows);
 
                     V.columns = data.columns;
                     V.rows = rows; // TODO - revise
@@ -193,7 +196,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
 
         function group(row) {
             var cur = svc.groupBy.get();
-            var found = $.map(row, function (cell) {
+            var found = _.map(row, function (cell) {
                 var model = cell.model;
                 return (model.field === cur) ? model.value : null
             });
@@ -242,7 +245,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
             function sortFn(field) {
                 return function (row) {
                     // TODO - perf
-                    var model = $.map(row, function (cell) {
+                    var model = _.map(row, function (cell) {
                         return (cell.model.field == field) ? cell.model : null
                     })[0];
                     return model ? model.value : ''; // some views may have no sorted fields
@@ -341,7 +344,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
 
             var res = TableModel.addRowLike(prevModel);
             svc.patchCriteria(projectId, res.patches);
-            reloadUnsorted();
+            svc.reload();
         }
 
         function addRowOnTab(model) {
@@ -373,14 +376,6 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel) {
                 value: model.criteria[groupedBy] // No vendors!
             };
             return predicate;
-        }
-
-        function reloadUnsorted() {
-            var sortBy = svc.sortBy.get();
-            svc.sortBy.set({}); // causes reload only if sorted already
-            if (!Object.keys(sortBy).length) {
-                svc.reload();
-            }
         }
 
         return V;

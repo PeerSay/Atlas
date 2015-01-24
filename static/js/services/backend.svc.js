@@ -10,8 +10,8 @@ angular.module('peersay')
 // patch →  PATCH   /collection/id
 // delete → DELETE  /collection/id
 
-Backend.$inject = ['$http', '$q', 'Notification'];
-function Backend($http, $q, Notification) {
+Backend.$inject = ['$http', '$q', 'Notification', 'Util'];
+function Backend($http, $q, Notification, _) {
     var B = {
         // Middleware
         use: use,
@@ -89,7 +89,7 @@ function Backend($http, $q, Notification) {
 
     function getTransform(key) {
         return function (data) {
-            var mw = $.map(middleware, function (m) {
+            var mw = _.map(middleware, function (m) {
                 return m.re.test(key) ? m : null;
             })[0];
 

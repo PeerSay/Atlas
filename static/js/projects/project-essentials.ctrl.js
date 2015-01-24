@@ -3,8 +3,8 @@
 angular.module('peersay')
     .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
 
-ProjectEssentialsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'Projects'];
-function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
+ProjectEssentialsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'Projects', 'Util'];
+function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -32,7 +32,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     function activate() {
         Projects.readProject(m.projectId)
             .then(function (project) {
-                angular.forEach(m.fields, function (fld, key) {
+                _.forEach(m.fields, function (fld, key) {
                     // ensure missing fields are added to Projects obj
                     m.fields[key] = project[key] = project[key] || missingField(key);
                 });
@@ -62,7 +62,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects) {
     function getProgress(fields) {
         var progress = { value: 0, total: 0 };
 
-        angular.forEach(fields, function (fld) {
+        _.forEach(fields, function (fld) {
             progress.total++;
             if (m.fields[fld].status === 'ok') {
                 progress.value++;

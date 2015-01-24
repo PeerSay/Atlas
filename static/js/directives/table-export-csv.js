@@ -7,8 +7,8 @@ angular
     .directive('psExportCsv', psExportCsv);
 
 
-psExportCsv.$inject = ['$parse'];
-function psExportCsv($parse) {
+psExportCsv.$inject = ['$parse', 'Util'];
+function psExportCsv($parse, _) {
     return {
         restrict: 'A',
         scope: false,
@@ -30,15 +30,15 @@ function psExportCsv($parse) {
                 generate: function() {
                     //prepare data
                     values = [titles];
-                    angular.forEach(scope.cm.criteria, function (o) {
+                    _.forEach(scope.cm.criteria, function (o) {
                         values.push([o.name, o.description, o.group, o.priority]);
                     });
                     //console.log('>>values', values);
 
                     //convert to cvs
                     data = '';
-                    angular.forEach(values, function (row) {
-                        angular.forEach(row, function (val, j) {
+                    _.forEach(values, function (row) {
+                        _.forEach(row, function (val, j) {
                             var txt = (val === null) ? '' : val.toString();
                             var result = csv.stringify(txt);
                             if (j > 0) {

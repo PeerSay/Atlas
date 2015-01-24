@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('TableModel', TableModel);
 
-TableModel.$inject = [];
-function TableModel() {
+TableModel.$inject = ['Util'];
+function TableModel(_) {
     var M = {};
     var model = M.model = {
         columns: [],
@@ -54,7 +54,7 @@ function TableModel() {
 
         // Rows
         var rows = [];
-        angular.forEach(data, function (crit, i) {
+        _.forEach(data, function (crit, i) {
             var row = buildRow(crit, i);
             rows.push(row);
         });
@@ -67,7 +67,7 @@ function TableModel() {
 
     function buildRow(crit, idx, justAdded) {
         var row = [];
-        angular.forEach(M.model.columns, function (col) {
+        _.forEach(M.model.columns, function (col) {
             var cell = buildCell(col, row, idx, crit);
             if (justAdded && cell.field === 'name') {
                 cell.justAdded = true;
@@ -131,11 +131,11 @@ function TableModel() {
         //
         var allVendors = [];
         var allIndex = {};
-        angular.forEach(criteriaArr, function (crit) {
+        _.forEach(criteriaArr, function (crit) {
             crit.vendors = crit.vendors || [];
             crit._vendorsIndex = {};
 
-            angular.forEach(crit.vendors, function (vendor) {
+            _.forEach(crit.vendors, function (vendor) {
                 var key = vendor.title; // must be unique!
                 crit._vendorsIndex[key] = vendor;
 
@@ -161,7 +161,7 @@ function TableModel() {
         ]);
         var topics = [null];
         var found = {};
-        angular.forEach(topicModel.rows, function (row) {
+        _.forEach(topicModel.rows, function (row) {
             var topic = row[0].value; // topic cell is the only due to select
             if (topic && !found[topic]) {
                 found[topic] = true;
@@ -185,9 +185,9 @@ function TableModel() {
         };
         var test = function (col) {
             var res = false;
-            angular.forEach(predicate, function (obj) {
+            _.forEach(predicate, function (obj) {
                 var match = false;
-                angular.forEach(obj, function (v, k) {
+                _.forEach(obj, function (v, k) {
                     //console.log('>>> match k,v,col=', k, v, col);
                     return (match = (col[k] === v));
                 });
@@ -199,7 +199,7 @@ function TableModel() {
         };
         var colIdx = {};
 
-        angular.forEach(model.columns, function (col) {
+        _.forEach(model.columns, function (col) {
             if (test(col)) {
                 res.columns.push(col);
             }
@@ -210,13 +210,13 @@ function TableModel() {
         }
 
         // index
-        angular.forEach(res.columns, function (col) {
+        _.forEach(res.columns, function (col) {
             colIdx[col.field] = col; // unique!
         });
 
-        angular.forEach(model.rows, function (row) {
+        _.forEach(model.rows, function (row) {
             var selRow = [];
-            angular.forEach(row, function (cell) {
+            _.forEach(row, function (cell) {
                 var col = cell.column;
                 if (colIdx[col.field] === col) {
                     selRow.push(cell);
@@ -243,7 +243,7 @@ function TableModel() {
 
     function isUniqueCol(column, newValue) {
         var res = true;
-        angular.forEach(model.columns, function (col) {
+        _.forEach(model.columns, function (col) {
             if (!col.vendor || col === column) { return; }
 
             if (col.field === newValue) {
@@ -375,7 +375,7 @@ function TableModel() {
         var key = col.field;
         var patches = [];
 
-        angular.forEach(M.model.rows, function (row, i) {
+        _.forEach(M.model.rows, function (row, i) {
             var crit = row[0].criteria;
             var vendor = crit._vendorsIndex[key];
             var vendorIdx = crit.vendors.indexOf(vendor);
@@ -428,7 +428,7 @@ function TableModel() {
         };
         M.model.columns.push(col);
 
-        angular.forEach(M.model.rows, function (row, i) {
+        _.forEach(M.model.rows, function (row, i) {
             var cell = buildCell(col, row, i, criteria);
             row.push(cell)
         });
@@ -446,7 +446,7 @@ function TableModel() {
         var colIdx = M.model.columns.indexOf(col);
 
         // update model & build patch
-        angular.forEach(M.model.rows, function (row, i) {
+        _.forEach(M.model.rows, function (row, i) {
             var crit = row[0].criteria;
             var vendor = crit._vendorsIndex[key];
             var vendorIdx = crit.vendors.indexOf(vendor);

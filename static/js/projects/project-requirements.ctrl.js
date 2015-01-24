@@ -90,7 +90,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
         var model = TableModel.selectColumns([
             { field: 'name' },
             {field: 'description'},
-            {field: 'group'},
+            {field: 'topic'},
             {field: 'priority'}
         ]);
         var data = {
@@ -133,7 +133,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
             resRow.push({
                 model: {}, // not used view, but accessed by groupBy()
                 models: { //edits 2 models
-                    group: row[2],
+                    topic: row[2],
                     priority: row[3]
                 },
                 visible: true,
@@ -148,14 +148,14 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
 
         function isVisibleCol(col) {
             if (!m.compactTable) { return true; }
-            return !filter(/group|priority/)(col.field); // hide group/priority in compact view
+            return !filter(/topic|priority/)(col.field); // hide topic/priority in compact view
         }
 
         function cellType(val) {
             if (filter(/name|description/)(val)) {
                 return 'multiline';
             }
-            if (filter(/group|priority/)(val)) {
+            if (filter(/topic|priority/)(val)) {
                 return 'static';
             }
         }
@@ -212,7 +212,6 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
 
     // TODO
     //m.savingData = false;
-    //m.groupBy = 'group'; -> Topic
     //m.groupByTitle = groupByTitle; -> Uppercase
 
     activate();

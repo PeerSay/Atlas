@@ -20,8 +20,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         }
     };
     var groupBy = {
-        options: [null, 'group', 'priority'],
-        current: 'group',
+        options: [null, 'topic', 'priority'],
+        current: 'topic',
         get: function () {
             return this.current;
         },
@@ -31,10 +31,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             $rootScope.$emit('grouping', prop);
         },
         displayName: function (prop) {
-            var name = {
-                'null': 'none',
-                'group': 'topic'
-            }[prop] || prop;
+            var name = prop || 'none';
             return $filter('capitalize')(name);
         }
     };

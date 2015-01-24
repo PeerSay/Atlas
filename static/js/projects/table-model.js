@@ -30,24 +30,20 @@ function TableModel(_) {
 
     function buildModel(data) {
         // Server data format:
-        // [{
-        //  name: '',
-        //  description: '',
-        //  group: '', // TODO: topic
-        //  description: '',
-        //  vendors: [
-        //   { title: '', value: '', ??? },
-        //   ...
-        //  ]
-        // },
-        // ...
+        // [
+        //  { name: '', description: '', topic: '', priority: '', vendors: [
+        //    { title: '', value: '', ??? },
+        //    ...
+        //   ]
+        //  },
+        //  ...
         // ]
 
         // Columns
         var columns = [
             {field: 'name', value: 'Criteria'},
             {field: 'description', value: 'Description'},
-            {field: 'group', value: 'Topic'},
+            {field: 'topic', value: 'Topic'},
             {field: 'priority', value: 'Priority'}
         ];
         model.columns = columns.concat(indexVendors(data));
@@ -157,7 +153,7 @@ function TableModel(_) {
     function findTopics() {
         // TODO -- order of topics changes on cell.save() - as it's in column order (kinda bad)
         var topicModel = selectColumns([
-            { field: 'group'}
+            { field: 'topic' }
         ]);
         var topics = [null];
         var found = {};
@@ -270,7 +266,7 @@ function TableModel(_) {
             console.log('Save non-vendor cell patch:', JSON.stringify(patches));
 
             // Update model - only when grouping can change
-            if (/group|priority/.test(cell.field)) {
+            if (/topic|priority/.test(cell.field)) {
                 needReload = true;
                 M.topics.rebuild();
             }
@@ -343,7 +339,7 @@ function TableModel(_) {
         return {
             name: '',
             description: '',
-            group: crit ? crit.group : null,
+            topic: crit ? crit.topic : null,
             priority: crit ? crit.priority : 'required',
             vendors: []
         };

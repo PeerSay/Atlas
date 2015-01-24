@@ -31,7 +31,7 @@ function psExportCsv($parse, _) {
                     //prepare data
                     values = [titles];
                     _.forEach(scope.cm.criteria, function (o) {
-                        values.push([o.name, o.description, o.group, o.priority]);
+                        values.push([o.name, o.description, o.topic, o.priority]);
                     });
                     //console.log('>>values', values);
 

@@ -103,9 +103,9 @@
                                 <div class="list-group">
                                     <a href class="list-group-item"
                                             ng-repeat="topic in view.topic.options.all"
-                                            ng-init="active = (topic === cell.models.group.value)"
+                                            ng-init="active = (topic === cell.models.topic.value)"
                                             ng-class="{'active': active}"
-                                            ng-click="cell.models.group.value = topic; view.saveCell(cell.models.group);">
+                                            ng-click="cell.models.topic.value = topic; view.saveCell(cell.models.topic);">
                                         <span class="glyphicon glyphicon-ok" ng-show="active"></span>
                                         {{topic || 'None'}}
                                     </a>
@@ -116,7 +116,7 @@
                                                 ng-model="view.topic.addNew.value"
                                                 ng-show="view.topic.addNew.show"
                                                 ps-focus-on="view.topic.addNew.show"
-                                                ng-keydown="view.topic.keyPressed(cell.models.group, $event)"
+                                                ng-keydown="view.topic.keyPressed(cell.models.topic, $event)"
                                                 ng-blur="view.topic.doneEdit()">
                                     </a>
                                 </div>

@@ -53,7 +53,7 @@ var projectSchema = new Schema({
         {
             name: { type: String },
             description: {type: String },
-            group: { type: String },
+            topic: { type: String },
             priority: { type: String },
             vendors: [
                 {

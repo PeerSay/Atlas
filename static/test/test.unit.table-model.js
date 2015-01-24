@@ -1,5 +1,13 @@
 /*global describe:true, it:true, inject:true */
 
+// PhantomJS doesn't support bind yet
+Function.prototype.bind = Function.prototype.bind || function (thisp) {
+    var fn = this;
+    return function () {
+        return fn.apply(thisp, arguments);
+    };
+};
+
 describe.only('TableModel', function () {
     var TableModel;
     beforeEach(function () {
@@ -23,7 +31,7 @@ describe.only('TableModel', function () {
 
         it('should build vendor column', function () {
             var data = [
-                { name: '', description: '', group: null, priority: 'required', vendors: [
+                { name: '', description: '', topic: null, priority: 'required', vendors: [
                     { title: 'IBM', value: 'str' }
                 ] }
             ];
@@ -36,12 +44,12 @@ describe.only('TableModel', function () {
 
         it('should build single vendor column from 2 criteria', function () {
             var data = [
-                { name: '', description: '', group: null, priority: 'required',
+                { name: '', description: '', topic: null, priority: 'required',
                     vendors: [
                         { title: 'IBM', value: 'str' }
                     ]
                 },
-                { name: '', description: '', group: null, priority: 'required',
+                { name: '', description: '', topic: null, priority: 'required',
                     vendors: [
                         { title: 'IBM', value: 'str2' }
                     ]
@@ -55,10 +63,10 @@ describe.only('TableModel', function () {
 
         it('should build rows', function () {
             var data = [
-                { name: 'xyz', description: '', group: null, priority: 'required', vendors: [
+                { name: 'xyz', description: '', topic: null, priority: 'required', vendors: [
                     { title: 'IBM', value: 'str' }
                 ] },
-                { name: 'abc', description: '', group: null, priority: 'required', vendors: [] }
+                { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
             ];
             var model = TableModel.buildModel(data);
 
@@ -66,22 +74,22 @@ describe.only('TableModel', function () {
             model.rows[0].should.have.length(model.columns.length); // same length as columns
             model.rows[0][0].should.have.property('id').equal('name_0');
             model.rows[0][0].should.have.property('value').equal('xyz');
-            model.rows[0][0].should.have.property('path').equal('/criteria/0/name');
+            model.rows[0][0].patch.should.have.property('path').equal('/criteria/0/name');
             // existing vendor
             model.rows[0][4].should.have.property('id').equal('IBM_0');
             model.rows[0][4].should.have.property('value').equal('str');
-            model.rows[0][4].should.have.property('path').equal('/criteria/0/vendors/0/value');
+            model.rows[0][4].patch.should.have.property('path').equal('/criteria/0/vendors/0/value');
             // non-existing vendor
             model.rows[1][4].should.have.property('id').equal('IBM_1');
             model.rows[1][4].should.have.property('value').equal('');
-            model.rows[1][4].should.have.property('path').equal('/criteria/1/vendors/-');
+            model.rows[1][4].patch.should.have.property('path').equal('/criteria/1/vendors/-');
         });
     });
 
     describe('Select', function () {
         it('should build select static columns', function () {
             var data = [
-                { name: 'abc', description: '', group: null, priority: 'required', vendors: [] }
+                { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
             ];
             TableModel.buildModel(data);
             var sel = TableModel.selectColumns([{ field: 'name' }]);
@@ -90,7 +98,7 @@ describe.only('TableModel', function () {
             sel.rows.should.have.length(data.length);
             sel.rows[0].should.have.length(1);
 
-            var sel2 = TableModel.selectColumns([{ field: 'name' }, {field: 'description'}, {field: 'group'}]);
+            var sel2 = TableModel.selectColumns([{ field: 'name' }, {field: 'description'}, {field: 'topic'}]);
 
             sel2.columns.should.have.length(3);
             sel2.rows.should.have.length(data.length);
@@ -99,7 +107,7 @@ describe.only('TableModel', function () {
 
         it('should build select all/some vendor columns', function () {
             var data = [
-                { name: 'abc', description: '', group: null, priority: 'required', vendors: [
+                { name: 'abc', description: '', topic: null, priority: 'required', vendors: [
                     {title: 'IBM', value: 1},
                     {title: 'XP', value: 2},
                     {title: 'PS', value: 3}
@@ -129,8 +137,8 @@ describe.only('TableModel', function () {
     describe('Traversing', function () {
         it('cell should rowIdx for traversal', function () {
             var data = [
-                { name: '', description: '', group: null, priority: 'required', vendors: [] },
-                { name: '', description: '', group: null, priority: 'required', vendors: [] }
+                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
+                { name: '', description: '', topic: null, priority: 'required', vendors: [] }
             ];
             var model = TableModel.buildModel(data);
             var row0 = model.rows[0];
@@ -141,8 +149,8 @@ describe.only('TableModel', function () {
 
         it('should traverse rows via cell obj', function () {
             var data = [
-                { name: '', description: '', group: null, priority: 'required', vendors: [] },
-                { name: '', description: '', group: null, priority: 'required', vendors: [] }
+                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
+                { name: '', description: '', topic: null, priority: 'required', vendors: [] }
             ];
             var model = TableModel.buildModel(data);
             var row0 = model.rows[0];
@@ -159,9 +167,9 @@ describe.only('TableModel', function () {
 
         it('should traverse rows with predicate', function () {
             var data = [
-                { name: '', description: '', group: null, priority: 'required', vendors: [] },
-                { name: '', description: '', group: null, priority: 'required', vendors: [] },
-                { name: '', description: '', group: null, priority: 'optional', vendors: [] }
+                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
+                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
+                { name: '', description: '', topic: null, priority: 'optional', vendors: [] }
             ];
             var model = TableModel.buildModel(data);
             var row0 = model.rows[0];
@@ -182,8 +190,8 @@ describe.only('TableModel', function () {
     describe('Edits', function () {
         it('should add row', function () {
             var data = [
-                { name: 'aaa', description: '', group: 'AAA', priority: 'required', vendors: [] },
-                { name: '', description: '', group: null, priority: 'optional', vendors: [] }
+                { name: 'aaa', description: '', topic: 'AAA', priority: 'required', vendors: [] },
+                { name: '', description: '', topic: null, priority: 'optional', vendors: [] }
             ];
             var model = TableModel.buildModel(data);
             var row0 = model.rows[0];
@@ -194,7 +202,7 @@ describe.only('TableModel', function () {
             TableModel.addRowLike(cell00);
             var newRow = model.rows[1];
             newRow[0].rowIdx().should.equal(1); // new row has correct idx
-            newRow[0].criteria.group.should.equal('AAA'); // new row inherits some props
+            newRow[0].criteria.topic.should.equal('AAA'); // new row inherits some props
             newRow[0].criteria.priority.should.equal('required');
             newRow[0].criteria.name.should.equal(''); // others are empty
 

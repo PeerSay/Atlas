@@ -56,7 +56,7 @@ function Util() {
 
 
     function getNow() {
-        return performance ? performance.now.bind(performance) :
+        return window.performance ? performance.now.bind(performance) :
             function () {
                 return +new Date;
             };

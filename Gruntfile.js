@@ -55,10 +55,10 @@ module.exports = function (grunt) {
                 },
                 files: ['Gruntfile.js', 'static/**/*.*']
             },
-            //karma: {
-            //    files: ['static/js/**/*.js', 'static/test/**/*.js'],
-            //    tasks: ['karma:unit:run']
-            //},
+            karma: {
+                files: ['static/js/**/*.js', 'static/test/**/*.js'],
+                tasks: ['karma:unit:run']
+            },
             css: {
                 files: ['static/css/**/*.less'],
                 tasks: ['less']
@@ -82,6 +82,7 @@ module.exports = function (grunt) {
             options: {
                 basePath: './static',
                 files: [
+                    'bower_components/jquery/dist/jquery.min.js',
                     'bower_components/angular/angular.js',
                     'bower_components/angular-route/angular-route.js',
                     'bower_components/angular-messages/angular-messages.js',
@@ -262,7 +263,9 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dev', [
         'less',
-        'watch'
+        'watch:assets',
+
+        'watch:css'
     ]);
 
     grunt.registerTask('karma-watch', [

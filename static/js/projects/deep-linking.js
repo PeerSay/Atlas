@@ -35,8 +35,8 @@ angular.module('peersay')
  *  DeepLinking.unload();
  */
 
-DeepLinking.$inject = ['$location', '$rootScope', 'Storage'];
-function DeepLinking($location, $rootScope, Storage) {
+DeepLinking.$inject = ['$location', '$rootScope', 'Storage', 'Util'];
+function DeepLinking($location, $rootScope, Storage, _) {
     var namespace, paths;
 
     $location.load = load;
@@ -67,7 +67,7 @@ function DeepLinking($location, $rootScope, Storage) {
         }
         //console.log('>> Loaded search for [%s]', namespace, search);
 
-        angular.forEach(paths, function (path) {
+        _.forEach(paths, function (path) {
             var val = search[path];
             val = val ? val.split(',') : [null];
 

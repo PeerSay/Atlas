@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('Tiles', Tiles);
 
-Tiles.$inject = ['$rootScope', 'DeepLinking'];
-function Tiles($rootScope, DeepLinking) {
+Tiles.$inject = ['$rootScope', 'DeepLinking', 'Util'];
+function Tiles($rootScope, DeepLinking, _) {
     var T = {};
 
     var tiles = [
@@ -104,12 +104,12 @@ function Tiles($rootScope, DeepLinking) {
         // Tiles deep-linking
         $rootScope.$on('replace:tile', function (evt, vals) {
             T.visible.tiles = [];
-            angular.forEach(vals, function (uri) {
+            _.forEach(vals, function (uri) {
                 if (uri) { addTile(uri); }
             });
         });
         $rootScope.$on('add:tile', function (evt, vals) {
-            angular.forEach(vals, function (uri) {
+            _.forEach(vals, function (uri) {
                 addTile(uri);
             });
         });
@@ -136,7 +136,7 @@ function Tiles($rootScope, DeepLinking) {
     }
 
     function load(nspace) {
-        angular.forEach(tiles, function (tile) {
+        _.forEach(tiles, function (tile) {
             tile.show = false;
             T.checklist.tiles.push(tile);
         });
@@ -151,14 +151,14 @@ function Tiles($rootScope, DeepLinking) {
     }
 
     function addTile(uri) {
-        var tile = findBy('uri')(tiles, uri)[0];
+        var tile = _.findWhere(tiles, { uri: uri });
 
         tile.show = true;
         T.visible.tiles.push(tile);
     }
 
     function removeTile(uri) {
-        var tile = findBy('uri')(tiles, uri)[0];
+        var tile = _.findWhere(tiles, { uri: uri });
         var idx = T.visible.tiles.indexOf(tile);
 
         tile.show = false;
@@ -198,20 +198,10 @@ function Tiles($rootScope, DeepLinking) {
         total.max = 0;
         total.current = 0;
 
-        angular.forEach(T.visible.tiles, function (tile) {
+        _.forEach(T.visible.tiles, function (tile) {
             total.max += tile.progress.total;
             total.current += tile.progress.value;
         });
-    }
-
-
-    // TODO: to util
-    function findBy(key) {
-        return function (arr, val) {
-            return $.map(arr, function (obj) {
-                return (obj[key] !== val) ? null : obj;
-            });
-        };
     }
 
     return T;

@@ -9,26 +9,35 @@
             <th ng-repeat="col in view.columns"
                     ng-class="view.runtimeColClass(col)"
                     ng-show="::col.visible"
-                    ng-click="view.sortBy(col)"
+                    ng-click="!col.edited && view.sortBy(col)"
                     >
                 <div ng-if="!col.editable">{{ col.model.value }}</div>
 
-                <div ng-if="col.editable">
+                <div ng-if="col.editable"
+                        ng-init="validateFn = view.validateColumnCell(col)"
+                        ><!--Bind col to prevent infinite $digest-->
                     <a href tabindex="-1"
                             ng-show="!col.edited"
                             ng-click="col.edited = true; $event.stopPropagation()"
                             >{{ col.model.field }}</a>
-
                     <input type="text" tabindex="-1" class="form-control cell-input"
                             name="{{::col.model.id}}"
-                            ng-attr-placeholder="{{col.placeholder}}"
                             ng-show="col.edited"
                             ng-model="col.model.value"
                             ng-blur="onColBlur(col)"
-                            ng-keydown="onColKeydown($event)"
+                            ng-keydown="onColKeydown(col, $event)"
                             ps-focus-on="col.edited === true"
                             ps-select="true"
+                            ng-attr-placeholder="{{::col.placeholder}}"
+
+                            ps-input-validate="validateFn"
+                            ps-allow-empty="col.last"
+                            ng-required="!col.last"
                             />
+                    <span class="col-warn hint hint-bottom" ng-messages="getInput(col).$error" ng-class="{show: getInput(col).$dirty}">
+                        <span ng-message="inputValidate">Must be unique!</span>
+                        <span ng-message="required">Not empty please!</span>
+                    </span>
                 </div>
             </th>
         </tr>
@@ -43,11 +52,10 @@
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <!--<td>{{ row | json }}</td>-->
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
-                    class="editable"
-                    ng-class="view.cellClass(cell)"
+                    class="cell {{::cell.type}}"
+                    ng-class="{ 'edited': cell.edited }"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">
@@ -66,13 +74,13 @@
                             ng-focus="onCellFocus(cell)"
                             ng-blur="onCellBlur(cell)"
                             ng-keydown="onCellKeydown(cell, $event)"
-                            ps-focus-on="false"
+                            ps-focus-on="cell.justAdded"
                             ></textarea>
-                    <!--TODO: focusing-->
                 </div>
                 <div ng-if="cell.type === 'popup'">
                     <ps-table-popover
-                            ps-cont-selector="td"
+                            ps-container="td"
+                            ps-viewport=".modal-content"
                             ps-id="{{group.value + '_crit_' + $index}}"
                             ps-popover-on="view.popoverOn"
                             ps-allow-hide="!view.topic.addNew.show"
@@ -95,9 +103,9 @@
                                 <div class="list-group">
                                     <a href class="list-group-item"
                                             ng-repeat="topic in view.topic.options.all"
-                                            ng-init="active = (topic === cell.models.group.value)"
+                                            ng-init="active = (topic === cell.models.topic.value)"
                                             ng-class="{'active': active}"
-                                            ng-click="cell.models.group.value = topic; view.saveCell(cell.models.group);">
+                                            ng-click="cell.models.topic.value = topic; view.saveCell(cell.models.topic);">
                                         <span class="glyphicon glyphicon-ok" ng-show="active"></span>
                                         {{topic || 'None'}}
                                     </a>
@@ -108,7 +116,7 @@
                                                 ng-model="view.topic.addNew.value"
                                                 ng-show="view.topic.addNew.show"
                                                 ps-focus-on="view.topic.addNew.show"
-                                                ng-keydown="view.topic.keyPressed(cell.models.group, $event)"
+                                                ng-keydown="view.topic.keyPressed(cell.models.topic, $event)"
                                                 ng-blur="view.topic.doneEdit()">
                                     </a>
                                 </div>
@@ -122,7 +130,10 @@
         </tbody>
         <!--Empty table row -->
         <tr ng-show="!view.rows.length">
-            <td class="attention">Click to add</td>
+            <td class="attention">
+                <span class="clickable"
+                        ng-click="view.addEmptyRow()">Click to add</span>
+            </td>
         </tr>
     </table>
 </ng-form>

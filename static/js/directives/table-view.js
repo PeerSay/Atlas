@@ -18,6 +18,11 @@ function psTableView($timeout) {
             scope.onCellBlur = onCellBlur;
             scope.onColKeydown = onColKeydown;
             scope.onColBlur = onColBlur;
+            scope.getInput = getInput;
+
+            function getInput(colOrCell) {
+                return formModel[colOrCell.model.id]
+            }
 
             function onCellKeydown(cell, evt) {
                 var isTab = (evt.keyCode === 9) && !evt.shiftKey; // TAB w/o Shift
@@ -35,7 +40,7 @@ function psTableView($timeout) {
             function onCellBlur(cell) {
                 cell.edited = false;
 
-                var input = formModel[cell.model.id];
+                var input = getInput(cell);
                 var modified = input.$dirty;
                 if (modified) {
                     scope.view.saveCell(cell.model);
@@ -43,10 +48,12 @@ function psTableView($timeout) {
                 }
             }
 
-            function onColKeydown(evt) {
+            function onColKeydown(col, evt) {
                 var isEnter = (evt.keyCode === 13);
+                var isEsc = (evt.keyCode === 27);
                 var el = evt.target;
-                if (isEnter) {
+
+                if (isEnter || isEsc) {
                     $timeout(function () {
                         el.blur(); // blur leads to column save
                     }, 0, false);
@@ -56,9 +63,15 @@ function psTableView($timeout) {
             function onColBlur(col) {
                 col.edited = false;
 
-                var input = formModel[col.model.id];
+                var input = getInput(col);
+                var invalid = input.$invalid;
                 var modified = input.$dirty;
-                if (modified) {
+
+                if (invalid) {
+                    // return old value;
+                    col.model.value = !col.last ? col.model.field : '';
+                    input.$setPristine();
+                } else if (modified) {
                     scope.view.saveColumnCell(col.model);
                     input.$setPristine();
                 }

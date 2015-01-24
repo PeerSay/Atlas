@@ -53,11 +53,11 @@ var projectSchema = new Schema({
         {
             name: { type: String },
             description: {type: String },
-            group: { type: String },
+            topic: { type: String },
             priority: { type: String },
             vendors: [
                 {
-                    title: { type: String },
+                    title: { type: String, required: true },
                     value: { type: String } // TODO - better name, other fields
                 }
             ]

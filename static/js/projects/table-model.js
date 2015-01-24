@@ -54,17 +54,18 @@ function TableModel(_) {
             var row = buildRow(crit, i);
             rows.push(row);
         });
+        model.rows = rows;
 
         // TODO - virtual rows / cols?
-        model.rows = rows;
+
         M.topics.rebuild(); // XXX
         return model;
     }
 
-    function buildRow(crit, idx, justAdded) {
+    function buildRow(crit, rowIdx, justAdded) {
         var row = [];
         _.forEach(M.model.columns, function (col) {
-            var cell = buildCell(col, row, idx, crit);
+            var cell = buildCell(col, row, rowIdx, crit);
             if (justAdded && cell.field === 'name') {
                 cell.justAdded = true;
             }
@@ -73,7 +74,7 @@ function TableModel(_) {
         return row;
     }
 
-    function buildCell(col, row, idx, crit) {
+    function buildCell(col, row, rowIdx, crit) {
         var cell = {};
         var key = col.field;
         var vendor, vendorIdx;
@@ -98,12 +99,12 @@ function TableModel(_) {
         }
 
         var value = model.obj[model.key];
-        cell.id = [key, idx].join('_');
+        cell.id = [key, rowIdx].join('_');
         cell.field = key;
         cell.value = value;
         cell.patch = {
             op: model.op,
-            path: ['/criteria', idx, model.path].join('/')
+            path: ['/criteria', rowIdx, model.path].join('/')
         };
         cell.column = col;
         cell.criteria = crit;

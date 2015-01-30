@@ -19,17 +19,72 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
     // Table views
     m.groupBy = Table.groupBy;
 
-    m.normalTableView = Table.addView(m, 'vi-norm', toNormViewData)
+    m.normalTableView = Table.addView(m, 'vi-norm', getNormalViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'vi-full', toFullViewData)
+    m.fullTableView = Table.addView(m, 'vi-full', getFullViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
+
+    function getNormalViewConfig() {
+        // Columns: Prod1, [Prod2, Prod3] | Products?
+        return [
+            {
+                selector: 'vendors/.*?/value',
+                limit: 3,
+                cell: {
+                    type: 'ordinary'
+                }
+            }
+        ];
+
+        //TODO - // Artificial column to show empty table?
+    }
+
+    function getFullViewConfig() {
+        // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}
+        return [
+            {
+                selector: 'name',
+                column: {
+                    sortable: true
+                },
+                cell: {
+                    type: 'static'
+                }
+            },
+            {
+                selector: 'vendors/.*?/value',
+                column: {
+                    editable: true,
+                    sortable: true
+                },
+                cell: {
+                    editable: true,
+                    type: 'multiline'
+                }
+            },
+            {
+                selector: null, // virtual
+                column: {
+                    editable: true,
+                    placeholder: 'Add product...',
+                    last: true
+                },
+                cell: {
+                    type: 'static'
+                }
+            }
+        ];
+    }
+
+
+    /////////////////////////////////////
 
     function toNormViewData() {
         var groupBy = m.groupBy.get();

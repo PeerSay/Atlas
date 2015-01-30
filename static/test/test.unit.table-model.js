@@ -8,7 +8,7 @@ Function.prototype.bind = Function.prototype.bind || function (thisp) {
     };
 };
 
-describe.only('TableModel', function () {
+describe('TableModel', function () {
     var TableModel;
     beforeEach(function () {
         module('peersay');
@@ -18,75 +18,173 @@ describe.only('TableModel', function () {
         });
     });
 
-    describe('Build', function () {
+    describe('Build2', function () {
         it('should build model on empty criteria data', function () {
             var data = [];
-            var model = TableModel.buildModel(data);
+            var model = TableModel.buildModel2(data);
 
-            model.columns.should.have.length(4);
-            model.columns[0].should.have.property('field').equal('name');
-            model.columns[0].should.have.property('value').equal('Criteria');
             model.rows.should.have.length(0);
+            Object.keys(model.columns).should.have.length(5);
+            model.columns['name'].should.have.property('field').equal('name');
+            model.columns['name'].should.have.property('value').equal('Criteria');
         });
 
         it('should build vendor column', function () {
-            var data = [
-                { name: '', description: '', topic: null, priority: 'required', vendors: [
-                    { title: 'IBM', value: 'str' }
-                ] }
-            ];
-            var model = TableModel.buildModel(data);
+            var data = mockSingleVendor();
+            var model = TableModel.buildModel2(data);
 
-            model.columns.should.have.length(5);
-            model.columns[4].should.have.property('field').equal('IBM');
-            model.columns[4].should.have.property('value').equal('IBM');
+            Object.keys(model.columns).should.have.length(7);
+            model.columns['vendors/IBM/value'].should.have.property('value').equal('IBM');
+            model.columns['vendors/IBM/value'].should.have.property('field').equal('IBM');
+            model.columns['vendors/IBM/score'].should.have.property('value').equal('IBM');
+            model.columns['vendors/IBM/score'].should.have.property('field').equal('IBM');
         });
 
         it('should build single vendor column from 2 criteria', function () {
-            var data = [
-                { name: '', description: '', topic: null, priority: 'required',
-                    vendors: [
-                        { title: 'IBM', value: 'str' }
-                    ]
-                },
-                { name: '', description: '', topic: null, priority: 'required',
-                    vendors: [
-                        { title: 'IBM', value: 'str2' }
-                    ]
-                }
-            ];
-            var model = TableModel.buildModel(data);
+            var data = mock2Rows2Vendors();
+            var model = TableModel.buildModel2(data);
 
-            model.columns.should.have.length(5);
-            model.columns[4].should.have.property('value').equal('IBM');
+            Object.keys(model.columns).should.have.length(7);
+            model.columns['vendors/IBM/value'].should.have.property('value').equal('IBM');
         });
 
         it('should build rows', function () {
-            var data = [
-                { name: 'xyz', description: '', topic: null, priority: 'required', vendors: [
-                    { title: 'IBM', value: 'str' }
-                ] },
-                { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
-            ];
-            var model = TableModel.buildModel(data);
+            var data = mock2Rows1Vendor();
+            var model = TableModel.buildModel2(data);
 
-            model.rows.should.have.length(data.length);
-            model.rows[0].should.have.length(model.columns.length); // same length as columns
-            model.rows[0][0].should.have.property('id').equal('name_0');
-            model.rows[0][0].should.have.property('value').equal('xyz');
-            model.rows[0][0].patch.should.have.property('path').equal('/criteria/0/name');
-            // existing vendor
-            model.rows[0][4].should.have.property('id').equal('IBM_0');
-            model.rows[0][4].should.have.property('value').equal('str');
-            model.rows[0][4].patch.should.have.property('path').equal('/criteria/0/vendors/0/value');
-            // non-existing vendor
-            model.rows[1][4].should.have.property('id').equal('IBM_1');
-            model.rows[1][4].should.have.property('value').equal('');
-            model.rows[1][4].patch.should.have.property('path').equal('/criteria/1/vendors/-');
+            Object.keys(model.rows).should.have.length(data.length);
+            // 1st row - existing vendor
+            model.rows[0]['name'].should.have.property('value').equal('xyz');
+            model.rows[0]['vendors/IBM/value'].should.have.property('value').equal('str');
+            model.rows[0]['vendors/IBM/score'].should.have.property('value').equal(1);
+            // 2nd row - non-existing vendor
+            model.rows[1]['name'].should.have.property('value').equal('abc');
+            model.rows[1]['vendors/IBM/value'].should.have.property('value').equal(null);
+            model.rows[1]['vendors/IBM/score'].should.have.property('value').equal(null);
+        });
+
+
+        // TODO - build viewModel
+    });
+
+    describe('Select2', function () {
+        it('should select single column with single selector', function () {
+            var data = mock1Row0Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'name'
+                }];
+            });
+
+            sel.columns.should.have.length(1);
+            sel.columns[0].model.should.have.property('field').equal('name');
+
+            sel.rows.should.have.length(1);
+            sel.rows[0].should.have.length(1);
+            sel.rows[0][0].model.should.have.property('value').equal('abc');
+        });
+
+        it('should select multiple columns with array selector, coming in order', function () {
+            var data = mock1Row0Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: ['name', 'priority']
+                }];
+            });
+
+            sel.columns.should.have.length(2);
+            sel.columns[1].model.should.have.property('field').equal('priority');
+
+            sel.rows.should.have.length(1);
+            sel.rows[0].should.have.length(2);
+            sel.rows[0][1].model.should.have.property('value').equal('required');
+        });
+
+        it('should select vendor columns with re selector', function () {
+            var data = mock1Row2Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'vendors/.*?/value'
+                }];
+            });
+
+            sel.columns.should.have.length(2); // 2 cols
+            sel.columns[0].model.should.have.property('field').equal('IBM');
+
+            sel.rows.should.have.length(1);
+            sel.rows[0].should.have.length(2); // 2 cols
+            sel.rows[0][1].model.should.have.property('value').equal('xp');
+        });
+
+        it('should select vendor columns with re selector and limit', function () {
+            var data = mock1Row2Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'vendors/.*?/score',
+                    limit: 1
+                }];
+            });
+
+            sel.columns.should.have.length(1); // 1 col
+            sel.columns[0].model.should.have.property('field').equal('IBM');
+
+            sel.rows.should.have.length(1);
+            sel.rows[0].should.have.length(1); // 1 col
+            sel.rows[0][0].model.should.have.property('value').equal(1);
+        });
+
+        it('should add columns properties from spec', function () {
+            var data = mock1Row2Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'name',
+                    column: {
+                        editable: true,
+                        sortable: true
+                    }
+                }];
+            });
+
+            sel.columns.should.have.length(1); // 1 col
+            sel.columns[0].should.have.property('id'); // added by default
+            sel.columns[0].should.have.property('visible').equal(true); // added by default
+            sel.columns[0].should.have.property('editable').equal(true);
+            sel.columns[0].should.have.property('sortable').equal(true);
+        });
+
+        it('should add cell properties from spec', function () {
+            var data = mock1Row2Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'name',
+                    cell: {
+                        editable: true,
+                        type: 'multiline'
+                    }
+                }];
+            });
+
+            sel.rows.should.have.length(1); // 1 row
+            sel.rows[0][0].should.have.property('id'); // added by default
+            sel.rows[0][0].should.have.property('visible').equal(true); // added by default
+            sel.rows[0][0].should.have.property('editable').equal(true);
+            sel.rows[0][0].should.have.property('type').equal('multiline');
         });
     });
 
-    describe('Select', function () {
+    /*describe('Select', function () {
         it('should build select static columns', function () {
             var data = [
                 { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
@@ -126,7 +224,7 @@ describe.only('TableModel', function () {
             sel2.rows.should.have.length(data.length);
             sel2.rows[0].should.have.length(2);
         });
-    });
+    });*/
 
 
     describe('Topics', function () {
@@ -210,3 +308,53 @@ describe.only('TableModel', function () {
         });
     })
 });
+
+
+function mockSingleVendor() {
+    return [
+        { name: 'abc', description: '', topic: null, priority: 'required', vendors: [
+            { title: 'IBM', value: 'str', score: 1 }
+        ] }
+    ];
+}
+
+function mock1Row0Vendors() {
+    return [
+        { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
+    ];
+}
+
+function mock2Rows1Vendor() {
+    return [
+        { name: 'xyz', description: '', topic: null, priority: 'required', vendors: [
+            { title: 'IBM', value: 'str', score: 1 }
+        ] },
+        { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
+    ]
+}
+
+function mock2Rows2Vendors() {
+    return [
+        { name: '', description: '', topic: null, priority: 'required',
+            vendors: [
+                { title: 'IBM', value: 'str', score: 1 }
+            ]
+        },
+        { name: '', description: '', topic: null, priority: 'required',
+            vendors: [
+                { title: 'IBM', value: 'str2', score: 2 }
+            ]
+        }
+    ];
+}
+
+
+function mock1Row2Vendors() {
+    return [
+        { name: '', description: '', topic: null, priority: 'required',
+            vendors: [
+                { title: 'IBM', value: 'ibm', score: 1 }, { title: 'XP', value: 'xp', score: 2 }
+            ]
+        }
+    ];
+}

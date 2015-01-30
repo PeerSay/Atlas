@@ -50,10 +50,10 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     /**
      * Creates & returns new view
      */
-    function addVIew(ctrl, name, toViewData) {
+    function addVIew(ctrl, name, configFn) {
         views[name] = {
-            //toData: _.timeIt('toData-' + name, toViewData, 1000)
-            toData: toViewData
+            //toData: _.timeIt('toData-' + name, configFn, 1000)
+            configFn: configFn
         };
         return TableView(ctrl, name, T);
     }
@@ -61,7 +61,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     function toData(projectId, name) {
         return readCriteria(projectId)
             .then(function (model) {
-                return views[name].toData(model)
+                //return views[name].toData(model);
+                return TableModel.selectViewModel(views[name].configFn);
             });
     }
 
@@ -74,7 +75,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     //
     function transformCriteriaModel(data) {
         // data format: data.criteria = [...];
-        return TableModel.buildModel(data.criteria);
+        return TableModel.buildModel2(data.criteria);
     }
 
     function readCriteria(id) {
@@ -85,7 +86,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     }
 
     function updateCriteria(id, data) {
-        return Backend.update(['projects', id, 'criteria'], data); // TODO
+        return Backend.update(['projects', id, 'criteria'], data); // TODO - remove
     }
 
     function patchCriteria(id, data) {
@@ -172,12 +173,12 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         function getData($defer) {
             svc.toData(projectId, name)
                 .then(function (data) {
-                    var rows = V.sort(data.rows);
+                    //var rows = V.sort(data.rows);
 
                     V.columns = data.columns;
-                    V.rows = rows; // TODO - revise
+                    V.rows = data.rows;
 
-                    $defer.resolve(rows);
+                    $defer.resolve(data.rows);
                 });
         }
 
@@ -296,7 +297,6 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         function saveColumnCell(model) {
             var isAddNew = (model.id === 'new');
-            // TODO - validity
 
             var res;
             if (isAddNew) {

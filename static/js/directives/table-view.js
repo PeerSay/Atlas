@@ -21,7 +21,7 @@ function psTableView($timeout) {
             scope.getInput = getInput;
 
             function getInput(colOrCell) {
-                return formModel[colOrCell.model.id]
+                return formModel[colOrCell.id]
             }
 
             function onCellKeydown(cell, evt) {
@@ -50,7 +50,7 @@ function psTableView($timeout) {
 
             function onColKeydown(col, evt) {
                 var isEnter = (evt.keyCode === 13);
-                var isEsc = (evt.keyCode === 27);
+                var isEsc = (evt.keyCode === 27); // TODO - discard
                 var el = evt.target;
 
                 if (isEnter || isEsc) {

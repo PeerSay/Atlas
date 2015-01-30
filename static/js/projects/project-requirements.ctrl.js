@@ -21,17 +21,77 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
     m.compactTable = false;
     m.reloadTables = Table.reload.bind(Table);
 
-    m.normalTableView = Table.addView(m, 'ev-norm', toNormViewData)
+    m.normalTableView = Table.addView(m, 'ev-norm', getNormalViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'ev-full', toFullViewData)
+    m.fullTableView = Table.addView(m, 'ev-full', getFullViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
+
+    function getNormalViewConfig() {
+        // Columns: Criteria
+        return [
+            {
+                selector: 'name',
+                cell: {
+                    type: 'ordinary',
+                    emptyValue: 'No name?'
+                }
+            }
+        ];
+    }
+
+    function getFullViewConfig() {
+        // Columns: Criteria, Description, [Topic, Priority], {empty}
+        var spec =  [
+            {
+                selector: ['name', 'descriptions'],
+                column: {
+                    sortable: true
+                },
+                cell: {
+                    editable: true,
+                    type: 'multiline'
+                }
+            },
+            // <-- here goes topic & priority if not compactTable
+            /*{
+                selector: null, // virtual
+                models: { //edits 2 models
+                    topic: true,
+                    priority: true //XXX
+                },
+                column: {
+                    last: true
+                },
+                cell: {
+                    editable: true,
+                    type: 'popup'
+                }
+            }*/
+        ];
+        if (!m.compactTable) {
+            spec.splice(1, 0, {
+                    selector: ['topic', 'priority'],
+                    column: {
+                        sortable: true
+                    },
+                    cell: {
+                        type: 'static'
+                    }
+                }
+            );
+        }
+
+        return spec;
+    }
+
+    /////////////////////////////////////////
 
     function toNormViewData() {
         var groupBy = m.groupBy.get();
@@ -43,20 +103,6 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
             columns: [],
             rows: []
         };
-        // todo - in future:
-        /*var data2 = TableModel.select([
-         {
-         selector: { field: 'name' },
-         props: {
-         visible: true
-         }
-         }, {
-         selector: {field: groupBy},
-         props: {
-         visible: false
-         }
-         }
-         ]);*/
 
         // Columns: Criteria, [Topic|Priority](hidden - need for grouping)
         _.forEach(model.columns, function (col) {

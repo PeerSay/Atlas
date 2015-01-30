@@ -21,7 +21,7 @@
                             ng-click="col.edited = true; $event.stopPropagation()"
                             >{{ col.model.field }}</a>
                     <input type="text" tabindex="-1" class="form-control cell-input"
-                            name="{{::col.model.id}}"
+                            name="{{::col.id}}"
                             ng-show="col.edited"
                             ng-model="col.model.value"
                             ng-blur="onColBlur(col)"
@@ -55,7 +55,7 @@
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
                     class="cell {{::cell.type}}"
-                    ng-class="{ 'edited': cell.edited }"
+                    ng-class="{ 'edited': cell.edited, 'exists': cell.model.exists }"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">
@@ -68,7 +68,7 @@
                 </div>
                 <div ng-if="cell.editable && cell.type === 'multiline'">
                     <textarea class="form-control cell-input noresize"
-                            name="{{::cell.model.id}}"
+                            name="{{::cell.id}}"
                             msd-elastic
                             ng-model="cell.model.value"
                             ng-focus="onCellFocus(cell)"

@@ -10,14 +10,22 @@ function TableModel(_) {
         columns: [],
         rows: []
     };
-    M.buildModel = buildModel;
-    M.selectColumns = selectColumns;
+    M.viewModel = null;
     M.topics = {
         all: [],
         rebuild: function () {
             this.all = findTopics();
         }
     };
+
+    // Build/select
+    M.buildModel = buildModel;
+    M.buildModel2 = buildModel2;
+    M.buildViewModel = buildViewModel;
+
+    M.selectColumns = selectColumns; // XXX
+    M.selectViewModel = selectViewModel;
+    // Traverse
     M.nextRowLike = nextRowLike;
     M.isUniqueCol = isUniqueCol;
     // Edit
@@ -28,11 +36,136 @@ function TableModel(_) {
     M.addColumn = addColumn;
     M.removeColumn = removeColumn;
 
+    function buildModel2(data) {
+        // flatStruc is:
+        // { name: 'name', ... , 'vendors/IBM/value': 'IMB', 'vendors/IBM/score': 'IMB', ...}
+        var flatStruc = getFlatStruc(data);
+        //console.log('>> flat', JSON.stringify(flatStruc));
+
+        // Columns
+        var columns = {};
+        var sharedColModels = {};
+        _.forEach(flatStruc, function (field, key) {
+            var val = getColVal(field);
+            var colModel = sharedColModels[field] || {
+                value: val, // binding!
+                field: field // for sorting?
+            };
+            columns[key] = sharedColModels[field] = colModel;
+        });
+
+        // Rows
+        var rows = [];
+        _.forEach(data, function (crit) {
+            var row = {};
+            _.forEach(flatStruc, function (field, key) {
+                var cellModel = {
+                    field: field,
+                    value: getCellVal(crit, key),
+                    //criteria: crit,
+                    patch: {} // TODO
+                };
+                row[key] = cellModel;
+            });
+            rows.push(row);
+        });
+
+        M.model.columns = columns;
+        M.model.rows = rows;
+        return M.model;
+
+        //////
+
+        function getFlatStruc(criteria) {
+            var res = {};
+            _.forEach(['name', 'description', 'topic', 'priority', 'weight'], function (val) {
+                res[val] = val;
+            });
+
+            var vendors = {};
+            _.forEach(criteria, function (crit) {
+                _.forEach(crit.vendors, function (vendor) {
+                    if (!vendors[vendor.title]) {
+                        vendors[vendor.title] =  true;
+                    }
+                });
+            });
+
+            // TODO - escape key
+            _.forEach(vendors, function (v, key) {
+                res[['vendors', key, 'value'].join('/')] = key;
+                res[['vendors', key, 'score'].join('/')] = key;
+            });
+            return res;
+        }
+
+        function getColVal(field) {
+            var names = {
+                name: 'Criteria',
+                description: 'Description',
+                topic: 'Topic',
+                priority: 'Priority',
+                weight: 'Weight'
+            };
+            return names[field] || field;
+        }
+
+        function getCellVal(crit, key) {
+            var path = key.split('/'); // [vendors, IMB, score] or [name]
+            var val = path.reduce(function (obj, p) {
+                if (obj) {
+                    return angular.isArray(obj) ? _.findWhere(obj, {title: p}) : obj[p]
+                }
+            }, crit);
+
+            //console.log('>>Returned val for key: ', key, val);
+            return angular.isDefined(val) ? val : null;
+        }
+    }
+
+    function buildViewModel(model) {
+        // Columns
+        var columns = [];
+        var colIdx = 0;
+        _.forEach(model.columns, function (model, key) {
+            columns.push({
+                model: model,
+                key: key,
+                id: 'col-' + (colIdx++)
+            });
+        });
+
+        //Rows
+        var rows = [];
+        _.forEach(model.rows, function (row, rowIdx) {
+            var viewRow = [], cellIdx = 0;
+            _.forEach(row, function (model, key) {
+                var cell = {
+                    model: model,
+                    //key: key, /// TODO - need?
+                    colId: 'col-' + cellIdx,
+                    id: ['cell', rowIdx, cellIdx].join('-')
+                };
+                cellIdx++;
+                viewRow.push(cell);
+            });
+            rows.push(viewRow);
+        });
+
+        M.viewModel = {
+            columns: columns,
+            rows: rows
+        };
+        //console.log('>>>> ViewModel:', JSON.stringify(M.viewModel, null, 4));
+
+        return M.viewModel;
+    }
+
     function buildModel(data) {
         // Server data format:
         // [
-        //  { name: '', description: '', topic: '', priority: '', vendors: [
-        //    { title: '', value: '', ??? },
+        //  { name: '', description: '', topic: '', priority: '', products: [ TODO - rename
+        //    { title: '', input: '', score: '' },
         //    ...
         //   ]
         //  },
@@ -84,6 +217,7 @@ function TableModel(_) {
             model.key = key;
             model.path = key;
             model.op = 'replace';
+            model.exists = true;
         }
         else if (vendor = crit._vendorsIndex[key]) {
             vendorIdx = crit.vendors.indexOf(vendor);
@@ -91,11 +225,13 @@ function TableModel(_) {
             model.key = 'value';
             model.path = ['vendors', vendorIdx, 'value'].join('/');
             model.op = 'replace';
+            model.exists = true;
         } else { // no vendor yet
             model.obj = { title: key, value: '' };
             model.key = 'value';
             model.path = ['vendors', '-'].join('/');
             model.op = 'add';
+            model.exists = false;
         }
 
         var value = model.obj[model.key];
@@ -108,6 +244,7 @@ function TableModel(_) {
         };
         cell.column = col;
         cell.criteria = crit;
+        cell.exists = model.exists;
         cell.rowIdx = function () {
             return M.model.rows.indexOf(row); // changes
         };
@@ -166,6 +303,96 @@ function TableModel(_) {
             }
         });
         return topics;
+    }
+
+    function selectViewModel(specFn) {
+        /**
+         * var specFormat = [{
+            selector: 'key_re', // or null (no model => virtual column)
+            limit: 3, // optional
+            column: {
+                sortable: true, // optional
+                editable: true, // optional
+                last: true //optional - for css
+            },
+            cell: {
+                type: 'ordinary', // 'multiline', 'static', 'number', 'popup'
+                editable: true, // optional
+                emptyValue: 'str' // optional, displayed when model.value is empty
+            }
+          }, ...];
+        */
+        var model = M.viewModel || buildViewModel(M.model);
+        var spec = specFn(M.model); // get spec
+        var res = {
+            columns: [],
+            rows: []
+        };
+
+        //Columns
+        _.forEach(spec, function (item) {
+            // each item in spec defines one or more columns to show on view
+            var selectors = angular.isArray(item.selector) ? item.selector : [item.selector];
+            var limit = item.limit;
+
+            //first, select columns, for each selector in order
+            var viewColumns = [];
+            _.forEach(selectors, function (sel) {
+                // find matching cols in ViewModel
+                _.forEach(model.columns, function (col) {
+                    if (!match(col, sel)) { return; }
+
+                    var viewCol = {
+                        model: col.model, // ref to model
+                        id: col.id,
+                        visible: true,
+                        cellSpec: item.cell
+                    };
+                    // extend viewModel with requested props
+                    angular.extend(viewCol, item.column);
+                    viewColumns.push(viewCol);
+                });
+            });
+
+            //limit resulting columns (limit is per item)
+            if (limit) {
+                viewColumns.splice(limit);
+            }
+
+            res.columns = [].concat(res.columns, viewColumns);
+        });
+        //console.log('>>>> SelModel:', JSON.stringify(res.columns, null, 4));
+
+        //Rows - sorted!
+        _.forEach(model.rows, function (row) {
+            var viewRow = [];
+            // pick the cells of the columns we just selected
+            _.forEach(res.columns, function (col) {
+                var cell = _.findWhere(row, {colId: col.id});
+                var viewCell = {
+                    model: cell.model,
+                    id: cell.id,
+                    visible: true
+                };
+                // extend viewModel with requested props
+                angular.extend(viewCell, col.cellSpec);
+                viewRow.push(viewCell);
+            });
+            res.rows.push(viewRow);
+        });
+        //console.log('>>>> SelModel:', JSON.stringify(res.rows, null, 4));
+
+        return res;
+        //////
+
+        function match(col, sel) {
+            // model may be:
+            // {.., key: 'name'}, -> matched by 'name'
+            // {.., key: '/vendors/IMB/value'} -> -> matched by '/vendors/.*?/value' // TODO: '/' in vendor title -- need to escape
+            var re = new RegExp(sel);
+            //console.log('>>>Matching', col, sel, re.test(col.key));
+            return re.test(col.key);
+        }
     }
 
     function selectColumns(predicate, limit) {

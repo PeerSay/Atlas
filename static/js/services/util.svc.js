@@ -3,7 +3,8 @@
 angular.module('peersay')
     .factory('Util', Util);
 
-function Util() {
+Util.$inject = ['jQuery'];
+function Util($) {
     var U = {};
     // List
     U.forEach = angular.forEach.bind(angular);

@@ -92,6 +92,7 @@ module.exports = function (grunt) {
                     'bower_components/ng-table-resizable-columns/ng-table-resizable-columns.src.js',
                     'bower_components/angular-elastic/elastic.js',
                     'bower_components/ng-context-menu/dist/ng-context-menu.js',
+                    'bower_components/fast-json-patch/dist/json-patch-duplex.min.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],

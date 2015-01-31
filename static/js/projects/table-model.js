@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('TableModel', TableModel);
 
-TableModel.$inject = ['$filter', 'Util'];
-function TableModel($filter, _) {
+TableModel.$inject = ['$filter', 'Util', 'jsonpatch'];
+function TableModel($filter, _, jsonpatch) {
     var M = {};
     var model = M.model = {
         criteria: null,
@@ -18,6 +18,7 @@ function TableModel($filter, _) {
             this.all = getTopics().list;
         }
     };
+    M.patchObserver = null;
 
     // Build/select
     M.buildModel = buildModel; // XXX
@@ -42,6 +43,7 @@ function TableModel($filter, _) {
     // Build & select
     function buildModel2(data) {
         M.model.criteria = data;
+        M.patchObserver = jsonpatch.observe({criteria: data});
         M.topics.rebuild();
 
 
@@ -70,6 +72,7 @@ function TableModel($filter, _) {
                 var cellModel = {
                     field: field,
                     value: getCellValByKey(crit, key),
+                    key: key, // for save
                     criteria: crit, // for group & sort
                     patch: {} // TODO
                 };
@@ -162,6 +165,43 @@ function TableModel($filter, _) {
         return angular.isDefined(val) ? val : null;
     }
 
+    function setCellValByKey(crit, key, val) {
+        var path = key.split('/'); // [vendors, IMB, score] or [name]
+        var obj = crit, lastKey = null, exists = true;
+
+        // find object to modify
+        _.forEach(path, function (p) {
+            var val = !angular.isArray(obj) ? obj[p] : _.findWhere(obj, {title: p});
+            if (angular.isObject(val)) {
+                obj = val;
+            }
+            else if (!angular.isDefined(val)) { // undefined can only be non-existing vendor
+                exists = false;
+                obj = getNewVendor(p);
+            }
+            lastKey = p;
+        });
+
+        // modify
+        obj[lastKey] = val;
+        if (!exists) {
+            crit.vendors.push(obj);
+        }
+
+        var patch = jsonpatch.generate(M.patchObserver);
+        console.log('>>Save cell patch: ', JSON.stringify(patch));
+
+        return patch;
+    }
+
+    function getNewVendor(title) {
+        return {
+            title: title,
+            value: '',
+            score: 0
+        };
+    }
+
     function buildViewModel(model) {
         // Columns
         var columns = [];
@@ -182,7 +222,7 @@ function TableModel($filter, _) {
                 var cell = {
                     model: model,
                     field: model.field, // need to findWhere for virtual cells
-                    //key: key, /// TODO - need?
+                    //key: key, // need for save
                     colId: 'col-' + cellIdx,
                     id: ['cell', rowIdx, cellIdx].join('-')
                 };
@@ -589,62 +629,7 @@ function TableModel($filter, _) {
     //
 
     function saveCell(cell) {
-        var newVal = cell.value;
-        var patches = [];
-        var needReload = false;
-
-        if (!cell.column.vendor) {
-            patches.push({
-                op: cell.patch.op,
-                path: cell.patch.path,
-                value: newVal
-            });
-            console.log('Save non-vendor cell patch:', JSON.stringify(patches));
-
-            // Update model - only when grouping can change
-            if (/topic|priority/.test(cell.field)) {
-                needReload = true;
-                M.topics.rebuild();
-            }
-
-            // TODO - virtual cell (if any)
-        }
-        else if (cell.patch.op === 'replace') { // existing vendor
-            patches.push({
-                op: cell.patch.op,
-                path: cell.patch.path,
-                value: newVal
-            });
-            console.log('Save existing vendor cell patch:', JSON.stringify(patches));
-        }
-        else { // new vendor
-            var newVendor = {
-                title: cell.field,
-                value: newVal
-            };
-            patches.push({
-                op: cell.patch.op,
-                path: cell.patch.path,
-                value: newVendor
-            });
-            console.log('Save new vendor cell patch:', JSON.stringify(patches));
-
-            // Update model
-            var criteria = cell.criteria;
-            criteria.vendors.push(newVendor);
-            criteria._vendorsIndex[cell.field] = newVendor;
-            var newPath = ['vendors', criteria.vendors.length - 1, 'value'].join('/');
-            cell.patch = {
-                op: 'replace',
-                path: cell.patch.path.replace('vendors/-', newPath)
-            };
-            //console.log('>>new patch', cell.patch.path);
-        }
-
-        return {
-            patches: patches,
-            needReload: needReload
-        };
+        return setCellValByKey(cell.criteria, cell.key, cell.value);
     }
 
     function addRowLike(cell) {

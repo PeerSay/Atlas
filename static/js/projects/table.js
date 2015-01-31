@@ -253,6 +253,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 if (this.addNew.value) {
                     model.value = this.addNew.value;
                     saveCell(model);
+                    TableModel.topics.rebuild(); // XXX
                 }
                 this.doneEdit();
                 return;
@@ -294,9 +295,11 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         }
 
         function saveCell(cell) {
-            var res = TableModel.saveCell(cell);
-            svc.patchCriteria(projectId, res.patches);
-            if (res.needReload) {
+            var patch = TableModel.saveCell(cell);
+            svc.patchCriteria(projectId, patch);
+
+            var needReload = (cell.field === svc.groupBy.get());
+            if (needReload) {
                 svc.reload();
             }
         }

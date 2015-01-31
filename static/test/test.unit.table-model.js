@@ -271,53 +271,73 @@ describe('TableModel', function () {
         });
     });
 
-    /*describe('Select', function () {
-        it('should build select static columns', function () {
-            var data = [
-                { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
-            ];
-            TableModel.buildModel(data);
-            var sel = TableModel.selectColumns([{ field: 'name' }]);
-
-            sel.columns.should.have.length(1);
-            sel.rows.should.have.length(data.length);
-            sel.rows[0].should.have.length(1);
-
-            var sel2 = TableModel.selectColumns([{ field: 'name' }, {field: 'description'}, {field: 'topic'}]);
-
-            sel2.columns.should.have.length(3);
-            sel2.rows.should.have.length(data.length);
-            sel2.rows[0].should.have.length(3);
-        });
-
-        it('should build select all/some vendor columns', function () {
-            var data = [
-                { name: 'abc', description: '', topic: null, priority: 'required', vendors: [
-                    {title: 'IBM', value: 1},
-                    {title: 'XP', value: 2},
-                    {title: 'PS', value: 3}
-                ] }
-            ];
-            TableModel.buildModel(data);
-            var sel = TableModel.selectColumns([{ vendor: true }]);
-
-            sel.columns.should.have.length(3);
-            sel.rows.should.have.length(data.length);
-            sel.rows[0].should.have.length(3);
-
-            var sel2 = TableModel.selectColumns([{ vendor: true }], 2);
-
-            sel2.columns.should.have.length(2);
-            sel2.rows.should.have.length(data.length);
-            sel2.rows[0].should.have.length(2);
-        });
-    });*/
-
-
     describe('Topics', function () {
 
     });
 
+    describe('Edit2', function () {
+        it('should generate non-vendor patch', function () {
+            var data = mock1Row0Vendors();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'name'
+                }];
+            });
+            var cell = sel.rows[0][0];
+
+            //modify
+            cell.model.value = '123';
+            var patch = TableModel.saveCell(cell.model);
+
+            patch[0].should.have.property('op').equal('replace');
+            patch[0].should.have.property('path').equal('/criteria/0/name');
+            patch[0].should.have.property('value').equal('123');
+        });
+
+        it('should generate existing vendor patch', function () {
+            var data = mock2Rows1Vendor();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'vendors/.*?/value'
+                }];
+            });
+            var cell = sel.rows[0][0];
+
+            //modify
+            cell.model.value = '123';
+            var patch = TableModel.saveCell(cell.model);
+
+            patch[0].should.have.property('op').equal('replace');
+            patch[0].should.have.property('path').equal('/criteria/0/vendors/0/value');
+            patch[0].should.have.property('value').equal('123');
+        });
+
+        it.only('should generate non-existign vendor patch', function () {
+            var data = mock2Rows1Vendor();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'vendors/.*?/value'
+                }];
+            });
+            var cell = sel.rows[1][0]; // no vendors here
+
+            //modify
+            cell.model.value = '123';
+            var patch = TableModel.saveCell(cell.model);
+
+            patch[0].should.have.property('op').equal('add');
+            patch[0].should.have.property('path').equal('/criteria/1/vendors/0');
+            patch[0].value.should.have.property('value').equal('123');
+            patch[0].value.should.have.property('title').equal('IBM');
+            patch[0].value.should.have.property('score').equal(0);
+        });
+    });
 
     describe('Traversing', function () {
         it('cell should rowIdx for traversal', function () {

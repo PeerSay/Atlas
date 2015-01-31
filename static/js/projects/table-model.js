@@ -3,8 +3,8 @@
 angular.module('peersay')
     .factory('TableModel', TableModel);
 
-TableModel.$inject = ['Util'];
-function TableModel(_) {
+TableModel.$inject = ['$filter', 'Util'];
+function TableModel($filter, _) {
     var M = {};
     var model = M.model = {
         columns: [],
@@ -19,12 +19,14 @@ function TableModel(_) {
     };
 
     // Build/select
-    M.buildModel = buildModel;
+    M.buildModel = buildModel; // XXX
     M.buildModel2 = buildModel2;
     M.buildViewModel = buildViewModel;
-
     M.selectColumns = selectColumns; // XXX
     M.selectViewModel = selectViewModel;
+    // Group & sort
+    M.getGroupByValue = getGroupByValue;
+    M.sortViewModel = sortViewModel;
     // Traverse
     M.nextRowLike = nextRowLike;
     M.isUniqueCol = isUniqueCol;
@@ -36,6 +38,7 @@ function TableModel(_) {
     M.addColumn = addColumn;
     M.removeColumn = removeColumn;
 
+    // Build & select
     function buildModel2(data) {
         // flatStruc is:
         // { name: 'name', ... , 'vendors/IBM/value': 'IMB', 'vendors/IBM/score': 'IMB', ...}
@@ -61,8 +64,8 @@ function TableModel(_) {
             _.forEach(flatStruc, function (field, key) {
                 var cellModel = {
                     field: field,
-                    value: getCellVal(crit, key),
-                    //criteria: crit,
+                    value: getCellValByKey(crit, key),
+                    criteria: crit, // for group & sort
                     patch: {} // TODO
                 };
                 row[key] = cellModel;
@@ -109,18 +112,18 @@ function TableModel(_) {
             };
             return names[field] || field;
         }
+    }
 
-        function getCellVal(crit, key) {
-            var path = key.split('/'); // [vendors, IMB, score] or [name]
-            var val = path.reduce(function (obj, p) {
-                if (obj) {
-                    return angular.isArray(obj) ? _.findWhere(obj, {title: p}) : obj[p]
-                }
-            }, crit);
+    function getCellValByKey(crit, key) {
+        var path = key.split('/'); // [vendors, IMB, score] or [name]
+        var val = path.reduce(function (obj, p) {
+            if (obj) {
+                return angular.isArray(obj) ? _.findWhere(obj, {title: p}) : obj[p]
+            }
+        }, crit);
 
-            //console.log('>>Returned val for key: ', key, val);
-            return angular.isDefined(val) ? val : null;
-        }
+        //console.log('>>Returned val for key: ', key, val);
+        return angular.isDefined(val) ? val : null;
     }
 
     function buildViewModel(model) {
@@ -160,6 +163,39 @@ function TableModel(_) {
 
         return M.viewModel;
     }
+
+    // Group & sort
+    //
+    function getGroupByValue(viewRow, groupBy) {
+        var criteria = viewRow[0].model.criteria;
+        //console.log('>>>>>groupBy [%s] crit=%O, returns: %s', curGroup, criteria, criteria[curGroup]);
+        return criteria[groupBy];
+    }
+
+    function sortViewModel(orderBy, groupBy) {
+        // orderBy format: {'name': 'asc'|'desc'}
+        var rows = M.viewModel.rows;
+        var key = Object.keys(orderBy)[0];
+        if (!key) {
+            return rows; // unsorted
+        }
+
+        var reverse = (orderBy[key] === 'desc');
+        var sortArr = groupBy ? [sortFn(groupBy), sortFn(key)] : sortFn(key);
+        //console.log('Sorting viewModel [%s] by', orderBy[key], [groupBy, orderBy]);
+
+        return M.viewModel.rows = $filter('orderBy')(rows, sortArr, reverse);
+        //////
+
+        function sortFn(key) {
+            return function (viewRow) {
+                var criteria = viewRow[0].model.criteria;
+                return getCellValByKey(criteria, key);
+            }
+        }
+    }
+
+    ///////////////////
 
     function buildModel(data) {
         // Server data format:
@@ -344,6 +380,7 @@ function TableModel(_) {
 
                     var viewCol = {
                         model: col.model, // ref to model
+                        key: col.key,
                         id: col.id,
                         visible: true,
                         cellSpec: item.cell

@@ -184,6 +184,58 @@ describe('TableModel', function () {
         });
     });
 
+    describe.only('Group & sort', function () {
+        it('should return groupBy value', function () {
+            var data = mock3RowsForSorting();
+            TableModel.buildModel2(data);
+            var rows = TableModel.buildViewModel(TableModel.model).rows;
+
+            // by topic
+            TableModel.getGroupByValue(rows[0], 'topic').should.equal('AAA');
+            should.not.exist(TableModel.getGroupByValue(rows[1], 'topic'));
+            // by priority
+            TableModel.getGroupByValue(rows[0], 'priority').should.equal('required');
+            TableModel.getGroupByValue(rows[1], 'priority').should.equal('optional');
+            // not grouped
+            should.not.exist(TableModel.getGroupByValue(rows[1], null));
+            should.not.exist(TableModel.getGroupByValue(rows[2], null));
+        });
+
+        it('should sort on simple column keys', function () {
+            var data = mock2Rows1Vendor();
+            TableModel.buildModel2(data);
+            TableModel.buildViewModel(TableModel.model);
+
+            var rows = TableModel.sortViewModel({'name': 'asc'}, null);
+            rows[0][0].model.value.should.equal('abc'); //'abc' < 'xyz
+            rows[1][0].model.value.should.equal('xyz');
+        });
+
+        it('should sort on complex column keys', function () {
+            var data = mock2Rows1Vendor();
+            TableModel.buildModel2(data);
+            TableModel.buildViewModel(TableModel.model);
+
+            TableModel.sortViewModel({'vendors/IBM/score': 'desc'}, null);
+            var sel = TableModel.selectViewModel(function () {
+                return [{ selector: 'vendors/IBM/score' }];
+            });
+            sel.rows[0][0].model.should.have.property('value').equal(null);
+            sel.rows[1][0].model.value.should.equal(1); // row with vendor defined moved to 2nd pos
+        });
+
+        it('should sort by group first', function () {
+            var data = mock3RowsForSorting();
+            TableModel.buildModel2(data);
+            TableModel.buildViewModel(TableModel.model);
+
+            var rows = TableModel.sortViewModel({'name': 'asc'}, 'topic');
+            rows[0][0].model.value.should.equal('b'); //b > a, but it's group is null, so it's on top
+            rows[1][0].model.value.should.equal('a');
+            rows[2][0].model.value.should.equal('c');
+        });
+    });
+
     /*describe('Select', function () {
         it('should build select static columns', function () {
             var data = [
@@ -326,7 +378,7 @@ function mock1Row0Vendors() {
 
 function mock2Rows1Vendor() {
     return [
-        { name: 'xyz', description: '', topic: null, priority: 'required', vendors: [
+        { name: 'xyz', description: '', topic: 'AAA', priority: 'required', vendors: [
             { title: 'IBM', value: 'str', score: 1 }
         ] },
         { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
@@ -357,4 +409,12 @@ function mock1Row2Vendors() {
             ]
         }
     ];
+}
+
+function mock3RowsForSorting() {
+    return [
+        { name: 'a', description: '', topic: 'AAA', priority: 'required', vendors: [] },
+        { name: 'b', description: '', topic: null, priority: 'optional', vendors: [] },
+        { name: 'c', description: '', topic: 'AAA', priority: 'required', vendors: [] }
+    ]
 }

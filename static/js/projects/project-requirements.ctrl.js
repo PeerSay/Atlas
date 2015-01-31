@@ -50,7 +50,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
         // Columns: Criteria, Description, [Topic, Priority], {empty}
         var spec =  [
             {
-                selector: ['name', 'descriptions'],
+                selector: ['name', 'description'],
                 column: {
                     sortable: true
                 },

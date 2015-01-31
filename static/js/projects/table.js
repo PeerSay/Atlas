@@ -112,8 +112,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         V.columns = [];
         V.rows = [];
         V.runtimeColClass = runtimeColClass;
-        //V.sort = _.timeIt('sort', sort, 1000);
-        V.sort = sort;
+        //V.sort = _.timeIt('sort', TableModel.sortViewModel, 1000);
         //Edit
         V.validateColumnCell = validateColumnCell;
         V.saveColumnCell = saveColumnCell;
@@ -184,7 +183,16 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         // Grouping
         function grouping() {
-            settings.groupBy = group;
+            // Setting groupBy on ngTable settings object enables grouping.
+            // This function is called on table reload for every row(!)
+            // and must return a value which groups given row under that group name.
+            // Returning undefined for every row essentially makes a single group {undefined: [rows]},
+            // whose 'falsy' name is not displayed by angular rendering invisible group row.
+            //
+            settings.groupBy = function (row) {
+                var groupBy = svc.groupBy.get();
+                return TableModel.getGroupByValue(row, groupBy);
+            };
 
             $rootScope.$on('grouping', function () {
                 V.tableParams.reload();
@@ -192,63 +200,34 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             return V;
         }
 
-        function group(row) {
-            var cur = svc.groupBy.get();
-            var found = _.map(row, function (cell) {
-                var model = cell.model;
-                return (model.field === cur) ? model.value : null
-            });
-            //console.log('>>>>>groupBy [%s] returns: %s, on', cur, found, row);
-            return found[0];
-        }
-
         // Sorting
         function sorting(options) {
             parameters.sorting = svc.sortBy.get();
 
             if (options.active) {
-                // expose to html
+                // Expose click handler for html. Only for views that requested active sorting.
                 V.sortBy = sortBy;
             }
 
             $rootScope.$on('sorting', function (evt, order) {
-                V.tableParams.sorting(order); // causes reload if order differs
+                // This call causes table reload if order differs.
+                // By this time viewModel is already sorted and selectView happening on every reload
+                // will get rows in required sorted order.
+                V.tableParams.sorting(order);
             });
             return V;
         }
 
         function sortBy(col) {
-            var field = col.model.field;
-            var order = {};
-            order[field] = V.tableParams.isSortBy(field, 'asc') ? 'desc' : 'asc';
+            var field = col.key;
+            var orderBy = {};
+            orderBy[field] = V.tableParams.isSortBy(field, 'asc') ? 'desc' : 'asc';
 
-            svc.sortBy.set(order);
-        }
-
-        function sort(arr) {
-            // format: {'name': 'asc'|'desc'}
-            var orderBy = svc.sortBy.get();
-            var field = Object.keys(orderBy)[0];
-            if (!field) {
-                return arr; // unsorted
-            }
-
-            var reverse = (orderBy[field] === 'desc');
             var groupBy = svc.groupBy.get();
-            var sortArr = groupBy ? [sortFn(groupBy), sortFn(field)] : sortFn(field);
-            //console.log('Sorting [%s] view [%s] by', name, orderBy[field], [groupBy, field]);
 
-            return $filter('orderBy')(arr, sortArr, reverse);
-
-            function sortFn(field) {
-                return function (row) {
-                    // TODO - perf
-                    var model = _.map(row, function (cell) {
-                        return (cell.model.field == field) ? cell.model : null
-                    })[0];
-                    return model ? model.value : ''; // some views may have no sorted fields
-                }
-            }
+            //V.sort(orderBy, groupBy);
+            TableModel.sortViewModel(orderBy, groupBy);
+            svc.sortBy.set(orderBy);
         }
 
         // Class
@@ -258,8 +237,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
             return {
                 'sortable': sortable,
-                'sort-asc': V.tableParams.isSortBy(col.model.field, 'asc'),
-                'sort-desc': V.tableParams.isSortBy(col.model.field, 'desc'),
+                'sort-asc': V.tableParams.isSortBy(col.key, 'asc'),
+                'sort-desc': V.tableParams.isSortBy(col.key, 'desc'),
                 'editable': col.editable,
                 'edited': edited,
                 'last': col.last && !edited

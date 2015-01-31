@@ -71,6 +71,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
             },
             {
                 selector: null, // virtual
+                columnModel: { field: '...', value: ''}, // addNew
                 column: {
                     editable: true,
                     placeholder: 'Add product...',

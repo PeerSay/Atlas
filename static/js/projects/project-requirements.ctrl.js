@@ -60,12 +60,9 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
                 }
             },
             // <-- here goes topic & priority if not compactTable
-            /*{
+            {
                 selector: null, // virtual
-                models: { //edits 2 models
-                    topic: true,
-                    priority: true //XXX
-                },
+                cellModels: ['topic', 'priority'], // cell edits 2 models
                 column: {
                     last: true
                 },
@@ -73,7 +70,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
                     editable: true,
                     type: 'popup'
                 }
-            }*/
+            }
         ];
         if (!m.compactTable) {
             spec.splice(1, 0, {

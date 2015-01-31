@@ -182,9 +182,44 @@ describe('TableModel', function () {
             sel.rows[0][0].should.have.property('editable').equal(true);
             sel.rows[0][0].should.have.property('type').equal('multiline');
         });
+
+        it('should add virtual column with specified model', function () {
+            var data = mockSingleVendor();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: null,
+                    columnModel: {
+                        value: 'x',
+                        field: 'some'
+                    }
+                }];
+            });
+
+            sel.columns.should.have.length(1); // 1 col
+            sel.columns[0].model.should.have.property('value').equal('x');
+        });
+
+        it('should add virtual cells with specified models', function () {
+            var data = mockSingleVendor();
+            TableModel.buildModel2(data);
+            TableModel.viewModel = null; // force rebuild
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: null,
+                    cellModels: ['topic', 'priority']
+                }];
+            });
+
+            sel.columns.should.have.length(1); // 1 col
+            sel.rows[0].should.have.length(1); // 1 cell
+            sel.rows[0][0].models.should.have.property('topic');
+            sel.rows[0][0].models.should.have.property('priority');
+        });
     });
 
-    describe.only('Group & sort', function () {
+    describe('Group & sort', function () {
         it('should return groupBy value', function () {
             var data = mock3RowsForSorting();
             TableModel.buildModel2(data);

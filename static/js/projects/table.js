@@ -220,6 +220,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         function sortBy(col) {
             var field = col.key;
+            if (!field) { return; } // non-sortable (virtual) cols have no key
+
             var orderBy = {};
             orderBy[field] = V.tableParams.isSortBy(field, 'asc') ? 'desc' : 'asc';
 

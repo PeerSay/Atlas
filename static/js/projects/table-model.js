@@ -7,6 +7,7 @@ TableModel.$inject = ['$filter', 'Util'];
 function TableModel($filter, _) {
     var M = {};
     var model = M.model = {
+        criteria: null,
         columns: [],
         rows: []
     };
@@ -14,7 +15,7 @@ function TableModel($filter, _) {
     M.topics = {
         all: [],
         rebuild: function () {
-            this.all = findTopics();
+            this.all = getTopics().list;
         }
     };
 
@@ -40,6 +41,10 @@ function TableModel($filter, _) {
 
     // Build & select
     function buildModel2(data) {
+        M.model.criteria = data;
+        M.topics.rebuild();
+
+
         // flatStruc is:
         // { name: 'name', ... , 'vendors/IBM/value': 'IMB', 'vendors/IBM/score': 'IMB', ...}
         var flatStruc = getFlatStruc(data);
@@ -76,28 +81,19 @@ function TableModel($filter, _) {
         M.model.columns = columns;
         M.model.rows = rows;
         return M.model;
-
         //////
 
-        function getFlatStruc(criteria) {
+        function getFlatStruc() {
             var res = {};
             _.forEach(['name', 'description', 'topic', 'priority', 'weight'], function (val) {
                 res[val] = val;
             });
 
-            var vendors = {};
-            _.forEach(criteria, function (crit) {
-                _.forEach(crit.vendors, function (vendor) {
-                    if (!vendors[vendor.title]) {
-                        vendors[vendor.title] =  true;
-                    }
-                });
-            });
-
+            var vendors = getVendors().list;
             // TODO - escape key
-            _.forEach(vendors, function (v, key) {
-                res[['vendors', key, 'value'].join('/')] = key;
-                res[['vendors', key, 'score'].join('/')] = key;
+            _.forEach(vendors, function (val) {
+                res[['vendors', val, 'value'].join('/')] = val;
+                res[['vendors', val, 'score'].join('/')] = val;
             });
             return res;
         }
@@ -112,6 +108,46 @@ function TableModel($filter, _) {
             };
             return names[field] || field;
         }
+    }
+
+    function getVendors() {
+        return indexArray(M.model.criteria, 'vendors/title');
+    }
+
+    function getTopics() {
+        return indexArray(M.model.criteria, 'topic', null);
+    }
+
+
+    function indexArray(arr, path, init) {
+        var list = [];
+        var index = {};
+        var add = function (val) {
+            if (!index[val]) {
+                index[val] =  true;
+                list.push(val);
+            }
+        };
+
+        if (arguments.length > 2) {
+            add(init);
+        }
+        (function iterate(arr, paths) {
+            var key = paths[0];
+            _.forEach(arr, function (it) {
+                if (angular.isArray(it[key])) {
+                    iterate(it[key], paths.slice(1));
+                }
+                else {
+                    add(it[key]);
+                }
+            });
+        })(arr, path.split('/'));
+
+        return {
+            index: index,
+            list: list
+        };
     }
 
     function getCellValByKey(crit, key) {
@@ -145,6 +181,7 @@ function TableModel($filter, _) {
             _.forEach(row, function (model, key) {
                 var cell = {
                     model: model,
+                    field: model.field, // need to findWhere for virtual cells
                     //key: key, /// TODO - need?
                     colId: 'col-' + cellIdx,
                     id: ['cell', rowIdx, cellIdx].join('-')
@@ -164,11 +201,136 @@ function TableModel($filter, _) {
         return M.viewModel;
     }
 
+    function selectViewModel(specFn) {
+        /**
+         * var specFormat = [{
+            selector: 'key_re', // or ['key1','key2'] or null (for virtual)
+            limit: 3, // optional
+            columnModel: {}, // optional, model for virtual col
+            cellModels: [], // optional, models selector for virtual cells
+            column: {
+                sortable: true, // optional
+                editable: true, // optional
+                last: true //optional - for css
+            },
+            cell: {
+                type: 'ordinary', // 'multiline', 'static', 'number', 'popup'
+                editable: true, // optional
+                emptyValue: 'str' // optional, displayed when model.value is empty
+            }
+          }, ...];
+         */
+        var viewModel = M.viewModel || buildViewModel(M.model);
+        var spec = specFn(M.model); // get spec
+        var res = {
+            columns: [],
+            rows: []
+        };
+
+        //Columns
+        _.forEach(spec, function (item) {
+            // each item in spec defines one or more columns to show on view
+            var selectors = angular.isArray(item.selector) ? item.selector : [item.selector];
+
+            // select columns for each selector in order
+            var viewColumns = [];
+            _.forEach(selectors, function (sel) {
+                viewColumns = [].concat(viewColumns, selectViewColumns(item, sel));
+            });
+
+            //limit resulting columns (per item)
+            if (item.limit) {
+                viewColumns.splice(item.limit);
+            }
+
+            res.columns = [].concat(res.columns, viewColumns);
+        });
+        //console.log('>>>> SelModel:', JSON.stringify(res.columns, null, 4));
+
+        //Rows (already sorted)
+        _.forEach(viewModel.rows, function (row) {
+            var viewRow = [];
+            // pick the cells of the columns we just selected
+            _.forEach(res.columns, function (col) {
+                viewRow.push(selectViewCell(col, row));
+            });
+            res.rows.push(viewRow);
+        });
+        //console.log('>>>> SelModel:', JSON.stringify(res.rows, null, 4));
+
+        return res;
+        //////
+
+        function selectViewColumns(spec, sel) {
+            var res = [];
+            if (sel !== null){
+                // find matching cols in ViewModel
+                _.forEach(viewModel.columns, function (col) {
+                    if (!match(col, sel)) { return; }
+
+                    var viewCol = {
+                        model: col.model, // ref to model
+                        key: col.key,
+                        id: col.id,
+                        visible: true
+                    };
+                    // extend viewModel with requested props & spec to use it later on cells
+                    res.push(angular.extend(viewCol, spec.column, {spec: spec}));
+                });
+            }
+            else {
+                var virtualCol = {
+                    key: null, // not sortable
+                    id: 'virtual', // now only one virtual col in tables
+                    visible: true,
+                    virtual: true
+                };
+                if (spec.columnModel) {
+                    // model is provided by spec (Add Product col)
+                    virtualCol.model = spec.columnModel;
+                }
+                // extend viewModel with requested props & spec to use it later on cells
+                res.push(angular.extend(virtualCol, spec.column, {spec: spec}));
+            }
+            return res;
+        }
+
+        function selectViewCell(col, row) {
+            var viewCell = {
+                visible: true
+            };
+            if (!col.virtual) {
+                var cell = _.findWhere(row, {colId: col.id}); // cannot be found for virtual cols
+                viewCell.model = cell.model;
+                viewCell.id = cell.id;
+            }
+            else if (col.spec.cellModels) {
+                //cell manages several models (Popup case)
+                viewCell.models = {};
+                _.forEach(col.spec.cellModels, function (name) {
+                    var cell = _.findWhere(row, {field: name});
+                    viewCell.models[name] = cell.model;
+                });
+            }
+            // extend viewModel with requested props
+            return angular.extend(viewCell, col.spec.cell);
+        }
+
+        function match(col, sel) {
+            // col may be:
+            // {.., key: 'name'}, -> matched by 'name'
+            // {.., key: '/vendors/IMB/value'} -> -> matched by '/vendors/.*?/value' // TODO: '/' in vendor title -- need to escape
+            var re = new RegExp(sel);
+            //console.log('>>>Matching', col, sel, re.test(col.key));
+            return re.test(col.key);
+        }
+    }
+
     // Group & sort
     //
     function getGroupByValue(viewRow, groupBy) {
         var criteria = viewRow[0].model.criteria;
-        //console.log('>>>>>groupBy [%s] crit=%O, returns: %s', curGroup, criteria, criteria[curGroup]);
+        //console.log('>>>>>groupBy [%s] crit=%O, returns: %s', curGroup, criteria, criteria[groupBy]);
         return criteria[groupBy];
     }
 
@@ -339,97 +501,6 @@ function TableModel($filter, _) {
             }
         });
         return topics;
-    }
-
-    function selectViewModel(specFn) {
-        /**
-         * var specFormat = [{
-            selector: 'key_re', // or null (no model => virtual column)
-            limit: 3, // optional
-            column: {
-                sortable: true, // optional
-                editable: true, // optional
-                last: true //optional - for css
-            },
-            cell: {
-                type: 'ordinary', // 'multiline', 'static', 'number', 'popup'
-                editable: true, // optional
-                emptyValue: 'str' // optional, displayed when model.value is empty
-            }
-          }, ...];
-        */
-        var model = M.viewModel || buildViewModel(M.model);
-        var spec = specFn(M.model); // get spec
-        var res = {
-            columns: [],
-            rows: []
-        };
-
-        //Columns
-        _.forEach(spec, function (item) {
-            // each item in spec defines one or more columns to show on view
-            var selectors = angular.isArray(item.selector) ? item.selector : [item.selector];
-            var limit = item.limit;
-
-            //first, select columns, for each selector in order
-            var viewColumns = [];
-            _.forEach(selectors, function (sel) {
-                // find matching cols in ViewModel
-                _.forEach(model.columns, function (col) {
-                    if (!match(col, sel)) { return; }
-
-                    var viewCol = {
-                        model: col.model, // ref to model
-                        key: col.key,
-                        id: col.id,
-                        visible: true,
-                        cellSpec: item.cell
-                    };
-                    // extend viewModel with requested props
-                    angular.extend(viewCol, item.column);
-                    viewColumns.push(viewCol);
-                });
-            });
-
-            //limit resulting columns (limit is per item)
-            if (limit) {
-                viewColumns.splice(limit);
-            }
-
-            res.columns = [].concat(res.columns, viewColumns);
-        });
-        //console.log('>>>> SelModel:', JSON.stringify(res.columns, null, 4));
-
-        //Rows - sorted!
-        _.forEach(model.rows, function (row) {
-            var viewRow = [];
-            // pick the cells of the columns we just selected
-            _.forEach(res.columns, function (col) {
-                var cell = _.findWhere(row, {colId: col.id});
-                var viewCell = {
-                    model: cell.model,
-                    id: cell.id,
-                    visible: true
-                };
-                // extend viewModel with requested props
-                angular.extend(viewCell, col.cellSpec);
-                viewRow.push(viewCell);
-            });
-            res.rows.push(viewRow);
-        });
-        //console.log('>>>> SelModel:', JSON.stringify(res.rows, null, 4));
-
-        return res;
-        //////
-
-        function match(col, sel) {
-            // model may be:
-            // {.., key: 'name'}, -> matched by 'name'
-            // {.., key: '/vendors/IMB/value'} -> -> matched by '/vendors/.*?/value' // TODO: '/' in vendor title -- need to escape
-            var re = new RegExp(sel);
-            //console.log('>>>Matching', col, sel, re.test(col.key));
-            return re.test(col.key);
-        }
     }
 
     function selectColumns(predicate, limit) {

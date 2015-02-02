@@ -131,80 +131,36 @@ function TableModel($filter, _, jsonpatch) {
         console.log('Save column patch:', JSON.stringify(patch));
 
         // rebuild!
-        _.timeIt('rebuild!', buildModel, 1000)(T.model.criteria);
+        //_.timeIt('rebuild!', buildModel, 1000)(T.model.criteria);
+        buildModel(T.model.criteria);
 
         return patch;
     }
 
     function addColumn(newVal) {
-        var patches = [];
-        var newVendor = {
-            title: newVal,
-            value: ''
-        };
+        T.model.addColumn(newVal);
 
-        //add empty vendor to first criteria
-        patches.push({
-            op: 'add',
-            path: ['/criteria', 0, 'vendors', '-'].join('/'),
-            value: newVendor
-        });
-        console.log('Add column patch:', JSON.stringify(patches));
+        var patch = jsonpatch.generate(T.patchObserver);
+        console.log('Add column patch:', JSON.stringify(patch));
 
-        // Update vendors model
-        var criteria = T.model.rows[0][0].criteria;
-        criteria.vendors.push(newVendor);
-        criteria._vendorsIndex[newVal] = newVendor;
-        var col = {
-            id: ['col', T.model.columns.length + 1].join('_'),
-            field: newVal,
-            value: newVal,
-            vendor: true
-        };
-        T.model.columns.push(col);
+        // rebuild!
+        //_.timeIt('rebuild!', buildModel, 1000)(T.model.criteria);
+        buildModel(T.model.criteria);
 
-        _.forEach(T.model.rows, function (row, i) {
-            var cell = buildCell(col, row, i, criteria);
-            row.push(cell)
-        });
-
-        return {
-            patches: patches,
-            needReload: true
-        };
+        return patch;
     }
 
-    function removeColumn(cell) {
-        var patches = [];
-        var key = cell.field;
-        var col = cell.column;
-        var colIdx = T.model.columns.indexOf(col);
+    function removeColumn(cellModel) {
+        T.model.removeColumn(cellModel);
 
-        // update model & build patch
-        _.forEach(T.model.rows, function (row, i) {
-            var crit = row[0].criteria;
-            var vendor = crit._vendorsIndex[key];
-            var vendorIdx = crit.vendors.indexOf(vendor);
-            // TODO - fix
-            if (vendor && vendorIdx >= 0) {
-                crit.vendors = crit.vendors.splice(vendorIdx, 1);
-                delete crit._vendorsIndex[key];
+        var patch = jsonpatch.generate(T.patchObserver);
+        console.log('Remove column patch:', JSON.stringify(patch));
 
-                patches.push({
-                    op: 'remove',
-                    path: ['/criteria', i, 'vendors', vendorIdx].join('/')
-                });
-            }
-        });
-        console.log('Remove column patch:', JSON.stringify(patches));
+        // rebuild!
+        //_.timeIt('rebuild!', buildModel, 1000)(T.model.criteria);
+        buildModel(T.model.criteria);
 
-        // update model cont.
-        T.model.columns.splice(colIdx, 1);
-
-        return {
-            patches: patches,
-            needReload: true
-        };
+        return patch;
     }
 
 
@@ -260,6 +216,8 @@ function TableModel($filter, _, jsonpatch) {
         M.setValByKey = setValByKey;
         M.isUniqueColumn = isUniqueColumn;
         M.saveColumn = saveColumn;
+        M.addColumn = addColumn;
+        M.removeColumn = removeColumn;
 
         // Format:
         // { name: 'name', ... , 'vendors/IBM/value': 'IMB', 'vendors/IBM/score': 'IMB', ...}
@@ -295,7 +253,6 @@ function TableModel($filter, _, jsonpatch) {
             _.forEach(flatStruc, function (field, key) {
                 var cellModel = {
                     value: getValByKey(crit, key),
-                    //column: M.columns[key], // ?
                     key: key, // for save
                     criteria: crit // for group & sort
                 };
@@ -332,9 +289,9 @@ function TableModel($filter, _, jsonpatch) {
             return angular.isDefined(val) ? val : null;
         }
 
-        function setValByKey(crit, key, val, noAdd) {
+        function getObjByKey(crit, key) {
             var path = key.split('/'); // [vendors, IMB, score] or [name]
-            var obj = crit, lastKey = null, exists = true;
+            var obj = crit, lastKey = null, justAdded = false;
 
             // find object to modify
             _.forEach(path, function (p) {
@@ -343,16 +300,26 @@ function TableModel($filter, _, jsonpatch) {
                     obj = val;
                 }
                 else if (!angular.isDefined(val)) { // undefined can only be non-existing vendor
-                    exists = false;
+                    justAdded = true;
                     obj = getNewVendor(p);
                 }
                 lastKey = p;
             });
 
+            return {
+                obj: obj,
+                key: lastKey,
+                justAdded: justAdded
+            };
+        }
+
+        function setValByKey(crit, key, val, noAdd) {
+            var res = getObjByKey(crit, key);
+
             // patched!
-            obj[lastKey] = val;
-            if (!exists && !noAdd) {
-                crit.vendors.push(obj);
+            res.obj[res.key] = val;
+            if (res.justAdded && !noAdd) {
+                crit.vendors.push(res.obj);
             }
         }
 
@@ -391,7 +358,30 @@ function TableModel($filter, _, jsonpatch) {
                 setValByKey(crit, key, newVal, true); // patched!
             });
 
-            // Model is inconsistent need to rebuild!
+            // Model is inconsistent - need to rebuild!
+        }
+
+        function addColumn(newVal) {
+            var key = ['vendors', newVal, 'title'].join('/');
+            _.forEach(M.criteria, function (crit) {
+                setValByKey(crit, key, newVal); // patched!
+            });
+
+            // Model is inconsistent - need to rebuild!
+        }
+
+        function removeColumn(cell) {
+            var key = cell.key;
+
+            _.forEach(M.criteria, function (crit) {
+                var res = getObjByKey(crit, key);
+                if (!res.obj  || res.justAdded) { return; }
+
+                var vendorIdx = crit.vendors.indexOf(res.obj);
+                crit.vendors.splice(vendorIdx, 1); // patched!
+            });
+
+            // Model is inconsistent - need to rebuild!
         }
 
         // Misc

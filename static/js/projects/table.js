@@ -266,6 +266,16 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         // Edit
         //
+        function saveCell(model) {
+            var patch = TableModel.saveCell(model);
+            svc.patchCriteria(projectId, patch);
+
+            var needReload = (model.key === svc.groupBy.get());
+            if (needReload) {
+                svc.reload();
+            }
+        }
+
         function validateColumnCell(col) {
             return function (newValue) {
                 var res = true;
@@ -277,8 +287,9 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             };
         }
 
-        function saveColumnCell(model) {
-            var isAddNew = (model.id === 'new');
+        function saveColumnCell(col) {
+            var model = col.model;
+            var isAddNew = (col.id === 'virtual');
             var patch;
             if (isAddNew) {
                 patch = TableModel.addColumn(model.value);
@@ -291,19 +302,9 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             svc.reload();
         }
 
-        function saveCell(model) {
-            var patch = TableModel.saveCell(model);
-            svc.patchCriteria(projectId, patch);
-
-            var needReload = (model.key === svc.groupBy.get());
-            if (needReload) {
-                svc.reload();
-            }
-        }
-
         function removeColumn(model) {
-            var res = TableModel.removeColumn(model);
-            svc.patchCriteria(projectId, res.patches);
+            var patch = TableModel.removeColumn(model);
+            svc.patchCriteria(projectId, patch);
             svc.reload();
         }
 

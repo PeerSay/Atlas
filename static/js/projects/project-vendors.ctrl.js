@@ -215,7 +215,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
             if (action === 'remove') {
                 view.removeColumn(cell.model);
             }
-            else {
+            else if (action === 'add'){
                 inviteToEdit(view);
             }
         }, 0, false);
@@ -226,7 +226,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
         if (!cell) { return true; }
 
         if (item === 'remove') {
-            if (!(cell.model.column && cell.model.column.vendor)) {
+            if (!(cell.model && /^vendors\//.test(cell.model.key))) {
                 // disable remove on non-vendor columns
                 return false;
             }

@@ -72,7 +72,7 @@ function psTableView($timeout) {
                     col.model.value = !col.last ? col.model.field : '';
                     input.$setPristine();
                 } else if (modified) {
-                    scope.view.saveColumnCell(col.model);
+                    scope.view.saveColumnCell(col);
                     input.$setPristine();
                 }
             }

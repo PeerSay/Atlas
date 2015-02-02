@@ -479,7 +479,7 @@ describe('TableModel', function () {
         });
     });
 
-    describe('Edit - save column', function () {
+    describe('Edit - save, add & remove column', function () {
         it('should verify the vendor name is unique', function () {
             var data = mock1Row2Vendors();
             TableModel.buildModel(data);
@@ -495,7 +495,7 @@ describe('TableModel', function () {
             TableModel.isUniqueColumn(col0.model, 'XP2').should.equal(true); // ok
         });
 
-        it.only('should save column title', function () {
+        it('should save existing column title', function () {
             var data = mock2Rows2Vendors();
             TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
@@ -518,7 +518,33 @@ describe('TableModel', function () {
             patch[1].should.have.property('value').equal('XP');
         });
 
+        it('should add new column', function () {
+            var data = mock2Rows1Vendor();
+            TableModel.buildModel(data);
+            var model = { field: '...', value: ''};
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: null, // virtual
+                    columnModel: model
+                }];
+            });
 
+            model.value = 'XP';
+            var patch = TableModel.addColumn(model.value);
+
+            patch.should.have.length(2);
+            patch[0].should.have.property('op').equal('add');
+            patch[0].should.have.property('path').equal('/criteria/1/vendors/0'); // in reverse order
+            patch[0].value.should.have.property('title').equal('XP');
+
+            patch[1].should.have.property('op').equal('add');
+            patch[1].should.have.property('path').equal('/criteria/0/vendors/1'); // second vendor
+            patch[0].value.should.have.property('title').equal('XP');
+        });
+
+        it('should remove column', function () {
+            //TODO -  (also bad patch due to fast-json-patch bug)
+        });
     });
 });
 

@@ -379,10 +379,10 @@ describe('TableModel', function () {
         });
     });
 
-    describe('Edit - add row', function () {
+    describe('Edit - add & remove row', function () {
         it('should add row to empty table', function () {
             var data = [];
-            var model = TableModel.buildModel(data);
+            TableModel.buildModel(data);
             var patch = TableModel.addRowLike(null);
 
             patch[0].op.should.equal('add');
@@ -417,7 +417,7 @@ describe('TableModel', function () {
 
         it('newly added row should have justAdded prop', function () {
             var data = mock1Row0Vendors();
-            var model = TableModel.buildModel(data);
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: ['name','priority']
@@ -429,6 +429,53 @@ describe('TableModel', function () {
 
             var cell10 = TableModel.viewModel.rows[1][0];
             cell10.should.have.property('justAdded').equal(true);
+        });
+
+        it.skip('should remove row', function () {
+            var data = mock2Rows1Vendor();
+            TableModel.buildModel(data);
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: ['name','priority']
+                }];
+            });
+            var cell00 = sel.rows[0][0];
+
+            var patch = TableModel.removeRow(cell00);
+
+            //bad patch, see issue I opened:
+            // https://github.com/Starcounter-Jack/JSON-Patch/issues/65
+            console.log('>>Bad patch: ', patch);
+
+            patch.should.have.length(1);
+            patch[0].op.should.equal('remove');
+            patch[0].path.should.equal('/criteria/0');
+        });
+
+        it.only('should remove last row', function () {
+            var data = mockSingleVendor();
+            var model = TableModel.buildModel(data);
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: ['name','priority']
+                }];
+            });
+            var cell00 = sel.rows[0][0];
+
+            var patch = TableModel.removeRow(cell00);
+
+            patch.should.have.length(1);
+            patch[0].op.should.equal('remove');
+            patch[0].path.should.equal('/criteria/0');
+
+            // model updated
+            model.rows.should.have.length(0);
+            var sel2 = TableModel.selectViewModel(function () {
+                return [{
+                    selector: ['name','priority']
+                }];
+            });
+            sel2.rows.should.have.length(0);
         });
     })
 });

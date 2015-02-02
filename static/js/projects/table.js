@@ -310,9 +310,9 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             svc.reload();
         }
 
-        function removeRow(model) {
-            var res = TableModel.removeRow(model);
-            svc.patchCriteria(projectId, res.patches);
+        function removeRow(cell) {
+            var patch = TableModel.removeRow(cell);
+            svc.patchCriteria(projectId, patch);
             svc.reload();
         }
 

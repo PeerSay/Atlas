@@ -114,8 +114,7 @@ function TableModel($filter, _, jsonpatch) {
         var crit = cell ? cell.model.criteria : null;
         var newIdx = cell ? cell.rowIdx + 1 : 0;
 
-        var row = T.model.addRow(crit);
-        T.viewModel.addRow(row, newIdx);
+        T.viewModel.addRow(crit, newIdx);
 
         var patch = jsonpatch.generate(T.patchObserver);
         console.log('Add row patch: ', JSON.stringify(patch));
@@ -124,24 +123,13 @@ function TableModel($filter, _, jsonpatch) {
     }
 
     function removeRow(cell) {
-        var rowIdx = cell.rowIdx();
-        var patches = [];
+        var rowIdx = cell.rowIdx;
+        T.viewModel.removeRow(rowIdx);
 
-        // Make patch
-        patches.push({
-            op: 'remove',
-            path: ['/criteria', rowIdx].join('/')
-        });
-        console.log('Remove row patch:', JSON.stringify(patches));
+        var patch = jsonpatch.generate(T.patchObserver);
+        console.log('Remove row patch:', JSON.stringify(patch));
 
-        //update model
-        T.model.rows.splice(rowIdx, 1);
-        // TODO: model.vendors = indexVendors(model.criteria);
-
-        return {
-            patches: patches,
-            needReload: true
-        };
+        return patch;
     }
 
     function saveColumn(col) {
@@ -294,6 +282,7 @@ function TableModel($filter, _, jsonpatch) {
         // API
         M.build = build;
         M.addRow = addRow;
+        M.removeRow = removeRow;
         M.getValByKey = getValByKey;
         M.setValByKey = setValByKey;
 
@@ -392,6 +381,8 @@ function TableModel($filter, _, jsonpatch) {
             }
         }
 
+
+        // Mutate
         function addRow(critOrNull) {
             var criteria = getNewCriteria(critOrNull);
             var row = buildRow(criteria);
@@ -401,7 +392,15 @@ function TableModel($filter, _, jsonpatch) {
             return row;
         }
 
+        function removeRow(crit) {
+            var critIdx = M.criteria.indexOf(crit);
 
+            // Patched!
+            M.criteria.splice(critIdx, 1);
+            M.rows.splice(critIdx, 1); // always same idx as criteria
+        }
+
+        // Misc
         function getVendors() {
             return indexArray(M.criteria, 'vendors/title');
         }
@@ -449,6 +448,7 @@ function TableModel($filter, _, jsonpatch) {
         V.select = select;
         V.sort = sort;
         V.addRow = addRow;
+        V.removeRow = removeRow;
 
         // Build
         function build(model) {
@@ -647,9 +647,18 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         // Mutate
-        function addRow(modelRow, idx) {
-            V.rows.splice(idx, 0, buildRow(modelRow));
-            V.rows[idx][0].justAdded = true;
+        function addRow(crit, idx) {
+            //update model first
+            var row = T.model.addRow(crit);
+            V.rows.splice(idx, 0, buildRow(row));
+            V.rows[idx][0].justAdded = true; // TODO - doesn't work
+        }
+
+        function removeRow(idx) {
+            var removedRow = V.rows.splice(idx, 1);
+
+            var crit = removedRow[0][0].model.criteria;
+            T.model.removeRow(crit);
         }
 
         return V;

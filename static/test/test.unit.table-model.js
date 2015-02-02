@@ -391,7 +391,7 @@ describe('TableModel', function () {
             patch[0].value.should.have.property('priority').equal('required');
 
             var cell00 = TableModel.viewModel.rows[0][0];
-            cell00.should.have.property('field').equal('name');
+            cell00.model.should.have.property('key').equal('name');
         });
 
         it('should add row to non-empty table', function () {
@@ -412,7 +412,7 @@ describe('TableModel', function () {
             patch[0].value.should.have.property('priority').equal('optional');
 
             var cell10 = TableModel.viewModel.rows[1][0];
-            cell10.should.have.property('field').equal('name');
+            cell10.model.should.have.property('key').equal('name');
         });
 
         it('newly added row should have justAdded prop', function () {
@@ -452,7 +452,7 @@ describe('TableModel', function () {
             patch[0].path.should.equal('/criteria/0');
         });
 
-        it.only('should remove last row', function () {
+        it('should remove last row', function () {
             var data = mockSingleVendor();
             var model = TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
@@ -477,7 +477,49 @@ describe('TableModel', function () {
             });
             sel2.rows.should.have.length(0);
         });
-    })
+    });
+
+    describe('Edit - save column', function () {
+        it('should verify the vendor name is unique', function () {
+            var data = mock1Row2Vendors();
+            TableModel.buildModel(data);
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'vendors/.*?/value'
+                }];
+            });
+            var col0 = sel.columns[0];
+
+            TableModel.isUniqueColumn(col0.model, 'IBM').should.equal(true); // ok on itself
+            TableModel.isUniqueColumn(col0.model, 'XP').should.equal(false);// conflict
+            TableModel.isUniqueColumn(col0.model, 'XP2').should.equal(true); // ok
+        });
+
+        it.only('should save column title', function () {
+            var data = mock2Rows2Vendors();
+            TableModel.buildModel(data);
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'vendors/.*?/value'
+                }];
+            });
+            var col0 = sel.columns[0];
+
+            col0.model.value = 'XP';
+            var patch = TableModel.saveColumn(col0.model);
+
+            patch.should.have.length(2);
+            patch[0].should.have.property('op').equal('replace');
+            patch[0].should.have.property('path').equal('/criteria/1/vendors/0/title'); // in reverse order?
+            patch[0].should.have.property('value').equal('XP');
+
+            patch[1].should.have.property('op').equal('replace');
+            patch[1].should.have.property('path').equal('/criteria/0/vendors/0/title'); // in reverse order?
+            patch[1].should.have.property('value').equal('XP');
+        });
+
+
+    });
 });
 
 

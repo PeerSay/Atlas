@@ -24,7 +24,7 @@ function TableModel($filter, _, jsonpatch) {
     T.sortViewModel = sortViewModel;
     // Traverse
     T.nextRowLike = nextRowLike;
-    T.isUniqueCol = isUniqueCol;
+    T.isUniqueColumn = isUniqueColumn;
     // Edit
     T.saveCell = saveCell;
     T.addRowLike = addRowLike;
@@ -86,16 +86,8 @@ function TableModel($filter, _, jsonpatch) {
         return groupedRows[0] || null;
     }
 
-    function isUniqueCol(column, newValue) {
-        var res = true;
-        _.forEach(model.columns, function (col) {
-            if (!col.vendor || col === column) { return; }
-
-            if (col.field === newValue) {
-                res = false;
-            }
-        });
-        return res;
+    function isUniqueColumn(colModel, newValue) {
+        return T.model.isUniqueColumn(colModel, newValue);
     }
 
     // Edits
@@ -133,34 +125,15 @@ function TableModel($filter, _, jsonpatch) {
     }
 
     function saveColumn(col) {
-        var newVal = col.value;
-        var key = col.field;
-        var patches = [];
+        T.model.saveColumn(col, col.value);
 
-        _.forEach(T.model.rows, function (row, i) {
-            var crit = row[0].criteria;
-            var vendor = crit._vendorsIndex[key];
-            var vendorIdx = crit.vendors.indexOf(vendor);
-            if (vendor && vendorIdx >= 0) {
-                // update model
-                col.field = newVal;
-                vendor.title = newVal;
-                crit._vendorsIndex[newVal] = vendor;
-                delete crit._vendorsIndex[key];
+        var patch = jsonpatch.generate(T.patchObserver);
+        console.log('Save column patch:', JSON.stringify(patch));
 
-                patches.push({
-                    op: 'replace',
-                    path: ['/criteria', i, 'vendors', vendorIdx, 'title'].join('/'),
-                    value: newVal
-                });
-            }
-        });
-        console.log('Save column patch:', JSON.stringify(patches));
+        // rebuild!
+        _.timeIt('rebuild!', buildModel, 1000)(T.model.criteria);
 
-        return {
-            patches: patches,
-            needReload: false // TODO
-        };
+        return patch;
     }
 
     function addColumn(newVal) {
@@ -285,6 +258,8 @@ function TableModel($filter, _, jsonpatch) {
         M.removeRow = removeRow;
         M.getValByKey = getValByKey;
         M.setValByKey = setValByKey;
+        M.isUniqueColumn = isUniqueColumn;
+        M.saveColumn = saveColumn;
 
         // Format:
         // { name: 'name', ... , 'vendors/IBM/value': 'IMB', 'vendors/IBM/score': 'IMB', ...}
@@ -308,7 +283,7 @@ function TableModel($filter, _, jsonpatch) {
                 var val = getColVal(field);
                 var colModel = sharedColModels[field] || {
                         value: val, // binding!
-                        field: field // to cancel edit
+                        field: field // to verify & cancel edit
                     };
                 columns[key] = sharedColModels[field] = colModel;
             });
@@ -320,7 +295,7 @@ function TableModel($filter, _, jsonpatch) {
             _.forEach(flatStruc, function (field, key) {
                 var cellModel = {
                     value: getValByKey(crit, key),
-                    field: field, // ?
+                    //column: M.columns[key], // ?
                     key: key, // for save
                     criteria: crit // for group & sort
                 };
@@ -357,7 +332,7 @@ function TableModel($filter, _, jsonpatch) {
             return angular.isDefined(val) ? val : null;
         }
 
-        function setValByKey(crit, key, val) {
+        function setValByKey(crit, key, val, noAdd) {
             var path = key.split('/'); // [vendors, IMB, score] or [name]
             var obj = crit, lastKey = null, exists = true;
 
@@ -376,11 +351,21 @@ function TableModel($filter, _, jsonpatch) {
 
             // patched!
             obj[lastKey] = val;
-            if (!exists) {
+            if (!exists && !noAdd) {
                 crit.vendors.push(obj);
             }
         }
 
+        function isUniqueColumn(column, newValue) {
+            var res = true;
+            _.forEach(M.columns, function (col) {
+                if (col === column) { return; }
+                if (col.field === newValue) {
+                    res = false;
+                }
+            });
+            return res;
+        }
 
         // Mutate
         function addRow(critOrNull) {
@@ -398,6 +383,15 @@ function TableModel($filter, _, jsonpatch) {
             // Patched!
             M.criteria.splice(critIdx, 1);
             M.rows.splice(critIdx, 1); // always same idx as criteria
+        }
+
+        function saveColumn(col, newVal) {
+            var key = ['vendors', col.field, 'title'].join('/');
+            _.forEach(M.criteria, function (crit) {
+                setValByKey(crit, key, newVal, true); // patched!
+            });
+
+            // Model is inconsistent need to rebuild!
         }
 
         // Misc
@@ -443,7 +437,7 @@ function TableModel($filter, _, jsonpatch) {
         var V = {};
         V.columns = [];
         V.rows = [];
-        //
+        // API
         V.build = build;
         V.select = select;
         V.sort = sort;
@@ -480,7 +474,6 @@ function TableModel($filter, _, jsonpatch) {
             _.forEach(modelRow, function (model, key) {
                 var cell = {
                     model: model,
-                    field: model.field, // for select - to findWhere for virtual cells
                     colId: 'col-' + cellIdx, // for select - to find col TODO- may change
                     id: cellIdFn(row, cellIdx),
                     rowIdx: rowIdxFn(row)
@@ -611,7 +604,9 @@ function TableModel($filter, _, jsonpatch) {
                     //cell manages several models (Popup case)
                     viewCell.models = {};
                     _.forEach(col.spec.cellModels, function (name) {
-                        var cell = _.findWhere(row, {field: name});
+                        var cell = _.find(row, function (viewCell) {
+                            return (viewCell.model.key === name);
+                        });
                         viewCell.models[name] = cell.model;
                     });
                 }
@@ -630,7 +625,6 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         //Sort
-
         function sort(keys, reverse) {
             var sortArr = _.map(keys, function (key) {
                 return getRowValByKeyFn(key);

@@ -270,7 +270,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             return function (newValue) {
                 var res = true;
                 if (col.edited) {
-                    res = TableModel.isUniqueCol(col.model, newValue);
+                    res = TableModel.isUniqueColumn(col.model, newValue);
                 }
                 //console.log('>> Validate col=[%s] val=[%s], res=', col.model.field, newValue, res);
                 return res;
@@ -279,26 +279,23 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         function saveColumnCell(model) {
             var isAddNew = (model.id === 'new');
-
-            var res;
+            var patch;
             if (isAddNew) {
-                res = TableModel.addColumn(model.value);
+                patch = TableModel.addColumn(model.value);
             }
             else {
-                res = TableModel.saveColumn(model);
+                patch = TableModel.saveColumn(model);
             }
 
-            svc.patchCriteria(projectId, res.patches);
-            if (res.needReload) {
-                svc.reload();
-            }
+            svc.patchCriteria(projectId, patch);
+            svc.reload();
         }
 
-        function saveCell(cell) {
-            var patch = TableModel.saveCell(cell);
+        function saveCell(model) {
+            var patch = TableModel.saveCell(model);
             svc.patchCriteria(projectId, patch);
 
-            var needReload = (cell.field === svc.groupBy.get());
+            var needReload = (model.key === svc.groupBy.get());
             if (needReload) {
                 svc.reload();
             }

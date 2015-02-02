@@ -75,7 +75,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     //
     function transformCriteriaModel(data) {
         // data format: data.criteria = [...];
-        return TableModel.buildModel2(data.criteria);
+        return TableModel.buildModel(data.criteria);
     }
 
     function readCriteria(id) {
@@ -316,27 +316,30 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             svc.reload();
         }
 
-        function addRowLike(model) {
+        function addRowLike(cell) {
             // find last criteria in group
-            var prevModel = model, nextRow;
-            while (nextRow = TableModel.nextRowLike(prevModel, getAlikePredicate(model))) {
-                prevModel = nextRow[0];
+            var prevCell = cell, nextRow;
+            var predicate = getAlikePredicate(cell.model);
+            while (nextRow = TableModel.nextRowLike(prevCell, predicate)) {
+                prevCell = nextRow[0];
             }
 
-            var res = TableModel.addRowLike(prevModel);
+            var res = TableModel.addRowLike(prevCell);
             svc.patchCriteria(projectId, res.patches);
             svc.reload();
         }
 
-        function addRowOnTab(model) {
+        function addRowOnTab(cell) {
             var added = false;
+            var model = cell.model;
             var lastCol = (model.field === 'description');
 
             if (lastCol) {
-                var nextRow = TableModel.nextRowLike(model, getAlikePredicate(model));
+                var predicate = getAlikePredicate(model);
+                var nextRow = TableModel.nextRowLike(cell, predicate);
                 if (!nextRow) {
-                    var res = TableModel.addRowLike(model);
-                    svc.patchCriteria(projectId, res.patches);
+                    var patch = TableModel.addRowLike(cell);
+                    svc.patchCriteria(projectId, patch);
                     svc.reload();
                     added = true;
                 }

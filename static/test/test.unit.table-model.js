@@ -18,10 +18,10 @@ describe('TableModel', function () {
         });
     });
 
-    describe('Build2', function () {
+    describe('Build', function () {
         it('should build model on empty criteria data', function () {
             var data = [];
-            var model = TableModel.buildModel2(data);
+            var model = TableModel.buildModel(data);
 
             model.rows.should.have.length(0);
             Object.keys(model.columns).should.have.length(5);
@@ -31,7 +31,7 @@ describe('TableModel', function () {
 
         it('should build vendor column', function () {
             var data = mockSingleVendor();
-            var model = TableModel.buildModel2(data);
+            var model = TableModel.buildModel(data);
 
             Object.keys(model.columns).should.have.length(7);
             model.columns['vendors/IBM/value'].should.have.property('value').equal('IBM');
@@ -42,7 +42,7 @@ describe('TableModel', function () {
 
         it('should build single vendor column from 2 criteria', function () {
             var data = mock2Rows2Vendors();
-            var model = TableModel.buildModel2(data);
+            var model = TableModel.buildModel(data);
 
             Object.keys(model.columns).should.have.length(7);
             model.columns['vendors/IBM/value'].should.have.property('value').equal('IBM');
@@ -50,7 +50,7 @@ describe('TableModel', function () {
 
         it('should build rows', function () {
             var data = mock2Rows1Vendor();
-            var model = TableModel.buildModel2(data);
+            var model = TableModel.buildModel(data);
 
             Object.keys(model.rows).should.have.length(data.length);
             // 1st row - existing vendor
@@ -63,15 +63,13 @@ describe('TableModel', function () {
             model.rows[1]['vendors/IBM/score'].should.have.property('value').equal(null);
         });
 
-
         // TODO - build viewModel
     });
 
-    describe('Select2', function () {
+    describe('Select', function () {
         it('should select single column with single selector', function () {
             var data = mock1Row0Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'name'
@@ -88,8 +86,7 @@ describe('TableModel', function () {
 
         it('should select multiple columns with array selector, coming in order', function () {
             var data = mock1Row0Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: ['name', 'priority']
@@ -101,13 +98,12 @@ describe('TableModel', function () {
 
             sel.rows.should.have.length(1);
             sel.rows[0].should.have.length(2);
-            sel.rows[0][1].model.should.have.property('value').equal('required');
+            sel.rows[0][1].model.should.have.property('value').equal('optional');
         });
 
         it('should select vendor columns with re selector', function () {
             var data = mock1Row2Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'vendors/.*?/value'
@@ -124,8 +120,7 @@ describe('TableModel', function () {
 
         it('should select vendor columns with re selector and limit', function () {
             var data = mock1Row2Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'vendors/.*?/score',
@@ -143,8 +138,7 @@ describe('TableModel', function () {
 
         it('should add columns properties from spec', function () {
             var data = mock1Row2Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'name',
@@ -164,8 +158,7 @@ describe('TableModel', function () {
 
         it('should add cell properties from spec', function () {
             var data = mock1Row2Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'name',
@@ -185,8 +178,7 @@ describe('TableModel', function () {
 
         it('should add virtual column with specified model', function () {
             var data = mockSingleVendor();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: null,
@@ -203,8 +195,7 @@ describe('TableModel', function () {
 
         it('should add virtual cells with specified models', function () {
             var data = mockSingleVendor();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: null,
@@ -222,8 +213,8 @@ describe('TableModel', function () {
     describe('Group & sort', function () {
         it('should return groupBy value', function () {
             var data = mock3RowsForSorting();
-            TableModel.buildModel2(data);
-            var rows = TableModel.buildViewModel(TableModel.model).rows;
+            TableModel.buildModel(data);
+            var rows = TableModel.viewModel.rows;
 
             // by topic
             TableModel.getGroupByValue(rows[0], 'topic').should.equal('AAA');
@@ -238,8 +229,7 @@ describe('TableModel', function () {
 
         it('should sort on simple column keys', function () {
             var data = mock2Rows1Vendor();
-            TableModel.buildModel2(data);
-            TableModel.buildViewModel(TableModel.model);
+            TableModel.buildModel(data);
 
             var rows = TableModel.sortViewModel({'name': 'asc'}, null);
             rows[0][0].model.value.should.equal('abc'); //'abc' < 'xyz
@@ -248,8 +238,7 @@ describe('TableModel', function () {
 
         it('should sort on complex column keys', function () {
             var data = mock2Rows1Vendor();
-            TableModel.buildModel2(data);
-            TableModel.buildViewModel(TableModel.model);
+            TableModel.buildModel(data);
 
             TableModel.sortViewModel({'vendors/IBM/score': 'desc'}, null);
             var sel = TableModel.selectViewModel(function () {
@@ -261,8 +250,7 @@ describe('TableModel', function () {
 
         it('should sort by group first', function () {
             var data = mock3RowsForSorting();
-            TableModel.buildModel2(data);
-            TableModel.buildViewModel(TableModel.model);
+            TableModel.buildModel(data);
 
             var rows = TableModel.sortViewModel({'name': 'asc'}, 'topic');
             rows[0][0].model.value.should.equal('b'); //b > a, but it's group is null, so it's on top
@@ -275,11 +263,65 @@ describe('TableModel', function () {
 
     });
 
-    describe('Edit2', function () {
+    describe('Traversing', function () {
+
+        it('should traverse rows via cell obj', function () {
+            var data = mock3RowsForSorting();
+            TableModel.buildModel(data);
+            var rows = TableModel.viewModel.rows;
+            var row0 = rows[0];
+            var row1 = rows[1];
+            var row2 = rows[2];
+
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'name'
+                }];
+            });
+            var cell00 = sel.rows[0][0];
+            var cell10 = sel.rows[1][0];
+            var cell20 = sel.rows[2][0];
+
+            var next1 = TableModel.nextRowLike(cell00);
+            var next2 = TableModel.nextRowLike(cell10);
+            var next3 = TableModel.nextRowLike(cell20);
+
+            next1.should.equal(row1);
+            next2.should.equal(row2);
+            should.not.exist(next3);
+        });
+
+        it('should traverse sorted rows with predicate', function () {
+            var data = mock3RowsForSorting();
+            TableModel.buildModel(data);
+            TableModel.sortViewModel({'priority': 'desc'}, null);
+            var rows = TableModel.viewModel.rows;
+            var row0 = rows[0];
+            var row1 = rows[1];
+            var row2 = rows[2];
+
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: 'name'
+                }];
+            });
+            var cell00 = sel.rows[0][0];
+            var cell10 = sel.rows[1][0];
+            var cell20 = sel.rows[2][0];
+            var predicate = {key: 'priority', value: 'required'};
+
+            var next1 = TableModel.nextRowLike(cell00, predicate);
+            next1.should.equal(row1);
+
+            var next2 = TableModel.nextRowLike(cell10, predicate);
+            should.not.exist(next2); // oob
+        });
+    });
+
+    describe('Edit - save cell', function () {
         it('should generate non-vendor patch', function () {
             var data = mock1Row0Vendors();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'name'
@@ -298,8 +340,7 @@ describe('TableModel', function () {
 
         it('should generate existing vendor patch', function () {
             var data = mock2Rows1Vendor();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'vendors/.*?/value'
@@ -316,10 +357,9 @@ describe('TableModel', function () {
             patch[0].should.have.property('value').equal('123');
         });
 
-        it.only('should generate non-existign vendor patch', function () {
+        it('should generate non-existing vendor patch', function () {
             var data = mock2Rows1Vendor();
-            TableModel.buildModel2(data);
-            TableModel.viewModel = null; // force rebuild
+            TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
                     selector: 'vendors/.*?/value'
@@ -339,79 +379,56 @@ describe('TableModel', function () {
         });
     });
 
-    describe('Traversing', function () {
-        it('cell should rowIdx for traversal', function () {
-            var data = [
-                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
-                { name: '', description: '', topic: null, priority: 'required', vendors: [] }
-            ];
+    describe('Edit - add row', function () {
+        it('should add row to empty table', function () {
+            var data = [];
             var model = TableModel.buildModel(data);
-            var row0 = model.rows[0];
-            var cell0 = row0[0];
+            var patch = TableModel.addRowLike(null);
 
-            cell0.rowIdx().should.equal(0);
+            patch[0].op.should.equal('add');
+            patch[0].path.should.equal('/criteria/0');
+            patch[0].value.should.have.property('name').equal('');
+            patch[0].value.should.have.property('priority').equal('required');
+
+            var cell00 = TableModel.viewModel.rows[0][0];
+            cell00.should.have.property('field').equal('name');
         });
 
-        it('should traverse rows via cell obj', function () {
-            var data = [
-                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
-                { name: '', description: '', topic: null, priority: 'required', vendors: [] }
-            ];
+        it('should add row to non-empty table', function () {
+            var data = mock1Row0Vendors();
             var model = TableModel.buildModel(data);
-            var row0 = model.rows[0];
-            var row1 = model.rows[1];
-            var cell00 = row0[0];
-            var cell10 = row1[0];
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: ['name','priority']
+                }];
+            });
+            var cell00 = sel.rows[0][0];
 
-            var next1 = TableModel.nextRowLike(cell00);
-            next1.should.equal(row1);
+            var patch = TableModel.addRowLike(cell00);
 
-            var next2 = TableModel.nextRowLike(cell10);
-            should.not.exist(next2); // oob
+            patch[0].op.should.equal('add');
+            patch[0].path.should.equal('/criteria/1');
+            patch[0].value.should.have.property('name').equal('');
+            patch[0].value.should.have.property('priority').equal('optional');
+
+            var cell10 = TableModel.viewModel.rows[1][0];
+            cell10.should.have.property('field').equal('name');
         });
 
-        it('should traverse rows with predicate', function () {
-            var data = [
-                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
-                { name: '', description: '', topic: null, priority: 'required', vendors: [] },
-                { name: '', description: '', topic: null, priority: 'optional', vendors: [] }
-            ];
+        it('newly added row should have justAdded prop', function () {
+            var data = mock1Row0Vendors();
             var model = TableModel.buildModel(data);
-            var row0 = model.rows[0];
-            var row1 = model.rows[1];
-            var cell00 = row0[0];
-            var cell10 = row1[0];
-            var predicate = {key: 'priority', value: 'required'};
+            var sel = TableModel.selectViewModel(function () {
+                return [{
+                    selector: ['name','priority']
+                }];
+            });
+            var cell00 = sel.rows[0][0];
 
-            var next1 = TableModel.nextRowLike(cell00, predicate);
-            next1.should.equal(row1);
+            var patch = TableModel.addRowLike(cell00);
 
-            var next2 = TableModel.nextRowLike(cell10, predicate);
-            should.not.exist(next2); // oob
-        });
-    });
-
-
-    describe('Edits', function () {
-        it('should add row', function () {
-            var data = [
-                { name: 'aaa', description: '', topic: 'AAA', priority: 'required', vendors: [] },
-                { name: '', description: '', topic: null, priority: 'optional', vendors: [] }
-            ];
-            var model = TableModel.buildModel(data);
-            var row0 = model.rows[0];
-            var row1 = model.rows[1];
-            var cell00 = row0[0];
-            var cell10 = row1[0];
-
-            TableModel.addRowLike(cell00);
-            var newRow = model.rows[1];
-            newRow[0].rowIdx().should.equal(1); // new row has correct idx
-            newRow[0].criteria.topic.should.equal('AAA'); // new row inherits some props
-            newRow[0].criteria.priority.should.equal('required');
-            newRow[0].criteria.name.should.equal(''); // others are empty
-
-            cell10.rowIdx().should.equal(2); // row after added has index changed
+            var cell10 = TableModel.viewModel.rows[1][0];
+            cell10.should.have.property('justAdded').equal(true);
         });
     })
 });
@@ -427,7 +444,7 @@ function mockSingleVendor() {
 
 function mock1Row0Vendors() {
     return [
-        { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
+        { name: 'abc', description: '', topic: null, priority: 'optional', vendors: [] }
     ];
 }
 
@@ -473,3 +490,12 @@ function mock3RowsForSorting() {
         { name: 'c', description: '', topic: 'AAA', priority: 'required', vendors: [] }
     ]
 }
+
+/*
+function mock3RowsForTraverse() {
+    return [
+        { name: '', description: '', topic: 'AAA', priority: 'required', vendors: [] },
+        { name: '', description: '', topic: 'AAA', priority: 'required', vendors: [] },
+        { name: '', description: '', topic: null, priority: 'required', vendors: [] }
+    ];
+}*/

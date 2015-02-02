@@ -27,7 +27,7 @@ function psTableView($timeout) {
             function onCellKeydown(cell, evt) {
                 var isTab = (evt.keyCode === 9) && !evt.shiftKey; // TAB w/o Shift
                 if (isTab) {
-                    if (scope.view.addRowOnTab(cell.model)) {
+                    if (scope.view.addRowOnTab(cell)) {
                         return evt.preventDefault();
                     }
                 }

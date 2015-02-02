@@ -68,7 +68,8 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
                 },
                 cell: {
                     editable: true,
-                    type: 'popup'
+                    type: 'popup',
+                    noMenu: true
                 }
             }
         ];
@@ -234,10 +235,10 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
         // otherwise it remains open
         $timeout(function () {
             if (action === 'remove') {
-                view.removeRow(cell.model);
+                view.removeRow(cell);
             }
             else if (action === 'add') {
-                view.addRowLike(cell.model);
+                view.addRowLike(cell);
             }
         }, 0, false);
 

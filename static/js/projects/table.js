@@ -322,15 +322,15 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 prevCell = nextRow[0];
             }
 
-            var res = TableModel.addRowLike(prevCell);
-            svc.patchCriteria(projectId, res.patches);
+            var patch = TableModel.addRowLike(prevCell);
+            svc.patchCriteria(projectId, patch);
             svc.reload();
         }
 
         function addRowOnTab(cell) {
             var added = false;
             var model = cell.model;
-            var lastCol = (model.field === 'description');
+            var lastCol = (model.key === 'description');
 
             if (lastCol) {
                 var predicate = getAlikePredicate(model);
@@ -346,8 +346,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         }
 
         function addEmptyRow() {
-            var res = TableModel.addRowLike(null);
-            svc.patchCriteria(projectId, res.patches);
+            var patch = TableModel.addRowLike(null);
+            svc.patchCriteria(projectId, patch);
             svc.reload();
         }
 

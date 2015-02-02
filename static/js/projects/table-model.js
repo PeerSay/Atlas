@@ -73,7 +73,7 @@ function TableModel($filter, _, jsonpatch) {
     // Traverse
     //
     function nextRowLike(cell, predicate) {
-        var nextIdx = cell.rowIdx + 1;
+        var nextIdx = cell.rowIdx() + 1;
         var groupedRows = [];
         _.forEach(T.viewModel.rows, function (row) {
             var crit = row[0].model.criteria;
@@ -104,7 +104,7 @@ function TableModel($filter, _, jsonpatch) {
 
     function addRowLike(cell) {
         var crit = cell ? cell.model.criteria : null;
-        var newIdx = cell ? cell.rowIdx + 1 : 0;
+        var newIdx = cell ? cell.rowIdx() + 1 : 0;
 
         T.viewModel.addRow(crit, newIdx);
 
@@ -115,7 +115,7 @@ function TableModel($filter, _, jsonpatch) {
     }
 
     function removeRow(cell) {
-        var rowIdx = cell.rowIdx;
+        var rowIdx = cell.rowIdx();
         T.viewModel.removeRow(rowIdx);
 
         var patch = jsonpatch.generate(T.patchObserver);
@@ -588,7 +588,11 @@ function TableModel($filter, _, jsonpatch) {
                     var cell = _.findWhere(row, {colId: col.id}); // cannot be found for virtual cols
                     viewCell.model = cell.model;
                     viewCell.id = cell.id();
-                    viewCell.rowIdx = cell.rowIdx();
+                    viewCell.rowIdx = cell.rowIdx;
+                    if (cell.justAdded && col.spec.cell.editable) {
+                        viewCell.justAdded = cell.justAdded;
+                        delete cell.justAdded;
+                    }
                 }
                 else if (col.spec.cellModels) {
                     //cell manages several models (Popup case)
@@ -635,7 +639,7 @@ function TableModel($filter, _, jsonpatch) {
             //update model first
             var row = T.model.addRow(crit);
             V.rows.splice(idx, 0, buildRow(row));
-            V.rows[idx][0].justAdded = true; // TODO - doesn't work
+            V.rows[idx][0].justAdded = true;
         }
 
         function removeRow(idx) {

@@ -55,7 +55,7 @@
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
                     class="cell {{::cell.type}}"
-                    ng-class="{ 'edited': cell.edited, 'exists': cell.model.exists }"
+                    ng-class="{ 'edited': cell.edited }"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
                     data-target="{{view.menu.id}}">

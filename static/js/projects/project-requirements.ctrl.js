@@ -89,129 +89,6 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
         return spec;
     }
 
-    /////////////////////////////////////////
-
-    function toNormViewData() {
-        var groupBy = m.groupBy.get();
-        var model = TableModel.selectColumns([
-            { field: 'name' },
-            {field: groupBy}
-        ]);
-        var data = {
-            columns: [],
-            rows: []
-        };
-
-        // Columns: Criteria, [Topic|Priority](hidden - need for grouping)
-        _.forEach(model.columns, function (col) {
-            data.columns.push({
-                model: col,
-                visible: (col.field === 'name'),
-                editable: false,
-                sortable: false
-            })
-        });
-
-        //Rows
-        _.forEach(model.rows, function (row) {
-            var resRow = [];
-            _.forEach(row, function (cell, i) {
-                resRow.push({
-                    model: cell,
-                    visible: data.columns[i].visible,
-                    editable: false,
-                    type: 'ordinary',
-                    emptyValue: 'No name?'
-                });
-            });
-            data.rows.push(resRow);
-        });
-
-        return data;
-    }
-
-    function toFullViewData() {
-        var model = TableModel.selectColumns([
-            { field: 'name' },
-            {field: 'description'},
-            {field: 'topic'},
-            {field: 'priority'}
-        ]);
-        var data = {
-            columns: [],
-            rows: []
-        };
-
-        // Columns: Criteria, Description, [Topic, Priority], <empty>
-        _.forEach(model.columns, function (col) {
-            data.columns.push({
-                model: col,
-                visible: isVisibleCol(col),
-                editable: false,
-                sortable: true
-            })
-        });
-        // last is empty
-        data.columns.push({
-            model: {}, // TODO
-            visible: true,
-            editable: false,
-            sortable: false,
-            last: true
-        });
-
-        //Rows
-        _.forEach(model.rows, function (row) {
-            var resRow = [];
-            _.forEach(row, function (cell, i) {
-                resRow.push({
-                    model: cell,
-                    visible: data.columns[i].visible,
-                    editable: filter(/name|description/)(cell.field),
-                    type: cellType(cell.field),
-                    justAdded: cell.justAdded
-                });
-                delete cell.justAdded;
-            });
-            // last row -- popoup
-            resRow.push({
-                model: {}, // not used view, but accessed by groupBy()
-                models: { //edits 2 models
-                    topic: row[2],
-                    priority: row[3]
-                },
-                visible: true,
-                editable: true,
-                type: 'popup',
-                noMenu: true
-            });
-            data.rows.push(resRow);
-        });
-
-        return data;
-
-        function isVisibleCol(col) {
-            if (!m.compactTable) { return true; }
-            return !filter(/topic|priority/)(col.field); // hide topic/priority in compact view
-        }
-
-        function cellType(val) {
-            if (filter(/name|description/)(val)) {
-                return 'multiline';
-            }
-            if (filter(/topic|priority/)(val)) {
-                return 'static';
-            }
-        }
-
-        function filter(re) {
-            return function (val) {
-                return re.test(val);
-            }
-        }
-    }
-
-
     //Menu
     m.menu = {
         id: 'er-context-menu',
@@ -275,7 +152,7 @@ function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) 
     function onFullView() {
         var rows = m.fullTableView.rows;
         if (rows.length === 1) {
-            rows[0][0].justAdded = 1;
+            rows[0][0].justAdded = true; // TODO - fix
         }
     }
 }

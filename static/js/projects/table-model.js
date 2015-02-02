@@ -53,8 +53,10 @@ function TableModel($filter, _, jsonpatch) {
     // Group & sort
     //
     function getGroupByValue(viewRow, groupBy) {
-        var criteria = viewRow[0].model.criteria;
-        //console.log('>>>>>groupBy [%s] crit=%O, returns: %s', curGroup, criteria, criteria[groupBy]);
+        var cell0 = viewRow[0];
+        var model = cell0.model || cell0.models.name; // virtual {name} col is added for empty Products table
+        var criteria = model.criteria;
+        //console.log('>>>>>groupBy [%s] crit=%O, returns: %s', groupBy, criteria, criteria[groupBy]);
         return criteria[groupBy];
     }
 
@@ -206,6 +208,7 @@ function TableModel($filter, _, jsonpatch) {
     function Model() {
         var M = {};
         M.criteria = null;
+        M.vendors = null;
         M.columns = {};
         M.rows = [];
         // API
@@ -225,6 +228,7 @@ function TableModel($filter, _, jsonpatch) {
 
         function build(data) {
             M.criteria = data;
+            M.vendors = getVendors().list;
             flatStruc = getFlatStruc(data); // private
             M.columns = buildColumns();
             M.rows = [];
@@ -267,9 +271,8 @@ function TableModel($filter, _, jsonpatch) {
                 res[val] = val;
             });
 
-            var vendors = getVendors().list;
             // TODO - escape key
-            _.forEach(vendors, function (val) {
+            _.forEach(M.vendors, function (val) {
                 res[['vendors', val, 'value'].join('/')] = val;
                 res[['vendors', val, 'score'].join('/')] = val;
             });
@@ -592,6 +595,7 @@ function TableModel($filter, _, jsonpatch) {
                     if (cell.justAdded && col.spec.cell.editable) {
                         viewCell.justAdded = cell.justAdded;
                         delete cell.justAdded;
+                        //console.log('>> Just added: ', viewCell);
                     }
                 }
                 else if (col.spec.cellModels) {

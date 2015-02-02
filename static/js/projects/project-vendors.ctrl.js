@@ -31,9 +31,9 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
         .sorting({active: true})
         .done();
 
-    function getNormalViewConfig() {
-        // Columns: Prod1, [Prod2, Prod3] | Products?
-        return [
+    function getNormalViewConfig(model) {
+        // Columns: Prod1, [Prod2, Prod3] | {Products}
+        var res = [
             {
                 selector: 'vendors/.*?/value',
                 limit: 3,
@@ -43,7 +43,15 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
             }
         ];
 
-        //TODO - // Artificial column to show empty table?
+        var vendors = model.vendors;
+        if (!vendors.length) {
+            res.push({
+                selector: null,
+                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
+                cellModels: ['name'] // first cell is used for grouping and must have criteria
+            });
+        }
+         return res;
     }
 
     function getFullViewConfig() {

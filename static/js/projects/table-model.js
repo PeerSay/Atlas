@@ -512,7 +512,8 @@ function TableModel($filter, _, jsonpatch) {
              */
             var res = {
                 columns: [],
-                rows: []
+                rows: [],
+                watcher: null
             };
 
             //Columns
@@ -550,7 +551,7 @@ function TableModel($filter, _, jsonpatch) {
             //////
 
             function selectViewColumns(spec, sel) {
-                var res = [];
+                var cols = [];
                 if (sel !== null){
                     // find matching cols in ViewModel
                     _.forEach(V.columns, function (col) {
@@ -562,8 +563,25 @@ function TableModel($filter, _, jsonpatch) {
                             id: col.id, // TODO -fn
                             visible: true
                         };
+
+                        if (spec.footer) {
+                            // new obj for each col because spec obj would be shared
+                            viewCol.footer = {
+                                value: spec.footer.value,
+                                key: col.key,
+                                aggregate: spec.footer.aggregate,
+                                watch: spec.footer.watch
+                            };
+                            if (spec.footer.watch) {
+                                // create Watcher if any column has footer
+                                res.watcher = res.watcher || Watcher();
+                                console.log('>>> Register watcher for', col.key);
+                                res.watcher.register(col.key);
+                            }
+                        }
+
                         // extend viewModel with requested props & spec to use it later on cells
-                        res.push(angular.extend(viewCol, spec.column, {spec: spec}));
+                        cols.push(angular.extend(viewCol, spec.column, {spec: spec}));
                     });
                 }
                 else {
@@ -578,9 +596,9 @@ function TableModel($filter, _, jsonpatch) {
                         virtualCol.model = spec.columnModel;
                     }
                     // extend viewModel with requested props & spec to use it later on cells
-                    res.push(angular.extend(virtualCol, spec.column, {spec: spec}));
+                    cols.push(angular.extend(virtualCol, spec.column, {spec: spec}));
                 }
-                return res;
+                return cols;
             }
 
             function selectViewCell(col, row) {
@@ -596,6 +614,10 @@ function TableModel($filter, _, jsonpatch) {
                         viewCell.justAdded = cell.justAdded;
                         delete cell.justAdded;
                         //console.log('>> Just added: ', viewCell);
+                    }
+
+                    if (col.footer && col.footer.watch) {
+                        res.watcher.addModel(col.key, cell.model);
                     }
                 }
                 else if (col.spec.cellModels) {
@@ -654,6 +676,86 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         return V;
+    }
+
+    //Watcher class
+    function Watcher() {
+        var W = {};
+        W.register = register;
+        W.addModel = addModel;
+        W.digest = digest;
+        W.apply = apply;
+
+        var map = {};
+        var changedKey = '';
+        var changedStr = '';
+
+        function register(key) {
+            map[key] = ColWatcher();
+        }
+
+        function addModel(key, m) {
+            // Called while traversing rows on select
+            map[key].add(m);
+        }
+
+        function digest() {
+            // Called every time any change happens on model
+            // TODO - prevent calls w/o value changes
+            var sortedKeys = Object.keys(map).sort(); // ensures 'weight' is last and will trigger initial update
+            _.forEach(sortedKeys, function (key) {
+                var watcher = map[key];
+                var str = watcher.digest();
+                //console.log('>> Digest for [%s]: ', key, str);
+                if (str !== watcher.str) {
+                    changedKey = key;
+                    changedStr = str;
+                    watcher.str = str;
+                }
+            });
+            var res = {
+                key: changedKey,
+                str: changedStr // unused but required to trigger apply for several changes on same col
+            };
+            //console.log('>> Digest return: ', res);
+            return res;
+        }
+
+        function apply(footer, changedKey) {
+            // Called by $watch listenerFn for every column.footer
+            // when value returned by digest is different than previous
+
+            var colChanged = (changedKey === footer.key || changedKey === 'weight');
+            if (footer.aggregate && colChanged) {
+                console.log('>>Apply due [%s] for [%s], values: ', changedKey, footer.key, map[footer.key].values, map['weight'].values);
+
+                footer.value = footer.aggregate(map[footer.key].values, map['weight'].values);
+            }
+        }
+
+        function ColWatcher() {
+            var C = {};
+            C.values = [];
+            C.str = '';
+            C.add = add;
+            C.digest = digest;
+
+            var models = [];
+
+            function add(m) {
+                models.push(m);
+            }
+
+            function digest() {
+                C.values = _.map(models, function (m) {
+                    return m.value;
+                });
+                return C.values.join('');
+            }
+            return C;
+        }
+
+        return W;
     }
 
     return T;

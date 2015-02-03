@@ -77,6 +77,16 @@
                             ps-focus-on="cell.justAdded"
                             ></textarea>
                 </div>
+                <div ng-if="cell.editable && cell.type === 'number'">
+                    <input type="number" class="form-control cell-input"
+                            name="{{::cell.id}}"
+                            ng-model="cell.model.value"
+                            min="0" max="10"
+                            ng-focus="onCellFocus(cell)"
+                            ng-blur="onCellBlur(cell)"
+                            ng-keydown="onCellKeydown(cell, $event)"
+                            />
+                </div>
                 <div ng-if="cell.type === 'popup'">
                     <ps-table-popover
                             ps-container="td"
@@ -135,5 +145,16 @@
                         ng-click="view.addEmptyRow()">Click to add</span>
             </td>
         </tr>
+        <!--Footer-->
+        <tfoot>
+        <tr>
+            <th ng-repeat="col in view.columns"
+                    ng-class="view.runtimeFooterClass(col)"
+                    ng-show="col.footer"
+                    >
+                <div>{{ col.footer.value }}</div>
+            </th>
+        </tr>
+        </tfoot>
     </table>
 </ng-form>

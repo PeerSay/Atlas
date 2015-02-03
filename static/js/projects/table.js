@@ -60,8 +60,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
     function toData(projectId, name) {
         return readCriteria(projectId)
-            .then(function (model) {
-                //return views[name].toData(model);
+            .then(function () {
                 return TableModel.selectViewModel(views[name].configFn);
             });
     }
@@ -171,13 +170,14 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         function getData($defer) {
             svc.toData(projectId, name)
-                .then(function (data) {
+                .then(function (viewModel) {
                     //var rows = V.sort(data.rows);
 
-                    V.columns = data.columns;
-                    V.rows = data.rows;
+                    V.columns = viewModel.columns;
+                    V.rows = viewModel.rows;
+                    V.watcher = viewModel.watcher;
 
-                    $defer.resolve(data.rows);
+                    $defer.resolve(V.rows);
                 });
         }
 

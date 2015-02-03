@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel', 'Util'];
-function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table'];
+function ProjectRequirementsCtrl($scope, $timeout, Tiles, Table) {
     var m = this;
 
     m.tile = $scope.$parent.tile;

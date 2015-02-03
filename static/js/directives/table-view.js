@@ -2,16 +2,17 @@ angular
     .module('peersay')
     .directive('psTableView', psTableView);
 
-psTableView.$inject = ['$timeout'];
-function psTableView($timeout) {
+psTableView.$inject = ['$timeout', 'Util'];
+function psTableView($timeout, _) {
     return {
         restrict: 'E',
         templateUrl: 'html/table-view.html',
         scope: {
             view: '=psView'
         },
-        link: function (scope, element, attrs, ctrls, transcludeFn) {
-            var formModel = scope['form' + scope.view.name];
+        link: function (scope) {
+            var view = scope.view;
+            var formModel = scope['form' + view.name];
 
             scope.onCellKeydown = onCellKeydown;
             scope.onCellFocus = onCellFocus;
@@ -20,6 +21,22 @@ function psTableView($timeout) {
             scope.onColBlur = onColBlur;
             scope.getInput = getInput;
 
+            // TODO - better filter, less impact
+            if (view.name === 'sh-full') {
+                scope.$watch(function () {
+                    return view.watcher && view.watcher.digest();
+                }, function (newObj, oldObj) {
+                    //console.log('>> Watch changed: old=%s, new=%s', oldObj, newObj);
+
+                    _.forEach(view.columns, function (col) {
+                        if (col.footer) {
+                            //console.log('>> Applying for each col key:', col.footer.key);
+                            view.watcher.apply(col.footer, newObj.key);
+                        }
+                    });
+                }, true);
+            }
+
             function getInput(colOrCell) {
                 return formModel[colOrCell.id]
             }
@@ -27,7 +44,7 @@ function psTableView($timeout) {
             function onCellKeydown(cell, evt) {
                 var isTab = (evt.keyCode === 9) && !evt.shiftKey; // TAB w/o Shift
                 if (isTab) {
-                    if (scope.view.addRowOnTab(cell)) {
+                    if (view.addRowOnTab(cell)) {
                         return evt.preventDefault();
                     }
                 }
@@ -43,7 +60,7 @@ function psTableView($timeout) {
                 var input = getInput(cell);
                 var modified = input.$dirty;
                 if (modified) {
-                    scope.view.saveCell(cell.model);
+                    view.saveCell(cell.model);
                     input.$setPristine();
                 }
             }
@@ -72,7 +89,7 @@ function psTableView($timeout) {
                     col.model.value = !col.last ? col.model.field : '';
                     input.$setPristine();
                 } else if (modified) {
-                    scope.view.saveColumnCell(col);
+                    view.saveColumnCell(col);
                     input.$setPristine();
                 }
             }

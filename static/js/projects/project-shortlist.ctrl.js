@@ -1,8 +1,8 @@
 angular.module('peersay')
-    .controller('ProjectVendorsCtrl', ProjectVendorsCtrl);
+    .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
 
-ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table'];
-function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
+ProjectShortlistCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'Util'];
+function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -19,29 +19,31 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     // Table views
     m.groupBy = Table.groupBy;
 
-    m.normalTableView = Table.addView(m, 'vi-norm', getNormalViewConfig)
+    m.normalTableView = Table.addView(m, 'sh-norm', getNormalViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'vi-full', getFullViewConfig)
+    m.fullTableView = Table.addView(m, 'sh-full', getFullViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
 
     function getNormalViewConfig(model) {
-        // Columns: Prod1, [Prod2, Prod3] | {Products}
+        // Columns: Score1, [Score2, Score3] | {Products}
         var res = [
             {
-                selector: 'vendors/.*?/value',
+                selector: 'vendors/.*?/score',
                 limit: 3,
                 cell: {
                     type: 'ordinary'
                 }
             }
         ];
+
+        //TODO - extra row: Total scores
 
         var vendors = model.vendors;
         if (!vendors.length) {
@@ -55,7 +57,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     }
 
     function getFullViewConfig() {
-        // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}
+        // Columns: Criteria, Score1, [Score2, Score3, ...]
         return [
             {
                 selector: 'name',
@@ -64,32 +66,44 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                 },
                 cell: {
                     type: 'static'
-                }
+                },
+                footer: { value: '', watch: false }
             },
             {
-                selector: 'vendors/.*?/value',
+                selector: 'weight',
                 column: {
-                    editable: true,
                     sortable: true
                 },
                 cell: {
                     editable: true,
-                    type: 'multiline'
-                }
+                    type: 'number'
+                },
+                footer: { value: 'Total:', watch: true }
             },
             {
-                selector: null, // virtual
-                columnModel: { field: '...', value: ''}, // addNew
+                selector: 'vendors/.*?/score',
                 column: {
-                    editable: true,
-                    placeholder: 'Add product...',
-                    last: true
+                    sortable: true
                 },
                 cell: {
-                    type: 'static'
-                }
+                    editable: true,
+                    type: 'number'
+                },
+                footer: {value: '--', watch: true, aggregate: aggregateColumnScore}
             }
         ];
+
+        //TODO - extra row: Total scores
+    }
+
+    function aggregateColumnScore(scores, weights) {
+        var grade = 0, weightTot = 0;
+        _.forEach(scores, function (score, i) {
+            weightTot += weights[i];
+            grade += score * weights[i];
+        });
+        grade = Math.round(grade / weightTot * 100); // ok?
+        return grade;
     }
 
     //Menu
@@ -122,7 +136,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     }
 
     function menuItemEnabled(item) {
-        var cell = this.context && this.context.cell;
+        /*var cell = this.context && this.context.cell;
         if (!cell) { return true; }
 
         if (item === 'remove') {
@@ -130,13 +144,8 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                 // disable remove on non-vendor columns
                 return false;
             }
-        }
+        }*/
         return true;
-    }
-
-    function inviteToEdit(view) {
-        var addCol = view.columns[view.columns.length - 1]; //last is addNew
-        addCol.edited = true; // invite to edit
     }
 
 
@@ -160,9 +169,9 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     }
 
     function onFullView() {
-        var view = m.fullTableView;
+        /*var view = m.fullTableView;
         if (view.rows.length === 1 &&  view.columns.length === 3) {
             inviteToEdit(view);
-        }
+        }*/
     }
 }

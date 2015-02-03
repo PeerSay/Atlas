@@ -102,7 +102,7 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
             weightTot += weights[i];
             grade += score * weights[i];
         });
-        grade = Math.round(grade / weightTot * 100); // weighted average
+        grade = weightTot ? Math.round(grade / weightTot * 100) : 0; // weighted average
         return grade;
     }
 

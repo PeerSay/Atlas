@@ -180,7 +180,11 @@ module.exports = function (grunt) {
                     'bower_components/bootstrap/dist/fonts/*.*',
                     'bower_components/font-awesome/css/font-awesome.{css,min.css}',
                     'bower_components/font-awesome/fonts/*.*',
-                    'html/*.html'
+                    'html/*.html',
+                    'fonts/*.ttf',
+                    'images/*.{png,jpg}',
+                    'style.css'
+
                 ],
                 dest: 'dist/'
             },

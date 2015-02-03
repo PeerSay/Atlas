@@ -273,8 +273,8 @@ function RestApi(app) {
     /**
      * Patch format (see rfc6902):
      * [
-     *  {"op":"replace", "path":"/criteria/0/vendors/0/value", "value":2},
-     *  {"op":"add", "path":"/criteria/1/vendors/-", "value":{"title":"IMB","value":1}},
+     *  {"op":"replace", "path":"/criteria/0/vendors/0/input", "value":2},
+     *  {"op":"add", "path":"/criteria/1/vendors/-", "value":{"title":"IMB","input":1}},
      *  ...
      * ]
      * */

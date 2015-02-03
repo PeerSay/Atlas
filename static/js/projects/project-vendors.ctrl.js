@@ -35,7 +35,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
         // Columns: Prod1, [Prod2, Prod3] | {Products}
         var res = [
             {
-                selector: 'vendors/.*?/value',
+                selector: 'vendors/.*?/input',
                 limit: 3,
                 cell: {
                     type: 'ordinary'
@@ -67,7 +67,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
                 }
             },
             {
-                selector: 'vendors/.*?/value',
+                selector: 'vendors/.*?/input',
                 column: {
                     editable: true,
                     sortable: true

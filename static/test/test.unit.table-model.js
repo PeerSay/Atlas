@@ -34,8 +34,8 @@ describe('TableModel', function () {
             var model = TableModel.buildModel(data);
 
             Object.keys(model.columns).should.have.length(7);
-            model.columns['vendors/IBM/value'].should.have.property('value').equal('IBM');
-            model.columns['vendors/IBM/value'].should.have.property('field').equal('IBM');
+            model.columns['vendors/IBM/input'].should.have.property('value').equal('IBM');
+            model.columns['vendors/IBM/input'].should.have.property('field').equal('IBM');
             model.columns['vendors/IBM/score'].should.have.property('value').equal('IBM');
             model.columns['vendors/IBM/score'].should.have.property('field').equal('IBM');
         });
@@ -45,7 +45,7 @@ describe('TableModel', function () {
             var model = TableModel.buildModel(data);
 
             Object.keys(model.columns).should.have.length(7);
-            model.columns['vendors/IBM/value'].should.have.property('value').equal('IBM');
+            model.columns['vendors/IBM/input'].should.have.property('value').equal('IBM');
         });
 
         it('should build rows', function () {
@@ -55,11 +55,11 @@ describe('TableModel', function () {
             Object.keys(model.rows).should.have.length(data.length);
             // 1st row - existing vendor
             model.rows[0]['name'].should.have.property('value').equal('xyz');
-            model.rows[0]['vendors/IBM/value'].should.have.property('value').equal('str');
+            model.rows[0]['vendors/IBM/input'].should.have.property('value').equal('str');
             model.rows[0]['vendors/IBM/score'].should.have.property('value').equal(1);
             // 2nd row - non-existing vendor
             model.rows[1]['name'].should.have.property('value').equal('abc');
-            model.rows[1]['vendors/IBM/value'].should.have.property('value').equal(null);
+            model.rows[1]['vendors/IBM/input'].should.have.property('value').equal(null);
             model.rows[1]['vendors/IBM/score'].should.have.property('value').equal(null);
         });
 
@@ -106,7 +106,7 @@ describe('TableModel', function () {
             TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
-                    selector: 'vendors/.*?/value'
+                    selector: 'vendors/.*?/input'
                 }];
             });
 
@@ -343,7 +343,7 @@ describe('TableModel', function () {
             TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
-                    selector: 'vendors/.*?/value'
+                    selector: 'vendors/.*?/input'
                 }];
             });
             var cell = sel.rows[0][0];
@@ -353,7 +353,7 @@ describe('TableModel', function () {
             var patch = TableModel.saveCell(cell.model);
 
             patch[0].should.have.property('op').equal('replace');
-            patch[0].should.have.property('path').equal('/criteria/0/vendors/0/value');
+            patch[0].should.have.property('path').equal('/criteria/0/vendors/0/input');
             patch[0].should.have.property('value').equal('123');
         });
 
@@ -362,7 +362,7 @@ describe('TableModel', function () {
             TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
-                    selector: 'vendors/.*?/value'
+                    selector: 'vendors/.*?/input'
                 }];
             });
             var cell = sel.rows[1][0]; // no vendors here
@@ -373,7 +373,7 @@ describe('TableModel', function () {
 
             patch[0].should.have.property('op').equal('add');
             patch[0].should.have.property('path').equal('/criteria/1/vendors/0');
-            patch[0].value.should.have.property('value').equal('123');
+            patch[0].value.should.have.property('input').equal('123');
             patch[0].value.should.have.property('title').equal('IBM');
             patch[0].value.should.have.property('score').equal(0);
         });
@@ -485,7 +485,7 @@ describe('TableModel', function () {
             TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
-                    selector: 'vendors/.*?/value'
+                    selector: 'vendors/.*?/input'
                 }];
             });
             var col0 = sel.columns[0];
@@ -500,7 +500,7 @@ describe('TableModel', function () {
             TableModel.buildModel(data);
             var sel = TableModel.selectViewModel(function () {
                 return [{
-                    selector: 'vendors/.*?/value'
+                    selector: 'vendors/.*?/input'
                 }];
             });
             var col0 = sel.columns[0];
@@ -552,7 +552,7 @@ describe('TableModel', function () {
 function mockSingleVendor() {
     return [
         { name: 'abc', description: '', topic: null, priority: 'required', vendors: [
-            { title: 'IBM', value: 'str', score: 1 }
+            { title: 'IBM', input: 'str', score: 1 }
         ] }
     ];
 }
@@ -566,7 +566,7 @@ function mock1Row0Vendors() {
 function mock2Rows1Vendor() {
     return [
         { name: 'xyz', description: '', topic: 'AAA', priority: 'required', vendors: [
-            { title: 'IBM', value: 'str', score: 1 }
+            { title: 'IBM', input: 'str', score: 1 }
         ] },
         { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
     ]
@@ -576,12 +576,12 @@ function mock2Rows2Vendors() {
     return [
         { name: '', description: '', topic: null, priority: 'required',
             vendors: [
-                { title: 'IBM', value: 'str', score: 1 }
+                { title: 'IBM', input: 'str', score: 1 }
             ]
         },
         { name: '', description: '', topic: null, priority: 'required',
             vendors: [
-                { title: 'IBM', value: 'str2', score: 2 }
+                { title: 'IBM', input: 'str2', score: 2 }
             ]
         }
     ];
@@ -592,7 +592,7 @@ function mock1Row2Vendors() {
     return [
         { name: '', description: '', topic: null, priority: 'required',
             vendors: [
-                { title: 'IBM', value: 'ibm', score: 1 }, { title: 'XP', value: 'xp', score: 2 }
+                { title: 'IBM', input: 'ibm', score: 1 }, { title: 'XP', input: 'xp', score: 2 }
             ]
         }
     ];
@@ -606,11 +606,3 @@ function mock3RowsForSorting() {
     ]
 }
 
-/*
-function mock3RowsForTraverse() {
-    return [
-        { name: '', description: '', topic: 'AAA', priority: 'required', vendors: [] },
-        { name: '', description: '', topic: 'AAA', priority: 'required', vendors: [] },
-        { name: '', description: '', topic: null, priority: 'required', vendors: [] }
-    ];
-}*/

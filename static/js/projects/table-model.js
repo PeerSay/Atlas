@@ -223,7 +223,7 @@ function TableModel($filter, _, jsonpatch) {
         M.removeColumn = removeColumn;
 
         // Format:
-        // { name: 'name', ... , 'vendors/IBM/value': 'IMB', 'vendors/IBM/score': 'IMB', ...}
+        // { name: 'name', ... , 'vendors/IBM/input': 'IMB', 'vendors/IBM/score': 'IMB', ...}
         var flatStruc = null;
 
         function build(data) {
@@ -273,9 +273,10 @@ function TableModel($filter, _, jsonpatch) {
 
             // TODO - escape key
             _.forEach(M.vendors, function (val) {
-                res[['vendors', val, 'value'].join('/')] = val;
+                res[['vendors', val, 'input'].join('/')] = val;
                 res[['vendors', val, 'score'].join('/')] = val;
             });
+
             //console.log('>>Flat: ', res);
             return res;
         }
@@ -406,7 +407,7 @@ function TableModel($filter, _, jsonpatch) {
         function getNewVendor(title) {
             return {
                 title: title,
-                value: '',
+                input: '',
                 score: 0
             };
         }
@@ -461,7 +462,7 @@ function TableModel($filter, _, jsonpatch) {
                 });
 
                 if (isWatchedCol(key)) {
-                    console.log('>>> Register watcher for', key);
+                    //console.log('>>> Register watcher for', key);
                     V.watcher.register(key);
                 }
             });
@@ -641,7 +642,7 @@ function TableModel($filter, _, jsonpatch) {
             function match(col, sel) {
                 // col may be:
                 // {.., key: 'name'}, -> matched by 'name'
-                // {.., key: '/vendors/IMB/value'} -> -> matched by '/vendors/.*?/value' // TODO: '/' in vendor title -- need to escape
+                // {.., key: '/vendors/IMB/input'} -> -> matched by '/vendors/.*?/input' // TODO: '/' in vendor title -- need to escape
                 var re = new RegExp(sel);
                 //console.log('>>>Matching', col, sel, re.test(col.key));
                 return re.test(col.key);

@@ -59,7 +59,7 @@ var projectSchema = new Schema({
             vendors: [
                 {
                     title: { type: String, required: true },
-                    value: { type: String },
+                    input: { type: String },
                     score: { type: Number, min: 0, max: 10, default: 0 }
                 }
             ]

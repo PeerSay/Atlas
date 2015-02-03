@@ -21,9 +21,9 @@ function psTableView($timeout, _) {
             scope.onColBlur = onColBlur;
             scope.getInput = getInput;
 
-            // TODO - better filter, less impact
-            if (view.name === 'sh-full') {
+            if (view.watched) {
                 scope.$watch(function () {
+                    // TODO perf - less impact
                     return view.watcher && view.watcher.digest();
                 }, function (newObj, oldObj) {
                     //console.log('>> Watch changed: old=%s, new=%s', oldObj, newObj);

@@ -430,6 +430,7 @@ function TableModel($filter, _, jsonpatch) {
         var V = {};
         V.columns = [];
         V.rows = [];
+        V.watcher = Watcher();
         // API
         V.build = build;
         V.select = select;
@@ -454,9 +455,15 @@ function TableModel($filter, _, jsonpatch) {
             _.forEach(modelColumns, function (model, key) {
                 res.push({
                     model: model,
+                    footer: { value: '', key: key }, // shared model
                     key: key,
-                    id: 'col-' + (colIdx++) // TODO- may change
+                    id: 'col-' + (colIdx++)
                 });
+
+                if (isWatchedCol(key)) {
+                    console.log('>>> Register watcher for', key);
+                    V.watcher.register(key);
+                }
             });
             return res;
         }
@@ -467,14 +474,23 @@ function TableModel($filter, _, jsonpatch) {
             _.forEach(modelRow, function (model, key) {
                 var cell = {
                     model: model,
-                    colId: 'col-' + cellIdx, // for select - to find col TODO- may change
+                    colId: 'col-' + cellIdx, // for select - to find col
                     id: cellIdFn(row, cellIdx),
                     rowIdx: rowIdxFn(row)
                 };
+
+                if (isWatchedCol(key)) {
+                    V.watcher.addModel(key, cell.model);
+                }
+
                 cellIdx++;
                 row.push(cell);
             });
             return row;
+        }
+
+        function isWatchedCol(key) {
+            return (key === 'weight' || /\/score$/.test(key));
         }
 
         function rowIdxFn(row) {
@@ -512,8 +528,7 @@ function TableModel($filter, _, jsonpatch) {
              */
             var res = {
                 columns: [],
-                rows: [],
-                watcher: null
+                rows: []
             };
 
             //Columns
@@ -560,23 +575,16 @@ function TableModel($filter, _, jsonpatch) {
                         var viewCol = {
                             model: col.model, // ref to model
                             key: col.key,
-                            id: col.id, // TODO -fn
+                            id: col.id, // TODO -fn?
                             visible: true
                         };
 
                         if (spec.footer) {
-                            // new obj for each col because spec obj would be shared
-                            viewCol.footer = {
-                                value: spec.footer.value,
-                                key: col.key,
-                                aggregate: spec.footer.aggregate,
-                                watch: spec.footer.watch
-                            };
-                            if (spec.footer.watch) {
-                                // create Watcher if any column has footer
-                                res.watcher = res.watcher || Watcher();
-                                console.log('>>> Register watcher for', col.key);
-                                res.watcher.register(col.key);
+                            viewCol.footer = col.footer; // shared model
+                            viewCol.footer.aggregate = spec.footer.aggregate;
+                            if (spec.footer.value) {
+                                // if value specified then assign it (for static text)
+                                viewCol.footer.value = spec.footer.value;
                             }
                         }
 
@@ -614,10 +622,6 @@ function TableModel($filter, _, jsonpatch) {
                         viewCell.justAdded = cell.justAdded;
                         delete cell.justAdded;
                         //console.log('>> Just added: ', viewCell);
-                    }
-
-                    if (col.footer && col.footer.watch) {
-                        res.watcher.addModel(col.key, cell.model);
                     }
                 }
                 else if (col.spec.cellModels) {

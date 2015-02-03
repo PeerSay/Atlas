@@ -29,6 +29,7 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
         //.debug() // opt
         .grouping()
         .sorting({active: true})
+        .watching() //!
         .done();
 
     function getNormalViewConfig(model) {
@@ -39,7 +40,8 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                 limit: 3,
                 cell: {
                     type: 'ordinary'
-                }
+                },
+                footer: { aggregate: aggregateColumnScore }
             }
         ];
 
@@ -67,7 +69,7 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                 cell: {
                     type: 'static'
                 },
-                footer: { value: '', watch: false }
+                footer: { value: '' }
             },
             {
                 selector: 'weight',
@@ -78,7 +80,7 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                     editable: true,
                     type: 'number'
                 },
-                footer: { value: 'Total:', watch: true }
+                footer: { value: 'Total:' }
             },
             {
                 selector: 'vendors/.*?/score',
@@ -89,11 +91,9 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                     editable: true,
                     type: 'number'
                 },
-                footer: {value: '--', watch: true, aggregate: aggregateColumnScore}
+                footer: { aggregate: aggregateColumnScore }
             }
         ];
-
-        //TODO - extra row: Total scores
     }
 
     function aggregateColumnScore(scores, weights) {
@@ -102,52 +102,9 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
             weightTot += weights[i];
             grade += score * weights[i];
         });
-        grade = Math.round(grade / weightTot * 100); // ok?
+        grade = Math.round(grade / weightTot * 100); // weighted average
         return grade;
     }
-
-    //Menu
-    m.menu = {
-        id: 'vi-context-menu',
-        context: null,
-        view: m.fullTableView,
-        setContext: function (context) {
-            this.context = context;
-        },
-        enabled: menuItemEnabled,
-        doAction: menuDoAction
-    };
-    m.fullTableView.menu = m.menu; // expose to Table directive
-
-    function menuDoAction(action) {
-        if (!this.enabled(action)) { return; }
-
-        var view = this.view;
-        var cell = this.context.cell;
-
-        $timeout(function () {
-            if (action === 'remove') {
-                view.removeColumn(cell.model);
-            }
-            else if (action === 'add'){
-                inviteToEdit(view);
-            }
-        }, 0, false);
-    }
-
-    function menuItemEnabled(item) {
-        /*var cell = this.context && this.context.cell;
-        if (!cell) { return true; }
-
-        if (item === 'remove') {
-            if (!(cell.model && /^vendors\//.test(cell.model.key))) {
-                // disable remove on non-vendor columns
-                return false;
-            }
-        }*/
-        return true;
-    }
-
 
     /////////////////////////////
 

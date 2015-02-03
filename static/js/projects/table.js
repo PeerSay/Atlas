@@ -139,6 +139,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         V.grouping = grouping;
         V.sorting = sorting;
         V.debug = debug;
+        V.watching = watching;
         V.done = done;
 
         // ngTable params
@@ -158,6 +159,13 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             return V;
         }
 
+        function watching() {
+            // enable $watch on any scope change
+            // requires V.watcher when it is ready in getData
+            V.watched = true;
+            return V;
+        }
+
         function done() {
             settings.getData = getData;
             V.tableParams = new ngTableParams(parameters, settings);
@@ -170,12 +178,10 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
         function getData($defer) {
             svc.toData(projectId, name)
-                .then(function (viewModel) {
-                    //var rows = V.sort(data.rows);
-
-                    V.columns = viewModel.columns;
-                    V.rows = viewModel.rows;
-                    V.watcher = viewModel.watcher;
+                .then(function (viewSel) {
+                    V.columns = viewSel.columns;
+                    V.rows = viewSel.rows;
+                    V.watcher = TableModel.viewModel.watcher;
 
                     $defer.resolve(V.rows);
                 });

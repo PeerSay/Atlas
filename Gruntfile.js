@@ -159,7 +159,8 @@ module.exports = function (grunt) {
                 },
                 files: {
                     "static/css/public.css": "static/css/public.less",
-                    "static/css/app.css": "static/css/app.less"
+                    "static/css/app.css": "static/css/app.less",
+                    "static/css/index.css": "static/css/index.less"
                 }
             }
         },
@@ -183,8 +184,7 @@ module.exports = function (grunt) {
                     'html/*.html',
                     'fonts/*.ttf',
                     'images/*.{png,jpg}',
-                    'style.css'
-
+                    'functions.js'
                 ],
                 dest: 'dist/'
             },

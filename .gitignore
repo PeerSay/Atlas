@@ -19,6 +19,9 @@ coverage
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 
+#staging
+dist
+
 # Dependency directory
 # Commenting this out is preferred by some people, see
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
@@ -44,3 +47,6 @@ bower_components
 
 # Local configs
 config.*.js
+
+#annoying WebStorm stuff
+.idea

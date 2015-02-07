@@ -454,17 +454,19 @@ function TableModel($filter, _, jsonpatch) {
             var res = [];
             var colIdx = 0;
             _.forEach(modelColumns, function (model, key) {
+                var footer = { value: '', key: key, computed: null }; // shared model - XXX
+
                 res.push({
                     model: model,
-                    footer: { value: '', key: key }, // shared model
                     key: key,
-                    id: 'col-' + (colIdx++)
+                    id: 'col-' + (colIdx++),
+                    footer: footer
                 });
 
-                if (isWatchedCol(key)) {
+                /*if (isWatchedCol(key)) {
                     //console.log('>>> Register watcher for', key);
                     V.watcher.register(key);
-                }
+                }*/
             });
             return res;
         }
@@ -475,14 +477,15 @@ function TableModel($filter, _, jsonpatch) {
             _.forEach(modelRow, function (model, key) {
                 var cell = {
                     model: model,
+                    key: key,
                     colId: 'col-' + cellIdx, // for select - to find col
                     id: cellIdFn(row, cellIdx),
                     rowIdx: rowIdxFn(row)
                 };
 
-                if (isWatchedCol(key)) {
+                /*if (isWatchedCol(key)) {
                     V.watcher.addModel(key, cell.model);
-                }
+                }*/
 
                 cellIdx++;
                 row.push(cell);
@@ -490,9 +493,9 @@ function TableModel($filter, _, jsonpatch) {
             return row;
         }
 
-        function isWatchedCol(key) {
+        /*function isWatchedCol(key) {
             return (key === 'weight' || /\/score$/.test(key));
-        }
+        }*/
 
         function rowIdxFn(row) {
             return function () {
@@ -581,11 +584,22 @@ function TableModel($filter, _, jsonpatch) {
                         };
 
                         if (spec.footer) {
-                            viewCol.footer = col.footer; // shared model
-                            viewCol.footer.aggregate = spec.footer.aggregate;
+                            viewCol.footer = {};
                             if (spec.footer.value) {
                                 // if value specified then assign it (for static text)
                                 viewCol.footer.value = spec.footer.value;
+                            }
+                            else if(spec.footer.computed) {
+                                viewCol.footer.model = {value: 0};
+
+                                // TODO - fix max() for footer:
+                                // We compute values on ViewModel, but:
+                                // - we don't know what to watch until the view is selected
+                                // - thus need to add computed fields to ViewModel here
+                                // - and prevent several selectedViews to overwrite it
+                                // it means selectedViews *must* specify the same footer spec for the selected cols
+
+                                viewCol.footer.computed = getComputedMethods(spec.footer.computed, viewCol);
                             }
                         }
 
@@ -614,21 +628,29 @@ function TableModel($filter, _, jsonpatch) {
                 var viewCell = {
                     visible: true
                 };
+                var spec = angular.copy(col.spec); // XXX - passed via col
+                var computedSpec = spec.cell.computed;
+                delete spec.cell.computed; // prevent overriding by extend() below
+
                 if (!col.virtual) {
                     var cell = _.findWhere(row, {colId: col.id}); // cannot be found for virtual cols
                     viewCell.model = cell.model;
                     viewCell.id = cell.id();
                     viewCell.rowIdx = cell.rowIdx;
-                    if (cell.justAdded && col.spec.cell.editable) {
+                    if (cell.justAdded && spec.cell.editable) {
                         viewCell.justAdded = cell.justAdded;
                         delete cell.justAdded;
                         //console.log('>> Just added: ', viewCell);
                     }
+
+                    if(computedSpec) {
+                        viewCell.computed = getComputedMethods(computedSpec, cell);
+                    }
                 }
-                else if (col.spec.cellModels) {
+                else if (spec.cellModels) {
                     //cell manages several models (Popup case)
                     viewCell.models = {};
-                    _.forEach(col.spec.cellModels, function (name) {
+                    _.forEach(spec.cellModels, function (name) {
                         var cell = _.find(row, function (viewCell) {
                             return (viewCell.model.key === name);
                         });
@@ -636,7 +658,7 @@ function TableModel($filter, _, jsonpatch) {
                     });
                 }
                 // extend viewModel with requested props
-                return angular.extend(viewCell, col.spec.cell);
+                return angular.extend(viewCell, spec.cell);
             }
 
             function match(col, sel) {
@@ -680,87 +702,164 @@ function TableModel($filter, _, jsonpatch) {
             T.model.removeRow(crit);
         }
 
-        return V;
-    }
-
-    //Watcher class
-    function Watcher() {
-        var W = {};
-        W.register = register;
-        W.addModel = addModel;
-        W.digest = digest;
-        W.apply = apply;
-
-        var map = {};
-        var changedKey = '';
-        var changedStr = '';
-
-        function register(key) {
-            map[key] = ColWatcher();
-        }
-
-        function addModel(key, m) {
-            // Called while traversing rows on select
-            map[key].add(m);
-        }
-
-        function digest() {
-            // Called every time any change happens on model
-            // TODO - prevent calls w/o value changes
-            var sortedKeys = Object.keys(map).sort(); // ensures 'weight' is last and will trigger initial update
-            _.forEach(sortedKeys, function (key) {
-                var watcher = map[key];
-                var str = watcher.digest();
-                //console.log('>> Digest for [%s]: ', key, str);
-                if (str !== watcher.str) {
-                    changedKey = key;
-                    changedStr = str;
-                    watcher.str = str;
-                }
+        // Watch/compute
+        function getComputedMethods(spec, cell) {
+            var res = {};
+            _.forEach(spec, function (arr, method) {
+                var getterSpec = arr[0];
+                var computeFn = arr[1];
+                res[method] = getComputeWatcher(cell, getterSpec, computeFn);
             });
-            var res = {
-                key: changedKey,
-                str: changedStr // unused but required to trigger apply for several changes on same col
-            };
-            //console.log('>> Digest return: ', res);
             return res;
         }
 
-        function apply(footer, changedKey) {
-            // Called by $watch listenerFn for every column.footer
-            // when value returned by digest is different than previous
+        function getComputeWatcher(cell, spec, computeFn) {
+            // spec formats:
+            // 'col' - watch for all vals in cells' column (Weight percents)
+            // 'col,col:weight' - watch for cells' column and columns with key=weight (Score totals)
+            // 'row~number' - watch for those vals in cells' row, that have type=number (Max in scores rows)
+            // 'footer' - watch for those computed vals in footer' row (Max in footer)
+            var watcher = V.watcher.getMatched(spec, cell);
 
-            var colChanged = (changedKey === footer.key || changedKey === 'weight');
-            if (footer.aggregate && colChanged) {
-                console.log('>>Apply due [%s] for [%s], values: ', changedKey, footer.key, map[footer.key].values, map['weight'].values);
+            return function () {
+                // This func is called on $digest for every cell/footer that has computed vals.
+                // It must return fast!
+                // Thus it:
+                // 1. gets previous value of computeFn and 'simple value' of all cols/rows per watcher
+                // 2. computes new 'simple value' (join) on every call and compares it tp previous
+                // 3. if not changed, then returns previous value of computeFn (most of the time)
+                // 4. otherwise, it calls computeFn and returns it's value
+                // -> this value is used by View
 
-                footer.value = footer.aggregate(map[footer.key].values, map['weight'].values);
-            }
+                //TODO
+                /*var res = watcher.value;
+                var prevSimple = watcher.simple;
+                var simple = watcher.getSimple();
+                if (simple !== prevSimple) {
+                    res = watcher.value = computeFn.apply(null, [].concat(cell.model.value, watcher.params()));
+                }
+                return res;*/
+
+                var val = cell.model.value; // TODO: footer computed value
+                return computeFn.apply(null, [].concat(val, watcher.watched()));
+            };
         }
 
-        function ColWatcher() {
-            var C = {};
-            C.values = [];
-            C.str = '';
-            C.add = add;
-            C.digest = digest;
+        function Watcher() {
+            var W = {};
+            W.getMatched = getMatched;
+            var watchers = {};
 
-            var models = [];
+            function getMatched(spec, cell) {
+                var parsed = parseSpec(spec, cell);
+                var uid = getUid(parsed);
+                //console.log('>>Watched uid: ', uid);
+                var cached = watchers[uid];
+                if (cached) { return cached; }
 
-            function add(m) {
-                models.push(m);
+                return (watchers[uid] = WatcherOne(parsed));
             }
 
-            function digest() {
-                C.values = _.map(models, function (m) {
-                    return m.value;
+            function parseSpec(specStr, cell) {
+                var specs = specStr.split(',');
+                var res = _.map(specs, function (spec) {
+                    return parseOne(spec, cell);
                 });
-                return C.values.join('');
+                return res;
             }
-            return C;
+
+            function parseOne(spec, cell) {
+                var kind = spec.split(/~|:/)[0];
+                var rowType = spec.split(/~/)[1] || null;
+                var colKey = spec.split(/:/)[1] || null;
+                var rowIdx = cell.rowIdx && cell.rowIdx();
+
+                var res = {
+                    kind : kind,
+                    colKey: (kind === 'col') ? (colKey || cell.key) : null,
+                    rowKey: (kind === 'row') ? {idx: rowIdx, type: rowType} : null
+                };
+                return res;
+            }
+
+            function getUid(parsed) {
+                return _.map(parsed, function (o) {
+                    return o.colKey ? ('col:' + o.colKey) :
+                        o.rowKey ? (['row', o.rowKey.idx, o.rowKey.type].join(':')) :
+                            'footer';
+                }).join('|');
+            }
+
+            return W;
         }
 
-        return W;
+        function WatcherOne(parsed) {
+            var W = {};
+            W.value = null;
+            W.simple = null;
+            W.getSimple = getSimple;
+            W.watched = getWatched;
+
+            var watched = [];
+
+            init();
+
+            function init() {
+                _.forEach(parsed, buildWatched);
+            }
+
+            function getWatched() {
+                return watched;
+            }
+
+            function buildWatched(specObj) {
+                var array;
+                if (specObj.kind === 'col'){
+                    array = getCol(specObj.colKey);
+                } else if (specObj.kind === 'row') {
+                    array = getRow(specObj.rowKey);
+                } else {
+                    array = getFooter();
+                }
+                watched.push(array);
+                //console.log('>>Got watcher: ', JSON.stringify(array));
+            }
+
+            function getCol(key) {
+                var res = _.map(V.rows, function (row) {
+                    return _.findWhere(row, {key : key}).model; // 1 cell
+                });
+                return res;
+            }
+
+            function getRow(rowKey) {
+                var res = _.map(V.rows[rowKey.idx], function (cell) {
+                    return (cell.key.indexOf(rowKey.type) >= 0) ? cell.model: null;
+                });
+                return res;
+            }
+
+            function getFooter() {
+                var res =_.map(V.columns, function (col) {
+                    return col.footer.computed ? col.footer.computed : null;
+                });
+                return res;
+            }
+
+            function getSimple() {
+                var res = '';
+                _.forEach(watched, function (arr) {
+                    res += _.map(arr, function (item) {
+                        return item.value;
+                    }).join('');
+                });
+                return (W.simple = res);
+            }
+
+            return W;
+        }
+
+        return V;
     }
 
     return T;

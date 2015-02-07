@@ -39,9 +39,17 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                 selector: 'vendors/.*?/score',
                 limit: 3,
                 cell: {
-                    type: 'ordinary'
+                    type: 'number-static',
+                    computed: {
+                        max: ['row~score', maxInRow]
+                    }
                 },
-                footer: { aggregate: aggregateColumnScore }
+                footer: {
+                    computed: {
+                        total: ['col,col:weight', aggregateColumnScore]/*,
+                        max: ['footer', maxFootInRow]*/
+                    }
+                }
             }
         ];
 
@@ -59,7 +67,7 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
     }
 
     function getFullViewConfig() {
-        // Columns: Criteria, Score1, [Score2, Score3, ...]
+        // Columns: Criteria, Weight, Score1, [Score2, Score3, ...]
         return [
             {
                 selector: 'name',
@@ -78,7 +86,10 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                 },
                 cell: {
                     editable: true,
-                    type: 'number'
+                    type: 'number',
+                    computed: {
+                        percent: ['col', computePercents]
+                    }
                 },
                 footer: { value: 'Total:' }
             },
@@ -89,21 +100,60 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                 },
                 cell: {
                     editable: true,
-                    type: 'number'
+                    type: 'number',
+                    computed: {
+                        max: ['row~score', maxInRow]
+                    }
                 },
-                footer: { aggregate: aggregateColumnScore }
+                footer: {
+                    computed: {
+                        total: ['col,col:weight', aggregateColumnScore]/*,
+                        max: ['footer', maxFootInRow]*/
+                    }
+                }
             }
         ];
     }
 
-    function aggregateColumnScore(scores, weights) {
+    function aggregateColumnScore(prevVal, scores, weights) {
         var grade = 0, weightTot = 0;
         _.forEach(scores, function (score, i) {
-            weightTot += weights[i];
-            grade += score * weights[i];
+            var weight = weights[i].value;
+            weightTot += weight;
+            grade += score.value * weight;
         });
         grade = weightTot ? Math.round(grade / weightTot * 100) : 0; // weighted average
         return grade;
+    }
+
+    function maxInRow(value, rowCells) {
+        var max = 0;
+        _.forEach(rowCells, function (cell) {
+            if (cell.value > max) {
+                max = cell.value;
+            }
+        });
+        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowCells), (value === max));
+        return (value === max);
+    }
+
+    // TODO
+    function maxFootInRow(value, rowCells) {
+        var max = 0;
+        _.forEach(rowCells, function (cell) {
+            if (cell.value > max) {
+                max = cell.value;
+            }
+        });
+        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowCells), (value === max));
+        return (value === max);
+    }
+
+    function computePercents(value, colCells) {
+        var sum = colCells.reduce(function (prev, cur) {
+            return prev + cur.value;
+        }, 0);
+        return sum ? Math.round(value / sum * 100) : 0;
     }
 
     /////////////////////////////

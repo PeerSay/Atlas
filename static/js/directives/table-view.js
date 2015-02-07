@@ -21,7 +21,7 @@ function psTableView($timeout, _) {
             scope.onColBlur = onColBlur;
             scope.getInput = getInput;
 
-            if (view.watched) {
+            /*if (view.watched) {
                 scope.$watch(function () {
                     // TODO perf - less impact
                     return view.watcher && view.watcher.digest();
@@ -35,7 +35,7 @@ function psTableView($timeout, _) {
                         }
                     });
                 }, true);
-            }
+            }*/
 
             function getInput(colOrCell) {
                 return formModel[colOrCell.id]

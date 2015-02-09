@@ -11,7 +11,7 @@ function TableModel($filter, _, jsonpatch) {
     T.topics = {
         all: [],
         rebuild: function () {
-            this.all = getTopics().list;
+            this.all = getTopics();
         }
     };
     T.patchObserver = null;
@@ -168,7 +168,7 @@ function TableModel($filter, _, jsonpatch) {
 
     // Misc
     function getTopics() {
-        return indexArray(T.model.criteria, 'topic', null);
+        return indexArray(T.model.criteria, 'topic', null).list;
     }
 
     function indexArray(arr, path, init) {
@@ -194,7 +194,7 @@ function TableModel($filter, _, jsonpatch) {
                     add(it[key]);
                 }
             });
-        })(arr, path.split('/'));
+        })(arr, path.split('\0'));
 
         return {
             index: index,
@@ -228,7 +228,7 @@ function TableModel($filter, _, jsonpatch) {
 
         function build(data) {
             M.criteria = data;
-            M.vendors = getVendors().list;
+            M.vendors = getVendors();
             flatStruc = getFlatStruc(data); // private
             M.columns = buildColumns();
             M.rows = [];
@@ -271,10 +271,9 @@ function TableModel($filter, _, jsonpatch) {
                 res[val] = val;
             });
 
-            // TODO - escape key
             _.forEach(M.vendors, function (val) {
-                res[['vendors', val, 'input'].join('/')] = val;
-                res[['vendors', val, 'score'].join('/')] = val;
+                res[['vendors', val, 'input'].join('\0')] = val;
+                res[['vendors', val, 'score'].join('\0')] = val;
             });
 
             //console.log('>>Flat: ', res);
@@ -282,7 +281,7 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         function getValByKey(crit, key) {
-            var path = key.split('/'); // [vendors, IMB, score] or [name]
+            var path = key.split('\0'); // [vendors, IMB, score] or [name]
             var val = path.reduce(function (obj, p) {
                 if (obj) {
                     return angular.isArray(obj) ? _.findWhere(obj, {title: p}) : obj[p];
@@ -294,7 +293,7 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         function getObjByKey(crit, key) {
-            var path = key.split('/'); // [vendors, IMB, score] or [name]
+            var path = key.split('\0'); // [vendors, IMB, score] or [name]
             var obj = crit, lastKey = null, justAdded = false;
 
             // find object to modify
@@ -357,7 +356,7 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         function saveColumn(col, newVal) {
-            var key = ['vendors', col.field, 'title'].join('/');
+            var key = ['vendors', col.field, 'title'].join('\0');
             _.forEach(M.criteria, function (crit) {
                 setValByKey(crit, key, newVal, true); // patched!
             });
@@ -366,7 +365,7 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         function addColumn(newVal) {
-            var key = ['vendors', newVal, 'title'].join('/');
+            var key = ['vendors', newVal, 'title'].join('\0');
             _.forEach(M.criteria, function (crit) {
                 setValByKey(crit, key, newVal); // patched!
             });
@@ -390,7 +389,7 @@ function TableModel($filter, _, jsonpatch) {
 
         // Misc
         function getVendors() {
-            return indexArray(M.criteria, 'vendors/title');
+            return indexArray(M.criteria, 'vendors\0title').list;
         }
 
         function getColVal(field) {
@@ -629,8 +628,6 @@ function TableModel($filter, _, jsonpatch) {
                     visible: true
                 };
                 var spec = angular.copy(col.spec); // XXX - passed via col
-                var computedSpec = spec.cell.computed;
-                delete spec.cell.computed; // prevent overriding by extend() below
 
                 if (!col.virtual) {
                     var cell = _.findWhere(row, {colId: col.id}); // cannot be found for virtual cols
@@ -643,7 +640,9 @@ function TableModel($filter, _, jsonpatch) {
                         //console.log('>> Just added: ', viewCell);
                     }
 
+                    var computedSpec = spec.cell && spec.cell.computed;
                     if(computedSpec) {
+                        delete spec.cell.computed; // prevent overriding by extend() below
                         viewCell.computed = getComputedMethods(computedSpec, cell);
                     }
                 }
@@ -664,8 +663,10 @@ function TableModel($filter, _, jsonpatch) {
             function match(col, sel) {
                 // col may be:
                 // {.., key: 'name'}, -> matched by 'name'
-                // {.., key: '/vendors/IMB/input'} -> -> matched by '/vendors/.*?/input' // TODO: '/' in vendor title -- need to escape
-                var re = new RegExp(sel);
+                // {.., key: '/vendors/IMB/input'} -> -> matched by '/vendors/.*?/input'
+
+                // selector accepts '/', but internally paths are joined with '\0' to allow / in vendor names
+                var re = new RegExp(sel.replace(/\//g, '\0'));
                 //console.log('>>>Matching', col, sel, re.test(col.key));
                 return re.test(col.key);
             }

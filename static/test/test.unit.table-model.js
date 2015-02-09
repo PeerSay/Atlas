@@ -34,10 +34,10 @@ describe('TableModel', function () {
             var model = TableModel.buildModel(data);
 
             Object.keys(model.columns).should.have.length(7);
-            model.columns['vendors/IBM/input'].should.have.property('value').equal('IBM');
-            model.columns['vendors/IBM/input'].should.have.property('field').equal('IBM');
-            model.columns['vendors/IBM/score'].should.have.property('value').equal('IBM');
-            model.columns['vendors/IBM/score'].should.have.property('field').equal('IBM');
+            model.columns['vendors\0IBM\0input'].should.have.property('value').equal('IBM');
+            model.columns['vendors\0IBM\0input'].should.have.property('field').equal('IBM');
+            model.columns['vendors\0IBM\0score'].should.have.property('value').equal('IBM');
+            model.columns['vendors\0IBM\0score'].should.have.property('field').equal('IBM');
         });
 
         it('should build single vendor column from 2 criteria', function () {
@@ -45,7 +45,7 @@ describe('TableModel', function () {
             var model = TableModel.buildModel(data);
 
             Object.keys(model.columns).should.have.length(7);
-            model.columns['vendors/IBM/input'].should.have.property('value').equal('IBM');
+            model.columns['vendors\0IBM\0input'].should.have.property('value').equal('IBM');
         });
 
         it('should build rows', function () {
@@ -55,12 +55,13 @@ describe('TableModel', function () {
             Object.keys(model.rows).should.have.length(data.length);
             // 1st row - existing vendor
             model.rows[0]['name'].should.have.property('value').equal('xyz');
-            model.rows[0]['vendors/IBM/input'].should.have.property('value').equal('str');
-            model.rows[0]['vendors/IBM/score'].should.have.property('value').equal(1);
+            model.rows[0]['vendors\0IBM\0input'].should.have.property('value').equal('str');
+            model.rows[0]['vendors\0IBM\0score'].should.have.property('value').equal(1);
             // 2nd row - non-existing vendor
             model.rows[1]['name'].should.have.property('value').equal('abc');
-            model.rows[1]['vendors/IBM/input'].should.have.property('value').equal(null);
-            model.rows[1]['vendors/IBM/score'].should.have.property('value').equal(null);
+            model.rows[1]['vendors\0IBM\0input'].should.have.property('value').equal(null);
+            model.rows[1]['vendors\0IBM\0score'].should.have.property('value').equal(null);
+
         });
 
         // TODO - build viewModel
@@ -240,7 +241,7 @@ describe('TableModel', function () {
             var data = mock2Rows1Vendor();
             TableModel.buildModel(data);
 
-            TableModel.sortViewModel({'vendors/IBM/score': 'desc'}, null);
+            TableModel.sortViewModel({'vendors\0IBM\0score': 'desc'}, null);
             var sel = TableModel.selectViewModel(function () {
                 return [{ selector: 'vendors/IBM/score' }];
             });

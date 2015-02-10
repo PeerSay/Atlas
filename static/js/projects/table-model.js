@@ -230,7 +230,8 @@ function TableModel($filter, _, jsonpatch) {
         function build(data) {
             M.criteria = data;
             M.vendors = getVendors();
-            flatStruc = getFlatStruc(data); // private
+            flatStruc = getFlatStruc(data);
+
             M.columns = buildColumns();
             M.rows = [];
             _.forEach(data, function (crit) {
@@ -791,8 +792,8 @@ function TableModel($filter, _, jsonpatch) {
             function cachedComputeFn(spec, cell, computeCb) {
                 var keys = parseSpec(spec, cell);
                 var value = function () {
-                    //return !cell.footer ? cell.model.value : cell.footer.computed.total();
-                    return cell.model.value;
+                    //Footer has no model.value but we add it on digest!
+                    return cell.model ? cell.model.value : 0;
                 };
                 var prevValue = null;
 
@@ -811,7 +812,7 @@ function TableModel($filter, _, jsonpatch) {
                     });
 
                     var oldPrevValue = prevValue;
-                    var needCompute = modified || (prevValue === null && params.length);
+                    var needCompute = modified || (prevValue === null && (params.length === keys.length));
                     if (needCompute) {
                         prevValue = computeCb(value(), params);
                         //console.log('>> Computed long res=[%s]<-[%s], of keys', prevValue, oldPrevValue, JSON.stringify(keys));

@@ -419,6 +419,7 @@ function TableModel($filter, _, jsonpatch) {
                 description: '',
                 topic: crit ? crit.topic : null,
                 priority: crit ? crit.priority : 'required',
+                weight: 1,
                 vendors: []
             };
         }

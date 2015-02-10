@@ -126,7 +126,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
         if (!cell) { return true; }
 
         if (item === 'remove') {
-            if (!(cell.model && /^vendors\//.test(cell.model.key))) {
+            if (!(cell.model && /^vendors/.test(cell.model.key))) {
                 // disable remove on non-vendor columns
                 return false;
             }

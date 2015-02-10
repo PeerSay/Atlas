@@ -21,21 +21,14 @@ function psTableView($timeout, _) {
             scope.onColBlur = onColBlur;
             scope.getInput = getInput;
 
-            /*if (view.watched) {
+            if (view.watched) {
                 scope.$watch(function () {
                     // TODO perf - less impact
                     return view.watcher && view.watcher.digest();
                 }, function (newObj, oldObj) {
-                    //console.log('>> Watch changed: old=%s, new=%s', oldObj, newObj);
-
-                    _.forEach(view.columns, function (col) {
-                        if (col.footer) {
-                            //console.log('>> Applying for each col key:', col.footer.key);
-                            view.watcher.apply(col.footer, newObj.key);
-                        }
-                    });
+                    // update values logic is in Watcher class
                 }, true);
-            }*/
+            }
 
             function getInput(colOrCell) {
                 return formModel[colOrCell.id]

@@ -108,7 +108,7 @@ function TableModel($filter, _, jsonpatch) {
         var crit = cell ? cell.model.criteria : null;
         var newIdx = cell ? cell.rowIdx() + 1 : 0;
 
-        T.viewModel.addRow(crit, newIdx);
+        T.viewModel.addRow(crit, newIdx); // updates model!
 
         var patch = jsonpatch.generate(T.patchObserver);
         console.log('Add row patch: ', JSON.stringify(patch));
@@ -118,7 +118,8 @@ function TableModel($filter, _, jsonpatch) {
 
     function removeRow(cell) {
         var rowIdx = cell.rowIdx();
-        T.viewModel.removeRow(rowIdx);
+
+        T.viewModel.removeRow(rowIdx); // updates model!
 
         var patch = jsonpatch.generate(T.patchObserver);
         console.log('Remove row patch:', JSON.stringify(patch));
@@ -440,6 +441,7 @@ function TableModel($filter, _, jsonpatch) {
 
         // Build
         function build(model) {
+            V.watcher.reset(true);
             V.columns = buildColumns(model.columns);
             V.rows = [];
             _.forEach(model.rows, function (row) {
@@ -453,7 +455,7 @@ function TableModel($filter, _, jsonpatch) {
             var res = [];
             var colIdx = 0;
             _.forEach(modelColumns, function (model, key) {
-                var footer = { value: '', key: key, computed: null }; // shared model - XXX
+                var footer = { value: '', key: key, computed: {} };
 
                 res.push({
                     model: model,
@@ -462,10 +464,9 @@ function TableModel($filter, _, jsonpatch) {
                     footer: footer
                 });
 
-                /*if (isWatchedCol(key)) {
-                    //console.log('>>> Register watcher for', key);
-                    V.watcher.register(key);
-                }*/
+                if (isWatchedRow(key)) {
+                    V.watcher.addFooterCell(footer);
+                }
             });
             return res;
         }
@@ -477,14 +478,16 @@ function TableModel($filter, _, jsonpatch) {
                 var cell = {
                     model: model,
                     key: key,
-                    colId: 'col-' + cellIdx, // for select - to find col
                     id: cellIdFn(row, cellIdx),
                     rowIdx: rowIdxFn(row)
                 };
 
-                /*if (isWatchedCol(key)) {
-                    V.watcher.addModel(key, cell.model);
-                }*/
+                if (isWatchedCol(key)) {
+                    V.watcher.addColCell(cell, key);
+                }
+                if (isWatchedRow(key)) {
+                    V.watcher.addRowCell(cell, modelRowIdx(cell));
+                }
 
                 cellIdx++;
                 row.push(cell);
@@ -492,9 +495,13 @@ function TableModel($filter, _, jsonpatch) {
             return row;
         }
 
-        /*function isWatchedCol(key) {
-            return (key === 'weight' || /\/score$/.test(key));
-        }*/
+        function isWatchedCol(key) {
+            return (key === 'weight' || /score$/.test(key));
+        }
+
+        function isWatchedRow(key) {
+            return /score$/.test(key);
+        }
 
         function rowIdxFn(row) {
             return function () {
@@ -507,6 +514,10 @@ function TableModel($filter, _, jsonpatch) {
             return function () {
                 return ['cell', rowIdx(), i].join('-');
             };
+        }
+
+        function modelRowIdx(cell) {
+            return T.model.criteria.indexOf(cell.model.criteria);
         }
 
         //Select
@@ -589,16 +600,10 @@ function TableModel($filter, _, jsonpatch) {
                                 viewCol.footer.value = spec.footer.value;
                             }
                             else if(spec.footer.computed) {
-                                viewCol.footer.model = {value: 0};
+                                viewCol.footer = col.footer;
 
-                                // TODO - fix max() for footer:
-                                // We compute values on ViewModel, but:
-                                // - we don't know what to watch until the view is selected
-                                // - thus need to add computed fields to ViewModel here
-                                // - and prevent several selectedViews to overwrite it
-                                // it means selectedViews *must* specify the same footer spec for the selected cols
-
-                                viewCol.footer.computed = getComputedMethods(spec.footer.computed, viewCol);
+                                var methods = getComputedMethods(spec.footer.computed, viewCol.footer);
+                                angular.extend(viewCol.footer.computed, methods); // need to preserve original obj!
                             }
                         }
 
@@ -630,7 +635,7 @@ function TableModel($filter, _, jsonpatch) {
                 var spec = angular.copy(col.spec); // XXX - passed via col
 
                 if (!col.virtual) {
-                    var cell = _.findWhere(row, {colId: col.id}); // cannot be found for virtual cols
+                    var cell = _.findWhere(row, {key: col.key});
                     viewCell.model = cell.model;
                     viewCell.id = cell.id();
                     viewCell.rowIdx = cell.rowIdx;
@@ -663,11 +668,10 @@ function TableModel($filter, _, jsonpatch) {
             function match(col, sel) {
                 // col may be:
                 // {.., key: 'name'}, -> matched by 'name'
-                // {.., key: '/vendors/IMB/input'} -> -> matched by '/vendors/.*?/input'
+                // {.., key: '/vendors\0IMB\0input'} -> -> matched by '/vendors/.*?/input'
 
                 // selector accepts '/', but internally paths are joined with '\0' to allow / in vendor names
                 var re = new RegExp(sel.replace(/\//g, '\0'));
-                //console.log('>>>Matching', col, sel, re.test(col.key));
                 return re.test(col.key);
             }
         }
@@ -678,6 +682,7 @@ function TableModel($filter, _, jsonpatch) {
                 return getRowValByKeyFn(key);
             });
 
+            V.watcher.reset(); //!
             return (V.rows = $filter('orderBy')(V.rows, sortArr, reverse));
         }
 
@@ -718,48 +723,104 @@ function TableModel($filter, _, jsonpatch) {
             // spec formats:
             // 'col' - watch for all vals in cells' column (Weight percents)
             // 'col,col:weight' - watch for cells' column and columns with key=weight (Score totals)
-            // 'row~number' - watch for those vals in cells' row, that have type=number (Max in scores rows)
+            // 'row' - watch for those vals in cells' row (Max in scores rows)
             // 'footer' - watch for those computed vals in footer' row (Max in footer)
-            var watcher = V.watcher.getMatched(spec, cell);
-
-            return function () {
-                // This func is called on $digest for every cell/footer that has computed vals.
-                // It must return fast!
-                // Thus it:
-                // 1. gets previous value of computeFn and 'simple value' of all cols/rows per watcher
-                // 2. computes new 'simple value' (join) on every call and compares it tp previous
-                // 3. if not changed, then returns previous value of computeFn (most of the time)
-                // 4. otherwise, it calls computeFn and returns it's value
-                // -> this value is used by View
-
-                //TODO
-                /*var res = watcher.value;
-                var prevSimple = watcher.simple;
-                var simple = watcher.getSimple();
-                if (simple !== prevSimple) {
-                    res = watcher.value = computeFn.apply(null, [].concat(cell.model.value, watcher.params()));
-                }
-                return res;*/
-
-                var val = cell.model.value; // TODO: footer computed value
-                return computeFn.apply(null, [].concat(val, watcher.watched()));
-            };
+            return V.watcher.cachedComputeFn(spec, cell, function (val, arrays) {
+                return computeFn.apply(null, [].concat(val, arrays));
+            });
         }
 
         function Watcher() {
             var W = {};
-            W.getMatched = getMatched;
-            var watchers = {};
+            W.addColCell = addColCell;
+            W.addRowCell = addRowCell;
+            W.addFooterCell = addFooterCell;
+            W.cachedComputeFn = cachedComputeFn;
+            W.digest = digest;
+            W.reset = reset;
 
-            function getMatched(spec, cell) {
-                var parsed = parseSpec(spec, cell);
-                var uid = getUid(parsed);
-                //console.log('>>Watched uid: ', uid);
-                var cached = watchers[uid];
-                if (cached) { return cached; }
+            var reducers = {};
+            var results = {};
 
-                return (watchers[uid] = WatcherOne(parsed));
+            // build
+            function addColCell(cell, key) {
+                add(cell, 'col:' + key, 'model/value');
             }
+
+            function addRowCell(cell, idx) {
+                add(cell, 'row:' + idx, 'model/value');
+            }
+
+            function addFooterCell(cell) {
+                add(cell, 'footer:total', 'computed/total')
+            }
+
+            function add (cell, uid, path) {
+                if (!reducers[uid]) {
+                    reducers[uid] = Reducer(path);
+                }
+                reducers[uid].add(cell);
+            }
+
+            // digest
+            function digest() {
+                var res = {};
+                _.forEach(reducers, function (obj, key) {
+                    var simple = obj.reduce(); // updates oldVal and array
+                    res[key] = { newVal: simple, oldVal: obj.oldVal, array: obj.flatArray };
+                    //console.log('>>Digest res for [%s]:', key, JSON.stringify(res[key]));
+                });
+                //console.log('>>Digest - done!');
+                return (results = res);
+            }
+
+            function reset(deep) {
+                if (deep) {
+                    // called when new viewModel is built - to prevent adding ros/cols to non-empty arrays
+                    reducers = {};
+                } else {
+                    // called on sort because no value is changed, but they become invalid
+                    _.forEach(reducers, function (obj) {
+                        obj.reset();
+                    });
+                }
+                //console.log('>>Reset - deep?=%s', !!deep);
+            }
+
+            //get
+            function cachedComputeFn(spec, cell, computeCb) {
+                var keys = parseSpec(spec, cell);
+                var value = function () {
+                    //return !cell.footer ? cell.model.value : cell.footer.computed.total();
+                    return cell.model.value;
+                };
+                var prevValue = null;
+
+                return function () {
+                    var params = [];
+                    var modified = false;
+                    _.forEach(keys, function (key) {
+                        var res = results[key];
+                        if (!res) { return; }
+                        //console.log('>> ComputeFn of %s:', JSON.stringify(keys), JSON.stringify(res));
+
+                        if (res.newVal !== res.oldVal) {
+                            modified = true;
+                        }
+                        params.push(res.array);
+                    });
+
+                    var oldPrevValue = prevValue;
+                    var needCompute = modified || (prevValue === null && params.length);
+                    if (needCompute) {
+                        prevValue = computeCb(value(), params);
+                        //console.log('>> Computed long res=[%s]<-[%s], of keys', prevValue, oldPrevValue, JSON.stringify(keys));
+                    }
+                    //console.log('>>  Computed return=[%s] of keys', prevValue, JSON.stringify(keys));
+                    return prevValue;
+                };
+            }
+
 
             function parseSpec(specStr, cell) {
                 var specs = specStr.split(',');
@@ -770,94 +831,63 @@ function TableModel($filter, _, jsonpatch) {
             }
 
             function parseOne(spec, cell) {
-                var kind = spec.split(/~|:/)[0];
-                var rowType = spec.split(/~/)[1] || null;
-                var colKey = spec.split(/:/)[1] || null;
-                var rowIdx = cell.rowIdx && cell.rowIdx();
-
-                var res = {
-                    kind : kind,
-                    colKey: (kind === 'col') ? (colKey || cell.key) : null,
-                    rowKey: (kind === 'row') ? {idx: rowIdx, type: rowType} : null
-                };
+                var kind = spec.split(/:/)[0];
+                var res = '';
+                if (kind === 'col') {
+                    var colKey = spec.split(/:/)[1] || null;
+                    res = 'col:' + (colKey || cell.key);
+                } else if (kind === 'row') {
+                    var rowIdx = getModelIdx(cell.model.criteria);
+                    res = 'row:' + rowIdx
+                } else if (kind === 'footer') {
+                    res =  'footer:total';
+                }
                 return res;
-            }
 
-            function getUid(parsed) {
-                return _.map(parsed, function (o) {
-                    return o.colKey ? ('col:' + o.colKey) :
-                        o.rowKey ? (['row', o.rowKey.idx, o.rowKey.type].join(':')) :
-                            'footer';
-                }).join('|');
+                function getModelIdx(crit) {
+                    return T.model.criteria.indexOf(crit);
+                }
             }
 
             return W;
         }
 
-        function WatcherOne(parsed) {
-            var W = {};
-            W.value = null;
-            W.simple = null;
-            W.getSimple = getSimple;
-            W.watched = getWatched;
+        function Reducer(path) {
+            var R = {};
+            R.add = add;
+            R.reduce = reduce;
+            R.reset = reset;
+            R.oldVal = null;
+            R.newVal = null;
+            R.flatArray = [];
 
-            var watched = [];
+            var array = [];
+            var obj = path.split('/')[0];
+            var key = path.split('/')[1];
 
-            init();
-
-            function init() {
-                _.forEach(parsed, buildWatched);
+            function add(item) {
+                array.push(item);
             }
 
-            function getWatched() {
-                return watched;
-            }
-
-            function buildWatched(specObj) {
-                var array;
-                if (specObj.kind === 'col'){
-                    array = getCol(specObj.colKey);
-                } else if (specObj.kind === 'row') {
-                    array = getRow(specObj.rowKey);
-                } else {
-                    array = getFooter();
-                }
-                watched.push(array);
-                //console.log('>>Got watcher: ', JSON.stringify(array));
-            }
-
-            function getCol(key) {
-                var res = _.map(V.rows, function (row) {
-                    return _.findWhere(row, {key : key}).model; // 1 cell
+            function reduce() {
+                //console.log('>> Reducing: ', JSON.stringify(array));
+                R.flatArray = _.map(array, function (item) {
+                    var val = item[obj] ? item[obj][key] : 0; // XXX - null?
+                    if (angular.isFunction(val)) { // computed
+                        val = val() || 0;
+                        item.model = {value: val}; // hack!
+                    }
+                    return val;
                 });
-                return res;
+                R.oldVal = R.newVal;
+                return (R.newVal = R.flatArray.join(''));
             }
 
-            function getRow(rowKey) {
-                var res = _.map(V.rows[rowKey.idx], function (cell) {
-                    return (cell.key.indexOf(rowKey.type) >= 0) ? cell.model: null;
-                });
-                return res;
+            function reset() {
+                R.newVal = null;
             }
 
-            function getFooter() {
-                var res =_.map(V.columns, function (col) {
-                    return col.footer.computed ? col.footer.computed : null;
-                });
-                return res;
-            }
-
-            function getSimple() {
-                var res = '';
-                _.forEach(watched, function (arr) {
-                    res += _.map(arr, function (item) {
-                        return item.value;
-                    }).join('');
-                });
-                return (W.simple = res);
-            }
-
-            return W;
+            return R;
         }
 
         return V;

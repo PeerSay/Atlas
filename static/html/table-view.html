@@ -165,10 +165,8 @@
         <tfoot>
         <tr>
             <th ng-repeat="col in view.columns"
-                    ng-class="view.runtimeFooterClass(col)"
-                    ng-show="col.footer"
-                    >
-                <div ng-if="col.footer.value">{{ ::col.footer.value }}</div>
+                    ng-show="col.footer">
+                <div ng-if="col.footer.value">{{:: col.footer.value }}</div>
                 <div ng-if="col.footer.computed"
                         ng-class="{'max' : col.footer.computed.max()}"
                         >{{ col.footer.computed.total() }}</div>

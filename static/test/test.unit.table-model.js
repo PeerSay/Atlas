@@ -63,8 +63,6 @@ describe('TableModel', function () {
             model.rows[1]['vendors\0IBM\0score'].should.have.property('value').equal(null);
 
         });
-
-        // TODO - build viewModel
     });
 
     describe('Select', function () {

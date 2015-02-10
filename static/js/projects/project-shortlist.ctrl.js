@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
 
-ProjectShortlistCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'Util'];
-function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
+ProjectShortlistCtrl.$inject = ['$scope', 'Tiles', 'Table', 'Util'];
+function ProjectShortlistCtrl($scope, Tiles, Table, _) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -41,25 +41,25 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                 cell: {
                     type: 'number-static',
                     computed: {
-                        max: ['row~score', maxInRow]
+                        max: ['row', maxInRow]
                     }
                 },
                 footer: {
                     computed: {
-                        total: ['col,col:weight', aggregateColumnScore]/*,
+                        total: ['col,col:weight', aggregateColumnScore]
+                        /* TODO: Can be omitted because it works due to full view?,
                         max: ['footer', maxFootInRow]*/
                     }
                 }
             }
         ];
 
-        //TODO - extra row: Total scores
-
         var vendors = model.vendors;
         if (!vendors.length) {
+            // show at least one column if no vendors added yet
             res.push({
                 selector: null,
-                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
+                columnModel: { field: 'Products', value: 'Products'},
                 cellModels: ['name'] // first cell is used for grouping and must have criteria
             });
         }
@@ -102,13 +102,13 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
                     editable: true,
                     type: 'number',
                     computed: {
-                        max: ['row~score', maxInRow]
+                        max: ['row', maxInRow]
                     }
                 },
                 footer: {
                     computed: {
-                        total: ['col,col:weight', aggregateColumnScore]/*,
-                        max: ['footer', maxFootInRow]*/
+                        total: ['col,col:weight', aggregateColumnScore],
+                        max: ['footer', maxInRow]
                     }
                 }
             }
@@ -118,40 +118,28 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
     function aggregateColumnScore(prevVal, scores, weights) {
         var grade = 0, weightTot = 0;
         _.forEach(scores, function (score, i) {
-            var weight = weights[i].value;
+            var weight = weights[i];
             weightTot += weight;
-            grade += score.value * weight;
+            grade += score * weight;
         });
         grade = weightTot ? Math.round(grade / weightTot * 100) : 0; // weighted average
         return grade;
     }
 
-    function maxInRow(value, rowCells) {
+    function maxInRow(value, rowVals) {
         var max = 0;
-        _.forEach(rowCells, function (cell) {
-            if (cell.value > max) {
-                max = cell.value;
+        _.forEach(rowVals, function (val) {
+            if (val > max) {
+                max = val;
             }
         });
-        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowCells), (value === max));
-        return (value === max);
-    }
-
-    // TODO
-    function maxFootInRow(value, rowCells) {
-        var max = 0;
-        _.forEach(rowCells, function (cell) {
-            if (cell.value > max) {
-                max = cell.value;
-            }
-        });
-        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowCells), (value === max));
+        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowVals), (value === max));
         return (value === max);
     }
 
     function computePercents(value, colCells) {
         var sum = colCells.reduce(function (prev, cur) {
-            return prev + cur.value;
+            return prev + cur;
         }, 0);
         return sum ? Math.round(value / sum * 100) : 0;
     }
@@ -176,9 +164,6 @@ function ProjectShortlistCtrl($scope, $timeout, Tiles, Table, _) {
     }
 
     function onFullView() {
-        /*var view = m.fullTableView;
-        if (view.rows.length === 1 &&  view.columns.length === 3) {
-            inviteToEdit(view);
-        }*/
+        //nothing?
     }
 }

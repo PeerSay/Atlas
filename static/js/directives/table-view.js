@@ -31,7 +31,7 @@ function psTableView($timeout, _) {
             }
 
             function getInput(colOrCell) {
-                return formModel[colOrCell.id]
+                return formModel[colOrCell.id];
             }
 
             function onCellKeydown(cell, evt) {

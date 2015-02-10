@@ -692,7 +692,7 @@ function TableModel($filter, _, jsonpatch) {
             return function (row) {
                 var criteria = row[0].model.criteria;
                 return T.model.getValByKey(criteria, key);
-            }
+            };
         }
 
         // Mutate
@@ -754,7 +754,7 @@ function TableModel($filter, _, jsonpatch) {
             }
 
             function addFooterCell(cell) {
-                add(cell, 'footer:total', 'computed/total')
+                add(cell, 'footer:total', 'computed/total');
             }
 
             function add (cell, uid, path) {
@@ -840,7 +840,7 @@ function TableModel($filter, _, jsonpatch) {
                     res = 'col:' + (colKey || cell.key);
                 } else if (kind === 'row') {
                     var rowIdx = getModelIdx(cell.model.criteria);
-                    res = 'row:' + rowIdx
+                    res = 'row:' + rowIdx;
                 } else if (kind === 'footer') {
                     res =  'footer:total';
                 }

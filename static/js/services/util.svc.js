@@ -55,7 +55,7 @@ function Util($) {
                 calls++;
 
                 return res;
-            }
+            };
         })();
     }
 
@@ -63,7 +63,7 @@ function Util($) {
     function getNow() {
         return window.performance ? performance.now.bind(performance) :
             function () {
-                return +new Date;
+                return new Date().getTime();
             };
     }
 

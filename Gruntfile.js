@@ -145,7 +145,8 @@ module.exports = function (grunt) {
                 undef: false,
                 boss: true,
                 eqnull: true,
-                browser: true
+                browser: true,
+                shadow: true
             },
             all: ['Gruntfile.js', '*.js', 'static/js/**/*.js', 'static/test/**/*.js']
         },

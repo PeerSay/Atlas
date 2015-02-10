@@ -568,7 +568,7 @@ function mock2Rows1Vendor() {
             { title: 'IBM', input: 'str', score: 1 }
         ] },
         { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
-    ]
+    ];
 }
 
 function mock2Rows2Vendors() {
@@ -602,6 +602,6 @@ function mock3RowsForSorting() {
         { name: 'a', description: '', topic: 'AAA', priority: 'required', vendors: [] },
         { name: 'b', description: '', topic: null, priority: 'optional', vendors: [] },
         { name: 'c', description: '', topic: 'AAA', priority: 'required', vendors: [] }
-    ]
+    ];
 }
 

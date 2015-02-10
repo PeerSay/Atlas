@@ -3,7 +3,8 @@
 angular.module('peersay')
     .factory('Util', Util);
 
-function Util() {
+Util.$inject = ['jQuery'];
+function Util($) {
     var U = {};
     // List
     U.forEach = angular.forEach.bind(angular);
@@ -21,8 +22,12 @@ function Util() {
      *  var timedFn = timeIt('some', fn, 1000);
      *  timedFn();
      *  timedFn();
-     * outputs:
      *
+     * After 1s outputs:
+     *  PERF: [some] called 2 times, took 0.123ms
+     *
+     * @param wait - if no calls to timedFn were done after last call for [wait]ms,
+     *               then sampling ends and result is written to console.
      * */
     function timeIt(name, func, wait) {
         if (timed[name]) { return timed[name]; }
@@ -35,7 +40,7 @@ function Util() {
             return function () {
                 var context = this, args = arguments;
                 var later = function () {
-                    console.log('>> TIME: [%s] called %s times, took %sms ', name, calls, lasted);
+                    console.log('>> PERF: [%s] called %s times, took %sms ', name, calls, lasted);
                     lasted = 0;
                     calls = 0;
                 };
@@ -50,7 +55,7 @@ function Util() {
                 calls++;
 
                 return res;
-            }
+            };
         })();
     }
 
@@ -58,7 +63,7 @@ function Util() {
     function getNow() {
         return window.performance ? performance.now.bind(performance) :
             function () {
-                return +new Date;
+                return new Date().getTime();
             };
     }
 

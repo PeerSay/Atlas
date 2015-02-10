@@ -3,6 +3,6 @@ angular.module('peersay')
 
 function multiline() {
     return function (item) {
-        return item.replace(/\n/g, '<br>');
+        return (''+item).replace(/\n/g, '<br>');
     };
 }

@@ -55,10 +55,12 @@ var projectSchema = new Schema({
             description: {type: String },
             topic: { type: String },
             priority: { type: String },
+            weight: { type: Number, min: 0, max: 10, default: 1 },
             vendors: [
                 {
                     title: { type: String, required: true },
-                    value: { type: String } // TODO - better name, other fields
+                    input: { type: String },
+                    score: { type: Number, min: 0, max: 10, default: 0 }
                 }
             ]
         }

@@ -92,6 +92,7 @@ module.exports = function (grunt) {
                     'bower_components/ng-table-resizable-columns/ng-table-resizable-columns.src.js',
                     'bower_components/angular-elastic/elastic.js',
                     'bower_components/ng-context-menu/dist/ng-context-menu.js',
+                    'bower_components/fast-json-patch/dist/json-patch-duplex.min.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],
@@ -144,7 +145,8 @@ module.exports = function (grunt) {
                 undef: false,
                 boss: true,
                 eqnull: true,
-                browser: true
+                browser: true,
+                shadow: true
             },
             all: ['Gruntfile.js', '*.js', 'static/js/**/*.js', 'static/test/**/*.js']
         },
@@ -158,7 +160,8 @@ module.exports = function (grunt) {
                 },
                 files: {
                     "static/css/public.css": "static/css/public.less",
-                    "static/css/app.css": "static/css/app.less"
+                    "static/css/app.css": "static/css/app.less",
+                    "static/css/index.css": "static/css/index.less"
                 }
             }
         },
@@ -179,7 +182,10 @@ module.exports = function (grunt) {
                     'bower_components/bootstrap/dist/fonts/*.*',
                     'bower_components/font-awesome/css/font-awesome.{css,min.css}',
                     'bower_components/font-awesome/fonts/*.*',
-                    'html/*.html'
+                    'html/*.html',
+                    'fonts/*.ttf',
+                    'images/*.{png,jpg}',
+                    'functions.js'
                 ],
                 dest: 'dist/'
             },
@@ -263,9 +269,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dev', [
         'less',
-        'watch:assets',
-
-        'watch:css'
+        'watch'
     ]);
 
     grunt.registerTask('karma-watch', [

@@ -1,8 +1,8 @@
 angular.module('peersay')
     .controller('ProjectVendorsCtrl', ProjectVendorsCtrl);
 
-ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table', 'TableModel', 'Util'];
-function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
+ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table'];
+function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     var m = this;
 
     m.tile = $scope.$parent.tile;
@@ -19,122 +19,78 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
     // Table views
     m.groupBy = Table.groupBy;
 
-    m.normalTableView = Table.addView(m, 'vi-norm', toNormViewData)
+    m.normalTableView = Table.addView(m, 'vi-norm', getNormalViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: false})
         .done();
 
-    m.fullTableView = Table.addView(m, 'vi-full', toFullViewData)
+    m.fullTableView = Table.addView(m, 'vi-full', getFullViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
 
-    function toNormViewData() {
-        var groupBy = m.groupBy.get();
-        var vendors = TableModel.selectColumns([{ vendor: true }], 3);
-        var group = TableModel.selectColumns([{ field: groupBy }]);
-        var data = {
-            columns: [],
-            rows: []
-        };
-
-        // Columns: Prod1, [Prod2, Prod3] | Products?
-        _.forEach(vendors.columns, function (col) {
-            data.columns.push({
-                model: col,
-                visible: true,
-                editable: false,
-                sortable: false
-            })
-        });
-        // add grouping column
-        _.forEach(group.columns, function (col) {
-            data.columns.push({
-                model: col,
-                visible: false,
-                editable: false,
-                sortable: false
-            })
-        });
-        // Artificial column to show empty table
-        data.columns.push({
-            model: { value: 'Products' },
-            visible: !vendors.columns.length,
-            editable: false,
-            sortable: false
-        });
-
-        // Rows
-        _.forEach(vendors.rows, function (row, i) {
-            var fullRow = [].concat(row, group.rows[i]);
-            var resRow = [];
-            _.forEach(fullRow, function (cell, j) {
-                resRow.push({
-                    model: cell,
-                    visible: data.columns[j].visible,
-                    editable: false,
+    function getNormalViewConfig(model) {
+        // Columns: Prod1, [Prod2, Prod3] | {Products}
+        var res = [
+            {
+                selector: 'vendors/.*?/input',
+                limit: 3,
+                cell: {
                     type: 'ordinary'
-                });
-            });
-            data.rows.push(resRow);
-        });
+                }
+            }
+        ];
 
-        return data;
+        var vendors = model.vendors;
+        if (!vendors.length) {
+            res.push({
+                selector: null,
+                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
+                cellModels: ['name'] // first cell is used for grouping and must have criteria
+            });
+        }
+         return res;
     }
 
-    function toFullViewData() {
-        var groupBy = m.groupBy.get();
-        var model = TableModel.selectColumns([{ field: 'name' }, { field: groupBy }, { vendor: true }]);
-        var data = {
-            columns: [],
-            rows: []
-        };
-
-        // Columns: Criteria, {Group}(hidden), Prod1, [Prod2, Prod3], {AddNew}
-        _.forEach(model.columns, function (col) {
-            data.columns.push({
-                model: col,
-                visible: (col.field !== groupBy),
-                editable: col.vendor,
-                sortable: true
-            })
-        });
-        // last is empty
-        data.columns.push({
-            model: { id: 'new', field: '...', value: ''},
-            visible: true,
-            editable: true,
-            sortable: false,
-            last: true,
-            placeholder: 'Add product...'
-        });
-
-        //Rows
-        _.forEach(model.rows, function (row) {
-            var resRow = [];
-            _.forEach(row, function (cell, i) {
-                resRow.push({
-                    model: cell,
-                    visible: data.columns[i].visible,
-                    editable: cell.column.vendor,
-                    type: !cell.column.vendor ? 'static' : 'multiline'
-                });
-            });
-            // last row -- empty
-            resRow.push({
-                model: {},
-                visible: true,
-                editable: false,
-                type: 'static'
-            });
-            data.rows.push(resRow);
-        });
-
-        return data;
+    function getFullViewConfig() {
+        // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}
+        return [
+            {
+                selector: 'name',
+                column: {
+                    sortable: true
+                },
+                cell: {
+                    type: 'static'
+                }
+            },
+            {
+                selector: 'vendors/.*?/input',
+                column: {
+                    editable: true,
+                    sortable: true
+                },
+                cell: {
+                    editable: true,
+                    type: 'multiline'
+                }
+            },
+            {
+                selector: null, // virtual
+                columnModel: { field: '...', value: ''}, // addNew
+                column: {
+                    editable: true,
+                    placeholder: 'Add product...',
+                    last: true
+                },
+                cell: {
+                    type: 'static'
+                }
+            }
+        ];
     }
-
 
     //Menu
     m.menu = {
@@ -159,7 +115,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
             if (action === 'remove') {
                 view.removeColumn(cell.model);
             }
-            else {
+            else if (action === 'add'){
                 inviteToEdit(view);
             }
         }, 0, false);
@@ -170,7 +126,7 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table, TableModel, _) {
         if (!cell) { return true; }
 
         if (item === 'remove') {
-            if (!(cell.model.column && cell.model.column.vendor)) {
+            if (!(cell.model && /^vendors/.test(cell.model.key))) {
                 // disable remove on non-vendor columns
                 return false;
             }

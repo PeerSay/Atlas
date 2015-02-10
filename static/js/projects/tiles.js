@@ -36,7 +36,7 @@ function Tiles($rootScope, DeepLinking, _) {
             uri: 'sh',
             name: 'shortlists',
             title: 'Shortlists',
-            html: '/html/project-todo.html',
+            html: '/html/project-shortlist.html',
             progress: {},
             show: false
         },

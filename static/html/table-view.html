@@ -1,19 +1,20 @@
-<ng-form name="form{{::view.name}}">
+<ng-form name="form{{:: view.name }}">
     <table class="table"
             ng-table="view.tableParams"
             ng-class="{ 'ng-table-resizable-columns': false }"
-            ng-attr-data-resizable-columns-id="{{ false && 'psTable' }}"
+            ng-attr-data-resizable-columns-id="{{:: false && 'psTable' }}"
             >
+        <!--Header-->
         <thead>
         <tr>
             <th ng-repeat="col in view.columns"
                     ng-class="view.runtimeColClass(col)"
-                    ng-show="::col.visible"
+                    ng-show=":: col.visible"
                     ng-click="!col.edited && view.sortBy(col)"
                     >
-                <div ng-if="!col.editable">{{ col.model.value }}</div>
-
-                <div ng-if="col.editable"
+                <div ng-if=":: !col.editable">{{ col.model.value }}</div>
+                <!--Editable header cell-->
+                <div ng-if=":: col.editable"
                         ng-init="validateFn = view.validateColumnCell(col)"
                         ><!--Bind col to prevent infinite $digest-->
                     <a href tabindex="-1"
@@ -21,14 +22,14 @@
                             ng-click="col.edited = true; $event.stopPropagation()"
                             >{{ col.model.field }}</a>
                     <input type="text" tabindex="-1" class="form-control cell-input"
-                            name="{{::col.model.id}}"
+                            name="{{:: col.id }}"
                             ng-show="col.edited"
                             ng-model="col.model.value"
                             ng-blur="onColBlur(col)"
                             ng-keydown="onColKeydown(col, $event)"
                             ps-focus-on="col.edited === true"
                             ps-select="true"
-                            ng-attr-placeholder="{{::col.placeholder}}"
+                            ng-attr-placeholder="{{:: col.placeholder }}"
 
                             ps-input-validate="validateFn"
                             ps-allow-empty="col.last"
@@ -42,88 +43,113 @@
             </th>
         </tr>
         </thead>
+        <!--Groups & cells-->
         <tbody ng-repeat="group in $groups">
         <tr class="ng-table-group" ng-show="group.value">
-            <td colspan="{{view.columns.length}}" class="group">
+            <td colspan="{{ view.columns.length }}" class="group">
                 <a href ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()" tabindex="-1">
                     <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
-                    {{group.value}}
+                    {{:: group.value }}
                 </a>
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
-                    class="cell {{::cell.type}}"
+                    class="cell {{:: cell.type }}"
                     ng-class="{ 'edited': cell.edited }"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
-                    data-target="{{view.menu.id}}">
-                <div ng-if="!cell.editable">
-                    <span ng-if="cell.model.value" ng-bind-html="cell.model.value | multiline"></span>
-                    <span ng-if="!cell.model.value && cell.emptyValue" class="attention">
-                        <span class="glyphicon glyphicon-exclamation-sign"></span>
-                        {{ ::cell.emptyValue }}
-                    </span>
+                    data-target="{{:: view.menu.id }}">
+                <!--Not-editable cell-->
+                <div ng-if=":: !cell.editable">
+                    <div ng-if=":: cell.type === 'ordinary' || cell.type === 'static'">
+                        <span ng-if="cell.model.value" ng-bind-html="cell.model.value | multiline"></span>
+                        <span ng-if="!cell.model.value && cell.emptyValue" class="attention">
+                            <span class="glyphicon glyphicon-exclamation-sign"></span>
+                            {{:: cell.emptyValue }}
+                        </span>
+                    </div>
+                    <div ng-if=":: cell.type === 'number-static'"
+                            ng-class="{'max' : cell.computed.max()}">
+                        {{ cell.model.value }}
+                    </div>
                 </div>
-                <div ng-if="cell.editable && cell.type === 'multiline'">
-                    <textarea class="form-control cell-input noresize"
-                            name="{{::cell.model.id}}"
-                            msd-elastic
-                            ng-model="cell.model.value"
-                            ng-focus="onCellFocus(cell)"
-                            ng-blur="onCellBlur(cell)"
-                            ng-keydown="onCellKeydown(cell, $event)"
-                            ps-focus-on="cell.justAdded"
-                            ></textarea>
-                </div>
-                <div ng-if="cell.type === 'popup'">
-                    <ps-table-popover
-                            ps-container="td"
-                            ps-viewport=".modal-content"
-                            ps-id="{{group.value + '_crit_' + $index}}"
-                            ps-popover-on="view.popoverOn"
-                            ps-allow-hide="!view.topic.addNew.show"
-                            >
-                        <span class="popover-icon glyphicon glyphicon-cog"></span>
-                        <form class="popover-form">
-                            <div class="form-group">
-                                <label class="checkbox-ext no-select text-nowrap block">
-                                    <input type="checkbox"
-                                            ng-model="cell.models.priority.value"
-                                            ng-true-value="'required'"
-                                            ng-false-value="'optional'"
-                                            ng-click="view.saveCell(cell.models.priority);">
-                                    Required criteria
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Select topic:</label>
-                                <div class="list-group">
-                                    <a href class="list-group-item"
-                                            ng-repeat="topic in view.topic.options.all"
-                                            ng-init="active = (topic === cell.models.topic.value)"
-                                            ng-class="{'active': active}"
-                                            ng-click="cell.models.topic.value = topic; view.saveCell(cell.models.topic);">
-                                        <span class="glyphicon glyphicon-ok" ng-show="active"></span>
-                                        {{topic || 'None'}}
-                                    </a>
-                                    <a href class="list-group-item"
-                                            ng-click="view.topic.addNew.show = true">
-                                        <div class="create-new" ng-show="!view.topic.addNew.show">Create new...</div>
-                                        <input type="text" class="form-control" placeholder="Topic name"
-                                                ng-model="view.topic.addNew.value"
-                                                ng-show="view.topic.addNew.show"
-                                                ps-focus-on="view.topic.addNew.show"
-                                                ng-keydown="view.topic.keyPressed(cell.models.topic, $event)"
-                                                ng-blur="view.topic.doneEdit()">
-                                    </a>
+                <!--Editable cell-->
+                <div ng-if=":: cell.editable">
+                    <div ng-if=":: cell.type === 'multiline'">
+                        <textarea class="form-control cell-input noresize"
+                                name="{{:: cell.id }}"
+                                msd-elastic
+                                ng-model="cell.model.value"
+                                ng-focus="onCellFocus(cell)"
+                                ng-blur="onCellBlur(cell)"
+                                ng-keydown="onCellKeydown(cell, $event)"
+                                ps-focus-on="cell.justAdded"
+                                ></textarea>
+                    </div>
+                    <div ng-if=":: cell.type === 'number'" class="abs-container">
+                        <input type="number" class="form-control cell-input"
+                                name="{{:: cell.id }}"
+                                min="0" max="10"
+                                ng-model="cell.model.value"
+                                ng-class="{'max' : cell.computed.max()}"
+                                ng-focus="onCellFocus(cell)"
+                                ng-blur="onCellBlur(cell)"
+                                ng-keydown="onCellKeydown(cell, $event)"
+                                />
+                        <div class="cell-hint"
+                                ng-if=":: cell.computed.percent"
+                                ng-show="cell.edited">{{ cell.computed.percent() }}%</div>
+                    </div>
+                    <div ng-if=":: cell.type === 'popup'">
+                        <ps-table-popover
+                                ps-container="td"
+                                ps-viewport=".modal-content"
+                                ps-id="{{:: group.value + '_crit_' + $index }}"
+                                ps-popover-on="view.popoverOn"
+                                ps-allow-hide="!view.topic.addNew.show"
+                                >
+                            <span class="popover-icon glyphicon glyphicon-cog"></span>
+                            <form class="popover-form">
+                                <div class="form-group">
+                                    <label class="checkbox-ext no-select text-nowrap block">
+                                        <input type="checkbox"
+                                                ng-model="cell.models.priority.value"
+                                                ng-true-value="'required'"
+                                                ng-false-value="'optional'"
+                                                ng-click="view.saveCell(cell.models.priority);">
+                                        Required criteria
+                                    </label>
                                 </div>
-                                <span class="hint" ng-show="view.topic.addNew.show">Press enter</span>
-                            </div>
-                        </form>
-                    </ps-table-popover>
+
+                                <div class="form-group">
+                                    <label>Select topic:</label>
+                                    <div class="list-group">
+                                        <a href class="list-group-item"
+                                                ng-repeat="topic in view.topic.options.all"
+                                                ng-init="active = (topic === cell.models.topic.value)"
+                                                ng-class="{'active': active}"
+                                                ng-click="cell.models.topic.value = topic; view.saveCell(cell.models.topic);">
+                                            <span class="glyphicon glyphicon-ok" ng-show="active"></span>
+                                            {{ topic || 'None' }}
+                                        </a>
+                                        <a href class="list-group-item"
+                                                ng-click="view.topic.addNew.show = true">
+                                            <div class="create-new" ng-show="!view.topic.addNew.show">Create new...</div>
+                                            <input type="text" class="form-control" placeholder="Topic name"
+                                                    ng-model="view.topic.addNew.value"
+                                                    ng-show="view.topic.addNew.show"
+                                                    ps-focus-on="view.topic.addNew.show"
+                                                    ng-keydown="view.topic.keyPressed(cell.models.topic, $event)"
+                                                    ng-blur="view.topic.doneEdit()">
+                                        </a>
+                                    </div>
+                                    <span class="hint" ng-show="view.topic.addNew.show">Press enter</span>
+                                </div>
+                            </form>
+                        </ps-table-popover>
+                    </div>
                 </div>
             </td>
         </tr>
@@ -135,5 +161,17 @@
                         ng-click="view.addEmptyRow()">Click to add</span>
             </td>
         </tr>
+        <!--Footer-->
+        <tfoot>
+        <tr>
+            <th ng-repeat="col in view.columns"
+                    ng-show="col.footer">
+                <div ng-if="col.footer.value">{{:: col.footer.value }}</div>
+                <div ng-if="col.footer.computed"
+                        ng-class="{'max' : col.footer.computed.max()}"
+                        >{{ col.footer.computed.total() }}</div>
+            </th>
+        </tr>
+        </tfoot>
     </table>
 </ng-form>

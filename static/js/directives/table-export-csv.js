@@ -7,48 +7,16 @@ angular
     .directive('psExportCsv', psExportCsv);
 
 
-psExportCsv.$inject = ['$parse', 'Util'];
-function psExportCsv($parse, _) {
+psExportCsv.$inject = ['$parse', 'Util', 'TableModel'];
+function psExportCsv($parse, _, TableModel) {
     return {
         restrict: 'A',
         scope: false,
         link: function(scope, element, attrs) {
-            var titles = scope.$parent.cm.titles;
             var data = '';
-            var values = [];
-
             var csv = {
-                stringify: function(str) {
-                    var res = str
-                        .replace(/^\s*/, '').replace(/\s*$/, '') // trim spaces
-                        .replace(/"/g,'""'); // replace quotes with double quotes;
-                    if (res.search(/("|,|\n)/g) >= 0) {
-                        res = '"' + res + '"'; // quote if contains special chars
-                    }
-                    return res;
-                },
                 generate: function() {
-                    //prepare data
-                    values = [titles];
-                    _.forEach(scope.cm.criteria, function (o) {
-                        values.push([o.name, o.description, o.topic, o.priority]);
-                    });
-                    //console.log('>>values', values);
-
-                    //convert to cvs
-                    data = '';
-                    _.forEach(values, function (row) {
-                        _.forEach(row, function (val, j) {
-                            var txt = (val === null) ? '' : val.toString();
-                            var result = csv.stringify(txt);
-                            if (j > 0) {
-                                data += ',';
-                            }
-                            data += result;
-                        });
-                        data += '\n';
-                    });
-                    //console.log('>>csv', data);
+                    data = TableModel.viewModel.getCSV();
                 },
                 link: function() {
                     // Work only in Chrome?

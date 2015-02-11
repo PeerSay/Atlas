@@ -440,6 +440,9 @@ function TableModel($filter, _, jsonpatch) {
         V.sort = sort;
         V.addRow = addRow;
         V.removeRow = removeRow;
+        // Export
+        V.getCSV = getCSV;
+
 
         // Build
         function build(model) {
@@ -522,7 +525,47 @@ function TableModel($filter, _, jsonpatch) {
             return T.model.criteria.indexOf(cell.model.criteria);
         }
 
-        //Select
+        // Export
+        function getCSV() {
+            // titles
+            var res = getRowStr(V.columns);
+            console.log('>>> CSV Titles: ', res);
+            // rows
+            _.forEach(V.rows, function (row) {
+                res += getRowStr(row);
+            });
+            // footer
+            res += getRowStr(V.columns, 'footer');
+            return res;
+            //////
+
+            function getRowStr(arr, field) {
+                var res = '';
+                _.forEach(arr, function (cell, j) {
+                    var obj = field ? cell[field] : cell;
+                    var val = obj.model ? obj.model.value : '';
+                    var txt = stringify(val);
+                    if (j > 0) {
+                        res += ',';
+                    }
+                    res += txt;
+                });
+                return (res += '\n');
+            }
+
+            function stringify(val) {
+                var str = (val === null) ? '' : val.toString();
+                var res = str
+                    .replace(/^\s*/, '').replace(/\s*$/, '') // trim spaces
+                    .replace(/"/g,'""'); // replace quotes with double quotes;
+                if (res.search(/("|,|\n)/g) >= 0) {
+                    res = '"' + res + '"'; // quote if contains special chars
+                }
+                return res;
+            }
+        }
+
+        // Select
         function select(spec) {
             /**
              * var specFormat = [{
@@ -678,7 +721,7 @@ function TableModel($filter, _, jsonpatch) {
             }
         }
 
-        //Sort
+        // Sort
         function sort(keys, reverse) {
             var sortArr = _.map(keys, function (key) {
                 return getRowValByKeyFn(key);

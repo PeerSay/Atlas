@@ -38,7 +38,7 @@
 
                 <!-- Signup -->
                 <div id="form">
-                    <form>
+                    <form onsubmit="addWaiting(); return false;">
                         <input type="text" id="email" value="Enter a Valid Email Here"
                                 onKeyDown="if(this.value =='Enter a Valid Email Here') this.value='';"
                                 onblur="if(this.value=='') this.value='Enter a Valid Email Here';">

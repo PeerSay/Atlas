@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="/css/index.css">
     <!-- endbuild -->
 
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
 
 </head>
@@ -30,22 +33,18 @@
         <section id="box">
             <div class="arrow-up"></div>
             <div id="box-top">
-                <h1>PeerSay is coming soon!</h1>
-                <p>Please register to be the first to try our service</p>
+                <h1 id="header">PeerSay is coming soon!</h1>
+                <p id="text">Please register to be the first to try our service</p>
 
                 <!-- Signup -->
                 <div id="form">
-                    <!--<form action="/api/waitinglist" method="post">-->
                     <form>
                         <input type="text" id="email" value="Enter a Valid Email Here"
                                 onKeyDown="if(this.value =='Enter a Valid Email Here') this.value='';"
                                 onblur="if(this.value=='') this.value='Enter a Valid Email Here';">
-                        <!input type="submit" id="submit" value="Disabled" disabled>
-                        <button
-                                onclick="addWaitingUser()"
-                        >Register</button>
-                        <div class="clear"></div>
                     </form>
+                    <button class="btn btn-lg btn-peersay pull-right" onclick="addWaiting()">Register</button>
+                    <div class="clear"></div>
                 </div>
             </div>
             <div id="box-bottom">
@@ -59,5 +58,41 @@
         </div>
     </div>
 </section>
+<script>
+    function addWaiting()
+    {
+        var simple_mail_re = /\S+@\S+\.\S+/;
+        var mail = document.getElementById("email").value;
+
+        if (!simple_mail_re.test(mail)){
+            alert(mail + ' is not a valid email');
+            return;
+        }
+
+        var data = JSON.stringify({email: mail});
+        var path = "/api/waiting-users";
+
+        jQuery.ajax({
+            url:path,
+            type:"POST",
+            data:data,
+            contentType:"application/json; charset=utf-8",
+            dataType:"json",
+            success: function(res){
+                console.log( res );
+                var new_header = "Thank you for registering!";
+                var new_text = "We'll let you know when we're up and running."
+                if (res.result === 'duplicate'){
+                    new_header = "Hey! You're back!";
+                    new_text = "We'll make sure you're among the first to get on board!"
+                }
+                document.getElementById("form").style.visibility="hidden";
+                document.getElementById("header").innerHTML = new_header;
+                document.getElementById("text").innerHTML = new_text;
+
+            }
+        });
+    }
+</script>
 </body>
 </html>

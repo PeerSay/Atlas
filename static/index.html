@@ -35,11 +35,15 @@
 
                 <!-- Signup -->
                 <div id="form">
-                    <form action="#" method="post">
+                    <!--<form action="/api/waitinglist" method="post">-->
+                    <form>
                         <input type="text" id="email" value="Enter a Valid Email Here"
                                 onKeyDown="if(this.value =='Enter a Valid Email Here') this.value='';"
                                 onblur="if(this.value=='') this.value='Enter a Valid Email Here';">
-                        <input type="submit" id="submit" value="Disabled" disabled>
+                        <!input type="submit" id="submit" value="Disabled" disabled>
+                        <button
+                                onclick="addWaitingUser()"
+                        >Register</button>
                         <div class="clear"></div>
                     </form>
                 </div>

@@ -7,6 +7,9 @@ var jsonpatch = require('json-patch');
 var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
+var WaitingUser = require('../app/models/waitingusers').WaitingUserModel;
+
+var errorcodes = require('../app/errors');
 
 
 function RestApi(app) {
@@ -16,6 +19,9 @@ function RestApi(app) {
         // Logging & auth
         app.use('/api/*', logApi);
         app.use(/\/user|\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
+
+        // Adding user (email) to waiting list
+        app.post('/api/waiting-users', jsonParser, addToWaitingUsers);
 
         // user
         app.get('/api/user', readUser);
@@ -29,6 +35,26 @@ function RestApi(app) {
         app.put('/api/projects/:id/criteria', jsonParser, updateProjectCriteria);
         app.patch('/api/projects/:id/criteria', jsonParser, patchProjectCriteria);
         return U;
+    }
+
+    // Waitinglist
+
+    function addToWaitingUsers(req, res, next) {
+        var data = req.body;
+
+        console.log('[API] Adding user to waiting list [%s]', data.email);
+
+        WaitingUser.add(data.email, data, function(err, user, code) {
+            if (err) { next(err); }
+
+            if (code === errorcodes.WAITING_DUPLICATE) {
+                console.log('[API] User ' + data.email + ' is already in list');
+                return res.json({error: 'already registered: ' + data.email});
+            }
+
+            console.log('[API] User ' + data.email + ' has been added to the waiting list');
+            return res.json({ result: true });
+        });
     }
 
     // User

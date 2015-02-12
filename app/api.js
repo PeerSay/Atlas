@@ -7,7 +7,7 @@ var jsonpatch = require('json-patch');
 var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
-var WaitingUser = require('../app/models/waitingusers').WaitingUserModel;
+var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
 
 var errorcodes = require('../app/errors');
 

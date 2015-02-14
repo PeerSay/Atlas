@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="/css/index.css">
     <!-- endbuild -->
 
-    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
 
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
@@ -33,17 +32,25 @@
         <section id="box">
             <div class="arrow-up"></div>
             <div id="box-top">
-                <h1 id="header">PeerSay is coming soon!</h1>
-                <p id="text">Please register to be the first to try our service</p>
+                <div id="before">
+                    <h1>PeerSay is coming soon!</h1>
+                    <p>Please register to be the first to try our service</p>
+                </div>
+                <div id="after-new" style="display: none">
+                    <h1>Thank you for registering!</h1>
+                    <p>We'll let you know when we're up and running.</p>
+                </div>
+                <div id="after-dup" style="display: none">
+                    <h1>Hey! Welcome back!</h1>
+                    <p>We'll make sure you're among the first to get on board!</p>
+                </div>
 
                 <!-- Signup -->
                 <div id="form">
-                    <form onsubmit="addWaiting(); return false;">
-                        <input type="text" id="email" value="Enter a Valid Email Here"
-                                onKeyDown="if(this.value =='Enter a Valid Email Here') this.value='';"
-                                onblur="if(this.value=='') this.value='Enter a Valid Email Here';">
+                    <form id="reg-form">
+                        <input type="text" id="email" placeholder="Enter a Valid Email Here">
                     </form>
-                    <button class="btn btn-lg btn-peersay pull-right" onclick="addWaiting()">Register</button>
+                    <button id="register" class="btn btn-lg btn-peersay pull-right">Register</button>
                     <div class="clear"></div>
                 </div>
             </div>
@@ -58,6 +65,15 @@
         </div>
     </div>
 </section>
+
+<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+
+<script>
+    $(function() {
+        $("#register").click(addWaiting);
+        $("#reg-form").submit(addWaiting);
+    })
+</script>
 <script>
     function addWaiting()
     {
@@ -66,7 +82,7 @@
 
         if (!simple_mail_re.test(mail)){
             alert(mail + ' is not a valid email');
-            return;
+            return false;
         }
 
         var data = JSON.stringify({email: mail});
@@ -80,18 +96,22 @@
             dataType:"json",
             success: function(res){
                 console.log( res );
-                var new_header = "Thank you for registering!";
-                var new_text = "We'll let you know when we're up and running."
-                if (res.result === 'duplicate'){
-                    new_header = "Hey! You're back!";
-                    new_text = "We'll make sure you're among the first to get on board!"
-                }
+                // Hide all messages before choosing the one to display
                 document.getElementById("form").style.visibility="hidden";
-                document.getElementById("header").innerHTML = new_header;
-                document.getElementById("text").innerHTML = new_text;
-
+                document.getElementById("before").style.display="none";
+                document.getElementById("after-new").style.display="none";
+                document.getElementById("after-dup").style.display="none";
+                // There is no error field --> new user added
+                if (typeof res.error === 'undefined'){
+                    document.getElementById("after-new").style.display="block";
+                }
+                // There is no status field --> A duplicate user
+                if (typeof res.result === 'undefined'){
+                    document.getElementById("after-dup").style.display="block";
+                }
             }
         });
+        return false;
     }
 </script>
 </body>

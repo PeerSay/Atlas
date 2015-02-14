@@ -49,7 +49,7 @@ function RestApi(app) {
 
             if (code === errorcodes.WAITING_DUPLICATE) {
                 console.log('[API] User ' + data.email + ' is already in list');
-                return res.json({result: 'duplicate', error: data.email + ' is already registered!'});
+                return res.json({error: data.email + ' is already registered!'});
             }
 
             console.log('[API] User ' + data.email + ' has been added to the waiting list');

@@ -6,7 +6,7 @@
             ng-click="cm.showFullView()"
             >
         <div class="panel-heading">
-            <h3 class="panel-title">{{cm.tile.title}}</h3>
+            <h3 class="panel-title">{{:: cm.tile.title }}</h3>
         </div>
         <div class="panel-body">
             <div class="view-mode" ng-class="m.viewMode.value">
@@ -72,16 +72,15 @@
                     <a class="btn btn-default export header-btn"
                             ng-mousedown="csv.generate()"
                             ng-href="{{ csv.link() }}"
-                            download="requirements.csv">Export</a>
-                    <!--TODO - eXport !!!-->
+                            download="export.csv">Export</a>
                     <h4 class="modal-title">
-                        {{tile.title}}
+                        {{:: tile.title }}
                         <small ng-show="cm.savingData">Saving...</small>
                     </h4>
                 </div>
                 <div class="modal-body">
                     <div class="tile-section border">
-                        <ps-table-view ps-view="cm.fullTableView"></ps-table-view>
+                        <ps-table-view ps-export-csv="csv" ps-view="cm.fullTableView"></ps-table-view>
                     </div>
                 </div>
                 <div class="modal-footer">

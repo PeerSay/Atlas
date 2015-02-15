@@ -206,7 +206,8 @@ module.exports = function (grunt) {
                 options: {
                     parseTag: 'htmlbuild', // avoid conflict with usemin
                     scripts: {
-                        ga: ['static/ga.js']
+                        ga: ['static/ga.js'],
+                        mixpanel: ['static/mixpanel.js']
                     }
                 }
             }

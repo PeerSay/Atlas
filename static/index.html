@@ -93,6 +93,7 @@
 
         var data = JSON.stringify({email: mail});
         var path = "/api/waiting-users";
+        var mixPanelRes;
 
         jQuery.ajax({
             url:path,
@@ -101,8 +102,8 @@
             contentType:"application/json; charset=utf-8",
             dataType:"json",
             success: function(res){
-                mixpanel.track("success");
                 console.log( res );
+                mixPanelRes = "success";
 
                 // Hide all messages before choosing the one to display
                 document.getElementById("form").style.visibility="hidden";
@@ -117,11 +118,12 @@
 
                 // There is no status field --> A duplicate user
                 if (typeof res.result === 'undefined'){
-                    mixpanel.track("duplicate");
+                    mixPanelRes = "duplicate";
                     document.getElementById("after-dup").style.display="block";
                 }
             }
         });
+        mixpanel.track(mixPanelRes);
         return false;
     }
 </script>

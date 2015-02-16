@@ -29,15 +29,20 @@
   display: block;
 }
 
-/* Vendor prefixes*/
-
-/* From Bootstrap*/
+/* From Bootstrap */
 .box-shadow(@shadow) {
   -webkit-box-shadow: @shadow; // iOS <4.3 & Android <4.1
   box-shadow: @shadow;
 }
 
-/* Helper for containers of absolutely positioned els*/
+/* Helper for containers of absolutely positioned els */
 .abs-container {
   position: relative;
+}
+
+/* Triangles (for chevrons etc.) */
+.triangle(@from, @to, @size, @color) {
+  border: @size solid transparent;
+  border-@{from}-color: @color;
+  border-@{to}-width: 0;
 }

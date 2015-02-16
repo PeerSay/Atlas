@@ -1,4 +1,27 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
+    <!--Project Progress / Wizard-->
+    <div class="row">
+        <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
+            <ul class="nav nav-pills nav-justified">
+                <li role="presentation" class="active">
+                    <a href="#">1. Essentials</a>
+                    <span class="chevron"></span>
+                </li>
+                <li role="presentation">
+                    <a href="#">2. Requirements</a>
+                    <span class="chevron"></span>
+                </li>
+                <li role="presentation">
+                    <a href="#">3. Products</a>
+                    <span class="chevron"></span>
+                </li>
+                <li role="presentation">
+                    <a href="#">4. Decisions</a>
+                </li>
+            </ul>
+            <ps-progress valuenow="50" style="'success'"></ps-progress>
+        </nav>
+    </div>
     <!--Title / edit-->
     <div class="row" ng-controller="ProjectTitleCtrl as m">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

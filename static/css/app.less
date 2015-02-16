@@ -1,26 +1,20 @@
 @import "util.less";
 @import "common.less";
-
 /*
 * General
 */
-
 h1 {
   color: #cd5c5c;
 }
-
 code {
   background: #eee;
 }
-
 body {
   background: #ececec;
 }
-
 /*
 * Navigation
 */
-
 .navbar {
   .logo {
     position: absolute;
@@ -35,11 +29,9 @@ body {
     }
   }
 }
-
 /*
 * Auth forms
 */
-
 .panel.auth {
   box-shadow: 0 0 1px 3px #ccc;
   overflow: hidden;
@@ -100,22 +92,18 @@ body {
     }
   }
 }
-
 #activate-acc-dlg {
   .email-sent {
     font-size: 18px;
     color: #428BCA;
   }
 }
-
 /*
 * App Header
 */
-
 .page-title {
   margin: 0 0 10px;
 }
-
 .btn.head {
   margin: 0 0 10px 10px;
   color: #666;
@@ -123,13 +111,11 @@ body {
     text-shadow: 1px 1px 1px #fff;
   }
 }
-
 .notification {
   margin-top: -20px;
   padding: 8px;
   font-size: 12px;
 }
-
 /*
 * Projects
 */
@@ -209,7 +195,6 @@ body {
     transition: all .3s;
   }
 }
-
 /* Tile section - may be inside tile or dlg*/
 .tile-section {
   margin-bottom: 20px;
@@ -396,7 +381,6 @@ body {
       }
     }
 
-
     .colored {
       background-color: #f9f7d0;
     }
@@ -459,14 +443,12 @@ body {
     &.ok { background-color: hsv(120, 50%, 72%); }
   }
 }
-
 /*Table header warning*/
 /*TODO - unify w/ auth warn*/
 .col-warn {
   position: absolute;
   top: 50px;
   right: 3px;
-
   opacity: 0;
   transition: opacity .5s, top .3s;
   &.ng-active.show {
@@ -505,7 +487,6 @@ body {
     }
   }
 }
-
 /*Popover controls*/
 .popover-form {
   min-width: 160px;
@@ -529,7 +510,6 @@ body {
     color: #bbb;
   }
 }
-
 .hamburger-icon {
   display: inline-block;
   .icon-bar {
@@ -543,12 +523,10 @@ body {
     }
   }
 }
-
 /*Table resizable columns*/
 .rc-handle-container {
   position: relative;
 }
-
 .rc-handle {
   position: absolute;
   width: 7px;
@@ -556,7 +534,6 @@ body {
   margin-left: -3px;
   z-index: 2;
 }
-
 table.rc-table-resizing {
   cursor: ew-resize;
 
@@ -566,13 +543,11 @@ table.rc-table-resizing {
     cursor: ew-resize;
   }
 }
-
 /*Context menu*/
 .context-menu {
   /*plugin requirement - bad for scrolling/resize =>TODO*/
   position: fixed;
 }
-
 .panel {
   &.dialog {
     position: relative;
@@ -582,12 +557,11 @@ table.rc-table-resizing {
     }
   }
 }
-
 .full-view {
   .modal-header > .header-btn {
     float: right;
     margin: -5px 5px 0 0;
-    &.last{
+    &.last {
       margin-right: 20px;
     }
     &.export {
@@ -595,7 +569,6 @@ table.rc-table-resizing {
     }
   }
 }
-
 /*
 * Project Details
 */
@@ -616,7 +589,6 @@ table.rc-table-resizing {
     }
   }
 }
-
 .edit-form {
   position: relative;
   top: -10px;
@@ -632,7 +604,6 @@ table.rc-table-resizing {
     font-size: 30px;
   }
 }
-
 /*
   Tile Menus
 */
@@ -667,10 +638,93 @@ table.rc-table-resizing {
     }
   }
 }
-
 .debug {
   display: none;
   .col {
     outline: 1px solid #00a98d;
+  }
+}
+/*
+* Progress / Wizard
+*/
+.project-progress {
+  .nav-pills > li {
+    /* Invert natural z-order, so that chevrons can be on top of next el */
+    z-index: 5;
+    & + li {
+      z-index: 4;
+      & + li {
+        z-index: 3;
+        & + li {
+          z-index: 2;
+        }
+      }
+    }
+
+    /* Color vars/utils */
+    @pb-color: #f8f8f8;
+    @pb-hover-color: #fff;
+    @pb-active-color: #428BCA;
+    @bp-chevron-space-color: rgba(100, 100, 100, 0.15);
+    .pb-colorize-chevron(@color) {
+      &:after {
+        border-top-color: @color;
+      }
+      @media (min-width: 768px) {
+        &:after {
+          border-color: transparent; /*reset above*/
+          border-left-color: @color;
+        }
+      }
+    }
+
+    .chevron {
+      /* Extra small devices (phones, less than 768px) - chevron at the bottom*/
+      display: block;
+      position: absolute;
+      z-index: 1;
+      right: 47%; top: 45px;
+      .triangle(top, bottom, 10px, @bp-chevron-space-color);
+      &:after {
+        content: "";
+        position: absolute;
+        left: -10px; top: -15px;
+        .triangle(top, bottom, 10px, @pb-active-color);
+      }
+
+      /* Small devices (tablets, 768px and up) */
+      @media (min-width: 768px) {
+        right: -20px;
+        top: 0;
+        .triangle(left, right, 20px, @bp-chevron-space-color);
+        &:after {
+          content: "";
+          position: absolute;
+          left: -24px; top: -20px;
+          .triangle(left, right, 20px, @pb-active-color);
+        }
+      }
+    }
+    &:not(.active) {
+      a {
+        background-color: @pb-color;
+      }
+      .chevron {
+        .pb-colorize-chevron(@pb-color);
+      }
+      &:hover {
+        a {
+          background-color: @pb-hover-color;
+        }
+        .chevron {
+          .pb-colorize-chevron(@pb-hover-color);
+        }
+      }
+    }
+  }
+
+  .progress {
+    margin: 7px 0 0;
+    height: 5px;
   }
 }

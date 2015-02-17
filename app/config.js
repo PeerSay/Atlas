@@ -51,7 +51,6 @@ function getConfig(param) {
         deploy: deploy,
         web: {
             port: local.web.port || ENV_PORT,
-            base_url: local.web.base_url || 'http://peersay.herokuapp.com',
             static_dir: local.web.static_dir || path.join(__dirname, '..', 'dist')
         },
         db: {

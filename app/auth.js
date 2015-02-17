@@ -44,8 +44,8 @@ function Auth(app) {
         app.post('/api/auth/logout', logout); // api call!
 
         // linkedin
-        app.get('/auth/linkedin', logAuthAttempt, passport.authenticate('linkedin')); // redirect to linkedin.com
-        app.get('/auth/linkedin/callback', authenticateByLinkedIn); // redirect back from linkedin.com
+        app.get('/auth/linkedin', authenticateByLinkedIn); // redirect to linkedin.com
+        app.get('/auth/linkedin/callback', authenticateByLinkedInCallback); // redirect back from linkedin.com
 
         // Private pages
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
@@ -77,8 +77,8 @@ function Auth(app) {
     passport.use(new LinkedInStrategy({
             consumerKey: config.auth.linkedin.api_key,
             consumerSecret: config.auth.linkedin.secret_key,
-            callbackURL: config.web.base_url + "/auth/linkedin/callback",
             profileFields: ['id', 'first-name', 'last-name', 'email-address']
+            /*callbackURL is not needed as it's passed per request*/
         },
         passportVerifyLinkedIn
     ));
@@ -109,7 +109,7 @@ function Auth(app) {
             }
 
             if (user.needVerify) {
-                mailVerifyAsync(user);
+                mailVerifyAsync(user, util.baseURL(req, config));
                 return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
             }
 
@@ -207,12 +207,16 @@ function Auth(app) {
     // Auth/register - LinkedIn
     //
 
-    function logAuthAttempt(req, res, next) {
+    function authenticateByLinkedIn(req, res, next) {
         console.log('[AUTH] Auth-linkedin attempt by unknown');
-        next()
+
+        passport.authenticate(
+            'linkedin',
+            { callbackURL: '/auth/linkedin/callback' } // relative URL is OK
+        ) (req, res, next);
     }
 
-    function authenticateByLinkedIn(req, res, next) {
+    function authenticateByLinkedInCallback(req, res, next) {
         // delegates to passportVerifyLinkedIn, profile is passed by linkedin.com
         passport.authenticate('linkedin', function (err, user, info) {
             if (err) { return next(err); }
@@ -387,8 +391,8 @@ function Auth(app) {
 
     // Mail
     //
-    function mailVerifyAsync(user) {
-        var verify_url = config.web.base_url +
+    function mailVerifyAsync(user, base_url) {
+        var verify_url = base_url +
             "/auth/signup/verify" +
             '?email=' + encodeURIComponent(user.email) +
             "&id=" + encodeURIComponent(user.needVerify);

@@ -53,12 +53,10 @@ function isEmptyObj(obj) {
     return !Object.keys(obj).length;
 }
 
-function baseURL(req, config) {
-    var base_url = req.protocol + '://' + req.hostname;
-    if (!/^80|443$/.test(config.web.port)) {
-        base_url += ':' + config.web.port;
-    }
-    return base_url;
+function baseURL(req) {
+    // See: http://stackoverflow.com/questions/10183291/how-to-get-the-full-url-in-express-js
+    // and: https://tools.ietf.org/html/rfc7230#section-5.4
+    return req.protocol + '://' + req.get('host');
 }
 
 module.exports = {

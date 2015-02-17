@@ -109,7 +109,7 @@ function Auth(app) {
             }
 
             if (user.needVerify) {
-                mailVerifyAsync(user, util.baseURL(req, config));
+                mailVerifyAsync(user, util.baseURL(req));
                 return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
             }
 

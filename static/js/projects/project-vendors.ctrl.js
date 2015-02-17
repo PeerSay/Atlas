@@ -7,10 +7,6 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
 
     m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
-    m.progress = {
-        value: 0,
-        total: 1
-    };
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
@@ -144,16 +140,6 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
 
     //TODO:
     //m.savingData = false; // show indicator
-
-    activate();
-
-    function activate() {
-        Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
-        $scope.$on('$destroy', function () {
-            m.progress = { value: 0, total: 0 };
-            Tiles.setProgress(m.tile, m.progress);
-        });
-    }
 
     function showFullView(control) {
         Tiles.toggleFullView(true, m.tile.uri, control);

@@ -9,7 +9,6 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
 
     m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
-    m.progress = {};
     // Full view
     m.fullView = Tiles.fullView;
     m.showFullView = showFullView;
@@ -36,14 +35,7 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
                     // ensure missing fields are added to Projects obj
                     m.fields[key] = project[key] = project[key] || missingField(key);
                 });
-
-                setProgress();
             });
-
-        $scope.$on('$destroy', function () {
-            m.progress = { value: 0, total: 0 };
-            Tiles.setProgress(m.tile, m.progress);
-        });
     }
 
     function missingField(key) {
@@ -52,11 +44,6 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
             value: '',
             status: 'missing'
         };
-    }
-
-    function setProgress() {
-        m.progress = getProgress(['title', 'budget', 'duration.days', 'domain']);
-        Tiles.setProgress(m.tile, m.progress);
     }
 
     function getProgress(fields) {
@@ -85,9 +72,6 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
         data[ctl.key] = value;
 
         Projects.updateProject(m.projectId, data)
-            .then(function () {
-                setProgress();
-            })
             .finally(function () {
                 toggleEditInline(ctl, false);
             });

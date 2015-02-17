@@ -13,7 +13,6 @@ function Tiles($rootScope, DeepLinking, _) {
             name: 'essentials',
             title: 'Project Essentials',
             html: '/html/project-essentials.html',
-            progress: {},
             show: false
         },
         {
@@ -21,7 +20,6 @@ function Tiles($rootScope, DeepLinking, _) {
             name: 'evaluation',
             title: 'Evaluation Requirements',
             html: '/html/project-requirements.html',
-            progress: {},
             show: false
         },
         {
@@ -29,7 +27,6 @@ function Tiles($rootScope, DeepLinking, _) {
             name: 'vendor-input',
             title: 'Product Input',
             html: '/html/project-vendors.html',
-            progress: {},
             show: false
         },
         {
@@ -37,38 +34,9 @@ function Tiles($rootScope, DeepLinking, _) {
             name: 'shortlists',
             title: 'Shortlists',
             html: '/html/project-shortlist.html',
-            progress: {},
-            show: false
-        },
-        {
-            uri: 'po',
-            name: 'pocs',
-            title: 'POCs',
-            html: '/html/project-todo.html',
-            progress: {},
-            show: false
-        },
-        {
-            uri: 'vr',
-            name: 'vendor-ref',
-            title: 'Vendor Reference',
-            html: '/html/project-todo.html',
-            progress: {},
-            show: false
-        },
-        {
-            uri: 'de',
-            name: 'debrief',
-            title: 'Audit / Debrief',
-            html: '/html/project-todo.html',
-            progress: {},
             show: false
         }
     ];
-    T.checklist = {
-        tiles: [],
-        current: null
-    };
     T.visible = {
         tiles: []
     };
@@ -80,7 +48,6 @@ function Tiles($rootScope, DeepLinking, _) {
         max: 0,
         current: 0
     };
-    T.setProgress = setProgress;
     // Full view dlg
     T.fullView = {
         dlg: null,
@@ -93,12 +60,13 @@ function Tiles($rootScope, DeepLinking, _) {
 
     function activate() {
         listenToNavEvents();
+
+        T.visible.tiles = tiles;
     }
 
     function listenToNavEvents() {
         // Tiles deep-linking
         $rootScope.$on('replace:tile', function (evt, vals) {
-            T.visible.tiles = [];
             _.forEach(vals, function (uri) {
                 if (uri) { addTile(uri); }
             });
@@ -129,31 +97,23 @@ function Tiles($rootScope, DeepLinking, _) {
     function load(nspace) {
         _.forEach(tiles, function (tile) {
             tile.show = false;
-            T.checklist.tiles.push(tile);
         });
-        T.checklist.current = T.checklist.tiles[0]; //TODO - select correct current
         DeepLinking.load(nspace, ['tile', 'mode', 'dlg']);
     }
 
     function unload() {
-        T.checklist.tiles = [];
         T.visible.tiles = [];
         DeepLinking.unload();
     }
 
     function addTile(uri) {
         var tile = _.findWhere(tiles, { uri: uri });
-
         tile.show = true;
-        T.visible.tiles.push(tile);
     }
 
     function removeTile(uri) {
         var tile = _.findWhere(tiles, { uri: uri });
-        var idx = T.visible.tiles.indexOf(tile);
-
         tile.show = false;
-        T.visible.tiles.splice(idx, 1);
     }
 
     function toggleTile(tile, on) {
@@ -174,20 +134,11 @@ function Tiles($rootScope, DeepLinking, _) {
         }
     }
 
-    function setProgress(tile, progress) {
-        tile.progress = progress;
-        setProgressTotal();
-    }
-
+    // TODO
     function setProgressTotal() {
         var total = T.progressTotal;
-        total.max = 0;
-        total.current = 0;
-
-        _.forEach(T.visible.tiles, function (tile) {
-            total.max += tile.progress.total;
-            total.current += tile.progress.value;
-        });
+        total.max = 100;
+        total.current = 25;
     }
 
     return T;

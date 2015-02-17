@@ -81,11 +81,6 @@ function Tiles($rootScope, DeepLinking, _) {
         current: 0
     };
     T.setProgress = setProgress;
-    // View mode
-    T.viewMode = {
-        value: 'norm'
-    };
-    T.toggleViewMode = toggleViewMode;
     // Full view dlg
     T.fullView = {
         dlg: null,
@@ -115,10 +110,6 @@ function Tiles($rootScope, DeepLinking, _) {
         });
         $rootScope.$on('remove:tile', function (evt, val) {
             removeTile(val);
-        });
-        // Modes deep-linking
-        $rootScope.$on('replace:mode', function (evt, vals) {
-            T.viewMode.value = vals[0] || 'norm'; // must be 1 item
         });
         // Full view deep-linking
         $rootScope.$on('replace:dlg', function (evt, arr) {
@@ -168,11 +159,6 @@ function Tiles($rootScope, DeepLinking, _) {
     function toggleTile(tile, on) {
         var show = (arguments.length > 1) ? on : tile.show; // No negation cause negated by ng-model already
         DeepLinking[show ? 'add' : 'remove']('tile', tile.uri);
-    }
-
-    function toggleViewMode() {
-        var newMode = (T.viewMode.value === 'norm') ? 'min' : 'norm';
-        DeepLinking.overwrite('mode', newMode);
     }
 
     function toggleFullView(on, dlg, control) {

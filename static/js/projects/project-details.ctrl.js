@@ -9,10 +9,6 @@ function ProjectDetailsCtrl($scope, $routeParams, Tiles, _) {
     var m = this;
 
     m.projectId = $routeParams.projectId;
-    // Toggle view mode
-    m.viewMode = Tiles.viewMode;
-    m.toggleViewMode = Tiles.toggleViewMode.bind(Tiles);
-    m.viewModeBtnClass = viewModeBtnClass;
     // Tiles
     m.visible = Tiles.visible;
     // Checklist
@@ -25,9 +21,6 @@ function ProjectDetailsCtrl($scope, $routeParams, Tiles, _) {
     m.setTileProgress = setTileProgress;
     // Full view
     m.showFullView = showFullView;
-
-    // xxx
-    m.dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     activate();
 
@@ -76,13 +69,6 @@ function ProjectDetailsCtrl($scope, $routeParams, Tiles, _) {
         var total = Tiles.progressTotal;
         var val = total.max ? total.current / total.max * 100 : 0;
         return Math.floor(val + 0.5);
-    }
-
-    function viewModeBtnClass() {
-        return {
-            'glyphicon-zoom-out': m.viewMode.value === 'norm',
-            'glyphicon-zoom-in': m.viewMode.value === 'min'
-        };
     }
 
     function showFullView(tile) {

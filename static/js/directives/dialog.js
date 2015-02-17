@@ -22,7 +22,7 @@ function psTileDialog(Tiles) {
 
             $el.on('hidden.bs.modal', function () {
                 // need to toggle off only on manual close, not on navigation
-                if (!scope.dlg) { return;}
+                if (!scope.dlg) { return; }
 
                 // digest for $search change
                 scope.$apply(function () {

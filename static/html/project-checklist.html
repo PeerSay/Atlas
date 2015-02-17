@@ -26,7 +26,7 @@
         </div>
 
         <div class="panel-body">
-            <div class="view-mode" ng-class="m.viewMode.value">
+            <div class="view-mode">
                 <div class="tile-section">
                     <ps-progress valuenow="m.progressTotal()" style="'success'"></ps-progress>
                 </div>
@@ -41,7 +41,7 @@
 
                 </div>
 
-                <div class="tile-section norm">
+                <div class="tile-section">
                     <ul class="list-group">
                         <li class="list-group-item" ng-repeat="tile in m.checklist.tiles"
                                 ng-mouseover="tile.highlight = true"

@@ -53,10 +53,19 @@ function isEmptyObj(obj) {
     return !Object.keys(obj).length;
 }
 
+function baseURL(req, config) {
+    var base_url = req.protocol + '://' + req.hostname;
+    if (!/^80|443$/.test(config.web.port)) {
+        base_url += ':' + config.web.port;
+    }
+    return base_url;
+}
+
 module.exports = {
     hasher: hasher,
     randomBase64: randomBase64,
     genRestorePwdKey: genRestorePwdKey,
     isValidDate: isValidDate,
-    isEmptyObj: isEmptyObj // TODO - test
+    isEmptyObj: isEmptyObj,
+    baseURL: baseURL
 };

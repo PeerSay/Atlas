@@ -5,8 +5,8 @@ angular.module('PeerSay')
     .controller('MenuCtrl', MenuCtrl);
 
 
-MenuCtrl.$inject = ['Location', 'User', 'Projects'];
-function MenuCtrl(Location, User, Projects) {
+MenuCtrl.$inject = ['$state', 'User', 'Projects'];
+function MenuCtrl($state, User, Projects) {
     var m = this;
     m.user = {
         logout: logout
@@ -18,8 +18,8 @@ function MenuCtrl(Location, User, Projects) {
     function logout () {
         User.logout()
             .success(function () {
-                Location.url('/auth/login')
-                    .replace();
+                // Go to state and prevent Back
+                $state.transitionTo('auth.login', null, { location: 'replace' });
             });
     }
 }

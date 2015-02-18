@@ -43,8 +43,8 @@ function AuthCtrl(Location, $http, $state) {
                     }
                 }
                 else if (res.result) {
-                    $state.go('auth.restore-complete');
-                    //Location.path('/auth/restore/complete').replace();
+                    // Go to state and prevent Back
+                    $state.transitionTo('auth.restore-complete', null, { location: 'replace' });
                 }
             })
             .error(function (res) {
@@ -63,8 +63,8 @@ function AuthCtrl(Location, $http, $state) {
                     m.error.show = true;
                 }
                 else if (res.result) {
-                    $state.go('project.list');
-                    //Location.path('/projects').replace();
+                    // Go to state and prevent Back
+                    $state.transitionTo('project.list', null, { location: 'replace' });
                 }
             })
             .error(function (res) {

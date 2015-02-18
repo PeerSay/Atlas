@@ -51,27 +51,6 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <div class="input-group input-group-lg" ng-class="{
-                                    'has-success': m.form.pwd2.$valid,
-                                    'has-warning': m.form.pwd2.$touched && m.form.pwd2.$invalid}">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-                                <div class="hint" ng-messages="m.form.pwd2.$error" ng-class="{show: m.form.pwd2.$touched}">
-                                    <div ng-message="required">Required</div>
-                                    <div ng-message="minlength">6 chars or more</div>
-                                    <div ng-message="match">Don't match!</div>
-                                </div>
-                                <input type="password" id="password2" class="form-control" placeholder="Repeat password"
-                                        name="pwd2"
-                                        ng-model="m.passwordRepeat"
-                                        ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
-                                        ng-focus="m.form.pwd2.$setUntouched()"
-                                        minlength="6"
-                                        ps-match="m.user.password"
-                                        required>
-                            </div>
-                        </div>
-
                         <button class="btn btn-lg btn-success full-width"
                                 ng-disabled="m.form.$invalid"
                                 ng-click="m.restorePwdComplete()"

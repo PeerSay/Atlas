@@ -1,4 +1,4 @@
-angular.module('peersay')
+angular.module('PeerSay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
 ProjectRequirementsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table'];

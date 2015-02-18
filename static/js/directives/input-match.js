@@ -1,5 +1,5 @@
 angular
-    .module('peersay')
+    .module('PeerSay')
     .directive('psMatch', function () {
         return {
             require: 'ngModel',

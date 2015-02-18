@@ -5,8 +5,8 @@ describe('Client - unit', function () {
     describe('Module', function () {
         var module, deps;
         before(function () {
-            module = angular.module('peersay');
-            deps = module.value('peersay').requires;
+            module = angular.module('PeerSay');
+            deps = module.value('PeerSay').requires;
         });
 
         it('should be registered', function () {
@@ -23,7 +23,7 @@ describe('Client - unit', function () {
     describe('TileLocation', function () {
         var DeepLinking, Storage, rootScope, Location;
         beforeEach(function () {
-            module('peersay');
+            module('PeerSay');
 
             inject(function (_$rootScope_, _Storage_, _Location_, _DeepLinking_) {
                 rootScope = _$rootScope_;

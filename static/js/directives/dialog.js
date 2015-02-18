@@ -1,5 +1,5 @@
 angular
-    .module('peersay')
+    .module('PeerSay')
     .directive('psTileDialog', psTileDialog);
 
 psTileDialog.$inject = ['Tiles'];

@@ -1,4 +1,4 @@
-angular.module('peersay')
+angular.module('PeerSay')
     .filter('capitalize', capitalize);
 
 function capitalize() {

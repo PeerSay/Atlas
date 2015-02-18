@@ -11,7 +11,7 @@ Function.prototype.bind = Function.prototype.bind || function (thisp) {
 describe('TableModel', function () {
     var TableModel;
     beforeEach(function () {
-        module('peersay');
+        module('PeerSay');
 
         inject(function (_TableModel_) {
             TableModel = _TableModel_;

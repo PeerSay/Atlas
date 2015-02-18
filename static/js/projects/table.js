@@ -1,6 +1,6 @@
 /*global angular:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .factory('Table', Table);
 
 Table.$inject = ['$rootScope', '$filter', 'ngTableParams', 'Backend', 'TableModel', 'Util'];
@@ -74,6 +74,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     //
     function transformCriteriaModel(data) {
         // data format: data.criteria = [...];
+        // TODO - handle error
         return TableModel.buildModel(data.criteria);
     }
 

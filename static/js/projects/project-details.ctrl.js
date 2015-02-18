@@ -1,14 +1,14 @@
 /*global angular:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
 
-ProjectDetailsCtrl.$inject = ['$scope', '$routeParams', 'Tiles', 'Util'];
-function ProjectDetailsCtrl($scope, $routeParams, Tiles, _) {
+ProjectDetailsCtrl.$inject = ['$scope', '$stateParams', 'Tiles', 'Util'];
+function ProjectDetailsCtrl($scope, $stateParams, Tiles, _) {
     var m = this;
 
-    m.projectId = $routeParams.projectId;
+    m.projectId = $stateParams.projectId;
     // Tiles
     m.visible = Tiles.visible;
     // Checklist

@@ -1,6 +1,6 @@
 /*global angular:true, io:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .factory('socket', socketSvc);
 
 socketSvc.$inject = ['$rootScope'];

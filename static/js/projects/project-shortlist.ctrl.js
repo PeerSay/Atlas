@@ -1,4 +1,4 @@
-angular.module('peersay')
+angular.module('PeerSay')
     .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
 
 ProjectShortlistCtrl.$inject = ['$scope', 'Tiles', 'Table', 'Util'];

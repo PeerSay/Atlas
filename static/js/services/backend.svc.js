@@ -94,7 +94,7 @@ function Backend($http, $q, Notification, _) {
             })[0];
 
             if (mw) {
-                console.log('Matched middleware [%s] for url [%s]', mw.re, key);
+                //console.log('Matched middleware [%s] for url [%s]', mw.re, key);
                 return { result: mw.cb(data.result) };
             }
             return data;

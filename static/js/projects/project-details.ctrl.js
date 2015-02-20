@@ -3,39 +3,33 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-
-ProjectDetailsCtrl.$inject = ['$scope', '$stateParams', 'Tiles'];
-function ProjectDetailsCtrl($scope, $stateParams, Tiles) {
+ProjectDetailsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Wizard'];
+function ProjectDetailsCtrl($scope, $state, $stateParams, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    // Tiles
-    m.visible = Tiles.visible;
-    // Checklist
-    m.toggleTile = Tiles.toggleTile.bind(Tiles);
-    // Tiles progress
-    m.progressTotal = progressTotal;
-    // Full view
-    m.showFullView = showFullView;
+    m.steps = Wizard.steps;
+    m.progress = Wizard.progress.bind(Wizard);
+    m.stepClass = stepClass;
+    m.openStepDialog = openStepDialog;
 
-    activate();
-
-    function activate() {
-        Tiles.load('project-' + m.projectId);
-        $scope.$on('$destroy', function () {
-            Tiles.unload();
-        });
+    function stepClass(step) {
+        return {
+            active: step.reached,
+            disabled: !step.enabled
+        };
     }
 
-    function progressTotal() {
-        var total = Tiles.progressTotal;
-        var val = total.max ? total.current / total.max * 100 : 0;
-        return Math.floor(val + 0.5);
+    function openStepDialog(step) {
+        $state.go(step.state);
+
+        /*if (!step.enabled) { return; }
+
+        if (step.reached) {
+            $state.go(step.state);
+        } else {
+            // TODO - next
+        }*/
     }
 
-    function showFullView(tile) {
-        tile.show = true;
-        Tiles.toggleTile(tile); // otherwise dialog html is not rendered
-        Tiles.toggleFullView(true, tile.uri);
-    }
 }

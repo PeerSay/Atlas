@@ -3,23 +3,16 @@
     <div class="row">
         <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
             <ul class="nav nav-pills nav-justified">
-                <li role="presentation" class="active">
-                    <a href="#">1. Essentials</a>
-                    <span class="chevron"></span>
-                </li>
-                <li role="presentation">
-                    <a href="#">2. Requirements</a>
-                    <span class="chevron"></span>
-                </li>
-                <li role="presentation">
-                    <a href="#">3. Products</a>
-                    <span class="chevron"></span>
-                </li>
-                <li role="presentation">
-                    <a href="#">4. Decisions</a>
+                <li role="presentation"
+                        ng-repeat="step in m.steps"
+                        ng-init="num = $index+1"
+                        ng-class="m.stepClass(step)">
+                    <a href="#"
+                            ng-click="m.openStepDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
+                    <span class="chevron" ng-if=":: num < 4"></span>
                 </li>
             </ul>
-            <ps-progress valuenow="50" data-style="'success'"></ps-progress>
+            <ps-progress valuenow="m.progress()" data-style="'success'"></ps-progress>
         </nav>
     </div>
     <!--Title / edit-->
@@ -50,15 +43,35 @@
         </div>
     </div>
 
-    <!--All Tiles-->
+    <!--Tiles-->
     <div class="row">
-        <!--Others-->
-        <div ng-repeat="tile in m.visible.tiles">
-            <div ng-include="tile.html"></div>
+        <div ng-if="true" ui-view="step2"></div>
+        <div ng-if="true" ui-view="step3"></div>
+        <div ng-if="true" ui-view="step4"></div>
+
+        <!--<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 tile-container">
+            <div ui-view="step2"></div>
         </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 tile-container">
+            <div ui-view="step3"></div>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 tile-container">
+            <div ui-view="step4"></div>
+        </div>-->
     </div>
 
+    <!--Dialog-->
+    <div ui-view></div>
+
     <!--DBG-->
+    <div class="row">
+        <pre>
+      $state = {{$state.current.name}}
+      $stateParams = {{$stateParams}}
+      $state full url = {{ $state.$current.url.source }}
+    </pre>
+    </div>
+
     <div class="row debug" ng-init="dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">
         <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-repeat="it in dbg">
             <div class="col">{{it}}</div>

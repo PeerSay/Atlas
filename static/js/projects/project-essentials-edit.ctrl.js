@@ -1,32 +1,45 @@
 /*global angular:true*/
 
 angular.module('PeerSay')
-    .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
+    .controller('ProjectEssentialsEditCtrl', ProjectEssentialsEditCtrl);
 
-ProjectEssentialsCtrl.$inject = ['$scope', '$filter', 'Tiles', 'Projects', 'Util'];
-function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
+ProjectEssentialsEditCtrl.$inject = ['$scope', '$filter', 'Projects', 'Util', 'Wizard'];
+function ProjectEssentialsEditCtrl($scope, $filter, Projects, _, Wizard) {
     var m = this;
 
-    m.tile = $scope.$parent.tile;
+    //m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
-    // Full view
-    m.fullView = Tiles.fullView;
-    m.showFullView = showFullView;
-    // Editable fields
-    m.fields = {
-        title: {},
-        budget: {},
-        'duration.days': {},
-        'duration.startedAt': {},
-        'duration.finishedAt': {},
-        domain: {}
-    };
-    // Inline edits
-    m.toggleEditInline = toggleEditInline;
-    m.saveEditInline = updateProject;
-    m.displayValue = displayValue;
+    m.step = Wizard.steps[0];
+    m.title = m.step.title;
 
-    activate();
+    // Wizard
+    m.next = next;
+
+    function next() {
+        Wizard.next('es');
+    }
+
+
+    ////////////
+    /*
+    * // Full view
+     //m.fullView = Tiles.fullView;
+     //m.showFullView = showFullView;
+     // Editable fields
+     m.fields = {
+     title: {},
+     budget: {},
+     'duration.days': {},
+     'duration.startedAt': {},
+     'duration.finishedAt': {},
+     domain: {}
+     };
+     // Inline edits
+     m.toggleEditInline = toggleEditInline;
+     m.saveEditInline = updateProject;
+     m.displayValue = displayValue;*/
+
+    /*activate();
 
     function activate() {
         Projects.readProject(m.projectId)
@@ -46,25 +59,12 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
         };
     }
 
-    function getProgress(fields) {
-        var progress = { value: 0, total: 0 };
-
-        _.forEach(fields, function (fld) {
-            progress.total++;
-            if (m.fields[fld].status === 'ok') {
-                progress.value++;
-            }
-        });
-
-        return progress;
-    }
-
     function showFullView(control) {
-        Tiles.toggleFullView(true, m.tile.uri, control);
+        //Tiles.toggleFullView(true, m.tile.uri, control);
     }
 
     function toggleEditInline(ctl, on) {
-        Tiles.toggleFullView(true, m.tile.uri, on ? ctl.key : null);
+        //Tiles.toggleFullView(true, m.tile.uri, on ? ctl.key : null);
     }
 
     function updateProject(ctl, value) {
@@ -94,5 +94,5 @@ function ProjectEssentialsCtrl($scope, $filter, Tiles, Projects, _) {
             var date = new Date(val);
             return date.toDateString();
         }
-    }
+    }*/
 }

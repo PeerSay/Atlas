@@ -22,7 +22,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 
     $urlRouterProvider
-        .otherwise('/auth/login'); //XXX
+        .otherwise('/auth/login'); //XXX?
 
     $stateProvider
         // Auth
@@ -37,7 +37,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
                     template: '<ui-view/>'
                 },
                 'menu@': {
-                    templateUrl: '/html/menu.html'
+                    templateUrl: '/html/app-menu.html'
                 }
             }
         })
@@ -81,7 +81,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
                     template: '<ui-view/>'
                 },
                 'menu@': {
-                    templateUrl: '/html/menu.html'
+                    templateUrl: '/html/app-menu.html'
                 }
             }
         })
@@ -95,8 +95,65 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         // Project > Details
         //
         .state('project.details', {
+            //url: '/projects/:projectId?step={idx}',
             url: '/projects/:projectId',
-            templateUrl: '/html/project-details.html'
-        });
+            templateUrl: '/html/project-details.html',
+            resolve: {
+                Wizard: 'Wizard'
+            },
+            onEnter: ['$stateParams', '$state', '$timeout', 'Wizard', function($stateParams, $state, $timeout, Wizard){
+                Wizard.load($stateParams.projectId);
+            }]
+        })
+        // Project > Details > Steps
+        //
+        .state('project.details.steps', {
+            url: '/step-{step}',
+            views: {
+                '': {
+                    template: '<ui-view/>'
+                },
+                'step2': {
+                    templateUrl: '/html/project-tile.html',
+                    controller: 'ProjectRequirementsCtrl as cm'
+                },
+                'step3': {
+                    templateUrl: '/html/project-tile.html',
+                    controller: 'ProjectProductsCtrl as cm'
+                },
+                'step4': {
+                    templateUrl: '/html/project-tile.html',
+                    controller: 'ProjectShortlistCtrl as cm'
+                }
+            }
+        })
+        // Project > Details > Steps > Essentials
+        //
+        .state('project.details.steps.essentials', {
+            url: '/essentials',
+            templateUrl: '/html/project-essentials-edit.html',
+            controller: 'ProjectEssentialsEditCtrl as cm'
+        })
+        // Project > Details > Steps > Requirements
+        //
+        .state('project.details.steps.requirements', {
+            url: '/requirements',
+            templateUrl: '/html/project-requirements-edit.html',
+            controller: 'ProjectRequirementsEditCtrl as cm'
+        })
+        // Project > Details > Steps > Products
+        //
+        .state('project.details.steps.products', {
+            url: '/products',
+            templateUrl: '/html/project-products-edit.html',
+            controller: 'ProjectProductsEditCtrl as cm'
+        })
+        // Project > Details > Steps > Decisions
+        //
+        .state('project.details.steps.shortlist', {
+            url: '/shortlist',
+            templateUrl: '/html/project-shortlist-edit.html',
+            controller: 'ProjectShortlistEditCtrl as cm'
+        })
 
 }

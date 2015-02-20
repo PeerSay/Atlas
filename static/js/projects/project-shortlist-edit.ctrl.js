@@ -8,6 +8,10 @@ function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[3];
     m.title = m.step.title;
+    m.onClose = function () {
+        Wizard.closeDialog(m.step);
+    };
+
 
     // Table views
     m.groupBy = Table.groupBy;

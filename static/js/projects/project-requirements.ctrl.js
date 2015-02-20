@@ -8,10 +8,9 @@ function ProjectRequirementsCtrl($stateParams, Table, Wizard) {
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[1];
     m.title = m.step.title;
+    m.openDialog = Wizard.openDialog.bind(Wizard);
 
     // Table views
-    m.groupBy = Table.groupBy;
-
     m.tableView = Table.addView(m, 'ev-norm', getViewConfig)
         //.debug()
         .grouping()

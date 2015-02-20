@@ -8,7 +8,7 @@
                         ng-init="num = $index+1"
                         ng-class="m.stepClass(step)">
                     <a href="#"
-                            ng-click="m.openStepDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
+                            ng-click="m.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
                     <span class="chevron" ng-if=":: num < 4"></span>
                 </li>
             </ul>
@@ -45,19 +45,9 @@
 
     <!--Tiles-->
     <div class="row">
-        <div ng-if="true" ui-view="step2"></div>
-        <div ng-if="true" ui-view="step3"></div>
-        <div ng-if="true" ui-view="step4"></div>
-
-        <!--<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 tile-container">
-            <div ui-view="step2"></div>
-        </div>
-        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 tile-container">
-            <div ui-view="step3"></div>
-        </div>
-        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 tile-container">
-            <div ui-view="step4"></div>
-        </div>-->
+        <div ng-if="false" ui-view="step2"></div>
+        <div ng-if="false" ui-view="step3"></div>
+        <div ng-if="false" ui-view="step4"></div>
     </div>
 
     <!--Dialog-->
@@ -66,10 +56,10 @@
     <!--DBG-->
     <div class="row">
         <pre>
-      $state = {{$state.current.name}}
-      $stateParams = {{$stateParams}}
-      $state full url = {{ $state.$current.url.source }}
-    </pre>
+          $state = {{$state.current.name}}
+          $stateParams = {{$stateParams}}
+          $state full url = {{ $state.$current.url.source }}
+        </pre>
     </div>
 
     <div class="row debug" ng-init="dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">

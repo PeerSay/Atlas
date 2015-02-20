@@ -3,22 +3,24 @@
 angular.module('PeerSay')
     .controller('ProjectEssentialsEditCtrl', ProjectEssentialsEditCtrl);
 
-ProjectEssentialsEditCtrl.$inject = ['$scope', '$filter', 'Projects', 'Util', 'Wizard'];
-function ProjectEssentialsEditCtrl($scope, $filter, Projects, _, Wizard) {
+ProjectEssentialsEditCtrl.$inject = ['$scope', '$timeout', 'Projects', 'Util', 'Wizard'];
+function ProjectEssentialsEditCtrl($scope, $timeout, Projects, _, Wizard) {
     var m = this;
 
     //m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
     m.step = Wizard.steps[0];
     m.title = m.step.title;
+    m.onClose = function () {
+        Wizard.closeDialog(m.step);
+    };
 
     // Wizard
-    m.next = next;
+    m.goNext = goNext;
 
-    function next() {
-        Wizard.next('es');
+    function goNext() {
+        Wizard.next({from: m.step});
     }
-
 
     ////////////
     /*

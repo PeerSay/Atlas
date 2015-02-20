@@ -8,6 +8,9 @@ function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[2];
     m.title = m.step.title;
+    m.onClose = function () {
+        Wizard.closeDialog(m.step);
+    };
 
     // Table views
     m.groupBy = Table.groupBy;

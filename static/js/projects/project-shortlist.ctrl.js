@@ -8,10 +8,9 @@ function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[3];
     m.title = m.step.title;
+    m.openDialog = Wizard.openDialog.bind(Wizard);
 
-    // Table views - XXX
-    m.groupBy = Table.groupBy;
-
+    // Table views
     m.tableView = Table.addView(m, 'sh-norm', getViewConfig)
         //.debug()
         .grouping()

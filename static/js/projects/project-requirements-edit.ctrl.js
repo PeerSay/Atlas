@@ -8,6 +8,9 @@ function ProjectRequirementsEditCtrl($stateParams, $timeout, Table, Wizard) {
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[1];
     m.title = m.step.title;
+    m.onClose = function () {
+        Wizard.closeDialog(m.step);
+    };
 
     // Table views - TODO
     m.groupBy = Table.groupBy;

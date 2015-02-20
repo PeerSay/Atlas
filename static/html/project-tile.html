@@ -3,7 +3,7 @@
             ng-class="{'panel-primary': cm.highlight}"
             ng-mouseover="cm.highlight = true"
             ng-mouseleave="cm.highlight = false"
-            ng-click="cm.openDialog()"
+            ng-click="cm.openDialog(cm.step)"
             >
         <div class="panel-heading">
             <h3 class="panel-title">{{:: cm.title }}</h3>

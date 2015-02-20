@@ -2,13 +2,12 @@ angular
     .module('PeerSay')
     .directive('psTileDialog', psTileDialog);
 
-psTileDialog.$inject = ['Wizard'];
-function psTileDialog(Wizard) {
+psTileDialog.$inject = ['jQuery'];
+function psTileDialog($) {
     return {
         restrict: 'A',
         scope: {
-            toggle: '=psToggle',
-            dlg: '=psDlgUri',
+            onClose: '=psOnClose',
             onShow: '=psOnShow'
         },
         link: function (scope, element) {
@@ -20,14 +19,9 @@ function psTileDialog(Wizard) {
                 show: true
             });
 
-            $el.on('hidden.bs.modal', function () {
-                // need to toggle off only on manual close, not on navigation
-                //if (!scope.dlg) { return; }
-
-                // digest for $search change
+            $el.on('hide.bs.modal', function () {
                 scope.$apply(function () {
-                    //Tiles.toggleFullView(false);
-                    Wizard.closeDialog();
+                    scope.onClose();
                 });
             });
 
@@ -39,15 +33,10 @@ function psTileDialog(Wizard) {
                 });
             });
 
-            /*scope.$watch('toggle.dlg', function (newVal) {
-                var on = (scope.dlg === newVal) ? 'show'  : 'hide';
-                $el.modal(on);
-            }, true);*/
-
             // Clean-up
             element.on('$destroy', function () {
+                //$el.modal('hide'); //close to remove share when navigating away
                 $el.off('shown.bs.modal hidden.bs.modal');
-                $el.modal('hide'); //close to remove share when navigating away
             });
         }
     };

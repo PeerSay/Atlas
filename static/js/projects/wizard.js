@@ -3,31 +3,31 @@
 angular.module('PeerSay')
     .factory('Wizard', Wizard);
 
-Wizard.$inject = ['$state', '$stateParams',  '$timeout', 'Util'];
+Wizard.$inject = ['$state', '$stateParams', '$timeout', 'Util'];
 function Wizard($state, $stateParams, $timeout, _) {
     var W = {};
     W.steps = [
         {
+            idx: 1,
             state: '.essentials',
-            name: 'es',
             shortTitle: 'Essentials',
             title: 'Project Essentials',
             enabled: true,
             reached: true,
-            current: true
+            current: false
         },
         {
+            idx: 2,
             state: '.requirements',
-            name: 're',
             shortTitle: 'Requirements',
             title: 'Project Requirements',
             enabled: true,
             reached: false,
-            current: true
+            current: false
         },
         {
+            idx: 3,
             state: '.products',
-            name: 'pi',
             shortTitle: 'Products',
             title: 'Product Input',
             enabled: false,
@@ -35,8 +35,8 @@ function Wizard($state, $stateParams, $timeout, _) {
             current: false
         },
         {
+            idx: 4,
             state: '.shortlist',
-            name: 'sh',
             shortTitle: 'Decisions',
             title: 'Shortlist',
             enabled: false,
@@ -45,52 +45,61 @@ function Wizard($state, $stateParams, $timeout, _) {
         }
     ];
     W.load = load;
-    W.current = current;
     W.progress = progress;
+    W.isReached = isReached;
+    W.openDialog = openDialog;
     W.closeDialog = closeDialog;
     W.next = next;
 
-    function load (projectId) {
-        console.log('>>Wizard load', projectId);
-
+    function load(projectId) {
+        // TODO - load
         $timeout(function () {
-            console.log('>>Wizard load2', $state.current);
             if ($state.is('project.details')) {
-                // go to child state
-                $state.go('.steps', {step: current()}, {location: 'replace'});
+                // TODO - go to child state
+                $state.go('.steps', {step: 1}, {location: 'replace'});
             }
         }, 0);
     }
 
-    function current () {
-        // TODO
-        return $stateParams.step || 1;
+    function isReached(stepNum) {
+        var curNum = Number($stateParams.step);
+        return (stepNum >= curNum);
     }
 
-    function next(from) {
-        var step = _.findWhere(W.steps, { name: from });
-        var stepIdx = W.steps.indexOf(step);
-        var nextStep = W.steps[stepIdx + 1];
-        if (nextStep) {
-            nextStep.reached = true;
-            nextStep.current = true;
-        }
-        var afterStep = W.steps[stepIdx + 2];
-        if (afterStep) {
-            afterStep.enabled = true;
-        }
-        var stepNum = stepIdx + 2; // zero based
+    function openDialog(step) {
+        if (!step.enabled) { return; }
 
-        $timeout(function () {
-            $state.go('^' + nextStep.state, {step: stepNum});
-        }, 0);
+        if (step.reached) {
+            step.current = true;
+            $state.go(step.state);
+        } else {
+            next({to: step});
+        }
     }
 
-    function closeDialog() {
+    function closeDialog(step) {
+        step.current = false;
         if (!$state.is('project.details')) {
             // Can be closed already by navigating to next/prev
             $state.go('^');
         }
+    }
+
+    function next(param) {
+        var step = param.from;
+        var nextStep = step ? W.steps[step.idx] : param.to; // zero based
+        if (nextStep) {
+            nextStep.reached = true;
+            nextStep.current = true;
+        }
+        var afterStep = W.steps[nextStep.idx + 1];
+        if (afterStep) {
+            afterStep.enabled = true; // unlock
+        }
+
+        $timeout(function () {
+            $state.go(nextStep.state, {step: nextStep.idx});
+        }, 0);
     }
 
     function progress() {

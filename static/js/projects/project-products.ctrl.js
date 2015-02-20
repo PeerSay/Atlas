@@ -8,10 +8,9 @@ function ProjectProductsCtrl($stateParams, Table, Wizard) {
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[2];
     m.title = m.step.title;
+    m.openDialog = Wizard.openDialog.bind(Wizard);
 
-    // Table views - TODO
-    m.groupBy = Table.groupBy;
-
+    // Table view
     m.tableView = Table.addView(m, 'pi-norm', getViewConfig)
         //.debug()
         .grouping()

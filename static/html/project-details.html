@@ -45,9 +45,9 @@
 
     <!--Tiles-->
     <div class="row">
-        <div ng-if="false" ui-view="step2"></div>
-        <div ng-if="false" ui-view="step3"></div>
-        <div ng-if="false" ui-view="step4"></div>
+        <div ng-if="m.isReached(2)" ui-view="step2"></div>
+        <div ng-if="m.isReached(3)" ui-view="step3"></div>
+        <div ng-if="m.isReached(4)" ui-view="step4"></div>
     </div>
 
     <!--Dialog-->

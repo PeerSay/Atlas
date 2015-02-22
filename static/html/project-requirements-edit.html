@@ -1,5 +1,5 @@
 <!--Dialog-->
-<div class="modal fade full-view" tabindex="-1" role="dialog"
+<div class="modal full-view" tabindex="-1" role="dialog"
         ps-tile-dialog
         ps-on-close="cm.onClose">
     <div class="modal-dialog modal-lg">
@@ -48,7 +48,15 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary pull-right" data-dismiss="modal">Done</button>
+                <button class="btn btn-primary" data-dismiss="modal" ng-click="cm.goPrev()">
+                    <span class="glyphicon glyphicon-backward"></span>
+                    Essentials
+                </button>
+                <button class="btn" data-dismiss="modal">Done</button>
+                <button class="btn btn-primary" data-dismiss="modal" ng-click="cm.goNext()">
+                    Products
+                    <span class="glyphicon glyphicon-forward"></span>
+                </button>
             </div>
         </div>
     </div>

@@ -12,6 +12,14 @@ function ProjectRequirementsEditCtrl($stateParams, $timeout, Table, Wizard) {
         Wizard.closeDialog(m.step);
     };
 
+    m.goPrev = function () {
+        Wizard.prev({from: m.step});
+    };
+    m.goNext = function () {
+        Wizard.next({from: m.step});
+    };
+
+
     // Table views - TODO
     m.groupBy = Table.groupBy;
 

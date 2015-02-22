@@ -16,7 +16,25 @@ function psTileDialog($) {
 
             var $el = $(element).modal({
                 backdrop: 'static',
-                show: true
+                show: false
+            });
+
+            $el.on('show.bs.modal', function () {
+                //hide previous
+                var curModal = this;
+                $(".modal").each(function() {
+                    if (this !== curModal) {
+                        $(this).modal("hide");
+                    }
+                });
+            });
+
+            $el.on('shown.bs.modal', function () {
+                if (!scope.onShow) { return; }
+
+                scope.$apply(function () {
+                    scope.onShow();
+                });
             });
 
             $el.on('hide.bs.modal', function () {
@@ -25,18 +43,13 @@ function psTileDialog($) {
                 });
             });
 
-            $el.on('shown.bs.modal', function () {
-                scope.$apply(function () {
-                    if (scope.onShow) {
-                        scope.onShow();
-                    }
-                });
-            });
+            // Show
+            $el.modal('show'); // triggered manually to let show to trigger show event
 
             // Clean-up
             element.on('$destroy', function () {
                 //$el.modal('hide'); //close to remove share when navigating away
-                $el.off('shown.bs.modal hidden.bs.modal');
+                $el.off('show.bs.modal shown.bs.modal hidden.bs.modal');
             });
         }
     };

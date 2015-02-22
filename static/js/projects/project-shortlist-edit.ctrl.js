@@ -11,7 +11,9 @@ function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
     m.onClose = function () {
         Wizard.closeDialog(m.step);
     };
-
+    m.goPrev = function () {
+        Wizard.prev({from: m.step});
+    };
 
     // Table views
     m.groupBy = Table.groupBy;

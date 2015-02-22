@@ -10,6 +10,7 @@ function ProjectDetailsCtrl($stateParams, Wizard) {
     m.projectId = $stateParams.projectId;
     m.steps = Wizard.steps;
     m.progress = Wizard.progress.bind(Wizard);
+    m.isReached = Wizard.isReached.bind(Wizard);
     m.openDialog = Wizard.openDialog.bind(Wizard);
     m.stepClass = stepClass;
 

@@ -11,6 +11,12 @@ function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
     m.onClose = function () {
         Wizard.closeDialog(m.step);
     };
+    m.goPrev = function () {
+        Wizard.prev({from: m.step});
+    };
+    m.goNext = function () {
+        Wizard.next({from: m.step});
+    };
 
     // Table views
     m.groupBy = Table.groupBy;

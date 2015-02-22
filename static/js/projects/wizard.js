@@ -50,6 +50,7 @@ function Wizard($state, $stateParams, $timeout, _) {
     W.openDialog = openDialog;
     W.closeDialog = closeDialog;
     W.next = next;
+    W.prev = prev;
 
     function load(projectId) {
         // TODO - load
@@ -63,18 +64,13 @@ function Wizard($state, $stateParams, $timeout, _) {
 
     function isReached(stepNum) {
         var curNum = Number($stateParams.step);
-        return (stepNum >= curNum);
+        return (curNum >= stepNum);
     }
 
     function openDialog(step) {
         if (!step.enabled) { return; }
 
-        if (step.reached) {
-            step.current = true;
-            $state.go(step.state);
-        } else {
-            next({to: step});
-        }
+        next({to: step});
     }
 
     function closeDialog(step) {
@@ -88,17 +84,35 @@ function Wizard($state, $stateParams, $timeout, _) {
     function next(param) {
         var step = param.from;
         var nextStep = step ? W.steps[step.idx] : param.to; // zero based
-        if (nextStep) {
-            nextStep.reached = true;
-            nextStep.current = true;
-        }
-        var afterStep = W.steps[nextStep.idx + 1];
-        if (afterStep) {
-            afterStep.enabled = true; // unlock
-        }
+        if (!nextStep) { return; }
 
+        nextStep.current = true;
+        if (nextStep.reached) {
+            $timeout(function () {
+                $state.go(nextStep.state);
+            }, 0);
+        } else {
+            nextStep.reached = true;
+            // unlock next after
+            var afterStep = W.steps[nextStep.idx];
+            if (afterStep) {
+                afterStep.enabled = true;
+            }
+
+            $timeout(function () {
+                $state.go(nextStep.state, {step: nextStep.idx}); // change param = progress
+            }, 0);
+        }
+    }
+
+    function prev(param) {
+        var step = param.from;
+        var prevStep = W.steps[step.idx-2]; // zero based
+        if (prevStep) {
+            prevStep.current = true;
+        }
         $timeout(function () {
-            $state.go(nextStep.state, {step: nextStep.idx});
+            $state.go(prevStep.state);
         }, 0);
     }
 

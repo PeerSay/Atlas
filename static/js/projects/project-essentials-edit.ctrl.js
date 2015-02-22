@@ -7,20 +7,18 @@ ProjectEssentialsEditCtrl.$inject = ['$scope', '$timeout', 'Projects', 'Util', '
 function ProjectEssentialsEditCtrl($scope, $timeout, Projects, _, Wizard) {
     var m = this;
 
-    //m.tile = $scope.$parent.tile;
     m.projectId = $scope.$parent.m.projectId;
     m.step = Wizard.steps[0];
     m.title = m.step.title;
+    //Wizard
     m.onClose = function () {
         Wizard.closeDialog(m.step);
     };
-
-    // Wizard
-    m.goNext = goNext;
-
-    function goNext() {
+    m.goNext = function () {
         Wizard.next({from: m.step});
-    }
+    };
+
+
 
     ////////////
     /*

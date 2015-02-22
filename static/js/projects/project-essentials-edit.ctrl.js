@@ -17,7 +17,35 @@ function ProjectEssentialsEditCtrl($scope, $timeout, Projects, _, Wizard) {
     m.goNext = function () {
         Wizard.next({from: m.step});
     };
+    // Edits
+    m.fields = {
+        title: {},
+        budget: {},
+        'duration.days': {},
+        'duration.startedAt': {},
+        'duration.finishedAt': {},
+        domain: {}
+    };
 
+    activate();
+
+    function activate() {
+        Projects.readProject(m.projectId)
+            .then(function (project) {
+                _.forEach(m.fields, function (fld, key) {
+                    // ensure missing fields are added to Projects obj
+                    m.fields[key] = project[key] = project[key] || missingField(key);
+                });
+            });
+    }
+
+    function missingField(key) {
+        return {
+            key: key,
+            value: '',
+            status: 'missing'
+        };
+    }
 
 
     ////////////

@@ -1,16 +1,17 @@
 /*global angular:true*/
 
-angular.module('globals', [])
+angular.module('PeerSay.globals', [])
     .factory('jsonpatch', function() { return window.jsonpatch; })
     .factory('jQuery', function() { return window.$; });
 
-angular.module('peersay', [
-    'ngRoute',
+angular.module('PeerSay', [
+    'PeerSay.globals',
+    'ui.router',
+    'ngRoute', // TODO - remove?
     'ngMessages',
     'ngSanitize',
     'ngTable',
     'ngTableResizableColumns',
     'monospaced.elastic',
-    'ng-context-menu',
-    'globals'
+    'ng-context-menu'
 ]);

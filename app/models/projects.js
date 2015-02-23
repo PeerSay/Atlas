@@ -8,12 +8,6 @@ var defaultProject = {
 };
 
 /**
- * Time constants
- */
-var DAY = 1000 * 60 * 60 * 24;
-var MONTH = DAY * 30;
-
-/**
  * From: https://github.com/coreh/uid2
  * 62 characters in the ascii range that can be used in URLs without special encoding.
  */
@@ -37,17 +31,12 @@ var projectSchema = new Schema({
         retries: 5
     },
     title: { type: String, required: true },
-    domain: { type: String },
-    duration: {
-        startedAt: { type: Date, default: Date.now(), required: true },
-        finishedAt: { type: Date, default: Date.now() + MONTH, required: true }
-    },
-    budget: { type: Number, default: 1000, min: 0 },
+    description: { type: String },
+    startDate: { type: String },
+    duration: { type: String },
+    budget: { type: String },
     collaborators: [
         { type: Schema.ObjectId, ref: 'User' }
-    ],
-    defaults: [
-        { type: String }
     ],
     criteria: [
         {
@@ -67,18 +56,6 @@ var projectSchema = new Schema({
     ]
 });
 projectSchema.set('toJSON', { virtuals: true });
-
-
-projectSchema.virtual('duration.days').get(function () {
-    var dur = this.duration;
-    var diff = dur.finishedAt - dur.startedAt;
-    return Math.floor(diff / DAY + 0.5);
-});
-
-
-projectSchema.path('defaults').default(function () {
-    return ['title', 'budget', 'duration'];
-});
 
 
 projectSchema.statics.createByUser = function (project, user, next) {
@@ -152,46 +129,6 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
         });
 });
 
-
-projectSchema.pre('save', function ensureDefaults(next) {
-    var project = this;
-    var defaults = project.defaults; // must be selected to present!
-
-    if (project.isNew) {
-        if (project.title !== defaultProject.title) {
-            project.defaults = _.without(defaults, 'title');
-        }
-        return next();
-    }
-
-    if (defaults && project.isModified('title')) {
-        project.defaults = _.without(defaults, 'title');
-    }
-
-    if (defaults && project.isModified('budget')) {
-        project.defaults = _.without(defaults, 'budget');
-    }
-
-    if (defaults && project.isModified('duration')) {
-        project.defaults = _.without(defaults, 'duration');
-    }
-
-    return next();
-});
-
-
-projectSchema.pre('save', function validateDuration(next) {
-    var project = this;
-
-    if (project.isModified('duration')) {
-        var duration = project.duration;
-        if (duration.finishedAt - duration.startedAt < 0) {
-            return next(new Error('startedAt < finishedAt'));
-        }
-    }
-
-    return next();
-});
 
 // Model
 //

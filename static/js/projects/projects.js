@@ -1,6 +1,6 @@
 /*global angular:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .factory('Projects', Projects);
 
 Projects.$inject = ['Backend', 'User', 'Util'];
@@ -19,10 +19,16 @@ function Projects(Backend, User, _) {
     P.removeProject = removeProject;
     // Details
     P.current = {
-        project: null
+        project: {
+            title: '',
+            description: '',
+            budget: '',
+            startDate: '',
+            duration: ''
+        }
     };
     P.readProject = readProject;
-    P.updateProject = updateProject;
+    P.patchProject = patchProject;
 
     // Project list
     //
@@ -57,67 +63,23 @@ function Projects(Backend, User, _) {
 
     // Project details
     //
-
-    // Attaching transforms
-    Backend
-        .use('get', ['projects', '[^\/]*$'], transformProjectModel)
-        .use('put', ['projects', '[^\/]*$'], transformProjectModel);
-
     function readProject(id) {
         return Backend.read(['projects', id])
             .then(function (res) {
-                return (P.current.project = res);
-            });
-    }
-
-    function updateProject(id, data) {
-        return Backend.update(['projects', id], data)
-            .then(function (res) {
-                // change status of updated field
-                _.forEach(res, function (item) {
-                    var ctl = P.current.project[item.key];
-                    ctl.value = item.value;
-                    ctl.status = item.value ? 'ok' : 'missing'; // ok unless empty
-                });
-                return res;
-            });
-    }
-
-    // Called recursively for children properties
-    // Transforms { prop: val } to {
-    //   key: 'prop',
-    //   value: val,
-    //   status: 'ok|empty|missed'
-    // }
-    function transformProjectModel(data, prefix) {
-        if (!data) { return; } // POST returned error!
-
-        var result = {};
-        var defaults = angular.copy(data.defaults || []);
-        delete data.defaults;
-
-        _.forEach(data, function (val, key) {
-            if (angular.isObject(val)) {
-                val.defaults = defaults;
-                angular.extend(result, transformProjectModel(val, key));
-            }
-            else {
-                var dotted_key = prefix ? [prefix, key].join('.') : key;
-                result[dotted_key] = {
-                    key: dotted_key,
-                    value: val,
-                    status: getStatus(prefix || key, val, defaults)
+                var empty = {
+                    title: '',
+                    description: '',
+                    budget: '',
+                    startDate: '',
+                    duration: ''
                 };
-            }
-        });
+                angular.extend(P.current.project, empty, res);
+                return P.current.project;
+            });
+    }
 
-        return result;
-
-        function getStatus(key, val, defaults) {
-            if (!val) { return 'empty'; }
-            if (defaults && defaults.indexOf(key) >= 0) { return 'default'; }
-            return 'ok';
-        }
+    function patchProject(id, data) {
+        return Backend.patch(['projects', id], data);
     }
 
     function getIdxById(id) {

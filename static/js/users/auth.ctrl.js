@@ -1,11 +1,11 @@
 /*global angular:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['Location', '$http'];
-function AuthCtrl(Location, $http) {
+AuthCtrl.$inject = ['Location', '$http', '$state'];
+function AuthCtrl(Location, $http, $state) {
     var m = this;
     m.error = {
         show: false,
@@ -27,6 +27,7 @@ function AuthCtrl(Location, $http) {
     showErrorFromQs();
     getUserFromQs();
 
+    // Restore
     function restorePwd() {
         return $http.post('/api/auth/restore', {email: m.user.email})
             .success(function (res) {
@@ -42,7 +43,8 @@ function AuthCtrl(Location, $http) {
                     }
                 }
                 else if (res.result) {
-                    Location.path('/auth/restore/complete').replace();
+                    // Go to state and prevent Back
+                    $state.transitionTo('auth.restore-complete', null, { location: 'replace' });
                 }
             })
             .error(function (res) {
@@ -61,7 +63,8 @@ function AuthCtrl(Location, $http) {
                     m.error.show = true;
                 }
                 else if (res.result) {
-                    Location.path('/projects').replace();
+                    // Go to state and prevent Back
+                    $state.transitionTo('project.list', null, { location: 'replace' });
                 }
             })
             .error(function (res) {
@@ -70,6 +73,7 @@ function AuthCtrl(Location, $http) {
     }
 
 
+    // Util
     function showErrorFromQs() {
         var err = getValueFromQs('err');
         if (err) {

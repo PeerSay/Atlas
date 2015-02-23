@@ -1,79 +1,81 @@
-<div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
-    <!--Title / edit-->
-    <div class="row" ng-controller="ProjectTitleCtrl as m">
+<div class="container-fluid">
+    <!--Project Progress / Wizard-->
+    <div class="row">
+        <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
+            <ul class="nav nav-pills nav-justified">
+                <li role="presentation"
+                        ng-repeat="step in m.steps"
+                        ng-init="num = $index+1"
+                        ng-class="m.stepClass(step)">
+                    <a href
+                            ng-click="m.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
+                    <span class="chevron" ng-if=":: num < 4"></span>
+                </li>
+            </ul>
+            <ps-progress valuenow="m.progress()" data-style="'success'"></ps-progress>
+        </nav>
+    </div>
+    <!--Title / description-->
+    <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h3 class="page-title pull-left project-title" ng-show="!m.editTitle.show">
+            <h3 class="page-title pull-left project-title">
                 <span class="glyphicon glyphicon-dashboard"></span>
-                <a href ng-click="m.toggleEditTitleDlg(true)">{{m.title.value}}</a>
+                <a href
+                        ng-click="m.openEditDialog('title')"
+                        data-placement="right"
+                        ps-tooltip
+                        ps-tooltip-title="m.project.description"
+                        >{{ m.project.title }}</a>
                 <span class="glyphicon glyphicon-edit hover-edit"></span>
             </h3>
         </div>
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <form name="m.form" class="edit-form" ng-show="m.editTitle.show">
-                <div class="form-group">
-                    <textarea class="form-control vert" ng-model="m.editTitle.value"
-                            required
-                            ps-focus-on="m.editTitle.show"
-                            ps-select="true"></textarea>
-                </div>
-                <button class="btn btn-success"
-                        ng-disabled="m.form.$invalid"
-                        ng-click="m.updateProjectTitle()">Save
-                </button>
-                <button type="button" class="btn close" ng-click="m.toggleEditTitleDlg(false)">
-                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-            </form>
-        </div>
     </div>
-
-    <!--Page buttons-->
+    <!--Start date / duration-->
     <div class="row">
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <button type="button" class="btn btn-default pull-right head hint"
-                    ng-click="m.toggleViewMode()">
-                <span class="tooltip" data-toggle="tooltip" title="Toggle View" ps-tooltip></span>
-                <span aria-hidden="true" class="glyphicon" ng-class="m.viewModeBtnClass()"></span>
-            </button>
-
-            <button type="button" class="btn btn-default pull-right head hint">
-                <span class="tooltip" data-toggle="tooltip" title="Add Members" ps-tooltip></span>
-                <span aria-hidden="true" class="glyphicon glyphicon-user"></span>
-            </button>
-
-            <div class="btn-group pull-right">
-                <button type="button" class="btn btn-default dropdown-toggle head hint" data-toggle="dropdown">
-                    <span class="tooltip" data-toggle="tooltip" title="Project Menu" ps-tooltip></span>
-                    <span aria-hidden="true" class="glyphicon glyphicon-play"></span><span class="sr-only">Menu</span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li role="presentation" class="disabled">
-                        <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
-                    </li>
-                    <li role="presentation" class="disabled">
-                        <a role="menuitem" tabindex="-1" href="#">Present to Auditor</a>
-                    </li>
-                    <li role="presentation" class="disabled">
-                        <a role="menuitem" tabindex="-1" href="#">Debrief</a>
-                    </li>
-                </ul>
-            </div>
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h5 class="page-title pull-left project-title">
+                <a href
+                        ng-click="m.openEditDialog('startDate')">
+                    {{ m.project.startDate }}
+                    <span ng-if="m.project.duration"> / {{ m.project.duration }}</span>
+                </a>
+                <span class="glyphicon glyphicon-edit hover-edit"></span>
+            </h5>
+        </div>
+    </div>
+    <!--Budget-->
+    <div class="row" ng-if="m.project.budget">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h5 class="page-title pull-left project-title">
+                <a href
+                        ng-click="m.openEditDialog('budget')"
+                        >{{ m.project.budget }}</a>
+                <span class="glyphicon glyphicon-edit hover-edit"></span>
+            </h5>
         </div>
     </div>
 
-    <!--All Tiles-->
+    <!--Tiles-->
     <div class="row">
-        <!--Project Checklist-->
-        <div ng-include="'/html/project-checklist.html'"></div>
-        <!--Others-->
-        <div ng-repeat="tile in m.visible.tiles">
-            <div ng-include="tile.html"></div>
-        </div>
+        <div ng-if="m.isReached(2)" ui-view="step2"></div>
+        <div ng-if="m.isReached(3)" ui-view="step3"></div>
+        <div ng-if="m.isReached(4)" ui-view="step4"></div>
     </div>
+
+    <!--Dialog-->
+    <div ui-view></div>
 
     <!--DBG-->
     <div class="row debug">
-        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-repeat="it in m.dbg">
+        <pre>
+          $state = {{$state.current.name}}
+          $stateParams = {{$stateParams}}
+          $state full url = {{ $state.$current.url.source }}
+        </pre>
+    </div>
+
+    <div class="row debug" ng-init="dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">
+        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-repeat="it in dbg">
             <div class="col">{{it}}</div>
         </div>
     </div>

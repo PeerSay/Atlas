@@ -1,0 +1,77 @@
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="MenuCtrl as menu"
+        ng-cloak>
+    <div class="container-fluid">
+        <!--Header Link + Collapsed Menu button-->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--Header Link: selected upon app state-->
+            <a class="navbar-brand" href="/" target="_self"
+                    ng-show="$state.includes('auth')">PeerSay</a><!--TODO-logo-->
+            <a class="navbar-brand" ui-sref="project.list"
+                    ng-show="$state.includes('project')">Projects</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <p class="navbar-text visible-xs-block">Menu</p>
+
+            <!--Search-->
+            <!--<form class="navbar-form navbar-left" role="search">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search">
+                </div>
+            </form>-->
+
+            <!--Auth Menu-->
+            <ul class="nav navbar-nav navbar-right" ng-show="$state.includes('auth')">
+                <li ui-sref-active="active"><a ui-sref="auth.login">Login</a></li>
+                <li ui-sref-active="active"><a ui-sref="auth.signup">Signup</a></li>
+            </ul>
+
+            <!--Center Home link-->
+            <h4 class="logo navbar-text hidden-xs" ng-show="$state.includes('project')">
+                <a href="/" class="navbar-link" target="_self">PeerSay</a>
+            </h4>
+
+            <!--Main Menu-->
+            <ul class="nav navbar-nav navbar-right" ng-show="$state.includes('project')">
+                <li class="dropdown add">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Add <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href ng-click="menu.project.toggleCreateDlg(true)">Add Project</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown user">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-user"></span> User <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <!--<li class="dropdown-header">My name</li>
+                        <li class="divider"></li>
+                        <li class="disabled"><a href="#">Edit Profile</a></li>
+                        <li class="disabled"><a href="#">Edit Organization</a></li>
+                        <li class="divider"></li>-->
+                        <li>
+                            <a href="#" ng-click="menu.user.logout()">Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+                <!--<li class="dropdown notif">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                        <span class="visible-xs-inline">Notifications</span>
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="dropdown-header">Notifications</li>
+                        <li class="divider"></li>
+                        <li class="disabled"><a href="#">TODO</a></li>
+                    </ul>
+                </li>-->
+            </ul>
+        </div>
+    </div>
+</nav>

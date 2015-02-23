@@ -66,7 +66,14 @@ function Projects(Backend, User, _) {
     function readProject(id) {
         return Backend.read(['projects', id])
             .then(function (res) {
-                angular.extend(P.current.project, res);
+                var empty = {
+                    title: '',
+                    description: '',
+                    budget: '',
+                    startDate: '',
+                    duration: ''
+                };
+                angular.extend(P.current.project, empty, res);
                 return P.current.project;
             });
     }

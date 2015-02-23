@@ -36,6 +36,8 @@ function Backend($http, $q, Notification, _) {
                 deferred = $q.defer();
                 promise = deferred.promise;
                 doRequest(deferred, method, url, data);
+                // If not GET, then need to invalidate cache as data is staled now
+                invalidateCache(url);
             }
 
             // Error handling

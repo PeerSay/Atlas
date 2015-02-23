@@ -12,39 +12,47 @@
             </div>
             <div class="modal-body">
                 <!--Form-->
-                <form name="m.form">
+                <form name="cm.form">
                     <div class="form-group"
-                            ng-class="{'has-error': m.formesTitle.$touched && m.form.esTitle.$invalid}">
+                            ng-class="{'has-error': cm.form.esTitle.$invalid}">
                         <label for="es-title">Project Title</label>
                         <input type="text" id="es-title" name="esTitle" class="form-control" placeholder="Enter Project Title"
-                                ng-model="cm.fields.title.value"
+                                ng-model="cm.project.title"
+                                ng-blur="cm.patchProject()"
                                 required/>
-                        <span class="help-block warning" ng-messages="m.form.esTitle.$error" ng-class="{show: m.form.email.$touched}">
+                        <span class="help-block warning" ng-messages="cm.form.esTitle.$error" ng-class="{show: cm.form.email.$touched}">
                             <span ng-message="required">Required</span>
                         </span>
                     </div>
                     <div class="form-group">
                         <label for="es-descr">What are you trying to do?</label>
-                        <input id="es-descr" type="text" class="form-control" placeholder="Description"/>
+                        <input id="es-descr" type="text" class="form-control" placeholder="Description"
+                                ng-model="cm.project.description"
+                                ng-blur="cm.patchProject()"/>
                     </div>
                     <div class="form-group">
                         <label for="es-budget">Expected budget?</label>
                         <input id="es-budget" type="text" class="form-control" placeholder="Budget"
-                                ng-model="cm.fields.budget.value"/>
+                                ng-model="cm.project.budget"
+                                ng-blur="cm.patchProject()"/>
                     </div>
                     <div class="row">
                         <!--Col #1-->
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div class="form-group">
                                 <label for="es-start-date">Expected start date?</label>
-                                <input id="es-start-date" type="text" class="form-control" placeholder="Start Date"/>
+                                <input id="es-start-date" type="text" class="form-control" placeholder="Start Date"
+                                        ng-model="cm.project.startDate"
+                                        ng-blur="cm.patchProject()"/>
                             </div>
                         </div>
                         <!--Col #2-->
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div class="form-group">
                                 <label for="es-duration">Expected duration?</label>
-                                <input id="es-duration" type="text" class="form-control" placeholder="Duration"/>
+                                <input id="es-duration" type="text" class="form-control" placeholder="Duration"
+                                        ng-model="cm.project.duration"
+                                        ng-blur="cm.patchProject()"/>
                             </div>
                         </div>
                     </div>
@@ -52,9 +60,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal"
-                        ng-disabled="m.form.$invalid">Done</button>
+                        ng-disabled="cm.form.$invalid">Done</button>
                 <button class="btn btn-primary" data-dismiss="modal"
-                        ng-disabled="m.form.$invalid"
+                        ng-disabled="cm.form.$invalid"
                         ng-click="cm.goNext()">
                     Requirements
                     <span class="glyphicon glyphicon-forward"></span>

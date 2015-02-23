@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-controller="ProjectDetailsCtrl as m">
+<div class="container-fluid">
     <!--Project Progress / Wizard-->
     <div class="row">
         <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
@@ -7,7 +7,7 @@
                         ng-repeat="step in m.steps"
                         ng-init="num = $index+1"
                         ng-class="m.stepClass(step)">
-                    <a href="#"
+                    <a href
                             ng-click="m.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
                     <span class="chevron" ng-if=":: num < 4"></span>
                 </li>
@@ -15,31 +15,43 @@
             <ps-progress valuenow="m.progress()" data-style="'success'"></ps-progress>
         </nav>
     </div>
-    <!--Title / edit-->
-    <div class="row" ng-controller="ProjectTitleCtrl as m">
+    <!--Title / description-->
+    <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h3 class="page-title pull-left project-title" ng-show="!m.editTitle.show">
+            <h3 class="page-title pull-left project-title">
                 <span class="glyphicon glyphicon-dashboard"></span>
-                <a href ng-click="m.toggleEditTitleDlg(true)">{{m.title.value}}</a>
+                <a href
+                        ng-click="m.openEditDialog('title')"
+                        data-placement="right"
+                        ps-tooltip
+                        ps-tooltip-title="m.project.description"
+                        >{{ m.project.title }}</a>
                 <span class="glyphicon glyphicon-edit hover-edit"></span>
             </h3>
         </div>
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-            <form name="m.form" class="edit-form" ng-show="m.editTitle.show">
-                <div class="form-group">
-                    <textarea class="form-control vert" ng-model="m.editTitle.value"
-                            required
-                            ps-focus-on="m.editTitle.show"
-                            ps-select="true"></textarea>
-                </div>
-                <button class="btn btn-success"
-                        ng-disabled="m.form.$invalid"
-                        ng-click="m.updateProjectTitle()">Save
-                </button>
-                <button type="button" class="btn close" ng-click="m.toggleEditTitleDlg(false)">
-                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-            </form>
+    </div>
+    <!--Start date / duration-->
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h5 class="page-title pull-left project-title">
+                <a href
+                        ng-click="m.openEditDialog('startDate')">
+                    {{ m.project.startDate }}
+                    <span ng-if="m.project.duration"> / {{ m.project.duration }}</span>
+                </a>
+                <span class="glyphicon glyphicon-edit hover-edit"></span>
+            </h5>
+        </div>
+    </div>
+    <!--Budget-->
+    <div class="row" ng-if="m.project.budget">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h5 class="page-title pull-left project-title">
+                <a href
+                        ng-click="m.openEditDialog('budget')"
+                        >{{ m.project.budget }}</a>
+                <span class="glyphicon glyphicon-edit hover-edit"></span>
+            </h5>
         </div>
     </div>
 
@@ -54,7 +66,7 @@
     <div ui-view></div>
 
     <!--DBG-->
-    <div class="row">
+    <div class="row debug">
         <pre>
           $state = {{$state.current.name}}
           $stateParams = {{$stateParams}}

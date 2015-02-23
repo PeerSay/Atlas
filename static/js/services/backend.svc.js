@@ -1,6 +1,6 @@
 /*global angular:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .factory('Backend', Backend);
 
 // General CRUD rule:
@@ -36,6 +36,8 @@ function Backend($http, $q, Notification, _) {
                 deferred = $q.defer();
                 promise = deferred.promise;
                 doRequest(deferred, method, url, data);
+                // If not GET, then need to invalidate cache as data is staled now
+                invalidateCache(url);
             }
 
             // Error handling
@@ -94,7 +96,7 @@ function Backend($http, $q, Notification, _) {
             })[0];
 
             if (mw) {
-                console.log('Matched middleware [%s] for url [%s]', mw.re, key);
+                //console.log('Matched middleware [%s] for url [%s]', mw.re, key);
                 return { result: mw.cb(data.result) };
             }
             return data;

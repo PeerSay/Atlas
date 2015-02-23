@@ -1,6 +1,6 @@
 /*global angular:true*/
 
-angular.module('peersay')
+angular.module('PeerSay')
     .factory('User', User);
 
 User.$inject = ['$http', 'Backend', 'Storage'];

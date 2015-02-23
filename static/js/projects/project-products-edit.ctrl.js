@@ -1,60 +1,33 @@
-angular.module('peersay')
-    .controller('ProjectVendorsCtrl', ProjectVendorsCtrl);
+angular.module('PeerSay')
+    .controller('ProjectProductsEditCtrl', ProjectProductsEditCtrl);
 
-ProjectVendorsCtrl.$inject = ['$scope', '$timeout', 'Tiles', 'Table'];
-function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
+ProjectProductsEditCtrl.$inject = ['$stateParams', '$timeout', 'Table', 'Wizard'];
+function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
     var m = this;
 
-    m.tile = $scope.$parent.tile;
-    m.projectId = $scope.$parent.m.projectId;
-    m.progress = {
-        value: 0,
-        total: 1
+    m.projectId = $stateParams.projectId;
+    m.step = Wizard.steps[2];
+    m.title = m.step.title;
+    m.onClose = function () {
+        Wizard.closeDialog(m.step);
     };
-    // Full view
-    m.fullView = Tiles.fullView;
-    m.showFullView = showFullView;
-    m.onFullView = onFullView;
+    m.goPrev = function () {
+        Wizard.prev({from: m.step});
+    };
+    m.goNext = function () {
+        Wizard.next({from: m.step});
+    };
 
     // Table views
     m.groupBy = Table.groupBy;
 
-    m.normalTableView = Table.addView(m, 'vi-norm', getNormalViewConfig)
-        //.debug() // opt
-        .grouping()
-        .sorting({active: false})
-        .done();
-
-    m.fullTableView = Table.addView(m, 'vi-full', getFullViewConfig)
+    m.tableView = Table.addView(m, 'vi-full', getViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
 
-    function getNormalViewConfig(model) {
-        // Columns: Prod1, [Prod2, Prod3] | {Products}
-        var res = [
-            {
-                selector: 'vendors/.*?/input',
-                limit: 3,
-                cell: {
-                    type: 'ordinary'
-                }
-            }
-        ];
-
-        var vendors = model.vendors;
-        if (!vendors.length) {
-            res.push({
-                selector: null,
-                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
-                cellModels: ['name'] // first cell is used for grouping and must have criteria
-            });
-        }
-         return res;
-    }
-
-    function getFullViewConfig() {
+    function getViewConfig() {
         // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}
         return [
             {
@@ -96,14 +69,14 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     m.menu = {
         id: 'vi-context-menu',
         context: null,
-        view: m.fullTableView,
+        view: m.tableView,
         setContext: function (context) {
             this.context = context;
         },
         enabled: menuItemEnabled,
         doAction: menuDoAction
     };
-    m.fullTableView.menu = m.menu; // expose to Table directive
+    m.tableView.menu = m.menu; // expose to Table directive
 
     function menuDoAction(action) {
         if (!this.enabled(action)) { return; }
@@ -145,24 +118,11 @@ function ProjectVendorsCtrl($scope, $timeout, Tiles, Table) {
     //TODO:
     //m.savingData = false; // show indicator
 
-    activate();
 
-    function activate() {
-        Tiles.setProgress(m.tile, m.progress); // TODO - what is progress??
-        $scope.$on('$destroy', function () {
-            m.progress = { value: 0, total: 0 };
-            Tiles.setProgress(m.tile, m.progress);
-        });
-    }
-
-    function showFullView(control) {
-        Tiles.toggleFullView(true, m.tile.uri, control);
-    }
-
-    function onFullView() {
-        var view = m.fullTableView;
+    /*function onFullView() {
+        var view = m.tableView;
         if (view.rows.length === 1 &&  view.columns.length === 3) {
             inviteToEdit(view);
         }
-    }
+    }*/
 }

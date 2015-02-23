@@ -30,7 +30,7 @@ function RestApi(app) {
         app.post('/api/projects', jsonParser, createProject);
         app.get('/api/projects/:id', readProject);
         app.delete('/api/projects/:id', removeProject);
-        app.put('/api/projects/:id', jsonParser, updateProject);
+        app.patch('/api/projects/:id', jsonParser, patchProject);
         app.get('/api/projects/:id/criteria', readProjectCriteria);
         app.put('/api/projects/:id/criteria', jsonParser, updateProjectCriteria);
         app.patch('/api/projects/:id/criteria', jsonParser, patchProjectCriteria);
@@ -154,13 +154,13 @@ function RestApi(app) {
         });
     }
 
-    function updateProject(req, res, next) {
+    function patchProject(req, res, next) {
         var project_id = req.params.id;
         var data = req.body;
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Updating project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
+        console.log('[API] Patching project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
         User.findOne({email: email}, 'projects', function (err, user) {
             if (err) { return next(err); }
@@ -168,28 +168,24 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            var path = _.keys(data)[0]; // allow only one field update per op!
-            var new_value = data[path];
-            var select = path.split('.')[0]; // to select full object and return after update (e.g. duration)
-            var select_full = select + ' defaults'; // to update defaults in pre-save
-
-            Project.findOne({_id: project_id}, select_full, function (err, prj) {
+            Project.findById(project_id, function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);
                 }
 
-                // update
-                prj.set(path, new_value);
-                prj.markModified(path); // ensure pre-save hook removes default even if value is not changed
-
-                prj.save(function (err, data) {
+                // Patch
+                applyPatch(prj, data, function (err) {
                     if (err) { return modelError(res, err); }
 
-                    var result = _.pick(data.toJSON(), select);
-                    console.log('[API] Updating project[%s] result:', project_id, result);
+                    prj.save(function (err) {
+                        if (err) { return modelError(res, err); }
 
-                    return res.json({ result: result });
+                        var result = true; // no need to send data back
+                        console.log('[API] Patched project[%s] result:', project_id, result);
+
+                        return res.json({ result: result });
+                    });
                 });
             });
         });

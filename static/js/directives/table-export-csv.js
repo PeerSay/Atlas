@@ -1,5 +1,5 @@
 angular
-    .module('peersay')
+    .module('PeerSay')
     .config(['$compileProvider', function($compileProvider) {
         // allow data links
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|data):/);

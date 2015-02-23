@@ -1,27 +1,13 @@
 /*global angular:true*/
 
-angular.module('peersay')
-    .factory('Menu', Menu)
+angular.module('PeerSay')
     .factory('Location', Location)
     .controller('MenuCtrl', MenuCtrl);
 
 
-function Menu() {
-    var M = {};
-    M.activePage = {};
-    M.setActivePage = function (value) {
-        var stripped = value.replace(/\//g, '');
-        M.activePage.name = stripped;
-    };
-
-    return M;
-}
-
-
-MenuCtrl.$inject = ['Location', 'Menu', 'User', 'Projects'];
-function MenuCtrl(Location, Menu, User, Projects) {
+MenuCtrl.$inject = ['$state', 'User', 'Projects'];
+function MenuCtrl($state, User, Projects) {
     var m = this;
-    m.activePage = Menu.activePage;
     m.user = {
         logout: logout
     };
@@ -32,22 +18,19 @@ function MenuCtrl(Location, Menu, User, Projects) {
     function logout () {
         User.logout()
             .success(function () {
-                Location.url('/auth/login')
-                    .replace();
+                // Go to state and prevent Back
+                $state.transitionTo('auth.login', null, { location: 'replace' });
             });
     }
-
-    //init menu
-    Menu.setActivePage(Location.path());
 }
 
 // Credit: https://github.com/angular/angular.js/issues/1699
-Location.$inject = ['$location', '$route', '$rootScope', 'Menu'];
-function Location($location, $route, $rootScope, Menu) {
+Location.$inject = ['$location', '$route', '$rootScope'];
+function Location($location, $route, $rootScope) {
 
-    $rootScope.$on('$locationChangeSuccess', function () {
+    /*$rootScope.$on('$locationChangeSuccess', function () {
         Menu.setActivePage($location.path());
-    });
+    });*/
 
     $location.skipReload = function () {
         var lastRoute = $route.current;

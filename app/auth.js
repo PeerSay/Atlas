@@ -212,7 +212,12 @@ function Auth(app) {
 
         passport.authenticate(
             'linkedin',
-            { callbackURL: '/auth/linkedin/callback' } // relative URL is OK
+            {
+                // Note: I failed to find the list of available scope values in LinkedIn docs,
+                // These are gathered from different answers on StackOverflow:
+                scope: ['r_basicprofile', 'r_emailaddress', 'r_contactinfo', 'r_network'],
+                callbackURL: '/auth/linkedin/callback' // relative URL is OK
+            }
         ) (req, res, next);
     }
 

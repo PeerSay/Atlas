@@ -78,7 +78,7 @@ describe('Util', function () {
 
        it('should generate alpha-num random restore code', function () {
            var code = util.genRestorePwdKey();
-           var code_re = /[\d\w]{8,11}/;
+           var code_re = /[\d\w]{7,12}/;
 
            code.should.be.a('string');
            code_re.test(code).should.equal(true);

@@ -4,8 +4,8 @@ angular.module('PeerSay')
     .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['Location', '$http', '$state'];
-function AuthCtrl(Location, $http, $state) {
+AuthCtrl.$inject = ['Location', '$http', '$state', '$window', 'User'];
+function AuthCtrl(Location, $http, $state, $window, User) {
     var m = this;
     m.error = {
         show: false,
@@ -20,6 +20,8 @@ function AuthCtrl(Location, $http, $state) {
         restore: '',
         longSession: true
     };
+    m.controlFormSubmit = '';
+    m.login = login;
     m.restorePwd = restorePwd;
     m.restorePwdComplete = restorePwdComplete;
 
@@ -27,9 +29,45 @@ function AuthCtrl(Location, $http, $state) {
     showErrorFromQs();
     getUserFromQs();
 
+    // Login
+    function login() {
+        var data = {
+            email: m.user.email,
+            password: m.user.password,
+            longSession: !!m.user.longSession
+        };
+
+        m.controlFormSubmit = 'lock';
+
+        return User.login(data)
+            .then(function (res) {
+                if (res.error === 'verify-email') {
+                    // User is registered, but email address is not verified yet;
+                    // email was sent now =>  show account activation screen (page reload!)
+                    redirect('/auth/signup/success?email=' + m.user.email);
+                }
+                else if (res.error) {
+                    m.error.msg = res.error;
+                    m.error.show = true;
+                    m.controlFormSubmit = 'unlock';
+                }
+                else if (res.result) {
+                    // Submit login form normally (with page reload) via directive.
+                    // This is to trigger browser save password dialog, see this:
+                    // http://stackoverflow.com/questions/2382329/how-can-i-get-browser-to-prompt-to-save-password
+                    m.controlFormSubmit = 'submit';
+                }
+            });
+    }
+
+    function redirect(url) {
+        $window.location.href = url;
+    }
+
     // Restore
     function restorePwd() {
-        return $http.post('/api/auth/restore', {email: m.user.email})
+        var data = {email: m.user.email};
+        return $http.post('/api/auth/restore', data)
             .success(function (res) {
                 if (res.error) {
                     if (res.error === 'linkedin') {
@@ -44,7 +82,7 @@ function AuthCtrl(Location, $http, $state) {
                 }
                 else if (res.result) {
                     // Go to state and prevent Back
-                    $state.transitionTo('auth.restore-complete', null, { location: 'replace' });
+                    $state.go('auth.restore-complete', null, {location: 'replace'});
                 }
             })
             .error(function (res) {
@@ -64,7 +102,7 @@ function AuthCtrl(Location, $http, $state) {
                 }
                 else if (res.result) {
                     // Go to state and prevent Back
-                    $state.transitionTo('project.list', null, { location: 'replace' });
+                    $state.go('project.list', null, {location: 'replace'});
                 }
             })
             .error(function (res) {

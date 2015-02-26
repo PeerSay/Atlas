@@ -8,21 +8,26 @@ function User($http, Backend, Storage) {
     var U = {};
 
     U.user = Storage.get('user') || {};
-    U.readUser = readUser;
+
+    U.login = login;
     U.logout = logout;
+    U.readUser = readUser;
 
-    function readUser() {
-        return Backend.read(['user'])
-            .then(function (user) {
-                return (U.user = Storage.set('user', user));
-            });
+    function login(data) {
+        return Backend.post(['auth', 'login'], data);
     }
-
 
     function logout() {
         return $http.post('/api/auth/logout', {logout: true})
             .success(function () {
                 U.user = Storage.remove('user') || {};
+            });
+    }
+
+    function readUser() {
+        return Backend.read(['user'])
+            .then(function (data) {
+                return (U.user = Storage.set('user', data.result));
             });
     }
 

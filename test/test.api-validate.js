@@ -64,6 +64,15 @@ describe('REST API - Validation', function () {
                 .expect({error: 'Bad request: not JSON'}, done);
         });
 
+        it('should return 400 on PATCH with non-json body', function (done) {
+            request(app)
+                .patch('/api/users')
+                .send('test-str') // <--
+                .set('Accept', 'application/json')
+                .expect(400)
+                .expect({error: 'Bad request: not JSON'}, done);
+        });
+
         it('should return 404 on wrong api path', function (done) {
             request(app)
                 .get('/not-api') // <--
@@ -79,7 +88,69 @@ describe('REST API - Validation', function () {
         });
     });
 
-    describe('Auth API validation', function () {
+    describe('Auth API - Login', function () {
+        it('should return 409 on no email param for /login', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({a: 1})// <-- expected: {email: '...', password: '', longSession: true|false}
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: email is required'}, done);
+        });
+
+        it('should return 409 on non-email param for /login', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'abc'})// <-- expected: {email: '...', password: '', longSession: true|false}
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: email must be a valid email'}, done);
+        });
+
+        it('should return 409 on no password param for /login', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'a@a'})// <-- expected: {email: '...', password: '', longSession: true|false}
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: password is required'}, done);
+        });
+
+        it('should return 409 on ill-formatted password for /login', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'a@a', password: '123'}) // <-- min 6 chars pwd
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
+        });
+
+        it('should return 409 on no longSession for /login', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'a@a', password: '123123'})
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: longSession is required'}, done);
+        });
+
+        it('should return 409 on non-boolean longSession for /login', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'a@a', password: '123123', longSession: 'some'})
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json')
+                .expect(409)
+                .expect({error: 'Not valid: longSession must be a boolean'}, done);
+        });
+    });
+
+    describe('Auth API - Restore', function () {
         it('should return 409 on no email param for /restore', function (done) {
             request(app)
                 .post('/api/auth/restore')

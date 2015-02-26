@@ -19,6 +19,7 @@ function Backend($http, $q, Notification, _) {
         read: request('get'),
         update: request('put'),
         create: request('post'),
+        post: request('post'),
         remove: request('delete'),
         patch: request('patch')
     };
@@ -76,7 +77,7 @@ function Backend($http, $q, Notification, _) {
             transformResponse: appendTransform($http.defaults.transformResponse, getTransform(method + url))
         })
             .success(function (data) {
-                deferred.resolve(data.result);
+                deferred.resolve(data);
             })
             .error(function () {
                 deferred.reject();
@@ -91,11 +92,11 @@ function Backend($http, $q, Notification, _) {
 
     function getTransform(key) {
         return function (data) {
-            var mw = _.map(middleware, function (m) {
-                return m.re.test(key) ? m : null;
-            })[0];
+            var mw = _.find(middleware, function (m) {
+                return m.re.test(key);
+            });
 
-            if (mw) {
+            if (mw && data.result) {
                 //console.log('Matched middleware [%s] for url [%s]', mw.re, key);
                 return { result: mw.cb(data.result) };
             }

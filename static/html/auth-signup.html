@@ -7,6 +7,9 @@
                 </div>
                 <div class="panel-body">
                     <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true" ng-click="m.error.show = false">&times;</span>
+                        </button>
                         <strong>Error:</strong> {{m.error.msg}}.
                     </div>
 

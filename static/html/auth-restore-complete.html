@@ -7,6 +7,9 @@
                 </div>
                 <div class="panel-body">
                     <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true" ng-click="m.error.show = false">&times;</span>
+                        </button>
                         <strong>Error:</strong> {{m.error.msg}}.
                     </div>
 
@@ -22,7 +25,7 @@
                                 <div class="hint" ng-messages="m.form.code.$error" ng-class="{show: m.form.code.$touched}">
                                     <div ng-message="required">Required</div>
                                 </div>
-                                <input type="text" name="code" class="form-control" placeholder="Restore code"
+                                <input type="text" name="code" class="form-control" placeholder="Restore code" autocomplete="off"
                                         ng-model="m.user.restore"
                                         ng-model-options="{updateOn: 'blur'}"
                                         ng-focus="m.form.code.$setUntouched()"

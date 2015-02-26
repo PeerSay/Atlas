@@ -26,7 +26,7 @@ function Auth(app) {
     function setupRoutes() {
         // login
         app.get('/auth/login', sendAppEntry);
-        app.post('/auth/login', jsonParser, proceedLoggedIn); // special form submit to trigger browser password dialog
+        app.post('/auth/login', proceedLoggedIn); // special form submit to trigger browser password dialog
         app.post('/api/auth/login', jsonParser, authenticate); // api call actually authenticates and establishes session
 
         // signup

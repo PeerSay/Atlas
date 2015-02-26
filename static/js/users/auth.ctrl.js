@@ -4,8 +4,8 @@ angular.module('PeerSay')
     .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['Location', '$http', '$state', '$window', 'User'];
-function AuthCtrl(Location, $http, $state, $window, User) {
+AuthCtrl.$inject = ['Location', '$state', '$window', 'User'];
+function AuthCtrl(Location, $state, $window, User) {
     var m = this;
     m.error = {
         show: false,
@@ -66,36 +66,34 @@ function AuthCtrl(Location, $http, $state, $window, User) {
 
     // Restore
     function restorePwd() {
-        var data = {email: m.user.email};
-        return $http.post('/api/auth/restore', data)
-            .success(function (res) {
-                if (res.error) {
-                    if (res.error === 'linkedin') {
-                        m.error.show = false;
-                        m.errorLinkedIn.show = true;
-                    }
-                    else {
-                        m.errorLinkedIn.show = false;
-                        m.error.msg = res.error;
-                        m.error.show = true;
-                    }
+        var data = { email: m.user.email };
+
+        return User.restorePwd(data)
+            .then(function (res) {
+                if (res.error === 'linkedin') {
+                    m.error.show = false;
+                    m.errorLinkedIn.show = true;
+                }
+                else if (res.error) {
+                    m.errorLinkedIn.show = false;
+                    m.error.msg = res.error;
+                    m.error.show = true;
                 }
                 else if (res.result) {
                     // Go to state and prevent Back
                     $state.go('auth.restore-complete', null, {location: 'replace'});
                 }
-            })
-            .error(function (res) {
-                console.log('TODO handle restore err: %O', res);
             });
     }
 
     function restorePwdComplete() {
-        return $http.post('/api/auth/restore/complete', {
+        var data = {
             code: m.user.restore,
             password: m.user.password
-        })
-            .success(function (res) {
+        };
+
+        return User.restorePwdComplete(data)
+            .then(function (res) {
                 if (res.error) {
                     m.error.msg = res.error;
                     m.error.show = true;
@@ -103,10 +101,12 @@ function AuthCtrl(Location, $http, $state, $window, User) {
                 else if (res.result) {
                     // Go to state and prevent Back
                     $state.go('project.list', null, {location: 'replace'});
+
+                    // TODO - this is failed so far, because Chrome shows password save dialog with
+                    // restore code (instead of email), which is not helpful..
+                    // Submit login form to trigger browser save password dialog
+                    //m.controlFormSubmit = 'submit';
                 }
-            })
-            .error(function (res) {
-                console.log('TODO handle restore err: %O', res);
             });
     }
 

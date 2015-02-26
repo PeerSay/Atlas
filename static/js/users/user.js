@@ -8,9 +8,10 @@ function User($http, Backend, Storage) {
     var U = {};
 
     U.user = Storage.get('user') || {};
-
     U.login = login;
     U.logout = logout;
+    U.restorePwd = restorePwd;
+    U.restorePwdComplete = restorePwdComplete;
     U.readUser = readUser;
 
     function login(data) {
@@ -22,6 +23,14 @@ function User($http, Backend, Storage) {
             .success(function () {
                 U.user = Storage.remove('user') || {};
             });
+    }
+
+    function restorePwd(data) {
+        return Backend.post(['auth', 'restore'], data);
+    }
+
+    function restorePwdComplete(data) {
+        return Backend.post(['auth', 'restore', 'complete'], data);
     }
 
     function readUser() {

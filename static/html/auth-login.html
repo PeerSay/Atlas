@@ -8,10 +8,9 @@
                 <div class="panel-body">
                     <div class="alert alert-warning text-center" role="alert" ng-if="m.error.show">
                         <button type="button" class="close" aria-label="Close">
-                            <span aria-hidden="true"
-                                    ng-click="m.error.show = false">&times;</span>
+                            <span aria-hidden="true" ng-click="m.error.show = false">&times;</span>
                         </button>
-                        <strong>Oh snap!</strong> {{ m.error.msg }}.
+                        <strong>Error!</strong> {{ m.error.msg }}
                     </div>
 
                     <form class="auth" name="m.form" action="/auth/login" method="POST"

@@ -20,8 +20,9 @@ function AuthCtrl(Location, $state, $window, User) {
         restore: '',
         longSession: true
     };
-    m.controlFormSubmit = '';
+    m.formSubmitControl = '';
     m.login = login;
+    m.signup = signup;
     m.restorePwd = restorePwd;
     m.restorePwdComplete = restorePwdComplete;
 
@@ -37,7 +38,7 @@ function AuthCtrl(Location, $state, $window, User) {
             longSession: !!m.user.longSession
         };
 
-        m.controlFormSubmit = 'lock';
+        m.formSubmitControl = 'lock';
 
         return User.login(data)
             .then(function (res) {
@@ -49,19 +50,45 @@ function AuthCtrl(Location, $state, $window, User) {
                 else if (res.error) {
                     m.error.msg = res.error;
                     m.error.show = true;
-                    m.controlFormSubmit = 'unlock';
+                    m.formSubmitControl = 'unlock';
                 }
                 else if (res.result) {
                     // Submit login form normally (with page reload) via directive.
                     // This is to trigger browser save password dialog, see this:
                     // http://stackoverflow.com/questions/2382329/how-can-i-get-browser-to-prompt-to-save-password
-                    m.controlFormSubmit = 'submit';
+                    m.formSubmitControl = 'submit';
                 }
             });
     }
 
-    function redirect(url) {
-        $window.location.href = url;
+    //Signup
+    function signup () {
+        var data = {
+            email: m.user.email,
+            password: m.user.password
+        };
+
+        m.formSubmitControl = 'lock';
+
+        return User.signup(data)
+            .then(function (res) {
+                if (res.error === 'verify-email') {
+                    redirect('/auth/signup/success?email=' + m.user.email);
+                }
+                else if (res.error === 'duplicate') {
+                    m.error.msg = 'User already registered with email: ' + m.user.email;
+                    m.error.show = true;
+                    m.formSubmitControl = 'unlock';
+                }
+                else if (res.error) {
+                    m.error.msg = res.error;
+                    m.error.show = true;
+                    m.formSubmitControl = 'unlock';
+                }
+                else if (res.result) {
+                    m.formSubmitControl = 'submit';
+                }
+            });
     }
 
     // Restore
@@ -105,13 +132,17 @@ function AuthCtrl(Location, $state, $window, User) {
                     // TODO - this is failed so far, because Chrome shows password save dialog with
                     // restore code (instead of email), which is not helpful..
                     // Submit login form to trigger browser save password dialog
-                    //m.controlFormSubmit = 'submit';
+                    //m.formSubmitControl = 'submit';
                 }
             });
     }
 
 
     // Util
+    function redirect(url) {
+        $window.location.href = url;
+    }
+
     function showErrorFromQs() {
         var err = getValueFromQs('err');
         if (err) {

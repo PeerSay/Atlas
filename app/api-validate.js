@@ -16,6 +16,7 @@ function ApiValidate(app) {
 
         // Auth
         app.post('/api/auth/login', jsonParser, validateAuthLogin);
+        app.post('/api/auth/signup', jsonParser, validateAuthSignup);
         app.post('/api/auth/restore', jsonParser, validateAuthRestore);
         app.post('/api/auth/restore/complete', jsonParser, validateAuthRestoreComplete);
 
@@ -51,7 +52,23 @@ function ApiValidate(app) {
             longSession: Joi.boolean().required()
         };
 
-        Joi.validate(data, schema, function (err, value) {
+        Joi.validate(data, schema, function (err) {
+            if (err) {
+                var msg = err.details[0].message;
+                return errRes.notValid(res, msg);
+            }
+            next();
+        });
+    }
+
+    function validateAuthSignup(req, res, next) {
+        var data = req.body;
+        var schema = {
+            email: Joi.string().email().required(),
+            password: Joi.string().min(6).required()
+        };
+
+        Joi.validate(data, schema, function (err) {
             if (err) {
                 var msg = err.details[0].message;
                 return errRes.notValid(res, msg);
@@ -66,7 +83,7 @@ function ApiValidate(app) {
             email: Joi.string().email().required()
         };
 
-        Joi.validate(data, schema, function (err, value) {
+        Joi.validate(data, schema, function (err) {
             if (err) {
                 var msg = err.details[0].message;
                 return errRes.notValid(res, msg);
@@ -82,7 +99,7 @@ function ApiValidate(app) {
             password: Joi.string().min(6).required()
         };
 
-        Joi.validate(data, schema, function (err, value) {
+        Joi.validate(data, schema, function (err) {
             if (err) {
                 var msg = err.details[0].message;
                 return errRes.notValid(res, msg);

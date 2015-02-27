@@ -10,10 +10,12 @@
                         <button type="button" class="close" aria-label="Close">
                             <span aria-hidden="true" ng-click="m.error.show = false">&times;</span>
                         </button>
-                        <strong>Error:</strong> {{m.error.msg}}.
+                        <strong>Error:</strong> {{ m.error.msg }}.
                     </div>
 
-                    <form class="auth" name="m.form" action="/auth/signup" method="POST">
+                    <form class="auth" name="m.form" action="/auth/signup" method="POST"
+                            ps-form-submit="m.signup()"
+                            ps-form-submit-control="m.formSubmitControl">
                         <div class="form-group">
                             <div class="input-group input-group-lg" ng-class="{
                                     'has-success': m.form.email.$valid,

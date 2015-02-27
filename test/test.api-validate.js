@@ -10,6 +10,7 @@ require('../app/api-validate')(app).setupRoutes();
 
 
 describe('REST API - Validation', function () {
+    var typeAcceptHeaders = {'Content-Type':  'application/json', 'Accept': 'application/json'};
 
     describe('General API format & headers', function () {
         it('should return 406 on non-json Accept header', function (done) {
@@ -88,13 +89,13 @@ describe('REST API - Validation', function () {
         });
     });
 
+
     describe('Auth API - Login', function () {
         it('should return 409 on no email param for /login', function (done) {
             request(app)
                 .post('/api/auth/login')
                 .send({a: 1})// <-- expected: {email: '...', password: '', longSession: true|false}
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: email is required'}, done);
         });
@@ -103,8 +104,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/login')
                 .send({email: 'abc'})// <-- expected: {email: '...', password: '', longSession: true|false}
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: email must be a valid email'}, done);
         });
@@ -113,8 +113,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/login')
                 .send({email: 'a@a'})// <-- expected: {email: '...', password: '', longSession: true|false}
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: password is required'}, done);
         });
@@ -123,8 +122,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/login')
                 .send({email: 'a@a', password: '123'}) // <-- min 6 chars pwd
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
         });
@@ -133,8 +131,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/login')
                 .send({email: 'a@a', password: '123123'})
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: longSession is required'}, done);
         });
@@ -143,20 +140,58 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/login')
                 .send({email: 'a@a', password: '123123', longSession: 'some'})
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: longSession must be a boolean'}, done);
         });
     });
+
+
+    describe('Auth API - Signup', function () {
+        it('should return 409 on no email param for /signup', function (done) {
+            request(app)
+                .post('/api/auth/signup')
+                .send({a: 1})// <-- expected: {email: '...', password: ''}
+                .set(typeAcceptHeaders)
+                .expect(409)
+                .expect({error: 'Not valid: email is required'}, done);
+        });
+
+        it('should return 409 on non-email param for /signup', function (done) {
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'abc'})// <-- expected: {email: '...', password: ''}
+                .set(typeAcceptHeaders)
+                .expect(409)
+                .expect({error: 'Not valid: email must be a valid email'}, done);
+        });
+
+        it('should return 409 on no password param for /signup', function (done) {
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a'})// <-- expected: {email: '...', password: ''}
+                .set(typeAcceptHeaders)
+                .expect(409)
+                .expect({error: 'Not valid: password is required'}, done);
+        });
+
+        it('should return 409 on ill-formatted password for /signup', function (done) {
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123'}) // <-- min 6 chars pwd
+                .set(typeAcceptHeaders)
+                .expect(409)
+                .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
+        });
+    });
+
 
     describe('Auth API - Restore', function () {
         it('should return 409 on no email param for /restore', function (done) {
             request(app)
                 .post('/api/auth/restore')
                 .send({a: 1}) // <-- expected: {email: '...'}
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: email is required'}, done);
         });
@@ -165,8 +200,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/restore')
                 .send({email: 123}) // <--
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: email must be a string'}, done);
         });
@@ -175,8 +209,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/restore')
                 .send({email: 'abc'})// <--
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: email must be a valid email'}, done);
         });
@@ -185,8 +218,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/restore/complete')
                 .send({code: 'aaaaaa'})// <-- expected: {code: '...', password: '...'}
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: password is required'}, done);
         });
@@ -195,8 +227,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/restore/complete')
                 .send({code: 'aaa123', password: '123'}) // <-- min 6 chars pwd
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
         });
@@ -205,8 +236,7 @@ describe('REST API - Validation', function () {
             request(app)
                 .post('/api/auth/restore/complete')
                 .send({code: '-', password: '123123'}) // <-- alpha-num code
-                .set('Content-Type', 'application/json')
-                .set('Accept', 'application/json')
+                .set(typeAcceptHeaders)
                 .expect(409)
                 .expect({error: 'Not valid: code must only contain alpha-numeric characters'}, done);
         });

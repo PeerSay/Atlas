@@ -26,20 +26,21 @@ function Auth(app) {
     function setupRoutes() {
         // login
         app.get('/auth/login', sendAppEntry);
-        app.post('/auth/login', proceedLoggedIn); // special form submit to trigger browser password dialog
-        app.post('/api/auth/login', jsonParser, authenticate); // api call actually authenticates and establishes session
+        app.post('/api/auth/login', jsonParser, authenticate); // api call that authenticates and establishes session
+        app.post('/auth/login', proceedLoggedIn); // form submit to trigger browser password dialog
 
         // signup
         app.get('/auth/signup', sendAppEntry);
+        app.post('/api/auth/signup', jsonParser, register); // api call that registers user
+        app.post('/auth/signup', proceedLoggedIn); // form submit to trigger browser password dialog
         app.get('/auth/signup/success', sendAppEntry);  // show activation required page
-        app.get('/auth/signup/verified', sendAppEntry);  // redirect after verify link click
-        app.post('/auth/signup', urlencodedParser, register); // form submit
         app.get('/auth/signup/verify', verifyAccount); // link from email
+        app.get('/auth/signup/verified', sendAppEntry);  // redirect after verify link click
 
         // restore
         app.get('/auth/restore', sendAppEntry);
-        app.get('/auth/restore/complete', sendAppEntry); // ask for code and new password
         app.post('/api/auth/restore', jsonParser, restorePassword);
+        app.get('/auth/restore/complete', sendAppEntry); // ask for code and new password
         app.post('/api/auth/restore/complete', jsonParser, restorePasswordComplete);
 
         // logout
@@ -101,18 +102,20 @@ function Auth(app) {
 
             if (code === errors.AUTH_DUPLICATE) {
                 var msg = 'duplicate ' + email;
-                console.log('AUTH] Failed local: info=%s', msg);
-                return redirectErrorQs(req, res, msg);
+                console.log('AUTH] Failed local: msg=%s', msg);
+
+                return res.json({error: 'duplicate'});
             }
 
             if (!user) {
+                // Should not happen!
                 console.log('AUTH] Failed local for [%s], error=%s', email, code);
-                return redirectErrorQs(req, res, 'code:' + code);
+                return res.json({error: 'unexpected', code: code});
             }
 
             if (user.needVerify) {
                 mailVerifyAsync(user, util.baseURL(req));
-                return res.redirect('/auth/signup/success?email=' + user.email); // show verify page
+                return res.json({error: 'verify-email'});
             }
 
             var login = {
@@ -123,7 +126,8 @@ function Auth(app) {
             loginUser(req, login, function (err) {
                 if (err) { return next(err); }
 
-                return proceedLoggedIn(req, res);
+                // Client will re-submit form to trigger password save form
+                return res.json({result: true});
             });
         });
     }
@@ -164,11 +168,11 @@ function Auth(app) {
                     mailVerifyAsync(user, util.baseURL(req));
 
                     // Client will redirect to (/auth/signup/success?email=' + email) => show verify page
-                    return res.json({ error: 'verify-email' });
+                    return res.json({error: 'verify-email'});
                 }
 
                 console.log('[AUTH] Failed local: err=%s, code=%s', info.error, info.code);
-                return res.json({ error: info.error });
+                return res.json({error: info.error});
             }
 
             console.log('[AUTH] Verified-local [%s], info=%s', user.email, info);
@@ -181,7 +185,8 @@ function Auth(app) {
             loginUser(req, login, function (err) {
                 if (err) { return next(err); }
 
-                return res.json({ result: true });
+                // Client will re-submit form to trigger password save form
+                return res.json({result: true});
             });
         })(req, res, next);
     }
@@ -193,16 +198,16 @@ function Auth(app) {
             if (err) { return done(err); }
 
             if (code === errors.AUTH_NOT_FOUND) {
-                return done(null, null, { code: code, error: 'Wrong email or password' });
+                return done(null, null, {code: code, error: 'Wrong email or password'});
             }
             if (code === errors.AUTH_PWD_MISMATCH) {
-                return done(null, null, { code: code, error: 'Wrong email or password' });
+                return done(null, null, {code: code, error: 'Wrong email or password'});
             }
             if (code === errors.AUTH_NOT_VERIFIED) {
-                return done(null, user, { code: code, error: 'Account is not verified' });
+                return done(null, user, {code: code, error: 'Account is not verified'});
             }
             if (!user) {
-                return done(null, null, { code: -1, error: 'Unexpected' });
+                return done(null, null, {code: -1, error: 'Unexpected'});
             }
 
             return done(null, user);
@@ -238,7 +243,7 @@ function Auth(app) {
     //
 
     function authenticateByLinkedIn(req, res, next) {
-        console.log('[AUTH] Auth-linkedin attempt by unknown');
+        console.log('[AUTH] Auth-linkedin attempt');
 
         passport.authenticate(
             'linkedin',
@@ -248,7 +253,7 @@ function Auth(app) {
                 scope: ['r_basicprofile', 'r_emailaddress', 'r_contactinfo', 'r_network'],
                 callbackURL: '/auth/linkedin/callback' // relative URL is OK
             }
-        ) (req, res, next);
+        )(req, res, next);
     }
 
     function authenticateByLinkedInCallback(req, res, next) {
@@ -332,7 +337,7 @@ function Auth(app) {
             };
 
             mailRestoreAsync(restore);
-            res.json({ result: true });
+            res.json({result: true});
         });
     }
 
@@ -382,7 +387,7 @@ function Auth(app) {
             return res.redirect('/projects');
         }
 
-        res.sendFile('app.html', { root: config.web.static_dir });
+        res.sendFile('app.html', {root: config.web.static_dir});
     }
 
 
@@ -400,7 +405,7 @@ function Auth(app) {
     //
     function logout(req, res) {
         req.logout();
-        res.json({ result: true });
+        res.json({result: true});
     }
 
     // Errors

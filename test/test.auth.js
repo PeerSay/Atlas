@@ -113,6 +113,70 @@ describe('Auth', function () {
         it('should handle longSession param on POST /api/auth/login');
     });
 
+    describe('Signup - local', function () {
+        var userRegisterStub;
+
+        before(function () {
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, {email: 'a@a'});
+        });
+        after(function () {
+            User.register.restore();
+        });
+
+        it('should succeed on POST /api/auth/signup and return success json', function (done) {
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ result: true }, done);
+        });
+
+        it('should fail if duplicate email on POST /api/auth/signup', function (done) {
+            User.register.restore();
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, null, errors.AUTH_DUPLICATE);
+
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ error: 'duplicate' }, done);
+        });
+
+        it('should fail on unknown error form User model on POST /api/auth/signup', function (done) {
+            User.register.restore();
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, null, 1234);
+
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ error: 'unexpected', code: 1234 }, done);
+        });
+
+        it('should fail with unverified email on POST /api/auth/signup (although it is success for user)', function (done) {
+            User.register.restore();
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, {email: 'a@a', needVerify: true});
+
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ error: 'verify-email' }, done);
+        });
+    });
+
     describe('Password Restore', function () {
         var mailerStub, utilStub, userFindOneStub;
 

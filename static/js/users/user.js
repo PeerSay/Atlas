@@ -8,11 +8,16 @@ function User($http, Backend, Storage) {
     var U = {};
 
     U.user = Storage.get('user') || {};
+    U.signup = signup;
     U.login = login;
     U.logout = logout;
     U.restorePwd = restorePwd;
     U.restorePwdComplete = restorePwdComplete;
     U.readUser = readUser;
+
+    function signup(data) {
+        return Backend.post(['auth', 'signup'], data);
+    }
 
     function login(data) {
         return Backend.post(['auth', 'login'], data);

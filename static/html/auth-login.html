@@ -6,11 +6,16 @@
                     <h2 class="panel-title">Login</h2>
                 </div>
                 <div class="panel-body">
-                    <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
-                        <strong>Error:</strong> {{m.error.msg}}.
+                    <div class="alert alert-warning text-center" role="alert" ng-if="m.error.show">
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true" ng-click="m.error.show = false">&times;</span>
+                        </button>
+                        <strong>Error!</strong> {{ m.error.msg }}
                     </div>
 
-                    <form class="auth" name="m.form" action="/auth/login" method="POST">
+                    <form class="auth" name="m.form" action="/auth/login" method="POST"
+                            ps-form-submit="m.login()"
+                            ps-form-submit-control="m.formSubmitControl">
                         <div class="form-group">
                             <div class="input-group input-group-lg" ng-class="{
                                     'has-success': m.form.email.$valid,
@@ -20,7 +25,8 @@
                                     <div ng-message="required">Required</div>
                                     <div ng-message="email">Invalid email!</div>
                                 </div>
-                                <input type="email" name="email" class="form-control" placeholder="Your email"
+                                <input type="email" class="form-control" placeholder="Your email"
+                                        name="email"
                                         ng-model="m.user.email"
                                         ng-model-options="{updateOn: 'blur default'}"
                                         ng-focus="m.form.email.$setUntouched()"

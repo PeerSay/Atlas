@@ -11,6 +11,7 @@ chai.use(sinonChai);
 
 
 // Dependencies
+var errors = require('../app/errors');
 var app = express();
 app.use(cookieParser());
 app.use(session({
@@ -37,37 +38,143 @@ var auth = Auth(app).setupRoutes();
 
 
 describe('Auth', function () {
+    var typeAcceptHeaders = {'Content-Type':  'application/json', 'Accept': 'application/json'};
 
-    describe('Auth operations', function () {
-        it('should return 409 if no email is passed');
-        it('should return 409 if no password is passed');
+    describe('Login - local', function () {
+        var userAuthenticateStub;
 
-        it.skip('should resister new user on POST /auth/signup', function (done) {
-            /* var mock = sinon.mock(models.User);
-             mock.expects("register").once().returns(42);
-
-             console.log(models.User);
-             models.User.register();
-             mock.verify();*/
-
-            /*request(app)
-             .post('/auth/signup', {email: 'a@a', password: '123123'})
-             .expect(200, done)
-             .expect(function (res) {
-             mock.verify();
-             if (res.body.result == null) return 'Wrong result: ' + res.body.result;
-             });*/
-
+        before(function () {
+            userAuthenticateStub = sinon.stub(User, 'authenticate')
+                .withArgs('a@a', '123123')
+                .callsArgWith(2, null, {email: 'a@a'});
+        });
+        after(function () {
+            User.authenticate.restore();
         });
 
-        it('should redirect to /auth/signup/success upon register');
-        it('should send activation email upon register');
 
-        it('should not activate account upon GET to incorrect activation link');
-        it('should not redirect to /auth/signup/verified?err upon failed activation');
+        it('should set session cookie on POST /api/auth/login and return success json', function (done) {
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ result: true })
+                .expect('set-cookie', /connect\.sid/, done);
+        });
 
-        it('should activate account upon GET to correct activation link');
-        it('should redirect to /projects upon successful login after activation');
+        it('should fail login with invalid email on POST /api/auth/login', function (done) {
+            User.authenticate.restore();
+            sinon.stub(User, 'authenticate')
+                .withArgs('b@b', '123123')
+                .callsArgWith(2, null, null, errors.AUTH_NOT_FOUND); //<--
+
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'b@b', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({error: 'Wrong email or password'}, done);
+        });
+
+        it('should fail login with invalid password on POST /api/auth/login', function (done) {
+            User.authenticate.restore();
+            sinon.stub(User, 'authenticate')
+                .withArgs('b@b', '123123')
+                .callsArgWith(2, null, null, errors.AUTH_PWD_MISMATCH); //<--
+
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'b@b', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({error: 'Wrong email or password'}, done);
+        });
+
+        it('should fail login with unverified email on POST /api/auth/login & re-send email', function (done) {
+            User.authenticate.restore();
+            sinon.stub(User, 'authenticate')
+                .withArgs('b@b', '123123')
+                .callsArgWith(2, null, {email: 'b@b', name: {full: 'John Snow'}}, errors.AUTH_NOT_VERIFIED); //<--
+
+            // TODO - doesn't work!
+            /*sinon.stub(mailer, 'send')
+                .withArgs('b@b')
+                .calledOnce.should.equal(true);*/
+
+            request(app)
+                .post('/api/auth/login')
+                .send({email: 'b@b', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({error: 'verify-email'}, done);
+        });
+
+        it('should handle longSession param on POST /api/auth/login');
+    });
+
+    describe('Signup - local', function () {
+        var userRegisterStub;
+
+        before(function () {
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, {email: 'a@a'});
+        });
+        after(function () {
+            User.register.restore();
+        });
+
+        it('should succeed on POST /api/auth/signup and return success json', function (done) {
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ result: true }, done);
+        });
+
+        it('should fail if duplicate email on POST /api/auth/signup', function (done) {
+            User.register.restore();
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, null, errors.AUTH_DUPLICATE);
+
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ error: 'duplicate' }, done);
+        });
+
+        it('should fail on unknown error form User model on POST /api/auth/signup', function (done) {
+            User.register.restore();
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, null, 1234);
+
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ error: 'unexpected', code: 1234 }, done);
+        });
+
+        it('should fail with unverified email on POST /api/auth/signup (although it is success for user)', function (done) {
+            User.register.restore();
+            userRegisterStub = sinon.stub(User, 'register')
+                .withArgs('a@a', '123123')
+                .callsArgWith(3, null, {email: 'a@a', needVerify: true});
+
+            request(app)
+                .post('/api/auth/signup')
+                .send({email: 'a@a', password: '123123'})
+                .set(typeAcceptHeaders)
+                .expect(200)
+                .expect({ error: 'verify-email' }, done);
+        });
     });
 
     describe('Password Restore', function () {
@@ -132,7 +239,7 @@ describe('Auth', function () {
                 .set('Content-Type', 'application/json')
                 .set('Accept', 'application/json')
                 .expect(200)
-                .expect({result: {email: 'a@a', id: 1}}, done);
+                .expect({result: {email: 'a@a'}}, done);
         });
 
         it('should fail restore begin on POST /api/auth/restore if user is not found by email', function (done) {

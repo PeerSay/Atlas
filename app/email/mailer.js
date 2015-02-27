@@ -37,6 +37,10 @@ function send(to, tpl_name, locals, cb) {
     });
 }
 
+function dummySend(to, tpl_name) {
+    console.log('[EMAIL] SKIPPED sending [%s] to [%s]: disabled by config', tpl_name, to);
+}
+
 module.exports = {
-    send: enabled ? send : function () {}
+    send: enabled ? send : dummySend
 };

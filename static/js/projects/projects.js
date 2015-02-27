@@ -46,7 +46,7 @@ function Projects(Backend, User, _) {
     function createProject() {
         return Backend.create(['projects'], { title: P.create.title })
             .then(function (data) {
-                P.projects.push(data);
+                P.projects.push(data.result);
             })
             .finally(function () {
                 P.create.showDlg = false;
@@ -57,7 +57,7 @@ function Projects(Backend, User, _) {
     function removeProject(id) {
         return Backend.remove(['projects', id])
             .then(function (data) {
-                P.projects.splice(getIdxById(data.id), 1);
+                P.projects.splice(getIdxById(data.result.id), 1);
             });
     }
 
@@ -65,7 +65,7 @@ function Projects(Backend, User, _) {
     //
     function readProject(id) {
         return Backend.read(['projects', id])
-            .then(function (res) {
+            .then(function (data) {
                 var empty = {
                     title: '',
                     description: '',
@@ -73,13 +73,13 @@ function Projects(Backend, User, _) {
                     startDate: '',
                     duration: ''
                 };
-                angular.extend(P.current.project, empty, res);
+                angular.extend(P.current.project, empty, data.result);
                 return P.current.project;
             });
     }
 
     function patchProject(id, data) {
-        return Backend.patch(['projects', id], data);
+        return Backend.patch(['projects', id], data.result);
     }
 
     function getIdxById(id) {

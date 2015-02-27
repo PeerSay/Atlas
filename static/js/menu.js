@@ -19,7 +19,7 @@ function MenuCtrl($state, User, Projects) {
         User.logout()
             .success(function () {
                 // Go to state and prevent Back
-                $state.transitionTo('auth.login', null, { location: 'replace' });
+                $state.go('auth.login', null, { location: 'replace' });
             });
     }
 }

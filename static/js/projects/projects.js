@@ -79,7 +79,7 @@ function Projects(Backend, User, _) {
     }
 
     function patchProject(id, data) {
-        return Backend.patch(['projects', id], data.result);
+        return Backend.patch(['projects', id], data);
     }
 
     function getIdxById(id) {

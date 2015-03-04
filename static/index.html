@@ -16,6 +16,12 @@
     <!-- endbuild -->
 
     <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,600,300,200&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+    <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
+
+    <!-- htmlbuild:script inline mixpanel --><!-- /htmlbuild -->
+
+    <script> mixpanel.track("landing page load"); </script>
 </head>
 <body>
 
@@ -81,15 +87,23 @@
     <!-- /container -->
 
     <div class="container">
-        <div class="row">
+        <div id="before" class="row">
             <h1 class="font-thin"></h1>
 
             <form id="reg-form" class="form-inline" role="form">
                 <div class="form-group">
                     <input type="email" class="form-control" id="email" placeholder="Enter your email address">
-                    <button type="submit" id="register" class="btn btn-warning btn-lg">Register</button>
+                    <button type="submit" id="register" class="btn btn-peersay btn-lg">Register</button>
                 </div>
             </form>
+        </div>
+        <div id="after-new" style="display: none">
+            <h1 class="font-semibold-grey"> Thank you for registering!</h1>
+            <h4 class="font-semibold-grey"> We'll let you know when we're up and running</h4>
+        </div>
+        <div id="after-dup" style="display: none">
+            <h1 class="font-semibold-grey"> Hey! Welcome back!</h1>
+            <h4 class="font-semibold-grey"> We'll make sure you're among the first to get on board!</h4>
         </div>
         <!-- /row -->
     </div>
@@ -222,8 +236,8 @@
     <div class="container">
         <div class="row">
             <form class="form-inline" role="form">
-                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter your email address">
-                <button type="submit" class="btn btn-warning btn-lg">Register</button>
+                <input type="email" class="form-control" placeholder="Enter your email address">
+                <button type="submit" class="btn btn-peersay btn-lg">Register</button>
             </form>
         </div>
         <!-- /row -->
@@ -301,5 +315,68 @@
 <script src="/bower_components/jquery/plugins/jquery.easing.1.3.js"></script>
 <script src="index.js"></script>
 <!-- endbuild -->
+
+<script>
+    $(function () {
+        var $form = $("#reg-form").submit(addWaiting)
+                .on('mixpanel', function (evt, msg) {
+                    if (window.mixpanel) {
+                        mixpanel.track(msg);
+                    }
+                });
+        $("#register").click(function () {
+            $form.submit();
+        });
+
+        function addWaiting() {
+            var simple_mail_re = /\S+@\S+\.\S+/;
+            var mail = $("#email").val().trim();
+
+            if (!simple_mail_re.test(mail)) {
+                alert(mail + ' is not a valid email');
+                $form.trigger('mixpanel', ['not valid email']);
+                return false;
+            }
+
+            var data = JSON.stringify({ email: mail });
+            var path = "/api/waiting-users";
+
+            $.ajax({
+                url: path,
+                type: "POST",
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (res) {
+                    //console.log(res);
+
+                    // Hide all messages before choosing the one to display
+                    $form.css({visibility: 'hidden'});
+                    $('#before, #after-new, #after-dup').hide();
+
+                    // There is no error field --> new user added
+                    if (!res.error) {
+                        $("#after-new").show();
+                        $form.trigger('mixpanel', ['success']);
+                    }
+                    // There is no result field --> A duplicate user
+                    else if (!res.result) {
+                        $("#after-dup").show();
+                        $form.trigger('mixpanel', ['duplicate']);
+                    }
+                    else {
+                        $form.trigger('mixpanel', ['unexpected']);
+                    }
+                },
+                error: function () {
+                    $form.trigger('mixpanel', ['api-error']);
+                }
+            });
+            return false;
+        }
+    });
+
+</script>
+
 </body>
 </html>

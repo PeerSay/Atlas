@@ -208,8 +208,10 @@ module.exports = function (grunt) {
                     scripts: {
                         ga: ['static/ga.js'],
                         mixpanel: ['static/mixpanel.js'],
-                        GoogleConversion: ['static/GoogleConversion.js'],
-                        GoogleRemarketing: ['static/GoogleRemarketing.js']
+                        GoogleConversion: ['static/GoogleConversion.js']
+                    },
+                    sections: {
+                        GoogleRemarketing: ['static/GoogleRemarketing.html']
                     }
                 }
             }

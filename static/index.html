@@ -20,8 +20,11 @@
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
 
     <!-- htmlbuild:script inline mixpanel --><!-- /htmlbuild -->
-
-    <script> mixpanel.track("landing page load"); </script>
+    <script>
+        if (window.mixpanel) {
+            mixpanel.track("landing page load");
+        }
+    </script>
 </head>
 <body>
 
@@ -64,11 +67,8 @@
                 <div class="active-menu"></div>
             </div>
         </div>
-        <!-- /.nav-collapse -->
     </div>
-    <!-- /.container -->
 </div>
-<!-- /.navbar -->
 
 <!-- === MAIN Background === -->
 <div class="slide story" id="slide-1" data-slide="1">
@@ -80,36 +80,31 @@
                 <img src="images/PeerSayLogo65x65.png">
                 <br>
             </div>
-            <!-- /col-6 -->
         </div>
-        <!-- /row -->
     </div>
-    <!-- /container -->
 
+    <!--Register Form #1-->
     <div class="container">
-        <div id="before" class="row">
-            <h1 class="font-thin"></h1>
-
-            <form id="reg-form" class="form-inline" role="form">
+        <div class="row">
+            <form id="reg-form1" class="form-inline" role="form">
+                <h1 class="font-thin"></h1>
                 <div class="form-group">
-                    <input type="email" class="form-control" id="email" placeholder="Enter your email address">
-                    <button type="button" id="register" class="btn btn-peersay btn-lg">Register</button>
+                    <input type="email" class="js-reg-email form-control" placeholder="Enter your email address">
+                    <button type="button" class="js-reg-btn btn btn-peersay btn-lg">Register</button>
                 </div>
             </form>
+
+            <div class="js-reg-result-ok" style="display: none">
+                <h1 class="font-semibold-grey">Thank you for registering!</h1>
+                <h4 class="font-semibold-grey">We'll let you know when we're up and running</h4>
+            </div>
+            <div class="js-reg-result-dup" style="display: none">
+                <h1 class="font-semibold-grey">Hey! Welcome back!</h1>
+                <h4 class="font-semibold-grey">We'll make sure you're among the first to get on board!</h4>
+            </div>
         </div>
-        <div id="after-new" style="display: none">
-            <h1 class="font-semibold-grey"> Thank you for registering!</h1>
-            <h4 class="font-semibold-grey"> We'll let you know when we're up and running</h4>
-        </div>
-        <div id="after-dup" style="display: none">
-            <h1 class="font-semibold-grey"> Hey! Welcome back!</h1>
-            <h4 class="font-semibold-grey"> We'll make sure you're among the first to get on board!</h4>
-        </div>
-        <!-- /row -->
     </div>
-    <!-- /container -->
 </div>
-<!-- /slide1 -->
 
 <!-- === Slide 2 === -->
 <div class="slide story" id="slide-2" data-slide="2">
@@ -119,15 +114,15 @@
                 <span class="font-semibold">Evaluate & Choose</span> business products
             </div>
         </div>
-        <!-- /row -->
+
         <div class="row line-row">
             <div class="hr">&nbsp;</div>
         </div>
-        <!-- /row -->
+
         <div class="row subtitle-row">
             <div class="col-12 font-thin">This is how <span class="font-semibold">we do it</span></div>
         </div>
-        <!-- /row -->
+
         <div class="row content-row">
             <div class="col-12 col-lg-3 col-sm-6">
                 <p><i class="fa fa-eye"></i></p>
@@ -158,16 +153,8 @@
             </div>
             <!-- /col12 -->
         </div>
-        <!-- /row -->
     </div>
-    <!-- /container -->
 </div>
-<!-- /slide2 -->
-
-<!-- === SLide 3 - Portfolio -->
-<div class="slide story" id="slide-3" data-slide="3">
-</div>
-<!-- /slide3 -->
 
 <!-- === Slide 4 - Process === -->
 <div class="slide story" id="slide-4" data-slide="4">
@@ -175,17 +162,14 @@
         <div class="row title-row">
             <div class="col-12 font-thin">Evaluations <span class="font-semibold">made simple</span></div>
         </div>
-        <!-- /row -->
         <div class="row line-row">
             <div class="hr">&nbsp;</div>
         </div>
-        <!-- /row -->
         <div class="row subtitle-row">
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
             <div class="col-12 col-sm-10 font-light">List the requirements and add products that you consider. PeerSay will bring you value from the first step throughout the evaluation process.</div>
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
         </div>
-        <!-- /row -->
         <div class="row content-row">
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
             <div class="col-12 col-sm-2">
@@ -225,26 +209,31 @@
             <!-- /col12 -->
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
         </div>
-        <!-- /row -->
     </div>
-    <!-- /container -->
 </div>
-<!-- /slide4 -->
 
-<!-- === Slide 5 === -->
+<!-- === Slide 5 === Register2 -->
 <div class="slide story" id="slide-5" data-slide="5">
     <div class="container">
         <div class="row">
-            <form class="form-inline" role="form">
-                <input type="email" class="form-control" placeholder="Enter your email address">
-                <button type="submit" class="btn btn-peersay btn-lg">Register</button>
+            <form id="reg-form2" class="form-inline" role="form">
+                <div class="form-group">
+                    <input type="email" class="js-reg-email form-control" placeholder="Enter your email address">
+                    <button type="button" class="js-reg-btn btn btn-peersay btn-lg">Register</button>
+                </div>
             </form>
+
+            <div class="js-reg-result-ok" style="display: none">
+                <h1 class="font-semibold-grey">Thank you for registering!</h1>
+                <h4 class="font-semibold-grey">We'll let you know when we're up and running</h4>
+            </div>
+            <div class="js-reg-result-dup" style="display: none">
+                <h1 class="font-semibold-grey">Hey! Welcome back!</h1>
+                <h4 class="font-semibold-grey">We'll make sure you're among the first to get on board!</h4>
+            </div>
         </div>
-        <!-- /row -->
     </div>
-    <!-- /container -->
 </div>
-<!-- /slide5 -->
 
 <!-- === Slide 6 / Contact === -->
 <div class="slide story" id="slide-6" data-slide="6">
@@ -252,23 +241,22 @@
         <div class="row title-row">
             <div class="col-12 font-light">We appreciate your <span class="font-semibold">feedback</span></div>
         </div>
-        <!-- /row -->
+
         <div class="row line-row">
             <div class="hr">&nbsp;</div>
         </div>
-        <!-- /row -->
+
         <div class="row subtitle-row">
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
             <div class="col-12 col-sm-10 font-light">Don't be a stranger, drop us a line.</div>
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
         </div>
-        <!-- /row -->
+
         <div class="row subtitle-row">
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
             <div class="col-12 col-sm-10 font-light"></div>
             <div class="col-sm-1 hidden-sm">&nbsp;</div>
         </div>
-        <!-- /row -->
 
         <!--div id="contact-row-4" class="row">
            <div class="col-sm-1 hidden-sm">&nbsp;</div>
@@ -303,10 +291,7 @@
         <!-- /col12 -->
         <!--div class="col-sm-1 hidden-sm">&nbsp;</div-->
     </div>
-    <!-- /row -->
 </div>
-<!-- /container -->
-</div><!-- /Slide 6 -->
 
 <!-- SCRIPTS -->
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
@@ -320,19 +305,31 @@
 
 <script>
     $(function () {
-        var $form = $("#reg-form").submit(addWaiting)
+        var $chan = $('body')
                 .on('mixpanel', function (evt, msg) {
                     if (window.mixpanel) {
                         mixpanel.track(msg);
                     }
+                    if (msg === 'success' && typeof GoogleTrackConversion === 'function') {
+                        GoogleTrackConversion();
+                    }
                 });
-        $("#register").click(function () {
+
+        $("#reg-form1").submit(addWaiting);
+        $("#reg-form2").submit(addWaiting);
+        $(".js-reg-btn").click(function () {
+            var $form = $(this).closest('form');
             $form.submit();
         });
 
         function addWaiting() {
+            var $form = $(this);
+            var $email_el = $form.find('.js-reg-email');
+            var $result_ok_el = $form.nextAll('.js-reg-result-ok');
+            var $result_dup_el = $form.nextAll('.js-reg-result-dup');
+
             var simple_mail_re = /\S+@\S+\.\S+/;
-            var mail = $("#email").val().trim();
+            var mail = $email_el.val().trim();
             if (!mail) { return false; }
 
             if (!simple_mail_re.test(mail)) {
@@ -341,7 +338,7 @@
                 return false;
             }
 
-            var data = JSON.stringify({ email: mail });
+            var data = JSON.stringify({email: mail});
             var path = "/api/waiting-users";
 
             $.ajax({
@@ -354,32 +351,30 @@
                     //console.log(res);
 
                     // Hide all messages before choosing the one to display
-                    $form.css({visibility: 'hidden'});
-                    $('#before, #after-new, #after-dup').hide();
+                    $form.add($result_ok_el).add($result_dup_el)
+                            .hide();
 
                     // There is no error field --> new user added
                     if (!res.error) {
-                        $("#after-new").show();
-                        $form.trigger('mixpanel', ['success']);
-                        GoogleTrackConversion();
+                        $result_ok_el.show();
+                        $chan.trigger('mixpanel', ['success']);
                     }
                     // There is no result field --> A duplicate user
                     else if (!res.result) {
-                        $("#after-dup").show();
-                        $form.trigger('mixpanel', ['duplicate']);
+                        $result_dup_el.show();
+                        $chan.trigger('mixpanel', ['duplicate']);
                     }
                     else {
-                        $form.trigger('mixpanel', ['unexpected']);
+                        $chan.trigger('mixpanel', ['unexpected']);
                     }
                 },
                 error: function () {
-                    $form.trigger('mixpanel', ['api-error']);
+                    $chan.trigger('mixpanel', ['api-error']);
                 }
             });
             return false;
         }
     });
-
 </script>
 
 <!-- Google Code for Remarketing Tag -->

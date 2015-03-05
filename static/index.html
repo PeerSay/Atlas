@@ -93,7 +93,7 @@
             <form id="reg-form" class="form-inline" role="form">
                 <div class="form-group">
                     <input type="email" class="form-control" id="email" placeholder="Enter your email address">
-                    <button type="submit" id="register" class="btn btn-peersay btn-lg">Register</button>
+                    <button type="button" id="register" class="btn btn-peersay btn-lg">Register</button>
                 </div>
             </form>
         </div>
@@ -333,6 +333,7 @@
         function addWaiting() {
             var simple_mail_re = /\S+@\S+\.\S+/;
             var mail = $("#email").val().trim();
+            if (!mail) { return false; }
 
             if (!simple_mail_re.test(mail)) {
                 alert(mail + ' is not a valid email');

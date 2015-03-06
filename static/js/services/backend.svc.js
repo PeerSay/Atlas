@@ -15,6 +15,8 @@ function Backend($http, $q, Notification, _) {
     var B = {
         // Middleware
         use: use,
+        // Cache
+        invalidateCache: invalidateCache,
         // Crud
         read: request('get'),
         update: request('put'),
@@ -28,7 +30,7 @@ function Backend($http, $q, Notification, _) {
 
     function request(method) {
         return function (path, data) {
-            var url = [].concat('/api', path).join('/');
+            var url = arrToUrl(path);
             var promise, deferred;
 
             if (method === 'get') {
@@ -37,8 +39,6 @@ function Backend($http, $q, Notification, _) {
                 deferred = $q.defer();
                 promise = deferred.promise;
                 doRequest(deferred, method, url, data);
-                // If not GET, then need to invalidate cache as data is staled now
-                invalidateCache(url);
             }
 
             // Error handling
@@ -66,7 +66,8 @@ function Backend($http, $q, Notification, _) {
 
 
     function invalidateCache(url) {
-        delete cache[url];
+        var key = angular.isArray(url) ? arrToUrl(url) : url;
+        delete cache[key];
     }
 
     function doRequest(deferred, method, url, data) {
@@ -117,6 +118,10 @@ function Backend($http, $q, Notification, _) {
             cb: cb
         });
         return B;
+    }
+
+    function arrToUrl(arr) {
+        return [].concat('/api', arr).join('/');
     }
 
     return B;

@@ -234,7 +234,6 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
 
             var groupBy = svc.groupBy.get();
 
-            //V.sort(orderBy, groupBy);
             TableModel.sortViewModel(orderBy, groupBy);
             svc.sortBy.set(orderBy);
         }

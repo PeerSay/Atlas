@@ -34,7 +34,8 @@ function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
                     sortable: true
                 },
                 cell: {
-                    type: 'static'
+                    editable: true,
+                    type: 'multiline'
                 },
                 footer: { value: '' }
             },
@@ -55,6 +56,7 @@ function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
             {
                 selector: 'vendors/.*?/score',
                 column: {
+                    editable: true,
                     sortable: true
                 },
                 cell: {

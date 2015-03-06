@@ -36,7 +36,8 @@ function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
                     sortable: true
                 },
                 cell: {
-                    type: 'static'
+                    editable: true,
+                    type: 'multiline'
                 }
             },
             {

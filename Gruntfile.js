@@ -197,7 +197,7 @@ module.exports = function (grunt) {
             }
         },
 
-        // Replace comments in HTML with code (for ga.js)
+        // Replace comments in HTML with code (for ga.js, mixpanel, etc.)
         //
         htmlbuild: {
             dist: {
@@ -207,7 +207,11 @@ module.exports = function (grunt) {
                     parseTag: 'htmlbuild', // avoid conflict with usemin
                     scripts: {
                         ga: ['static/ga.js'],
-                        mixpanel: ['static/mixpanel.js']
+                        mixpanel: ['static/mixpanel.js'],
+                        GoogleConversion: ['static/GoogleConversion.js']
+                    },
+                    sections: {
+                        GoogleRemarketing: ['static/GoogleRemarketing.html']
                     }
                 }
             }

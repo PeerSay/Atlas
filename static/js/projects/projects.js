@@ -79,6 +79,13 @@ function Projects(Backend, User, _) {
     }
 
     function patchProject(id, data) {
+        var patch = data[0];
+        if (patch.path === '/title') {
+            // Project title is changed => invalidate Project stubs to get new titles
+            Backend.invalidateCache(['user']);
+        }
+        Backend.invalidateCache(['projects', id]);
+
         return Backend.patch(['projects', id], data);
     }
 

@@ -1,14 +1,17 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$stateParams', 'Table', 'Wizard'];
-function ProjectProductsCtrl($stateParams, Table, Wizard) {
+ProjectProductsCtrl.$inject = ['$interpolate', '$stateParams', 'Wizard', 'Table', 'TableModel'];
+function ProjectProductsCtrl($interpolate, $stateParams, Wizard, Table, TableModel) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[2];
     m.title = m.step.title;
     m.openDialog = Wizard.openDialog.bind(Wizard);
+    m.footer = {
+        text: getFooterTextFn()
+    };
 
     // Table view
     m.tableView = Table.addView(m, 'pi-norm', getViewConfig)
@@ -38,5 +41,15 @@ function ProjectProductsCtrl($stateParams, Table, Wizard) {
             });
         }
          return res;
+    }
+
+
+    function getFooterTextFn() {
+        var exp = $interpolate('Showing {{ shown }} out of {{ total }}');
+        return function () {
+            var shown = (m.tableView.rows[0] || []).length;
+            var total = (TableModel.model.vendors || []).length;
+            return exp({shown: shown, total: total});
+        };
     }
 }

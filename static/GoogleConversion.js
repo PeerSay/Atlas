@@ -4,11 +4,12 @@ var google_conversion_language = "en";
 var google_conversion_format = "3";
 var google_conversion_color = "ffffff";
 var google_conversion_label = "d4AmCNzWgVoQ166ryAM";
-var google_remarketing_only = false;
 
 function GoogleTrackConversion() {
     document.write = function(text) {
         $('#content').append(text);
     };
+    google_remarketing_only = false;
     $.getScript('https://www.googleadservices.com/pagead/conversion.js');
+    google_remarketing_only = true;
 };

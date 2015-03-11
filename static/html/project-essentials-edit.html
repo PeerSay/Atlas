@@ -5,7 +5,8 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" data-dismiss="modal"
+                        ng-disabled="cm.form.$invalid">
                     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                 </button>
                 <h4 class="modal-title">{{:: cm.title }}</h4>
@@ -61,7 +62,7 @@
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal"
                         ng-disabled="cm.form.$invalid">Done</button>
-                <button class="btn btn-primary" data-dismiss="modal"
+                <button class="btn btn-primary"
                         ng-disabled="cm.form.$invalid"
                         ng-click="cm.goNext()">
                     Requirements

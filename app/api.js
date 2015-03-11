@@ -31,8 +31,13 @@ function RestApi(app) {
         app.get('/api/projects/:id', readProject);
         app.delete('/api/projects/:id', removeProject);
         app.patch('/api/projects/:id', jsonParser, patchProject);
+
+        // project's progress
+        app.get('/api/projects/:id/progress', readProjectProgress);
+        app.put('/api/projects/:id/progress', jsonParser, updateProjectProgress);
+
+        // project's criteria
         app.get('/api/projects/:id/criteria', readProjectCriteria);
-        app.put('/api/projects/:id/criteria', jsonParser, updateProjectCriteria);
         app.patch('/api/projects/:id/criteria', jsonParser, patchProjectCriteria);
         return U;
     }
@@ -44,7 +49,7 @@ function RestApi(app) {
 
         console.log('[API] Adding user to waiting list [%s]', data.email);
 
-        WaitingUser.add(data.email, data, function(err, user, code) {
+        WaitingUser.add(data.email, data, function (err, user, code) {
             if (err) { next(err); }
 
             if (code === errorcodes.WAITING_DUPLICATE) {
@@ -53,7 +58,7 @@ function RestApi(app) {
             }
 
             console.log('[API] User ' + data.email + ' has been added to the waiting list');
-            return res.json({ result: true });
+            return res.json({result: true});
         });
     }
 
@@ -70,10 +75,10 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            var result = user.toJSON({ transform: xformUser });
+            var result = user.toJSON({transform: xformUser});
             console.log('[API] Reading user[%s] result:', email, result);
 
-            return res.json({ result: result });
+            return res.json({result: result});
         });
     }
 
@@ -95,10 +100,10 @@ function RestApi(app) {
             Project.createByUser(data, user, function (err, stubPrj) {
                 if (err) { return next(err); }
 
-                var result = stubPrj.toJSON({ transform: xformStubPrj}); // stub is enough for create
+                var result = stubPrj.toJSON({transform: xformStubPrj}); // stub is enough for create
                 console.log('[API] Creating project result:', result);
 
-                return res.json({ result: result });
+                return res.json({result: result});
             });
         });
     }
@@ -119,10 +124,10 @@ function RestApi(app) {
             Project.removeByUser(project_id, user, function (err) {
                 if (err) { return next(err); }
 
-                var result = { id: project_id, removed: true };
+                var result = {id: project_id, removed: true};
                 console.log('[API] Removing project[%s] result:', project_id, result);
 
-                return res.json({ result: result});
+                return res.json({result: result});
             });
         });
     }
@@ -140,16 +145,16 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators -criteria', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators -criteria -progress', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);
                 }
 
-                var result = prj.toJSON({ virtuals: true, transform: xformProject}); // virtuals give duration.days
+                var result = prj.toJSON({transform: xformProject});
                 console.log('[API] Reading project[%s] result:', project_id, result);
 
-                return res.json({ result: result });
+                return res.json({result: result});
             });
         });
     }
@@ -184,8 +189,69 @@ function RestApi(app) {
                         var result = true; // no need to send data back
                         console.log('[API] Patched project[%s] result:', project_id, result);
 
-                        return res.json({ result: result });
+                        return res.json({result: result});
                     });
+                });
+            });
+        });
+    }
+
+    // Progress
+
+    function readProjectProgress(req, res, next) {
+        var project_id = req.params.id;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Reading progress of project [%s] for user=[%s]', project_id, email);
+
+        User.findOne({email: email}, 'projects.progress', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) {
+                return errRes.notFound(res, email);
+            }
+
+            Project.findById(project_id, '-_id progress', function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return errRes.notFound(res, project_id);
+                }
+
+                var result = prj.toJSON({transform: xformProject});
+                console.log('[API] Reading progress of project[%s] result:', project_id, result);
+
+                return res.json({result: result});
+            });
+        });
+    }
+
+    function updateProjectProgress(req, res, next) {
+        var project_id = req.params.id;
+        var user = req.user;
+        var email = user.email;
+        var data = req.body;
+
+        console.log('[API] Updating progress of project [%s] for user=[%s]', project_id, email);
+
+        User.findOne({email: email}, 'projects.progress', function (err, user) {
+            if (err) { return next(err); }
+            if (!user) { return errRes.notFound(res, email); }
+
+            Project.findById(project_id, 'progress', function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return errRes.notFound(res, project_id);
+                }
+
+                prj.progress = data.progress; // update!
+
+                prj.save(function (err) {
+                    if (err) { return modelError(res, err); }
+
+                    var result = true; // no need to send data back
+                    console.log('[API] Updating progress of project[%s] result:', project_id, result);
+
+                    return res.json({result: result});
                 });
             });
         });
@@ -212,45 +278,10 @@ function RestApi(app) {
                     return errRes.notFound(res, project_id);
                 }
 
-                var result = prj.toJSON({ virtuals: false, transform: xformProjectCriteria});
+                var result = prj.toJSON({transform: xformProjectCriteria});
                 console.log('[API] Reading criteria of project[%s] result:', project_id, result);
 
-                return res.json({ result: result });
-            });
-        });
-    }
-
-    function updateProjectCriteria(req, res, next) {
-        var project_id = req.params.id;
-        var data = req.body;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Updating criteria of project[%s] for user=[%s], data=', project_id, email, data);
-
-        User.findOne({email: email}, 'projects.criteria', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.findById(project_id, 'criteria', function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                // Replace all
-                prj.criteria.splice.apply(prj.criteria, [].concat(0, prj.criteria.length, data.criteria));
-
-                prj.save(function (err) {
-                    if (err) { return modelError(res, err); }
-
-                    var result = true; // no need to send data back
-                    console.log('[API] Updating criteria of project[%s] result:', project_id, result);
-
-                    return res.json({ result: result });
-                });
+                return res.json({result: result});
             });
         });
     }
@@ -285,7 +316,7 @@ function RestApi(app) {
                         var result = true; // no need to send data back
                         console.log('[API] Patched criteria of project[%s] result:', project_id, result);
 
-                        return res.json({ result: result });
+                        return res.json({result: result});
                     });
                 });
             });
@@ -305,7 +336,7 @@ function RestApi(app) {
         try {
             jsonpatch.apply(obj, patch);
         }
-        catch(e) {
+        catch (e) {
             console.log('[API] Patch exception: ', e);
             return cb(e);
         }

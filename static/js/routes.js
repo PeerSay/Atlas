@@ -130,7 +130,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         // Project > Details > Steps > Essentials
         //
         .state('project.details.steps.essentials', {
-            url: '/essentials',
+            url: '/essentials?edit={field}',
             templateUrl: '/html/project-essentials-edit.html',
             controller: 'ProjectEssentialsEditCtrl as cm'
         })

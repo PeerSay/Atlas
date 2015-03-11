@@ -17,6 +17,8 @@ function ProjectEssentialsEditCtrl($stateParams, Wizard, Projects, jsonpatch) {
     m.goNext = function () {
         Wizard.next({from: m.step});
     };
+    m.onShow = onShow;
+    m.focusField = null;
     // Edits
     m.patchObserver = null;
     m.project = null;
@@ -39,5 +41,9 @@ function ProjectEssentialsEditCtrl($stateParams, Wizard, Projects, jsonpatch) {
         console.log('Project patch: ', JSON.stringify(patch));
 
         Projects.patchProject(m.projectId, patch);
+    }
+
+    function onShow() {
+        m.focusField = $stateParams.edit;
     }
 }

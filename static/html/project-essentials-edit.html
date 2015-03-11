@@ -1,11 +1,13 @@
 <!--Dialog-->
 <div class="modal full-view" tabindex="-1" role="dialog"
         ps-tile-dialog
-        ps-on-close="cm.onClose">
+        ps-on-close="cm.onClose"
+        ps-on-show="cm.onShow">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" data-dismiss="modal"
+                        ng-disabled="cm.form.$invalid">
                     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                 </button>
                 <h4 class="modal-title">{{:: cm.title }}</h4>
@@ -13,46 +15,56 @@
             <div class="modal-body">
                 <!--Form-->
                 <form name="cm.form">
+                    <!--Title-->
                     <div class="form-group"
                             ng-class="{'has-error': cm.form.esTitle.$invalid}">
                         <label for="es-title">Project Title</label>
                         <input type="text" id="es-title" name="esTitle" class="form-control" placeholder="Enter Project Title"
                                 ng-model="cm.project.title"
                                 ng-blur="cm.patchProject()"
+                                ps-focus-on="cm.focusField === 'title'"
                                 required/>
                         <span class="help-block warning" ng-messages="cm.form.esTitle.$error" ng-class="{show: cm.form.email.$touched}">
                             <span ng-message="required">Required</span>
                         </span>
                     </div>
+                    <!--Description-->
                     <div class="form-group">
                         <label for="es-descr">What are you trying to do?</label>
                         <input id="es-descr" type="text" class="form-control" placeholder="Description"
                                 ng-model="cm.project.description"
-                                ng-blur="cm.patchProject()"/>
+                                ng-blur="cm.patchProject()"
+                                />
                     </div>
+                    <!--Budget-->
                     <div class="form-group">
                         <label for="es-budget">Expected budget?</label>
                         <input id="es-budget" type="text" class="form-control" placeholder="Budget"
                                 ng-model="cm.project.budget"
-                                ng-blur="cm.patchProject()"/>
+                                ng-blur="cm.patchProject()"
+                                ps-focus-on="cm.focusField === 'budget'"
+                                />
                     </div>
                     <div class="row">
-                        <!--Col #1-->
+                        <!--Col #1: Start Date-->
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div class="form-group">
                                 <label for="es-start-date">Expected start date?</label>
                                 <input id="es-start-date" type="text" class="form-control" placeholder="Start Date"
                                         ng-model="cm.project.startDate"
-                                        ng-blur="cm.patchProject()"/>
+                                        ng-blur="cm.patchProject()"
+                                        ps-focus-on="cm.focusField === 'startDate'"
+                                        />
                             </div>
                         </div>
-                        <!--Col #2-->
+                        <!--Col #2: Duration-->
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                             <div class="form-group">
                                 <label for="es-duration">Expected duration?</label>
                                 <input id="es-duration" type="text" class="form-control" placeholder="Duration"
                                         ng-model="cm.project.duration"
-                                        ng-blur="cm.patchProject()"/>
+                                        ng-blur="cm.patchProject()"
+                                        />
                             </div>
                         </div>
                     </div>
@@ -61,7 +73,7 @@
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal"
                         ng-disabled="cm.form.$invalid">Done</button>
-                <button class="btn btn-primary" data-dismiss="modal"
+                <button class="btn btn-primary"
                         ng-disabled="cm.form.$invalid"
                         ng-click="cm.goNext()">
                     Requirements

@@ -2,8 +2,8 @@ angular
     .module('PeerSay')
     .directive('psTileDialog', psTileDialog);
 
-psTileDialog.$inject = ['jQuery'];
-function psTileDialog($) {
+psTileDialog.$inject = ['jQuery', '$timeout'];
+function psTileDialog($, $timeout) {
     return {
         restrict: 'A',
         scope: {
@@ -18,26 +18,19 @@ function psTileDialog($) {
                 backdrop: 'static',
                 show: false
             });
-
-            $el.on('show.bs.modal', function () {
-                //hide previous
-                var curModal = this;
-                $(".modal").each(function() {
-                    if (this !== curModal) {
-                        $(this).modal("hide");
-                    }
-                });
-            });
+            var destroyed = false;
 
             $el.on('shown.bs.modal', function () {
                 if (!scope.onShow) { return; }
 
-                scope.$apply(function () {
+                $timeout(function () {
                     scope.onShow();
-                });
+                }, 0);
             });
 
             $el.on('hide.bs.modal', function () {
+                if (destroyed || !scope.onClose) { return; }
+
                 scope.$apply(function () {
                     scope.onClose();
                 });
@@ -48,8 +41,14 @@ function psTileDialog($) {
 
             // Clean-up
             element.on('$destroy', function () {
-                //$el.modal('hide'); //close to remove share when navigating away
-                $el.off('show.bs.modal shown.bs.modal hidden.bs.modal');
+                // When navigating away (e.g. on Back), the state is destroyed together with
+                // element, but backdrop el remains. Thus, calling hide to remove it.
+                // Also need to prevent onClose() call on 'hide.bs.modal' event, cause
+                // it can cause unwanted navigation.
+                destroyed = true;
+                $el.modal('hide');
+
+                $el.off('shown.bs.modal hidden.bs.modal');
             });
         }
     };

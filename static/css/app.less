@@ -518,13 +518,17 @@ table.rc-table-resizing {
   }
   .hover-edit {
     opacity: 0;
-    font-size: 16px;
+    font-size: 14px;
     transition: opacity .2s;
   }
-  &:hover {
+  *:hover {
     .hover-edit {
       opacity: .2;
     }
+  }
+  .label-text {
+    color: #666;
+    text-decoration: underline;
   }
 }
 .edit-form {
@@ -664,11 +668,6 @@ table.rc-table-resizing {
         }
       }
     }
-  }
-
-  .progress {
-    margin: 7px 0 0;
-    height: 5px;
   }
 }
 

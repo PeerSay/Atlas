@@ -12,7 +12,6 @@
                     <span class="chevron" ng-if=":: num < 4"></span>
                 </li>
             </ul>
-            <ps-progress valuenow="m.progress()" data-style="'success'"></ps-progress>
         </nav>
     </div>
     <!--Title / description-->
@@ -25,32 +24,30 @@
                         data-placement="right"
                         ps-tooltip
                         ps-tooltip-title="m.project.description"
-                        >{{ m.project.title }}</a>
-                <span class="glyphicon glyphicon-edit hover-edit"></span>
+                        >{{ m.project.title }}
+                    <span class="glyphicon glyphicon-edit hover-edit"></span>
+                </a>
             </h3>
         </div>
     </div>
-    <!--Start date / duration-->
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <h5 class="page-title pull-left project-title">
+                <!--Start date / duration-->
                 <a href
                         ng-click="m.openEditDialog('startDate')">
                     {{ m.project.startDate }}
-                    <span ng-if="m.project.duration"> / {{ m.project.duration }}</span>
+                    <span ng-if="m.project.duration"> {{ m.project.duration }}</span>
+                    <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
-                <span class="glyphicon glyphicon-edit hover-edit"></span>
-            </h5>
-        </div>
-    </div>
-    <!--Budget-->
-    <div class="row" ng-if="m.project.budget">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h5 class="page-title pull-left project-title">
+
+                <!--Budget-->
+                <span class="label-text">Estimated Budget</span>:
                 <a href
                         ng-click="m.openEditDialog('budget')"
-                        >{{ m.project.budget }}</a>
-                <span class="glyphicon glyphicon-edit hover-edit"></span>
+                        >{{ m.project.budget }}
+                    <span class="glyphicon glyphicon-edit hover-edit"></span>
+                </a>
             </h5>
         </div>
     </div>

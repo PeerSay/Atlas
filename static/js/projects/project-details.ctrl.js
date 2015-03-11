@@ -10,7 +10,6 @@ function ProjectDetailsCtrl($stateParams, Wizard, Projects) {
     m.projectId = $stateParams.projectId;
     // Wizard
     m.steps = Wizard.steps;
-    m.progress = Wizard.progress.bind(Wizard);
     m.isReached = Wizard.isReached.bind(Wizard);
     m.openDialog = Wizard.openDialog.bind(Wizard);
     m.stepClass = stepClass;
@@ -36,7 +35,6 @@ function ProjectDetailsCtrl($stateParams, Wizard, Projects) {
     }
 
     function openEditDialog(field) {
-        // TODO - field focus
-        m.openDialog(m.steps[0]);
+        m.openDialog(m.steps[0], field);
     }
 }

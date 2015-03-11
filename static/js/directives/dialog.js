@@ -23,9 +23,9 @@ function psTileDialog($, $timeout) {
             $el.on('shown.bs.modal', function () {
                 if (!scope.onShow) { return; }
 
-                scope.$apply(function () {
+                $timeout(function () {
                     scope.onShow();
-                });
+                }, 0);
             });
 
             $el.on('hide.bs.modal', function () {

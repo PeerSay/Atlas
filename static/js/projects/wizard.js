@@ -49,7 +49,6 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
         stepNum: '1'
     };
     W.load = load;
-    W.progress = progress;
     W.isReached = isReached;
     W.openDialog = openDialog;
     W.closeDialog = closeDialog;
@@ -99,10 +98,10 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
         return (curStepNum >= stepNum);
     }
 
-    function openDialog(step) {
+    function openDialog(step, field) {
         if (!step.enabled) { return; }
 
-        next({to: step, openDlg: true});
+        next({to: step, child: true}, {edit: field});
     }
 
     function closeDialog(step) {
@@ -112,15 +111,15 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
         }
     }
 
-    function next(param) {
-        var fromStep = param.from;
-        var nextStep = fromStep ? W.steps[fromStep.idx] : param.to;
+    function next(spec, param) {
+        var fromStep = spec.from;
+        var nextStep = fromStep ? W.steps[fromStep.idx] : spec.to;
         if (!nextStep) { return; }
 
-        var nextUrl = param.openDlg ? nextStep.state : ('^' + nextStep.state);
+        var nextUrl = spec.child ? nextStep.state : ('^' + nextStep.state);
 
         if (nextStep.reached) {
-            $state.go(nextUrl);
+            $state.go(nextUrl, param || {});
         } else {
             nextStep.reached = true;
             // unlock next after
@@ -142,14 +141,6 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
         if (prevStep) {
             $state.go('^' + prevStep.state);
         }
-    }
-
-    function progress() {
-        var reached = W.steps.reduce(function (prev, next) {
-            return prev + (next.reached ? 1 : 0);
-        }, 0);
-        var percent = (reached / W.steps.length) * 100;
-        return percent;
     }
 
     return W;

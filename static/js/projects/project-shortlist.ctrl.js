@@ -1,14 +1,15 @@
 angular.module('PeerSay')
     .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
 
-ProjectShortlistCtrl.$inject = ['$stateParams', 'Table', 'Util', 'Wizard'];
-function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
+ProjectShortlistCtrl.$inject = ['$stateParams', '$interpolate', 'Table', 'TableModel', 'Util', 'Wizard'];
+function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[3];
     m.title = m.step.title;
     m.openDialog = Wizard.openDialog.bind(Wizard);
+    m.info = getInfoFn();
 
     // Table views
     m.tableView = Table.addView(m, 'sh-norm', getViewConfig)
@@ -51,14 +52,14 @@ function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
     }
 
     function aggregateColumnScore(prevVal, scores, weights) {
-        var grade = 0, weightTot = 0;
+        var gradeTot = 0, weightTot = 0;
         _.forEach(scores, function (score, i) {
             var weight = weights[i];
             weightTot += weight;
-            grade += score * weight;
+            gradeTot += score * weight;
         });
-        grade = weightTot ? Math.round(grade / weightTot * 100) : 0; // weighted average
-        return grade;
+        gradeTot = weightTot ? Math.round(gradeTot / weightTot * 10) / 10 : 0; // weighted average
+        return gradeTot;
     }
 
     function maxInRow(value, rowVals) {
@@ -70,5 +71,18 @@ function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
         });
         //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowVals), (value === max));
         return (value === max);
+    }
+
+    function getInfoFn() {
+        var exp = $interpolate('Showing {{ shown }} out of {{ total }}');
+        return function () {
+            var shown = (m.tableView.rows[0] || []).length;
+            var total = (TableModel.model.vendors || []).length;
+
+            return {
+                show: (total > shown),
+                text: exp({shown: shown, total: total})
+            };
+        };
     }
 }

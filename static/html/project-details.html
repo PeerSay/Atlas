@@ -18,13 +18,14 @@
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <h3 class="page-title pull-left project-title">
-                <span class="glyphicon glyphicon-dashboard"></span>
                 <a href
                         ng-click="m.openEditDialog('title')"
                         data-placement="right"
                         ps-tooltip
                         ps-tooltip-title="m.project.description"
-                        >{{ m.project.title }}
+                        >
+                    <span class="glyphicon glyphicon-info-sign"></span>
+                    {{ m.project.title }}
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
             </h3>
@@ -63,7 +64,7 @@
     <div ui-view></div>
 
     <!--DBG-->
-    <div class="row">
+    <div class="row debug">
         <pre>
           $state = {{$state.current.name}}
           $stateParams = {{$stateParams}}

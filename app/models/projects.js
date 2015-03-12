@@ -45,7 +45,7 @@ var projectSchema = new Schema({
             description: {type: String },
             topic: { type: String },
             priority: { type: String },
-            weight: { type: Number, min: 0, max: 10, default: 1 },
+            weight: { type: Number, min: 0, max: 100, default: 1 },
             vendors: [
                 {
                     title: { type: String, required: true },

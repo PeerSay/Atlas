@@ -51,14 +51,14 @@ function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
     }
 
     function aggregateColumnScore(prevVal, scores, weights) {
-        var grade = 0, weightTot = 0;
+        var gradeTot = 0, weightTot = 0;
         _.forEach(scores, function (score, i) {
             var weight = weights[i];
             weightTot += weight;
-            grade += score * weight;
+            gradeTot += score * weight;
         });
-        grade = weightTot ? Math.round(grade / weightTot * 100) : 0; // weighted average
-        return grade;
+        gradeTot = weightTot ? Math.round(gradeTot / weightTot * 10) / 10 : 0; // weighted average
+        return gradeTot;
     }
 
     function maxInRow(value, rowVals) {

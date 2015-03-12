@@ -9,7 +9,5 @@ function GoogleTrackConversion() {
     document.write = function(text) {
         $('#content').append(text);
     };
-    google_remarketing_only = false;
     $.getScript('https://www.googleadservices.com/pagead/conversion.js');
-    google_remarketing_only = true;
 };

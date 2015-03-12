@@ -1,14 +1,15 @@
 angular.module('PeerSay')
     .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
 
-ProjectShortlistCtrl.$inject = ['$stateParams', 'Table', 'Util', 'Wizard'];
-function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
+ProjectShortlistCtrl.$inject = ['$stateParams', '$interpolate', 'Table', 'TableModel', 'Util', 'Wizard'];
+function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
     m.step = Wizard.steps[3];
     m.title = m.step.title;
     m.openDialog = Wizard.openDialog.bind(Wizard);
+    m.info = getInfoFn();
 
     // Table views
     m.tableView = Table.addView(m, 'sh-norm', getViewConfig)
@@ -70,5 +71,18 @@ function ProjectShortlistCtrl($stateParams, Table, _, Wizard) {
         });
         //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowVals), (value === max));
         return (value === max);
+    }
+
+    function getInfoFn() {
+        var exp = $interpolate('Showing {{ shown }} out of {{ total }}');
+        return function () {
+            var shown = (m.tableView.rows[0] || []).length;
+            var total = (TableModel.model.vendors || []).length;
+
+            return {
+                show: (total > shown),
+                text: exp({shown: shown, total: total})
+            };
+        };
     }
 }

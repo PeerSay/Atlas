@@ -6,15 +6,15 @@
             ng-click="cm.openDialog(cm.step)"
             >
         <div class="panel-heading">
-            <h3 class="panel-title">{{:: cm.title }}</h3>
+            <h3 class="panel-title">
+                {{:: cm.title }}
+                <small class="info pull-right" ng-if="cm.info().show">{{ cm.info().text }}</small>
+            </h3>
         </div>
         <div class="panel-body">
             <div class="tile-section border">
                 <ps-table-view ps-view="cm.tableView"></ps-table-view>
             </div>
-
-            <h4 class="footer"
-                    ng-if="cm.footer"><small>{{ cm.footer.text() }}</small></h4>
         </div>
     </div>
 </div>

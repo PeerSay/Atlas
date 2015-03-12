@@ -9,9 +9,7 @@ function ProjectProductsCtrl($interpolate, $stateParams, Wizard, Table, TableMod
     m.step = Wizard.steps[2];
     m.title = m.step.title;
     m.openDialog = Wizard.openDialog.bind(Wizard);
-    m.footer = {
-        text: getFooterTextFn()
-    };
+    m.info = getInfoFn();
 
     // Table view
     m.tableView = Table.addView(m, 'pi-norm', getViewConfig)
@@ -44,12 +42,16 @@ function ProjectProductsCtrl($interpolate, $stateParams, Wizard, Table, TableMod
     }
 
 
-    function getFooterTextFn() {
+    function getInfoFn() {
         var exp = $interpolate('Showing {{ shown }} out of {{ total }}');
         return function () {
             var shown = (m.tableView.rows[0] || []).length;
             var total = (TableModel.model.vendors || []).length;
-            return exp({shown: shown, total: total});
+
+            return {
+                show: (total > shown),
+                text: exp({shown: shown, total: total})
+            };
         };
     }
 }

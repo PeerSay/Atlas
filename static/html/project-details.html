@@ -37,8 +37,8 @@
                 <!--Start date / duration-->
                 <a href
                         ng-click="m.openEditDialog('startDate')">
-                    {{ m.project.startDate }}
-                    <span ng-if="m.project.duration"> {{ m.project.duration }}</span>
+                    <span ng-if="m.project.startDate">Starting {{ m.project.startDate }}</span>
+                    <span ng-if="m.project.duration">for {{ m.project.duration }}</span>
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
 

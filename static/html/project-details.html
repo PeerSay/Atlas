@@ -36,6 +36,7 @@
             <h5 class="page-title pull-left project-title">
                 <!--Start date / duration-->
                 <a href
+                        ng-if="m.project.startDate || m.project.duration"
                         ng-click="m.openEditDialog('startDate')">
                     <span ng-if="m.project.startDate">Starting {{ m.project.startDate }}</span>
                     <span ng-if="m.project.duration">for {{ m.project.duration }}</span>
@@ -43,8 +44,10 @@
                 </a>
 
                 <!--Budget-->
-                <span class="label-text">Estimated Budget</span>:
+                <span class="label-text"
+                        ng-if="m.project.budget">Estimated Budget:</span>
                 <a href
+                        ng-if="m.project.budget"
                         ng-click="m.openEditDialog('budget')"
                         >{{ m.project.budget }}
                     <span class="glyphicon glyphicon-edit hover-edit"></span>

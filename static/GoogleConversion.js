@@ -9,5 +9,5 @@ function GoogleTrackConversion() {
     document.write = function(text) {
         $('#content').append(text);
     };
-    $.getScript('https://www.googleadservices.com/pagead/conversion.js');
+    $.getScript('//www.googleadservices.com/pagead/conversion.js');
 };

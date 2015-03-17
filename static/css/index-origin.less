@@ -217,12 +217,12 @@ body {
 	background-position: center center;
 	background-repeat: no-repeat;
 	padding-bottom: 65px;
-	padding-top: 500px;
+	padding-top: 50px;
 	text-align: center;
 }
 
 #slide-1 {
-	background-image: url('../images/bg900h.jpg');
+	background-image: url('../images/bg.jpg');
 	color: #ffffff;
     -webkit-background-size: 100%;
     -o-background-size: 100%;
@@ -236,26 +236,18 @@ body {
 }
 
 #slide-1 h1 {
-	padding-top: 100px;
+	padding-top: 130px;
 }
 
-@media (max-width: 1680px) {
-  #slide-1 {
-    padding-bottom: 65px;
-    padding-top: 150px;
-  }
-}
-
-@media (max-width: 1280px) {
-    #slide-1 {
-      padding-bottom: 65px;
-      padding-top: 50px;
-    }
+@media (max-width: 991px) {
+	#slide-1 {
+		background-position: -70% 0, 170% 0;
+	}
 }
 
 @media (max-width: 767px) {
-    #slide-1 {
-      background-image: url('../images/bg640h.jpg');
+	#slide-1 {
+		background-image: none;
 	}
 }
 
@@ -547,6 +539,14 @@ body {
 
 .navigation-slide {
 	cursor: pointer;
+}
+
+/* Helpers */
+
+.form-control {
+    width: 300px;
+    height: 42px;
+    font-size: 18px;
 }
 
 .btn-peersay {

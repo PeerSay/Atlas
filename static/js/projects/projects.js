@@ -99,6 +99,7 @@ function Projects(Backend, User, _) {
     }
 
     function updateProjectProgress (id, data) {
+        Backend.invalidateCache(['projects', id, 'progress']);
         return Backend.update(['projects', id, 'progress'], data);
     }
 

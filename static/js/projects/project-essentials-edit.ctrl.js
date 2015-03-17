@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectEssentialsEditCtrl', ProjectEssentialsEditCtrl);
 
-ProjectEssentialsEditCtrl.$inject = ['$stateParams', 'Wizard', 'Projects', 'jsonpatch'];
-function ProjectEssentialsEditCtrl($stateParams, Wizard, Projects, jsonpatch) {
+ProjectEssentialsEditCtrl.$inject = ['$scope', '$stateParams', 'Wizard', 'Projects', 'jsonpatch'];
+function ProjectEssentialsEditCtrl($scope, $stateParams, Wizard, Projects, jsonpatch) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -33,6 +33,10 @@ function ProjectEssentialsEditCtrl($stateParams, Wizard, Projects, jsonpatch) {
                 m.patchObserver = jsonpatch.observe(m.project);
                 return m.project;
             });
+
+        $scope.$on('$destroy', function () {
+            jsonpatch.unobserve(m.project, m.patchObserver);
+        })
     }
 
     function patchProject() {

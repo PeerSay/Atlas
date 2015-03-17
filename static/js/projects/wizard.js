@@ -83,7 +83,11 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
 
                 // Set initial reached
                 _.forEach(W.steps, function (step) {
-                    step.enabled = step.reached = (step.idx <= Number(curStepNum));
+                    step.reached = (step.idx <= Number(curStepNum));
+                    if (step.reached) {
+                        // Enable this & next
+                        step.enabled = (W.steps[step.idx] || {}).enabled = true;
+                    }
                 });
 
                 if ($stateParams.step !== curStepNum) {

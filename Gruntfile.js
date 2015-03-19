@@ -211,7 +211,8 @@ module.exports = function (grunt) {
                         GoogleConversion: ['static/GoogleConversion.js']
                     },
                     sections: {
-                        GoogleRemarketing: ['static/GoogleRemarketing.html']
+                        GoogleRemarketing: ['static/GoogleRemarketing.html'],
+                        GoogleRemarketingWithConversion: ['static/GoogleRemarketingWithConversion.html']
                     }
                 }
             }

@@ -97,7 +97,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         .state('project.details', {
             url: '/projects/:projectId',
             templateUrl: '/html/project-details.html',
-            controller: 'ProjectDetailsCtrl as m',
+            controller: 'ProjectDetailsCtrl as cm',
             resolve: {
                 Wizard: 'Wizard'
             },

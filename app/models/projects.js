@@ -35,6 +35,9 @@ var projectSchema = new Schema({
     startDate: { type: String },
     duration: { type: String },
     budget: { type: String },
+    summary: { type: String },
+    recommendations: { type: String },
+    notes: { type: String },
     progress: { type: Number, min: 1, max: 4, default: 1 },
     collaborators: [
         { type: Schema.ObjectId, ref: 'User' }

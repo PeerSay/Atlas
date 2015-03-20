@@ -42,7 +42,6 @@ function ProjectEssentialsEditCtrl($scope, $stateParams, Wizard, Projects, jsonp
     function patchProject() {
         var patch = jsonpatch.generate(m.patchObserver);
         if (!patch.length) { return; }
-        console.log('Project patch: ', JSON.stringify(patch));
 
         Projects.patchProject(m.projectId, patch);
     }

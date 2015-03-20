@@ -4,11 +4,11 @@
         <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
             <ul class="nav nav-pills nav-justified">
                 <li role="presentation"
-                        ng-repeat="step in m.steps"
+                        ng-repeat="step in cm.steps"
                         ng-init="num = $index+1"
-                        ng-class="m.stepClass(step)">
+                        ng-class="cm.stepClass(step)">
                     <a href
-                            ng-click="m.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
+                            ng-click="cm.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
                     <span class="chevron" ng-if=":: num < 4"></span>
                 </li>
             </ul>
@@ -17,15 +17,15 @@
     <!--Title / description-->
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h3 class="page-title pull-left project-title">
-                <a href
-                        ng-click="m.openEditDialog('title')"
+            <h3 class="page-title pull-left toggle-edit">
+                <a href class="toggle-value"
+                        ng-click="cm.openEditDialog('title')"
                         data-placement="right"
                         ps-tooltip
-                        ps-tooltip-title="m.project.description"
+                        ps-tooltip-title="cm.project.description"
                         >
                     <span class="glyphicon glyphicon-info-sign"></span>
-                    {{ m.project.title }}
+                    {{ cm.project.title }}
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
             </h3>
@@ -33,23 +33,23 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <h5 class="page-title pull-left project-title">
+            <h5 class="page-spacer pull-left toggle-edit">
                 <!--Start date / duration-->
-                <a href
-                        ng-if="m.project.startDate || m.project.duration"
-                        ng-click="m.openEditDialog('startDate')">
-                    <span ng-if="m.project.startDate">Starting {{ m.project.startDate }}</span>
-                    <span ng-if="m.project.duration">for {{ m.project.duration }}</span>
+                <a href class="toggle-value"
+                        ng-if="cm.project.startDate || cm.project.duration"
+                        ng-click="cm.openEditDialog('startDate')">
+                    <span ng-if="cm.project.startDate">Starting {{ cm.project.startDate }}</span>
+                    <span ng-if="cm.project.duration">for {{ cm.project.duration }}</span>
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
 
                 <!--Budget-->
                 <span class="label-text"
-                        ng-if="m.project.budget">Estimated Budget:</span>
-                <a href
-                        ng-if="m.project.budget"
-                        ng-click="m.openEditDialog('budget')"
-                        >{{ m.project.budget }}
+                        ng-if="cm.project.budget">Estimated Budget:</span>
+                <a href class="toggle-value"
+                        ng-if="cm.project.budget"
+                        ng-click="cm.openEditDialog('budget')"
+                        >{{ cm.project.budget }}
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
             </h5>
@@ -58,9 +58,39 @@
 
     <!--Tiles-->
     <div class="row">
-        <div ng-if="m.isReached(2)" ui-view="step2"></div>
-        <div ng-if="m.isReached(3)" ui-view="step3"></div>
-        <div ng-if="m.isReached(4)" ui-view="step4"></div>
+        <div ng-if="cm.isReached(2)" ui-view="step2"></div>
+        <div ng-if="cm.isReached(3)" ui-view="step3"></div>
+        <div ng-if="cm.isReached(4)" ui-view="step4"></div>
+    </div>
+
+    <!--Summary / Notes-->
+    <div class="row">
+        <!--Summary / Recommendations-->
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tile-container">
+            <div class="panel panel-default tile">
+                <div class="panel-body">
+                    <ps-edit-inline
+                            data-label="Summary"
+                            data-model="cm.fields.summary"
+                            data-on-save="cm.updateField(cm.fields.summary)"></ps-edit-inline>
+                    <ps-edit-inline
+                            data-label="Recommendations"
+                            data-model="cm.fields.recommendations"
+                            data-on-save="cm.updateField(cm.fields.recommendations)"></ps-edit-inline>
+                </div>
+            </div>
+        </div>
+        <!--Notes-->
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tile-container">
+            <div class="panel panel-default tile">
+                <div class="panel-body">
+                    <ps-edit-inline
+                            data-label="Notes"
+                            data-model="cm.fields.notes"
+                            data-on-save="cm.updateField(cm.fields.notes)"></ps-edit-inline>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!--Dialog-->

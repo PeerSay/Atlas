@@ -74,7 +74,10 @@ function Projects(Backend, User, _) {
                     description: '',
                     budget: '',
                     startDate: '',
-                    duration: ''
+                    duration: '',
+                    summary: '',
+                    recommendations: '',
+                    notes: ''
                 };
                 angular.extend(P.current.project, empty, data.result);
                 return P.current.project;
@@ -89,6 +92,7 @@ function Projects(Backend, User, _) {
         }
         Backend.invalidateCache(['projects', id]);
 
+        console.log('Project patch: ', JSON.stringify(data));
         return Backend.patch(['projects', id], data);
     }
 

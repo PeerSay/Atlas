@@ -2,15 +2,15 @@ angular
     .module('PeerSay')
     .directive('psTableView', psTableView);
 
-psTableView.$inject = ['$timeout', 'Util'];
-function psTableView($timeout, _) {
+psTableView.$inject = ['$timeout', 'jQuery'];
+function psTableView($timeout, $) {
     return {
         restrict: 'E',
         templateUrl: 'html/table-view.html',
         scope: {
             view: '=psView'
         },
-        link: function (scope) {
+        link: function (scope, element) {
             var view = scope.view;
             var formModel = scope['form' + view.name];
 
@@ -20,6 +20,7 @@ function psTableView($timeout, _) {
             scope.onColKeydown = onColKeydown;
             scope.onColBlur = onColBlur;
             scope.getInput = getInput;
+            scope.focusInputEl = focusInputEl;
 
             if (view.watched) {
                 scope.$watch(function () {
@@ -32,6 +33,13 @@ function psTableView($timeout, _) {
 
             function getInput(colOrCell) {
                 return formModel[colOrCell.id];
+            }
+
+            function focusInputEl(cell) {
+                var $input = element.find('[name="' + cell.id + '"]');
+                if ($input && $input[0]) {
+                    $input[0].focus();
+                }
             }
 
             function onCellKeydown(cell, evt) {
@@ -86,11 +94,6 @@ function psTableView($timeout, _) {
                     input.$setPristine();
                 }
             }
-
-            // Clean-up
-            /*element.on('$destroy', function () {
-             $el.off('show.bs.popover hide.bs.popover');
-             });*/
         }
     };
 }

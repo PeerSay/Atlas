@@ -46,7 +46,7 @@
         <!--Groups & cells-->
         <tbody ng-repeat="group in $groups">
         <tr class="ng-table-group" ng-show="group.value">
-            <td colspan="{{ view.columns.length }}" class="group">
+            <td colspan="{{ view.columns.length }}">
                 <a href ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()" tabindex="-1">
                     <span class="glyphicon" ng-class="{ 'glyphicon-chevron-right': group.$hideRows, 'glyphicon-chevron-down': !group.$hideRows }"></span>
                     {{:: group.value }}
@@ -54,14 +54,15 @@
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-                ng-class="{grayed: true}">
+                ng-class="{ grayed: !row[0].model.criteria.weight }">
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
                     class="cell {{:: cell.type }}"
-                    ng-class="{ 'edited': cell.edited }"
+                    ng-class="{ edited: cell.edited, editable: cell.editable }"
                     context-menu="view.menu.setContext({cell: cell})"
                     context-menu-disabled="!view.menu || cell.noMenu"
-                    data-target="{{:: view.menu.id }}">
+                    data-target="{{:: view.menu.id }}"
+                    ng-click="focusInputEl(cell)">
                 <!--Not-editable cell-->
                 <div ng-if=":: !cell.editable">
                     <div ng-if=":: cell.type === 'ordinary' || cell.type === 'static'">
@@ -77,7 +78,8 @@
                     </div>
                 </div>
                 <!--Editable cell-->
-                <div ng-if=":: cell.editable">
+                <div ng-if=":: cell.editable"
+                        ng-click="$event.stopPropagation()"> <!--Prevent click on input to trigger focus-->
                     <div ng-if=":: cell.type === 'multiline'">
                         <textarea class="form-control cell-input noresize"
                                 name="{{:: cell.id }}"

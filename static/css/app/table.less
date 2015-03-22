@@ -1,0 +1,152 @@
+/* Data table */
+.table {
+  &.dbg {
+    tr.bold {
+      td {
+        font-weight: bold;
+      }
+    }
+    td {
+      padding: 2px 8px;
+    }
+  }
+
+  margin-bottom: 0;
+  th {
+    position: relative;
+    background: #f5f5f5;
+    text-align: left;
+    /*width: 40%;*/
+
+    &.table-menu {
+      padding: 0 0 0 2px;
+    }
+  }
+  th + th, td + td {
+    border-left: 1px solid #ddd;
+    /*width: 60%;*/
+  }
+  td {
+    &.attention, .attention {
+      font-style: italic;
+      color: #999;
+      .clickable {
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  .ng-table-group td {
+    background: #f5f5f5;
+    padding: 3px 8px;
+  }
+  tr {
+    th, td {
+      height: 36px;
+      &.group {
+        height: auto;
+      }
+      &.cell, &.editable {
+        padding: 1px;
+        .cell-input {
+          width: 100%;
+          height: 34px;
+          border: none;
+          .box-shadow(none);
+          &:active, &:focus {
+            outline: 0;
+            background-color: transparent;
+          }
+          &.max {
+            background: #f5fffa;
+            &:active, &:focus {
+              background-color: transparent;
+            }
+          }
+        }
+        &.edited {
+          background-color: #f9f7d0;
+          .box-shadow(~"inset 0 0 1px rgba(0,0,0,.075), 1px 1px 5px rgba(102, 175, 233, .6)");
+          input.ng-dirty.ng-invalid {
+            background-color: #ffe5e5;
+          }
+        }
+        &.text {
+          input {
+            padding: 7px;
+          }
+        }
+        &.number {
+          input {
+            padding: 2px 2px 2px 8px;
+          }
+          .cell-hint {
+            position: absolute;
+            right: 101%;
+            top: -2px;
+            line-height: 36px;
+            padding: 0 5px;
+            border: 1px solid transparent;
+            border-radius: 3px 0 0 3px;
+            background: rgba(243, 0, 0, 0.21);
+            color: #FFF;
+            font-size: 12px;
+          }
+        }
+      }
+      &.last {
+        width: 36px;
+        text-align: center;
+        padding: 7px 5px;
+      }
+      &.sortable {
+        padding: 7px;
+      }
+      &.static {
+        padding: 8px;
+        background: #f5f5f5;
+      }
+      &.ordinary, &.number-static {
+        padding: 8px;
+      }
+      &.exists {
+        .box-shadow(~"inset 0 0 1px red");
+      }
+      div.max {
+        background: #f5fffa;
+        outline: 8px solid #f5fffa; /*hack!*/
+      }
+    }
+
+    &.editable {
+      td {
+        padding: 1px;
+        & > textarea {
+          padding: 7px;
+          width: 100%;
+          height: 34px;
+          border: none;
+          .box-shadow(none);
+          &:active, &:focus {
+            outline: 0;
+            background-color: #f9f7d0;
+          }
+        }
+        &.edited {
+          background-color: #f9f7d0;
+          .box-shadow(~"inset 0 0 1px rgba(0,0,0,.075), 1px 1px 5px rgba(102, 175, 233, .6)");
+        }
+      }
+    }
+  }
+
+  .colored {
+    background-color: #f9f7d0;
+  }
+}
+/*Hide pagination*/
+.ng-table-pager {
+  display: none;
+}

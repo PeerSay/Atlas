@@ -529,7 +529,6 @@ function TableModel($filter, _, jsonpatch) {
         function getCSV() {
             // titles
             var res = getRowStr(V.columns);
-            console.log('>>> CSV Titles: ', res);
             // rows
             _.forEach(V.rows, function (row) {
                 res += getRowStr(row);
@@ -677,11 +676,20 @@ function TableModel($filter, _, jsonpatch) {
                 var viewCell = {
                     visible: true
                 };
+                var defaultValDict = {
+                    'number-static' : 0,
+                    'number': 0
+                };
                 var spec = angular.copy(col.spec); // XXX - passed via col
 
                 if (!col.virtual) {
                     var cell = _.findWhere(row, {key: col.key});
                     viewCell.model = cell.model;
+                    if (viewCell.model.value === null) {
+                        // Fix display value; TODO - use Types
+                        viewCell.model.value = defaultValDict[spec.cell.type];
+                    }
+
                     viewCell.id = cell.id();
                     viewCell.rowIdx = cell.rowIdx;
                     if (cell.justAdded && spec.cell.editable) {

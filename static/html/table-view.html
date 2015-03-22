@@ -53,7 +53,8 @@
                 </a>
             </td>
         </tr>
-        <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
+        <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
+                ng-class="{grayed: true}">
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
                     class="cell {{:: cell.type }}"

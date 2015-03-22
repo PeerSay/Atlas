@@ -689,9 +689,6 @@ function TableModel($filter, _, jsonpatch) {
                         // Fix display value; TODO - use Types
                         viewCell.model.value = defaultValDict[spec.cell.type];
                     }
-                    if (cell.type === 'number') {
-                        viewCell.maxNumber = spec.cell.maxNumber || 10;
-                    }
 
                     viewCell.id = cell.id();
                     viewCell.rowIdx = cell.rowIdx;

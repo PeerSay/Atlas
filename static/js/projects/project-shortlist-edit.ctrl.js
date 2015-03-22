@@ -63,6 +63,7 @@ function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
                 cell: {
                     editable: true,
                     type: 'number',
+                    maxNumber: 10,
                     computed: {
                         max: ['row', maxInRow]
                     }

@@ -94,7 +94,7 @@
                     <div ng-if=":: cell.type === 'number'" class="abs-container">
                         <input type="number" class="form-control cell-input"
                                 name="{{:: cell.id }}"
-                                min="0" max="10"
+                                min="0" max="{{:: cell.maxNumber }}"
                                 ng-model="cell.model.value"
                                 ng-class="{'max' : cell.computed.max()}"
                                 ng-focus="onCellFocus(cell)"

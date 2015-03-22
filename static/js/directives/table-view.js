@@ -59,8 +59,16 @@ function psTableView($timeout, $) {
                 cell.edited = false;
 
                 var input = getInput(cell);
+                var invalid = input.$invalid;
                 var modified = input.$dirty;
-                if (modified) {
+
+                if (invalid) {
+                    // return old value; can only happen with number cells
+                    cell.model.value = 0;
+                    view.saveCell(cell.model);
+                    input.$setPristine();
+                }
+                else if (modified) {
                     view.saveCell(cell.model);
                     input.$setPristine();
                 }

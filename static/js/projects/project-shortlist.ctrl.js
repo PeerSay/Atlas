@@ -27,13 +27,13 @@ function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, 
                 cell: {
                     type: 'number-static',
                     computed: {
-                        max: ['row', maxInRow]
+                        max: ['row', Table.aggr.rowIsMax]
                     }
                 },
                 footer: {
                     computed: {
-                        total: ['col,col:weight', aggregateColumnScore],
-                        max: ['footer', maxInRow]
+                        total: ['col,col:weight', Table.aggr.columnTotalScore],
+                        max: ['footer', Table.aggr.rowIsMax]
                     }
                 }
             }
@@ -51,27 +51,6 @@ function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, 
          return res;
     }
 
-    function aggregateColumnScore(prevVal, scores, weights) {
-        var gradeTot = 0, weightTot = 0;
-        _.forEach(scores, function (score, i) {
-            var weight = weights[i];
-            weightTot += weight;
-            gradeTot += score * weight;
-        });
-        gradeTot = weightTot ? Math.round(gradeTot / weightTot * 10) / 10 : 0; // weighted average
-        return gradeTot;
-    }
-
-    function maxInRow(value, rowVals) {
-        var max = 0;
-        _.forEach(rowVals, function (val) {
-            if (val > max) {
-                max = val;
-            }
-        });
-        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowVals), (value === max));
-        return (value === max);
-    }
 
     function getInfoFn() {
         var exp = $interpolate('Showing {{ shown }} out of {{ total }}');

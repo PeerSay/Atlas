@@ -704,14 +704,24 @@ function TableModel($filter, _, jsonpatch) {
                         viewCell.computed = getComputedMethods(computedSpec, cell);
                     }
                 }
-                else if (spec.cellModels) {
+
+                // May be on virtual and normal cells
+                if (spec.cellModels) {
                     //cell manages several models (Popup case)
                     viewCell.models = {};
-                    _.forEach(spec.cellModels, function (name) {
+                    _.forEach(spec.cellModels, function (sel) {
+                        // special case - find input corresponding to score (for tooltip)
+                        var origSel = sel;
+                        if (sel === '~input') {
+                            sel = viewCell.model.key.replace(/score$/, 'input');
+                        }
+
                         var cell = _.find(row, function (viewCell) {
-                            return (viewCell.model.key === name);
+                            return (viewCell.model.key === sel);
                         });
-                        viewCell.models[name] = cell.model;
+                        if (cell) {
+                            viewCell.models[origSel] = cell.model;
+                        }
                     });
                 }
                 // extend viewModel with requested props
@@ -721,7 +731,7 @@ function TableModel($filter, _, jsonpatch) {
             function match(col, sel) {
                 // col may be:
                 // {.., key: 'name'}, -> matched by 'name'
-                // {.., key: '/vendors\0IMB\0input'} -> -> matched by '/vendors/.*?/input'
+                // {.., key: '/vendors\0IMB\0input'} -> matched by '/vendors/.*?/input'
 
                 // selector accepts '/', but internally paths are joined with '\0' to allow / in vendor names
                 var re = new RegExp(sel.replace(/\//g, '\0'));

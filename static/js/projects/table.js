@@ -45,6 +45,11 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     T.readCriteria = readCriteria;
     T.updateCriteria = updateCriteria;// TODO - do via patch
     T.patchCriteria = patchCriteria;
+    // Aggregate (share between ctrls)
+    T.aggr = {
+        rowIsMax: rowIsMax,
+        columnTotalScore: columnTotalScore
+    };
 
 
     /**
@@ -98,6 +103,32 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     Backend
         .use('get', ['projects', '.*?', 'criteria'], transformCriteriaModel);
 
+
+    // Aggregate
+    //
+    function rowIsMax(value, rowVals) {
+        if (!value) { return false; }
+
+        var max = 0;
+        _.forEach(rowVals, function (val) {
+            if (val > max) {
+                max = val;
+            }
+        });
+        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowVals), (value === max));
+        return (value === max);
+    }
+
+    function columnTotalScore(prevVal, scores, weights) {
+        var gradeTot = 0, weightTot = 0;
+        _.forEach(scores, function (score, i) {
+            var weight = weights[i];
+            weightTot += weight;
+            gradeTot += score * weight;
+        });
+        gradeTot = weightTot ? Math.round(gradeTot / weightTot * 10) / 10 : 0; // weighted average
+        return gradeTot;
+    }
 
     /**
      * TableView class

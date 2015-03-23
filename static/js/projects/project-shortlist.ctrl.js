@@ -17,6 +17,7 @@ function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, 
         .grouping()
         .sorting({active: false})
         .watching() //!
+        .hovering()
         .done();
 
     function getViewConfig(model) {

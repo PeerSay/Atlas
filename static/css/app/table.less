@@ -8,11 +8,25 @@
     &.grayed {
       opacity: .2;
     }
+    &.hovered td {
+      background: fadeout(#428BCA, 95%);
+      div {
+        //background: none !important;
+        outline: none !important;
+      }
+    }
 
     &.ng-table-group td {
       height: auto;
       padding: 3px 8px;
       background: #f5f5f5;
+
+      a {
+        display: block;
+      }
+      .glyphicon {
+        font-size: 12px;
+      }
     }
 
     /*Vertical borders*/

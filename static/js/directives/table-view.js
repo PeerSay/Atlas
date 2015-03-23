@@ -22,7 +22,7 @@ function psTableView($timeout, $) {
             scope.getInput = getInput;
             scope.focusInputEl = focusInputEl;
 
-            if (view.watched) {
+            if (view.enableWatch) {
                 scope.$watch(function () {
                     // TODO perf - less impact
                     return view.watcher && view.watcher.digest();

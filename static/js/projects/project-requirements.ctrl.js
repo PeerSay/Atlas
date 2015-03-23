@@ -15,6 +15,7 @@ function ProjectRequirementsCtrl($stateParams, Table, Wizard) {
         //.debug()
         .grouping()
         .sorting({active: false})
+        .hovering()
         .done();
 
     function getViewConfig() {

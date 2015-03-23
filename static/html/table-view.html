@@ -54,7 +54,10 @@
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-                ng-class="{ grayed: !row[0].model.criteria.weight }">
+                ng-class="{ grayed: !row[0].model.criteria.weight, hovered: row[0].model.criteria.hover }"
+                ng-mouseenter="view.enableHover && (row[0].model.criteria.hover = true)"
+                ng-mouseleave="view.enableHover && (row[0].model.criteria.hover = undefined)"
+                >
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
                     class="cell {{:: cell.type }}"

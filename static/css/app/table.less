@@ -6,6 +6,7 @@
     /*background: #cd5c5c;*/
 
     &.grayed {
+      // TODO - fix btn/popover opacity
       opacity: .2;
     }
     &.hovered td {
@@ -16,11 +17,11 @@
       }
     }
 
+    /*Group row*/
     &.ng-table-group td {
       height: auto;
       padding: 3px 8px;
       background: #f5f5f5;
-
       a {
         display: block;
       }
@@ -81,7 +82,8 @@
         }
       }
       &.last {
-        width: 36px;
+        min-width: 36px;
+        max-width: 36px;
         text-align: center;
         padding: 7px 5px;
       }
@@ -94,12 +96,17 @@
       background: #f5f5f5;
 
       &.sortable {
+        min-width: 80px;
         padding: 7px 0 7px 7px;
         div {
           &:before, &:after {
             right: 5px;
           }
         }
+      }
+
+      &.editable {
+        min-width: 80px;
       }
     }
 

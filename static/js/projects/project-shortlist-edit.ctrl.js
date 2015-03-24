@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectShortlistEditCtrl', ProjectShortlistEditCtrl);
 
-ProjectShortlistEditCtrl.$inject = ['$stateParams', 'Table', 'Util', 'Wizard'];
-function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
+ProjectShortlistEditCtrl.$inject = ['$scope', '$stateParams', 'Table', 'Util', 'Wizard'];
+function ProjectShortlistEditCtrl($scope, $stateParams, Table, _, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -17,13 +17,18 @@ function ProjectShortlistEditCtrl($stateParams, Table, _, Wizard) {
 
     // Table views
     m.groupBy = Table.groupBy;
-
     m.tableView = Table.addView(m, 'sh-full', getViewConfig)
         //.debug()
         .grouping()
         .sorting({active: true})
         .watching() //!
         .done();
+
+
+    $scope.$on('$destroy', function() {
+        // Trigger reload to force re-order columns on Normal view, sorted by Total Score
+        Table.reload();
+    });
 
     function getViewConfig() {
         // Columns: Criteria, Weight, Score1, [Score2, Score3, ...]

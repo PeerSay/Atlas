@@ -3,13 +3,16 @@
     <div class="row">
         <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
             <ul class="nav nav-pills nav-justified">
+                <li class="tail">
+                    <span class="chevron"></span>
+                </li>
                 <li role="presentation"
                         ng-repeat="step in cm.steps"
                         ng-init="num = $index+1"
                         ng-class="cm.stepClass(step)">
                     <a href
                             ng-click="cm.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
-                    <span class="chevron" ng-if=":: num < 4"></span>
+                    <span class="chevron" ng-class="{ last: (num === 4) }"></span>
                 </li>
             </ul>
         </nav>

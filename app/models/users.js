@@ -59,10 +59,6 @@ userSchema.statics.authenticate = function (email, password, cb) {
             return cb(null, null, errors.AUTH_NOT_FOUND);
         }
 
-        if (user.needVerify !== false) {
-            return cb(null, user, errors.AUTH_NOT_VERIFIED);
-        }
-
         var verify = split(user.password);
         util.hasher({plaintext: password, salt: verify.salt, iterations: HASH_ITERS}, function (err, result) {
             if (err) { return cb(err); }
@@ -70,6 +66,10 @@ userSchema.statics.authenticate = function (email, password, cb) {
             var hash = result.key.toString('hex');
             if (hash !== verify.hash) {
                 return cb(null, null, errors.AUTH_PWD_MISMATCH);
+            }
+
+            if (user.needVerify !== false) {
+                return cb(null, user, errors.AUTH_NOT_VERIFIED);
             }
 
             return cb(null, user);

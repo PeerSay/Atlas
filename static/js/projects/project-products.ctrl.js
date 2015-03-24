@@ -16,6 +16,7 @@ function ProjectProductsCtrl($interpolate, $stateParams, Wizard, Table, TableMod
         //.debug()
         .grouping()
         .sorting({active: false})
+        .hovering()
         .done();
 
     function getViewConfig(model) {

@@ -600,8 +600,21 @@ function TableModel($filter, _, jsonpatch) {
                     viewColumns = [].concat(viewColumns, selectViewColumns(item, sel));
                 });
 
-                //limit resulting columns (per item)
+                //Sort & limit resulting columns (per item)
                 if (item.limit) {
+                    // Sort first
+                    // Note - it will sort only columns that have computed total, i.e. Shortlist normal
+                    var val = function (viewCol) {
+                        return viewCol.footer ? viewCol.footer.computed.total() : 0;
+                    };
+                    //console.log('>>Sort cols: ', _.map(viewColumns, val));
+
+                    V.watcher.digest(); // trigger computed vals calc!
+                    viewColumns.sort(function (a, b) {
+                        return val(b) - val(a); //desc
+                    });
+
+                    // limit
                     viewColumns.splice(item.limit);
                 }
 
@@ -704,14 +717,24 @@ function TableModel($filter, _, jsonpatch) {
                         viewCell.computed = getComputedMethods(computedSpec, cell);
                     }
                 }
-                else if (spec.cellModels) {
+
+                // May be on virtual and normal cells
+                if (spec.cellModels) {
                     //cell manages several models (Popup case)
                     viewCell.models = {};
-                    _.forEach(spec.cellModels, function (name) {
+                    _.forEach(spec.cellModels, function (sel) {
+                        // special case - find input corresponding to score (for tooltip)
+                        var origSel = sel;
+                        if (sel === '~input') {
+                            sel = viewCell.model.key.replace(/score$/, 'input');
+                        }
+
                         var cell = _.find(row, function (viewCell) {
-                            return (viewCell.model.key === name);
+                            return (viewCell.model.key === sel);
                         });
-                        viewCell.models[name] = cell.model;
+                        if (cell) {
+                            viewCell.models[origSel] = cell.model;
+                        }
                     });
                 }
                 // extend viewModel with requested props
@@ -721,7 +744,7 @@ function TableModel($filter, _, jsonpatch) {
             function match(col, sel) {
                 // col may be:
                 // {.., key: 'name'}, -> matched by 'name'
-                // {.., key: '/vendors\0IMB\0input'} -> -> matched by '/vendors/.*?/input'
+                // {.., key: '/vendors\0IMB\0input'} -> matched by '/vendors/.*?/input'
 
                 // selector accepts '/', but internally paths are joined with '\0' to allow / in vendor names
                 var re = new RegExp(sel.replace(/\//g, '\0'));
@@ -808,7 +831,7 @@ function TableModel($filter, _, jsonpatch) {
                 add(cell, 'footer:total', 'computed/total');
             }
 
-            function add (cell, uid, path) {
+            function add(cell, uid, path) {
                 if (!reducers[uid]) {
                     reducers[uid] = Reducer(path);
                 }
@@ -923,15 +946,15 @@ function TableModel($filter, _, jsonpatch) {
             }
 
             function reduce() {
-                //console.log('>> Reducing: ', JSON.stringify(array));
                 R.flatArray = _.map(array, function (item) {
-                    var val = item[obj] ? item[obj][key] : 0; // XXX - null?
+                    var val = item[obj] ? item[obj][key] : 0;
                     if (angular.isFunction(val)) { // computed
                         val = val() || 0;
                         item.model = {value: val}; // hack!
                     }
-                    return val;
+                    return val || 0; // may be null which excludes val
                 });
+                //console.log('>> Reducing - flatArray', JSON.stringify(R.flatArray));
                 R.oldVal = R.newVal;
                 return (R.newVal = R.flatArray.join(''));
             }

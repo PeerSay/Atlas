@@ -45,6 +45,11 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     T.readCriteria = readCriteria;
     T.updateCriteria = updateCriteria;// TODO - do via patch
     T.patchCriteria = patchCriteria;
+    // Aggregate (share between ctrls)
+    T.aggr = {
+        rowIsMax: rowIsMax,
+        columnTotalScore: columnTotalScore
+    };
 
 
     /**
@@ -99,6 +104,32 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         .use('get', ['projects', '.*?', 'criteria'], transformCriteriaModel);
 
 
+    // Aggregate
+    //
+    function rowIsMax(value, rowVals) {
+        if (!value) { return false; }
+
+        var max = 0;
+        _.forEach(rowVals, function (val) {
+            if (val > max) {
+                max = val;
+            }
+        });
+        //console.log('>>Max-in-row for %s->%s, res=', value, JSON.stringify(rowVals), (value === max));
+        return (value === max);
+    }
+
+    function columnTotalScore(prevVal, scores, weights) {
+        var gradeTot = 0, weightTot = 0;
+        _.forEach(scores, function (score, i) {
+            var weight = weights[i];
+            weightTot += weight;
+            gradeTot += score * weight;
+        });
+        gradeTot = weightTot ? Math.round(gradeTot / weightTot * 10) / 10 : 0; // weighted average
+        return gradeTot;
+    }
+
     /**
      * TableView class
      * Exposed via addVIew call
@@ -141,6 +172,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         V.sorting = sorting;
         V.debug = debug;
         V.watching = watching;
+        V.hovering = hovering;
         V.done = done;
 
         // ngTable params
@@ -163,7 +195,13 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         function watching() {
             // enable $watch on any scope change
             // requires V.watcher when it is ready in getData
-            V.watched = true;
+            V.enableWatch = true;
+            return V;
+        }
+
+        function hovering() {
+            //enable hover effect on table rows
+            V.enableHover = true;
             return V;
         }
 
@@ -194,7 +232,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             // This function is called on table reload for every row(!)
             // and must return a value which groups given row under that group name.
             // Returning undefined for every row essentially makes a single group {undefined: [rows]},
-            // whose 'falsy' name is not displayed by angular rendering invisible group row.
+            // whose 'falsy' name is not displayed by angular, thus rendering invisible group row.
             //
             settings.groupBy = function (row) {
                 var groupBy = svc.groupBy.get();

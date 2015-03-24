@@ -4,21 +4,21 @@ angular
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
-                var title = '';
                 var $el = $(element)
                     .tooltip({
-                        delay: { "show": 600, "hide": 100 },
-                        title: function () {
-                            return title;
-                        }
-                    })
-                    .click(function () {
-                        $el.tooltip('hide');
+                        delay: { "show": 400, "hide": 50 }
                     });
 
                 scope.$watch(attrs.psTooltipTitle, function(value) {
-                    title = value;
+                    updateTitle(value);
                 });
+
+                function updateTitle(newTitle) {
+                    $el.attr('title', newTitle)
+                        .tooltip('fixTitle')
+                        .parent().find('.tooltip .tooltip-inner')
+                        .text(newTitle);
+                }
 
             }
         };

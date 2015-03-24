@@ -6,13 +6,28 @@
     /*background: #cd5c5c;*/
 
     &.grayed {
+      // TODO - fix btn/popover opacity
       opacity: .2;
     }
+    &.hovered td {
+      background: fadeout(#428BCA, 95%);
+      div {
+        //background: none !important;
+        outline: none !important;
+      }
+    }
 
+    /*Group row*/
     &.ng-table-group td {
       height: auto;
       padding: 3px 8px;
       background: #f5f5f5;
+      a {
+        display: block;
+      }
+      .glyphicon {
+        font-size: 12px;
+      }
     }
 
     /*Vertical borders*/
@@ -64,22 +79,11 @@
           input {
             padding: 2px 2px 2px 8px;
           }
-          .cell-hint {
-            position: absolute;
-            right: 101%;
-            top: -2px;
-            line-height: 36px;
-            padding: 0 5px;
-            border: 1px solid transparent;
-            border-radius: 3px 0 0 3px;
-            background: rgba(243, 0, 0, 0.21);
-            color: #FFF;
-            font-size: 12px;
-          }
         }
       }
       &.last {
-        width: 36px;
+        min-width: 36px;
+        max-width: 36px;
         text-align: center;
         padding: 7px 5px;
       }
@@ -92,12 +96,17 @@
       background: #f5f5f5;
 
       &.sortable {
+        min-width: 80px;
         padding: 7px 0 7px 7px;
         div {
           &:before, &:after {
             right: 5px;
           }
         }
+      }
+
+      &.editable {
+        min-width: 80px;
       }
     }
 

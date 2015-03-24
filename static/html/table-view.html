@@ -54,7 +54,10 @@
             </td>
         </tr>
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-                ng-class="{ grayed: !row[0].model.criteria.weight }">
+                ng-class="{ grayed: !row[0].model.criteria.weight, hovered: row[0].model.criteria.hover }"
+                ng-mouseenter="view.enableHover && (row[0].model.criteria.hover = true)"
+                ng-mouseleave="view.enableHover && (row[0].model.criteria.hover = undefined)"
+                >
             <td ng-repeat="cell in row"
                     ng-show="cell.visible"
                     class="cell {{:: cell.type }}"
@@ -100,10 +103,9 @@
                                 ng-focus="onCellFocus(cell)"
                                 ng-blur="onCellBlur(cell)"
                                 ng-keydown="onCellKeydown(cell, $event)"
+                                ps-tooltip
+                                ps-tooltip-title="(cell.computed.percent && cell.computed.percent() + '%') || cell.models['~input'].value"
                                 />
-                        <div class="cell-hint"
-                                ng-if=":: cell.computed.percent"
-                                ng-show="cell.edited">{{ cell.computed.percent() }}%</div>
                     </div>
                     <div ng-if=":: cell.type === 'popup'">
                         <ps-table-popover

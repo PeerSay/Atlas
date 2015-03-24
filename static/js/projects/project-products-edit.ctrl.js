@@ -60,7 +60,8 @@ function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
                     last: true
                 },
                 cell: {
-                    type: 'static'
+                    type: 'static',
+                    noMenu: true
                 }
             }
         ];

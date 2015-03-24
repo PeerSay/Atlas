@@ -154,6 +154,5 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             url: '/shortlist',
             templateUrl: '/html/project-shortlist-edit.html',
             controller: 'ProjectShortlistEditCtrl as cm'
-        })
-
+        });
 }

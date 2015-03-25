@@ -698,7 +698,7 @@ function TableModel($filter, _, jsonpatch) {
                 if (!col.virtual) {
                     var cell = _.findWhere(row, {key: col.key});
                     viewCell.model = cell.model;
-                    if (viewCell.model.value === null) {
+                    if (viewCell.model.value === null && spec.cell) {
                         // Fix display value; TODO - use Types
                         viewCell.model.value = defaultValDict[spec.cell.type];
                     }

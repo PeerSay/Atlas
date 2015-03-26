@@ -84,15 +84,15 @@
                 <div ng-if=":: cell.editable"
                         ng-click="$event.stopPropagation()"> <!--Prevent click on input to trigger focus-->
                     <div ng-if=":: cell.type === 'multiline'">
-                        <textarea class="form-control cell-input noresize"
-                                name="{{:: cell.id }}"
-                                msd-elastic
-                                ng-model="cell.model.value"
-                                ng-focus="onCellFocus(cell)"
-                                ng-blur="onCellBlur(cell)"
-                                ng-keydown="onCellKeydown(cell, $event)"
-                                ps-focus-on="cell.justAdded"
-                                ></textarea>
+                            <textarea class="form-control cell-input noresize"
+                                    name="{{:: cell.id }}"
+                                    msd-elastic
+                                    ng-model="cell.model.value"
+                                    ng-focus="onCellFocus(cell)"
+                                    ng-blur="onCellBlur(cell)"
+                                    ng-keydown="onCellKeydown(cell, $event)"
+                                    ps-focus-on="cell.justAdded"
+                                    ></textarea>
                     </div>
                     <div ng-if=":: cell.type === 'number'" class="abs-container">
                         <input type="number" class="form-control cell-input"
@@ -116,6 +116,7 @@
                                 ps-allow-hide="!view.topic.addNew.show"
                                 >
                             <span class="popover-icon glyphicon glyphicon-cog"></span>
+
                             <form class="popover-form">
                                 <div class="form-group">
                                     <label class="checkbox-ext no-select text-nowrap block">
@@ -174,7 +175,8 @@
                 <div ng-if="col.footer.value">{{:: col.footer.value }}</div>
                 <div ng-if="col.footer.computed"
                         ng-class="{'max' : col.footer.computed.max()}"
-                        >{{ col.footer.computed.total() }}</div>
+                        >{{ col.footer.computed.total() }}
+                </div>
             </th>
         </tr>
         </tfoot>

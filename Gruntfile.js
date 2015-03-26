@@ -93,6 +93,7 @@ module.exports = function (grunt) {
                     'bower_components/angular-elastic/elastic.js',
                     'bower_components/ng-context-menu/dist/ng-context-menu.js',
                     'bower_components/fast-json-patch/dist/json-patch-duplex.min.js',
+                    'bower_components/angular-ui-router/release/angular-ui-router.min.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],
@@ -107,7 +108,7 @@ module.exports = function (grunt) {
                 singleRun: false,
                 browsers: ['PhantomJS']
             },
-            // continuous integration mode: run tests once in PhantomJS browser.
+            // continuous integration mode: run tests once in PhantomJS and browsers.
             continuous: {
                 singleRun: true,
                 browsers: ['PhantomJS', 'Chrome']

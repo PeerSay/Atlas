@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectRequirementsEditCtrl', ProjectRequirementsEditCtrl);
 
-ProjectRequirementsEditCtrl.$inject = ['$stateParams', '$timeout', 'Table', 'Wizard'];
-function ProjectRequirementsEditCtrl($stateParams, $timeout, Table, Wizard) {
+ProjectRequirementsEditCtrl.$inject = ['$scope', '$stateParams', '$timeout', 'Table', 'Wizard'];
+function ProjectRequirementsEditCtrl($scope, $stateParams, $timeout, Table, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -19,15 +19,18 @@ function ProjectRequirementsEditCtrl($stateParams, $timeout, Table, Wizard) {
         Wizard.next({from: m.step});
     };
 
-
-    // Table views - TODO
+    // Table views
     m.groupBy = Table.groupBy;
-
     m.tableView = Table.addView(m, 'ev-full', getViewConfig)
         //.debug()
         .grouping()
         .sorting({active: true})
         .done();
+
+    $scope.$on('$destroy', function () {
+        m.tableView.destroy();
+    });
+
 
     function getViewConfig() {
         // Columns: Criteria, Description, [Topic, Priority], {empty}

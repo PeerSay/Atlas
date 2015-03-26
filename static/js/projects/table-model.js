@@ -45,9 +45,9 @@ function TableModel($filter, _, jsonpatch) {
         return T.model;
     }
 
-    function selectViewModel(specFn) {
+    function selectViewModel(specFn, name) {
         var spec = specFn(T.model); // get spec
-        return T.viewModel.select(spec);
+        return T.viewModel.select(spec, name);
     }
 
     // Group & sort
@@ -296,7 +296,7 @@ function TableModel($filter, _, jsonpatch) {
 
         function getObjByKey(crit, key) {
             var path = key.split('\0'); // [vendors, IMB, score] or [name]
-            var obj = crit, lastKey = null, justAdded = false;
+            var obj = crit, lastKey = null, missing = false;
 
             // find object to modify
             _.forEach(path, function (p) {
@@ -305,7 +305,7 @@ function TableModel($filter, _, jsonpatch) {
                     obj = val;
                 }
                 else if (!angular.isDefined(val)) { // undefined can only be non-existing vendor
-                    justAdded = true;
+                    missing = true;
                     obj = getNewVendor(p);
                 }
                 lastKey = p;
@@ -314,7 +314,7 @@ function TableModel($filter, _, jsonpatch) {
             return {
                 obj: obj,
                 key: lastKey,
-                justAdded: justAdded
+                missing: missing
             };
         }
 
@@ -323,7 +323,7 @@ function TableModel($filter, _, jsonpatch) {
 
             // patched!
             res.obj[res.key] = val;
-            if (res.justAdded && !noAdd) {
+            if (res.missing && !noAdd) {
                 crit.vendors.push(res.obj);
             }
         }
@@ -380,7 +380,7 @@ function TableModel($filter, _, jsonpatch) {
 
             _.forEach(M.criteria, function (crit) {
                 var res = getObjByKey(crit, key);
-                if (!res.obj  || res.justAdded) { return; }
+                if (!res.obj || res.missing) { return; }
 
                 var vendorIdx = crit.vendors.indexOf(res.obj);
                 crit.vendors.splice(vendorIdx, 1); // patched!
@@ -565,7 +565,7 @@ function TableModel($filter, _, jsonpatch) {
         }
 
         // Select
-        function select(spec) {
+        function select(spec, name) {
             /**
              * var specFormat = [{
                 selector: 'key_re', // or ['key1','key2'] or null (for virtual)
@@ -698,17 +698,20 @@ function TableModel($filter, _, jsonpatch) {
                 if (!col.virtual) {
                     var cell = _.findWhere(row, {key: col.key});
                     viewCell.model = cell.model;
-                    if (viewCell.model.value === null) {
+                    if (viewCell.model.value === null && spec.cell) {
                         // Fix display value; TODO - use Types
                         viewCell.model.value = defaultValDict[spec.cell.type];
                     }
 
                     viewCell.id = cell.id();
                     viewCell.rowIdx = cell.rowIdx;
+
+                    // Trigger focus for newly added row's fist cell.
+                    // Need to remove justAdded prop from viewModel to avoid setting wrong focus
+                    // on next select.
                     if (cell.justAdded && spec.cell.editable) {
                         viewCell.justAdded = cell.justAdded;
                         delete cell.justAdded;
-                        //console.log('>> Just added: ', viewCell);
                     }
 
                     var computedSpec = spec.cell && spec.cell.computed;
@@ -774,6 +777,8 @@ function TableModel($filter, _, jsonpatch) {
             //update model first
             var row = T.model.addRow(crit);
             V.rows.splice(idx, 0, buildRow(row));
+
+            // Trigger auto-focus on first cell of row
             V.rows[idx][0].justAdded = true;
         }
 

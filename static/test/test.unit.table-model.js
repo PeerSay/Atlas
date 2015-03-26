@@ -61,7 +61,6 @@ describe('TableModel', function () {
             model.rows[1]['name'].should.have.property('value').equal('abc');
             model.rows[1]['vendors\0IBM\0input'].should.have.property('value').equal(null);
             model.rows[1]['vendors\0IBM\0score'].should.have.property('value').equal(null);
-
         });
     });
 

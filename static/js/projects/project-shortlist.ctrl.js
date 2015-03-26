@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
 
-ProjectShortlistCtrl.$inject = ['$stateParams', '$interpolate', 'Table', 'TableModel', 'Util', 'Wizard'];
-function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, Wizard) {
+ProjectShortlistCtrl.$inject = ['$scope', '$stateParams', '$interpolate', 'Table', 'TableModel', 'Util', 'Wizard'];
+function ProjectShortlistCtrl($scope, $stateParams, $interpolate, Table, TableModel, _, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -19,6 +19,11 @@ function ProjectShortlistCtrl($stateParams, $interpolate, Table, TableModel, _, 
         .watching() //!
         .hovering()
         .done();
+
+    $scope.$on('$destroy', function () {
+        m.tableView.destroy();
+    });
+
 
     function getViewConfig(model) {
         // Columns: Score1, [Score2, Score3] | {Products}

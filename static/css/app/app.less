@@ -399,18 +399,22 @@ table.rc-table-resizing {
   margin-bottom: 20px;
   .nav-pills > li {
     /* Invert natural z-order, so that chevrons can be on top of next el */
-    z-index: 5;
+    z-index: 6;
     & + li {
-      z-index: 4;
+      z-index: 5;
       & + li {
-        z-index: 3;
+        z-index: 4;
         & + li {
-          z-index: 2;
+          z-index: 3;
+          & + li {
+            z-index: 2;
+          }
         }
       }
     }
 
     /* Color vars/utils */
+    @body-color: #ececec;
     @pb-color: #f8f8f8;
     @pb-hover-color: #fff;
     @pb-active-color: #428BCA;
@@ -424,6 +428,12 @@ table.rc-table-resizing {
           border-color: transparent; /*reset above*/
           border-left-color: @color;
         }
+      }
+    }
+    .hide-for-mobile {
+      visibility: hidden;
+      @media (min-width: 768px) {
+        visibility: visible;
       }
     }
 
@@ -457,6 +467,13 @@ table.rc-table-resizing {
           .triangle(left, right, 20px, @pb-active-color);
         }
       }
+
+      &.last {
+        .hide-for-mobile();
+      }
+    }
+    &.active:hover {
+      text-decoration: underline;
     }
     &:not(.active) {
       a {
@@ -465,13 +482,25 @@ table.rc-table-resizing {
       .chevron {
         .pb-colorize-chevron(@pb-color);
       }
-      &:hover {
+      &:hover:not(.disabled) {
         a {
           background-color: @pb-hover-color;
         }
         .chevron {
           .pb-colorize-chevron(@pb-hover-color);
         }
+      }
+    }
+
+    &.tail {
+      .hide-for-mobile();
+      width: 0.0001%;
+      .chevron {
+        right: -22px;
+      }
+      .chevron:after,
+      &:hover .chevron:after{
+        border-left-color: @body-color !important;
       }
     }
   }

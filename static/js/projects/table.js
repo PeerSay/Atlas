@@ -66,7 +66,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
     function toData(projectId, name) {
         return readCriteria(projectId)
             .then(function () {
-                return TableModel.selectViewModel(views[name].configFn);
+                return TableModel.selectViewModel(views[name].configFn, name);
             });
     }
 
@@ -174,6 +174,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
         V.watching = watching;
         V.hovering = hovering;
         V.done = done;
+        V.destroy = destroy;
 
         // ngTable params
         var settings = {
@@ -187,6 +188,25 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             count: 2 // must be at least one prop different form defaults!
         };
 
+        // Book-keeping
+        var offFnList = [];
+
+        function destroy() {
+            // Need to unsubscribe from all events when Ctrl is destroyed (it must call destroy() then),
+            // otherwise when Ctrl is created again its tableView will have 2 listeners and, e.g.
+            // reload twice, leading to #46 and alike
+            _.forEach(offFnList, function (offFn) {
+                offFn();
+            });
+        }
+
+        function on(evt, fn) {
+            var off = $rootScope.$on(evt, fn);
+            offFnList.push(off);
+        }
+
+        // Interface for Ctrls
+        //
         function debug() {
             settings.debugMode = true;
             return V;
@@ -209,9 +229,11 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
             settings.getData = getData;
             V.tableParams = new ngTableParams(parameters, settings);
 
-            $rootScope.$on('reload', function () {
+            on('reload', function () {
+                //console.log('>>> Reloading table [%s]', V.name);
                 V.tableParams.reload();
             });
+
             return V;
         }
 
@@ -239,7 +261,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 return TableModel.getGroupByValue(row, groupBy);
             };
 
-            $rootScope.$on('grouping', function () {
+            on('grouping', function () {
                 V.tableParams.reload();
             });
             return V;
@@ -254,7 +276,7 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 V.sortBy = sortBy;
             }
 
-            $rootScope.$on('sorting', function (evt, order) {
+            on('sorting', function (evt, order) {
                 // This call causes table reload if order differs.
                 // By this time viewModel is already sorted and selectView happening on every reload
                 // will get rows in required sorted order.

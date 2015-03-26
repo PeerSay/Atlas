@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$interpolate', '$stateParams', 'Wizard', 'Table', 'TableModel'];
-function ProjectProductsCtrl($interpolate, $stateParams, Wizard, Table, TableModel) {
+ProjectProductsCtrl.$inject = ['$scope', '$interpolate', '$stateParams', 'Wizard', 'Table', 'TableModel'];
+function ProjectProductsCtrl($scope, $interpolate, $stateParams, Wizard, Table, TableModel) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -18,6 +18,11 @@ function ProjectProductsCtrl($interpolate, $stateParams, Wizard, Table, TableMod
         .sorting({active: false})
         .hovering()
         .done();
+
+    $scope.$on('$destroy', function () {
+        m.tableView.destroy();
+    });
+
 
     function getViewConfig(model) {
         // Columns: Prod1, [Prod2, Prod3] | {Products}

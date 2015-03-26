@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$stateParams', 'Table', 'Wizard'];
-function ProjectRequirementsCtrl($stateParams, Table, Wizard) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$stateParams', 'Table', 'Wizard'];
+function ProjectRequirementsCtrl($scope, $stateParams, Table, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -17,6 +17,11 @@ function ProjectRequirementsCtrl($stateParams, Table, Wizard) {
         .sorting({active: false})
         .hovering()
         .done();
+
+    $scope.$on('$destroy', function () {
+        m.tableView.destroy();
+    });
+
 
     function getViewConfig() {
         // Columns: Criteria

@@ -36,7 +36,7 @@ function ProjectEssentialsEditCtrl($scope, $stateParams, Wizard, Projects, jsonp
 
         $scope.$on('$destroy', function () {
             jsonpatch.unobserve(m.project, m.patchObserver);
-        })
+        });
     }
 
     function patchProject() {

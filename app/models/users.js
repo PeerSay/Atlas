@@ -65,7 +65,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
 
             var hash = result.key.toString('hex');
             if (hash !== verify.hash) {
-                return cb(null, null, errors.AUTH_PWD_MISMATCH);
+                return cb(null, user, errors.AUTH_PWD_MISMATCH);
             }
 
             if (user.needVerify !== false) {
@@ -90,25 +90,25 @@ userSchema.statics.register = function (email, password, user_data, cb) {
     User.authenticate(email, password, function (err, user, code) {
         if (err) { return cb(err); }
 
-        if (code === errors.AUTH_NOT_VERIFIED) {
-            // user exists but not verified -> the best thing we can do is update pwd and re-send email
-            // otherwise it would lead to DOS - attacker could create accounts without having email,
-            // thus blocking actual owners' access
-            user.password = password;
-            user.needVerify = true;
-            return user.save(function (err, userUpd) {
-                if (err) { return cb(err); }
-
-                cb(null, userUpd);
-            });
-        }
-
-        if (code === errors.AUTH_PWD_MISMATCH) {
-            // user exists, verified but has different password -> show 'already registered'
-            return cb(null, null, errors.AUTH_DUPLICATE);
-        }
-
         if (user) {
+            if (user.needVerify !== false) {
+                // user exists but not verified -> the best thing we can do is update pwd and re-send email
+                // otherwise it would lead to DOS - attacker could create accounts without having email,
+                // thus blocking actual owners' access
+                user.password = password;
+                user.needVerify = true;
+                return user.save(function (err, userUpd) {
+                    if (err) { return cb(err); }
+
+                    cb(null, userUpd);
+                });
+            }
+
+            if (code === errors.AUTH_PWD_MISMATCH) {
+                // user exists, verified but has different password -> show 'already registered'
+                return cb(null, null, errors.AUTH_DUPLICATE);
+            }
+
             // user exists & password match, may be LinkedIn login/signup or just full match
             // anyway -> authorize user
             return cb(null, user);

@@ -210,7 +210,6 @@ describe('User Model', function () {
         it('User.authenticate should reject user with wrong password', function (done) {
             User.authenticate('some2@email.com', '3', function (err, user, code) {
                 should.not.exist(err);
-                should.not.exist(user);
                 code.should.be.equal(errors.AUTH_PWD_MISMATCH);
                 done();
             });

@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectProductsEditCtrl', ProjectProductsEditCtrl);
 
-ProjectProductsEditCtrl.$inject = ['$stateParams', '$timeout', 'Table', 'Wizard'];
-function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
+ProjectProductsEditCtrl.$inject = ['$scope', '$stateParams', '$timeout', 'Table', 'Wizard'];
+function ProjectProductsEditCtrl($scope, $stateParams, $timeout, Table, Wizard) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -20,12 +20,16 @@ function ProjectProductsEditCtrl($stateParams, $timeout, Table, Wizard) {
 
     // Table views
     m.groupBy = Table.groupBy;
-
     m.tableView = Table.addView(m, 'vi-full', getViewConfig)
         //.debug() // opt
         .grouping()
         .sorting({active: true})
         .done();
+
+    $scope.$on('$destroy', function () {
+        m.tableView.destroy();
+    });
+
 
     function getViewConfig() {
         // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}

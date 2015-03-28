@@ -185,6 +185,7 @@ function TableModel($filter, _, jsonpatch) {
         if (arguments.length > 2) {
             add(init);
         }
+
         (function iterate(arr, paths) {
             var key = paths[0];
             _.forEach(arr, function (it) {
@@ -420,7 +421,9 @@ function TableModel($filter, _, jsonpatch) {
                 topic: crit ? crit.topic : null,
                 priority: crit ? crit.priority : 'required',
                 weight: 1,
-                vendors: []
+                vendors: _.map(M.vendors, function (title) {
+                    return getNewVendor(title);
+                })
             };
         }
 

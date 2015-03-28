@@ -75,7 +75,7 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            var result = user.toJSON({transform: xformUser});
+            var result = user.toJSON({transform: xformUser, virtuals: true}); // need virtuals for name.full
             console.log('[API] Reading user[%s] result:', email, result);
 
             return res.json({result: result});
@@ -354,6 +354,14 @@ function RestApi(app) {
     }
 
     function xformUser(doc, ret) {
+        if (ret.name) {
+            if (ret.name.full) {
+                ret.name = ret.name.full;
+            }
+            else {
+                delete ret.name;
+            }
+        }
         if (typeof doc.ownerDocument === 'function') { // this is sub doc
             return xformStubPrj(doc, ret);
         }

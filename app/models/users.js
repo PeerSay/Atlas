@@ -42,7 +42,9 @@ var userSchema = new Schema({
 
 
 userSchema.virtual('name.full').get(function () {
-    return (this.name.givenName + ' ' + this.name.familyName).trim();
+    var first = this.name.givenName || '';
+    var last = this.name.familyName || '';
+    return (first + ' ' + last).trim();
 });
 
 

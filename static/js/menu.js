@@ -9,11 +9,22 @@ MenuCtrl.$inject = ['$state', 'User', 'Projects'];
 function MenuCtrl($state, User, Projects) {
     var m = this;
     m.user = {
+        displayName: '',
         logout: logout
     };
     m.project = {
         toggleCreateDlg: Projects.toggleCreateDlg.bind(Projects)
     };
+
+    activate();
+
+    function activate() {
+        User.readUser()
+            .then(function (user) {
+                m.user.displayName = user.name || user.email;
+                return user;
+            });
+    }
 
     function logout () {
         User.logout()

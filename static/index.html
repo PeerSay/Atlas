@@ -1,341 +1,341 @@
-<!DOCTYPE  html>
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="description" content=""/>
-    <meta name="keywords" content=""/>
-    <link rel="icon" href="images/PeerSayLogo65x65.png">
-    <title>PeerSay Registration Page</title>
-
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <title>PeerSay - Launching Soon</title>
+    <base href="/">
+    <!--<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">-->
     <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css">
     <!-- build:css css/index.css -->
     <link rel="stylesheet" href="/css/index.css">
     <!-- endbuild -->
 
-    <link href='//fonts.googleapis.com/css?family=Titillium+Web:400,600,300,200&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-
     <!-- htmlbuild:script inline ga --><!-- /htmlbuild -->
-
-    <!-- htmlbuild:script inline mixpanel --><!-- /htmlbuild -->
-    <script>
-        if (window.mixpanel) {
-            mixpanel.track("landing page load");
-        }
-    </script>
 </head>
 <body>
+<!--[if lt IE 8]>
+<p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+<![endif]-->
 
-<!-- === MAIN Background === -->
-<div class="slide story" id="slide-1" data-slide="1">
-    <div class="container">
-        <div id="home-row-1" class="row clearfix">
-            <div class="col-6">
-                <h1 class="font-semibold"> Peer<span class="font-thin">Say</span></h1>
-                <h4 class="font-thin">The Smart way to<span class="font-semibold-grey"> Choose Products</span></h4>
-                <img src="images/PeerSayLogo65x65.png">
-                <br>
-            </div>
+<!--Navbar/menu-->
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <!--Header Link + Collapsed Menu button-->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--Brand-->
+            <a class="navbar-brand" href="/" target="_self">
+                <img alt="Brand" width="85" height="72" src="/images/logo85x72.png">
+            </a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+            <p class="navbar-text visible-xs-block">Menu</p>
+
+            <!--Menu-->
+            <ul class="nav navbar-nav navbar-left">
+                <li><a href="#how-it-works">How It Works</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#contact">Contact</a></li>
+            </ul>
         </div>
     </div>
+</nav>
 
-    <!--Register Form #1-->
-    <div class="container">
-        <div class="row">
-            <form id="reg-form1" class="form-inline" role="form">
-                <h1 class="font-thin"></h1>
-                <div class="form-group">
-                    <input type="email" class="js-reg-email form-control" placeholder="Enter your email address">
-                    <button type="button" class="js-reg-btn btn btn-peersay btn-lg">Register</button>
-                </div>
-            </form>
-
-            <div class="js-reg-result-ok" style="display: none">
-                <h1 class="font-semibold-grey">Thank you for registering!</h1>
-                <h4 class="font-semibold-grey">We'll let you know when we're up and running</h4>
-            </div>
-            <div class="js-reg-result-dup" style="display: none">
-                <h1 class="font-semibold-grey">Hey! Welcome back!</h1>
-                <h4 class="font-semibold-grey">We'll make sure you're among the first to get on board!</h4>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- === Slide 2 === -->
-<div class="slide story" id="slide-2" data-slide="2">
-    <div class="container">
-        <div class="row title-row">
-            <div class="col-12 font-thin">A platform to
-                <span class="font-semibold">Evaluate & Choose</span> business products
-            </div>
-        </div>
-
-        <div class="row line-row">
-            <div class="hr">&nbsp;</div>
-        </div>
-
-        <div class="row subtitle-row">
-            <div class="col-12 font-thin">This is how <span class="font-semibold">we do it</span></div>
-        </div>
-
-        <div class="row content-row">
-            <div class="col-12 col-lg-3 col-sm-6">
-                <p><i class="fa fa-eye"></i></p>
-
-                <h2 class="font-thin">Online <span class="font-semibold">Platform</span></h2>
-                <h4 class="font-thin">Manage the entire product evaluation process online. Always on, backed up and secured. Evalute, Choose and Present.</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-lg-3 col-sm-6">
-                <p><i class="fa fa-laptop"></i></p>
-
-                <h2 class="font-thin">Peer <span class="font-semibold">Knowledge</span></h2>
-                <h4 class="font-thin">Communicate with teammates. Consult with Colleagues. Get reference opinions on selected products.</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-lg-3 col-sm-6">
-                <p><i class="fa fa-tablet"></i></p>
-
-                <h2 class="font-thin">Big Data <span class="font-semibold">Analysis</span></h2>
-                <h4 class="font-thin">Sliced and diced statistical analytics on products, industries and locations. Get only the relevant information! </h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-lg-3 col-sm-6">
-                <p><i class="fa fa-pencil"></i></p>
-
-                <h2 class="font-thin">Tailored <span class="font-semibold">to you</span></h2>
-                <h4 class="font-thin">Choose products relevant for your organization. Select nearby resellers and consultants. Get references from your industry. </h4>
-            </div>
-            <!-- /col12 -->
-        </div>
-    </div>
-</div>
-
-<!-- === Slide 4 - Process === -->
-<div class="slide story" id="slide-4" data-slide="4">
-    <div class="container">
-        <div class="row title-row">
-            <div class="col-12 font-thin">Evaluations <span class="font-semibold">made simple</span></div>
-        </div>
-        <div class="row line-row">
-            <div class="hr">&nbsp;</div>
-        </div>
-        <div class="row subtitle-row">
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-            <div class="col-12 col-sm-10 font-light">List the requirements and add products that you consider. PeerSay will bring you value from the first step throughout the evaluation process.</div>
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-        </div>
-        <div class="row content-row">
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-            <div class="col-12 col-sm-2">
-                <p><i class="fa fa-cloud"></i></p>
-
-                <h2 class="font-thin">Popular<br><span class="font-semibold">Requirements</span></h2>
-                <h4 class="font-thin">Never miss an important criteria</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-sm-2">
-                <p><i class="fa fa-cog"></i></p>
-
-                <h2 class="font-thin">Relevant<br><span class="font-semibold">Products</span></h2>
-                <h4 class="font-thin">Discover products you should consider</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-sm-2">
-                <p><i class="fa fa-map-marker"></i></p>
-
-                <h2 class="font-thin">Talk with a<br><span class="font-semibold">Reference</span></h2>
-                <h4 class="font-thin">Unbiased and objective reference users</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-sm-2">
-                <p><i class="fa fa-bolt"></i></p>
-
-                <h2 class="font-thin">Save <br><span class="font-semibold">Time</span></h2>
-                <h4 class="font-thin">Reduced from weeks to days</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-12 col-sm-2">
-                <p><i class="fa fa-gift"></i></p>
-
-                <h2 class="font-thin">Present to<br><span class="font-semibold">Managers</span></h2>
-                <h4 class="font-thin">A report that managers love</h4>
-            </div>
-            <!-- /col12 -->
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-        </div>
-    </div>
-</div>
-
-<!-- === Slide 5 === Register2 -->
-<div class="slide story" id="slide-5" data-slide="5">
+<!--Slider-->
+<div class="jumbotron">
     <div class="container">
         <div class="row">
-            <form id="reg-form2" class="form-inline" role="form">
-                <div class="form-group">
-                    <input type="email" class="js-reg-email form-control" placeholder="Enter your email address">
-                    <button type="button" class="js-reg-btn btn btn-peersay btn-lg">Register</button>
+            <!--Col #1: Controls-->
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <div class="panel panel-money-form">
+                    <div class="panel-body">
+                        <p>A platform to Evaluate & Choose business products</p>
+                        <form>
+                            <a href="#" class="btn btn-warning btn-lg">Sign up now</a>
+                        </form>
+                    </div>
                 </div>
+            </div>
+            <!--Col #2: Graphics-->
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Sections-->
+<div class="container-fluid">
+    <!--Sign Up-->
+    <div class="row section section-dark">
+        <div class="col-xs-12">
+            <h3 class="text-center">Sign up as a beta tester</h3>
+            <form class="form-inline text-center">
+                <div class="form-group">
+                    <label class="sr-only" for="xxx">Name</label>
+                    <input type="email" class="form-control signup-lg" id="xxxSome" placeholder="Email Address">
+                </div>
+                <a href="#" class="btn btn-warning">Go</a>
             </form>
-
-            <div class="js-reg-result-ok" style="display: none">
-                <h1 class="font-semibold-grey">Thank you for registering!</h1>
-                <h4 class="font-semibold-grey">We'll let you know when we're up and running</h4>
+        </div>
+    </div>
+    <!--How it works - Title-->
+    <div class="row section section-white">
+        <div class="col">
+            <h2 class="text-center">This is how we do it</h2>
+        </div>
+    </div>
+    <!--How it works - Content-->
+    <div class="row section section-blue">
+        <!--Col 1-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 col-lg-offset-2">
+            <div class="panel transparent">
+                <div class="panel-body text-center">
+                    <span class="icon icon-online"></span>
+                    <h4 class="">Online Platform</h4>
+                    <p>Mange the entire product evaluation process online. Always on, backed up and securted.
+                    Evaluate, Choose and Present.</p>
+                </div>
             </div>
-            <div class="js-reg-result-dup" style="display: none">
-                <h1 class="font-semibold-grey">Hey! Welcome back!</h1>
-                <h4 class="font-semibold-grey">We'll make sure you're among the first to get on board!</h4>
+        </div>
+        <!--Col 2-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
+            <div class="panel transparent">
+                <div class="panel-body text-center">
+                    <span class="icon icon-peer"></span>
+                    <h4 class="">Peer Knowledge</h4>
+                    <p>Communicate with teammates. Consult with colleagues. Get reference opinion on selected products.</p>
+                </div>
+            </div>
+        </div>
+        <!--Col 3-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
+            <div class="panel transparent">
+                <div class="panel-body text-center">
+                    <span class="icon icon-big-data"></span>
+                    <h4 class="">Big Data Analysis</h4>
+                    <p>Sliced and diced statistical analytics on domain, products, industries and locations.
+                    Get only the relevant information!</p>
+                </div>
+            </div>
+        </div>
+        <!--Col 4-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
+            <div class="panel transparent">
+                <div class="panel-body text-center">
+                    <span class="icon icon-personal"></span>
+                    <h4 class="">Tailored to You</h4>
+                    <p>Choose products relevant for your organization. Select near by resellers and consultants.
+                    Get reference from your industry!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Sign Up Btn-->
+    <div class="row section section-blue">
+        <div class="col text-center">
+            <form>
+                <a href="#" class="btn btn-primary btn-lg">Sign up now</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="container">
+    <!--Evaluations Section - 5 cols!-->
+    <div class="row section section-white">
+        <div class="col">
+            <h2 class="dark text-center">Evaluations Made Simple</h2>
+            <p class="text-center">List the requirements and add products...</p>
+            <div class="row">
+                <!--Col 1-->
+                <div class="col-xs-12 col-sm-3 col-md-2 col-md-offset-1 col-lg-2">
+                    <div class="panel">
+                        <div class="panel-body text-center">
+                            <span class="icon-sm icon-requirements"></span>
+                            <h5 class="white">Popular Requirements</h5>
+                            <p>Never miss an important criteria</p>
+                        </div>
+                    </div>
+                </div>
+                <!--Col 2-->
+                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                    <div class="panel">
+                        <div class="panel-body text-center">
+                            <span class="icon-sm icon-products"></span>
+                            <h5 class="white">Relevant Products</h5>
+                            <p>Discover products you should consider</p>
+                        </div>
+                    </div>
+                </div>
+                <!--Col 3-->
+                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                    <div class="panel">
+                        <div class="panel-body text-center">
+                            <span class="icon-sm icon-talk"></span>
+                            <h5 class="white">Talk With Reference</h5>
+                            <p>Unbiased and objective reference users</p>
+                        </div>
+                    </div>
+                </div>
+                <!--Col 4-->
+                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                    <div class="panel">
+                        <div class="panel-body text-center">
+                            <span class="icon-sm icon-time"></span>
+                            <h5 class="white">Save Time</h5>
+                            <p>From weeks to days</p>
+                        </div>
+                    </div>
+                </div>
+                <!--Col 5-->
+                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                    <div class="panel">
+                        <div class="panel-body text-center">
+                            <span class="icon-sm icon-present"></span>
+                            <h5 class="white">Present to Manager</h5>
+                            <p>A report that managers love</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Sign Up Btn-->
+            <div class="row">
+                <div class="col text-center">
+                    <form>
+                        <a href="#" class="btn btn-primary btn-lg">Sign up now</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Contacts - Title-->
+    <div class="row section section-white">
+        <div class="col-xs-12">
+            <h2 class="text-center">Get to Know us better</h2>
+            <p class="text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+                ut labore et dolore magna aliqua.</p>
+        </div>
+    </div>
+
+    <!--Contacts - Form-->
+    <div class="row section section-white">
+        <!--Col 1 - Address-->
+        <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+            <div class="h4">Cras at ultrices erat, sed vulputate!</div>
+            <p class="">2345 Dolripsum natrer, 1234,
+                Washington. United States.
+                (401) 1234 567</p>
+            <p class="">hello@peer-say.com</p>
+            <p class="">www.peer-say.com</p>
+        </div>
+        <!--Col 2 - Form-->
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+            <h4>Say Hello!</h4>
+            <form>
+                <div class="row">
+                    <!--Col1 - Name-->
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                        <div class="form-group">
+                            <label class="sr-only" for="xxx">Name</label>
+                            <input type="text" class="form-control contacts-lg" placeholder="Name">
+                        </div>
+                    </div>
+                    <!--Col1 - Email-->
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                        <div class="form-group">
+                            <label class="sr-only" for="xxx">Name</label>
+                            <input type="email" class="form-control contacts-lg" placeholder="Email">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group">
+                            <label class="sr-only" for="xxx">Name</label>
+                            <textarea class="form-control contacts-lg" placeholder="Message"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-default btn-lg pull-right">
+                    <span class="fa fa-envelope-o"></span>
+                    Send message
+                </button>
+            </form>
+        </div>
+        <!--Col 3 - Social-->
+        <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1">
+            <p>Ln</p>
+            <p>G+</p>
+            <p>Fb</p>
+            <p>Tw</p>
+        </div>
+    </div>
+</div>
+
+<!--Footer-->
+<div class="container-fluid">
+    <!--How it works - Content-->
+    <div class="row section section-black">
+        <!--Col-1 - Legal-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 col-lg-offset-2">
+            <div class="panel transparent">
+                <div class="panel-body">
+                    <img src="/images/logo-bw-x105.png" width="105" height="105" alt="Logo">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+                        ut labore et dolore magna aliqua.</p>
+                </div>
+            </div>
+        </div>
+        <!--Col-2 - Subscribe-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
+            <div class="panel transparent">
+                <div class="panel-body">
+                    <h6>Subscribe</h6>
+                    <form class="form-inline">
+                        <input type="email" class="form-control" placeholder="Email Address">
+                    </form>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                </div>
+            </div>
+        </div>
+        <!--Col-3 - Menu-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
+            <div class="panel transparent">
+                <div class="panel-body">
+                    <h6>Home</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#">How it works</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!--Col-4 - Copyright-->
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
+            <div class="panel transparent">
+                <div class="panel-body">
+                    <p class="copyright">© 2015 PeerSay. All Rights Reserved.</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- === Slide 6 / Contact === -->
-<div class="slide story" id="slide-6" data-slide="6">
-    <div class="container">
-        <div class="row title-row">
-            <div class="col-12 font-light">We appreciate your <span class="font-semibold">feedback</span></div>
-        </div>
-
-        <div class="row line-row">
-            <div class="hr">&nbsp;</div>
-        </div>
-
-        <div class="row subtitle-row">
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-            <div class="col-12 col-sm-10 font-light">Don't be a stranger, drop us a line.</div>
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-        </div>
-
-        <div class="row subtitle-row">
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-            <div class="col-12 col-sm-10 font-light"></div>
-            <div class="col-sm-1 hidden-sm">&nbsp;</div>
-        </div>
-
-        <!--div id="contact-row-4" class="row">
-           <div class="col-sm-1 hidden-sm">&nbsp;</div>
-           <div class="col-12 col-sm-2 with-hover-text">
-               <p><a target="_blank" href="#"><i class="fa fa-phone"></i></a></p>
-               <span class="hover-text font-light ">+972-52-720-6732</span></a>
-           </div--><!-- /col12 -->
-        <div class="col-12 col-sm-4 with-hover-text">
-            <p>
-                <a target="_blank" href="mailto:Contact@Peer-Say.com"><i class="fa fa-envelope"></i></a>
-            </p>
-            <span class="hover-text font-light ">contact@Peer-Say.com</span>
-        </div>
-        <!-- /col12 -->
-        <!--div class="col-12 col-sm-2 with-hover-text">
-            <p><a target="_blank" href="#"><i class="fa fa-home"></i></a></p>
-            <span class="hover-text font-light ">Raanana, Israel</span></a>
-        </div--><!-- /col12 -->
-        <div class="col-12 col-sm-4 with-hover-text">
-            <p>
-                <a target="_blank" href="http://www.facebook.com/Peer-Say"><i class="fa fa-facebook"></i></a>
-            </p>
-            <span class="hover-text font-light ">facebook/Peer-Say</span>
-        </div>
-        <!-- /col12 -->
-        <div class="col-12 col-sm-4 with-hover-text">
-            <p>
-                <a target="_blank" href="http://www.twitter.com/Peer-Say"><i class="fa fa-twitter"></i></a>
-            </p>
-            <span class="hover-text font-light ">@Peer-Say</span>
-        </div>
-        <!-- /col12 -->
-        <!--div class="col-sm-1 hidden-sm">&nbsp;</div-->
-    </div>
-</div>
-
-<!-- SCRIPTS -->
+<!--Scripts-->
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<!-- build:js js/index.js -->
-<script src="/bower_components/jquery/plugins/jquery.easing.1.3.js"></script>
-<script src="index.js"></script>
-<!-- endbuild -->
-
-<script>
-    $(function () {
-        var $chan = $('body')
-                .on('mixpanel', function (evt, msg) {
-                    if (window.mixpanel) {
-                        mixpanel.track(msg);
-                    }
-                    if (msg === 'success' && typeof GoogleTrackConversion === 'function') {
-                        GoogleTrackConversion();
-                    }
-                });
-
-        $("#reg-form1").submit(addWaiting);
-        $("#reg-form2").submit(addWaiting);
-        $(".js-reg-btn").click(function () {
-            var $form = $(this).closest('form');
-            $form.submit();
-        });
-
-        function addWaiting() {
-            var $form = $(this);
-            var $email_el = $form.find('.js-reg-email');
-            var $result_ok_el = $form.nextAll('.js-reg-result-ok');
-            var $result_dup_el = $form.nextAll('.js-reg-result-dup');
-
-            var simple_mail_re = /\S+@\S+\.\S+/;
-            var mail = $email_el.val().trim();
-            if (!mail) { return false; }
-
-            if (!simple_mail_re.test(mail)) {
-                alert(mail + ' is not a valid email');
-                $form.trigger('mixpanel', ['not valid email']);
-                return false;
-            }
-
-            var data = JSON.stringify({email: mail});
-            var path = "/api/waiting-users";
-
-            $.ajax({
-                url: path,
-                type: "POST",
-                data: data,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (res) {
-                    //console.log(res);
-
-                    // Hide all messages before choosing the one to display
-                    $form.add($result_ok_el).add($result_dup_el)
-                            .hide();
-
-                    // There is no error field --> new user added
-                    if (!res.error) {
-                        $result_ok_el.show();
-                        $chan.trigger('mixpanel', ['success']);
-                    }
-                    // There is no result field --> A duplicate user
-                    else if (!res.result) {
-                        $result_dup_el.show();
-                        $chan.trigger('mixpanel', ['duplicate']);
-                    }
-                    else {
-                        $chan.trigger('mixpanel', ['unexpected']);
-                    }
-                },
-                error: function () {
-                    $chan.trigger('mixpanel', ['api-error']);
-                }
-            });
-            return false;
-        }
-    });
-</script>
-
-<!-- htmlbuild:section inline GoogleRemarketingWithConversion --><!-- /htmlbuild -->
-
-<!-- htmlbuild:script inline GoogleConversion --><!-- /htmlbuild -->
-
+<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
 </body>
 </html>

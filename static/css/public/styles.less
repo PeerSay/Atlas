@@ -1,0 +1,251 @@
+/*TODO - rename file*/
+
+/* Move down content because we have a fixed navbar height*/
+body {
+  padding-top: @navbar-height;
+}
+
+h1, h2, h3, h5,
+.btn {
+  text-transform: uppercase;
+}
+h3 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+/*
+* Type
+*/
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand-Regular.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Quicksand Bold';
+  src: url('/fonts/Quicksand-Bold.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/*
+* Colors
+*/
+
+@section-dark-bg: #707070;
+@section-blue-bg: #d2eef8;
+
+
+/*
+* Components
+*/
+
+/*
+* Navbar
+*/
+.navbar {
+  .box-shadow(~"0 1px 15px 1px rgba(0, 0, 0, 0.15)");
+
+  .navbar-brand {
+    position: absolute;
+    top: -25px; left: 50%;
+    margin-left: -70px !important;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    padding: 40px 28px;
+    background: #fff;
+    .box-shadow(~"0 15px 22px -16px rgba(0, 0, 0, 0.2)");
+  }
+}
+
+/*Nav Links*/
+.navbar-nav {
+  &.navbar-left {
+    position: absolute;
+    right: 50%;
+    margin-right: 70px;
+  }
+  &.navbar-right {
+    position: absolute;
+    left: 50%;
+    margin-left: 70px;
+  }
+
+  @media (min-width: @grid-float-breakpoint) {
+    > li {
+      > a {
+        text-transform: uppercase;
+        padding-top: 40px;
+        padding-bottom: 20px;
+      }
+    }
+  }
+}
+
+/*
+* Jumbotron
+*/
+
+.jumbotron {
+  @media screen and (min-width: @screen-sm-min) {
+    padding-top:    (@jumbotron-padding * 3.25);
+    padding-bottom: (@jumbotron-padding * 3.25);
+  }
+  margin-bottom: 0;
+
+  .panel-money-form {
+    margin: 0 50px;
+    border-radius: 3px;
+    .box-shadow(~"none");
+    background: #38a3c8 url('/images/logo-fig-x250.png') top -15px right -20px no-repeat;
+    color: #fff;
+    .panel-body {
+      padding: 40px 30% 40px 50px;
+      p {
+        margin-bottom: 40px;
+        font-size: 2em;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+/*Sections*/
+.section {
+  padding-top: 40px;
+  padding-bottom: 50px;
+
+  .panel {
+    &.transparent {
+      background: none;
+      .box-shadow(~"none");
+    }
+  }
+
+  &.section-dark {
+    background-color: @section-dark-bg;
+    h3 {
+      color: #fff;
+    }
+  }
+
+  &.section-white {
+    background-color: #fff;
+    h2 {
+      color: @brand-primary;
+      &.dark {
+        color: #000;
+      }
+    }
+    .panel {
+      background-color: #6e6e6e;
+      h5 {
+        color: #fff;
+      }
+      p {
+        color: #eaeaea;
+      }
+    }
+  }
+
+  &.section-blue {
+    background-color: @section-blue-bg;
+    h4 {
+      color: #242424; // TODO - to var
+    }
+    .panel {
+      padding: 0 20px;
+    }
+  }
+
+  &.section-black {
+    background-color: #231f20;
+    p {
+      color: #fff;
+    }
+    h6 {
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 50px;
+    }
+    input {
+      margin-bottom: 20px;
+    }
+    a {
+      color: #fff;
+    }
+    .panel-menu {
+      padding: 0 0 0 50px;
+    }
+    .copyright {
+      margin-top: 150px;
+      color: #d1d1d1;
+    }
+  }
+
+}
+
+/*Buttons*/
+.btn {
+  font-family: @font-family-sans-serif-bold;
+  font-size: 14px;
+  &.btn-lg {
+    font-size: 15px;
+    border-radius: 50px;
+    padding: 25px 60px;
+  }
+  &.btn-warning {
+    text-shadow: 1px 1px lighten(@btn-warning-bg, 10%);
+  }
+  &.btn-primary {
+    text-shadow: 0 1px darken(@btn-primary-bg, 10%);
+  }
+}
+
+/*Forms/Inputs*/
+input.signup-lg {
+  width: 300px !important;
+}
+
+
+/*Icons*/
+.icon {
+  display: inline-block;
+  width: 83px; height: 83px;
+  &.icon-online {
+    background: url('/images/src/icon-online.png') no-repeat;
+  }
+  &.icon-peer {
+    background: url('/images/src/icon-peer.png') no-repeat;
+  }
+  &.icon-big-data {
+    background: url('/images/src/icon-big-data.png') no-repeat;
+  }
+  &.icon-personal {
+    background: url('/images/src/icon-personal.png') no-repeat;
+  }
+}
+
+.icon-sm {
+  display: inline-block;
+  width: 68px; height: 68px;
+  &.icon-requirements {
+    background: url('/images/src/sm-icon-requirements.png') no-repeat;
+  }
+  &.icon-products {
+    background: url('/images/src/sm-icon-products.png') no-repeat;
+  }
+  &.icon-talk {
+    background: url('/images/src/sm-icon-talk.png') no-repeat;
+  }
+  &.icon-time {
+    background: url('/images/src/sm-icon-time.png') no-repeat;
+  }
+  &.icon-present {
+    background: url('/images/src/sm-icon-present.png') no-repeat;
+  }
+}

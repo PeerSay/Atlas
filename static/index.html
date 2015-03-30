@@ -19,7 +19,9 @@
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
 
-<!--Navbar/menu-->
+<!----------------------------------------
+ Navbar/menu
+------------------------------------------->
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <!--Header Link + Collapsed Menu button-->
@@ -31,7 +33,7 @@
                 <span class="icon-bar"></span>
             </button>
             <!--Brand-->
-            <a class="navbar-brand" href="/" target="_self">
+            <a href="/" class="navbar-brand page-scroll">
                 <img alt="Brand" width="85" height="72" src="/images/logo85x72.png">
             </a>
         </div>
@@ -41,16 +43,18 @@
 
             <!--Menu-->
             <ul class="nav navbar-nav navbar-left">
-                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#how-it-works" class="page-scroll">How It Works</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#contact" class="page-scroll">Contact</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
-<!--Slider-->
+<!----------------------------------------
+ Slider
+------------------------------------------->
 <div class="jumbotron">
     <div class="container">
         <div class="row">
@@ -87,8 +91,13 @@
             </form>
         </div>
     </div>
+
+    <!----------------------------------------
+     How it works
+    ------------------------------------------->
+
     <!--How it works - Title-->
-    <div class="row section section-white">
+    <div id="how-it-works" class="row section section-white">
         <div class="col">
             <h2 class="text-center">This is how we do it</h2>
         </div>
@@ -221,8 +230,12 @@
         </div>
     </div>
 
+    <!----------------------------------------
+     Contacts
+    ------------------------------------------->
+
     <!--Contacts - Title-->
-    <div class="row section section-white">
+    <div id="contact" class="row section section-white">
         <div class="col-xs-12">
             <h2 class="text-center">Get to Know us better</h2>
             <p class="text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
@@ -285,7 +298,9 @@
     </div>
 </div>
 
-<!--Footer-->
+<!----------------------------------------
+ Footer
+------------------------------------------->
 <div class="container-fluid">
     <!--How it works - Content-->
     <div class="row section section-black">
@@ -317,8 +332,8 @@
                 <div class="panel-body">
                     <h6>Home</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#">How it works</a></li>
-                        <li><a href="#">Contact</a></li>
+                        <li><a href="#how-it-works" class="page-scroll">How it works</a></li>
+                        <li><a href="#contact" class="page-scroll">Contact</a></li>
                     </ul>
                 </div>
             </div>
@@ -336,6 +351,37 @@
 
 <!--Scripts-->
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<!--<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>-->
+<script>
+    $(function () {
+
+        // Smooth-scroll to a section on click
+        $('a.page-scroll').on('click', function(event) {
+            var menuOffsetTop = 80;
+            var $anchor = $(this);
+            var uri = $anchor.attr('href');
+            uri = (uri !== '/') ? uri : '';
+            var newScrollTop = uri ? $(uri).offset().top - menuOffsetTop : 0;
+
+            $('html, body').stop().animate({ scrollTop: newScrollTop }, 800, function () {
+                // Change location manually
+                window.location.hash = uri;
+            });
+
+            // Prevent location change
+            event.preventDefault();
+        });
+
+        // Show currently active section in menu
+        $(window).on('hashchange', function() {
+            var hash = window.location.hash;
+            var $navs = $('.navbar-nav')
+                    .find('li')
+                    .removeClass('active');
+            var $active = $navs.filter(':has(a[href="' + hash + '"])')
+                    .addClass('active');
+        });
+    });
+</script>
 </body>
 </html>

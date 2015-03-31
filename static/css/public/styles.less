@@ -9,10 +9,6 @@ h1, h2, h3, h5,
 .btn {
   text-transform: uppercase;
 }
-h3 {
-  font-size: 22px;
-  margin-bottom: 20px;
-}
 
 /*
 * Type
@@ -32,6 +28,51 @@ h3 {
   font-style: normal;
 }
 
+.dashed(@width, @height, @bg, @line-style) {
+  position: relative;
+  &:before {
+    content: "";
+    position: absolute;
+    width: @width;
+    left: 50%;
+    top: @height / 2;
+    margin-left: -(@width / 2);
+    border-bottom: @line-style;
+  }
+  span {
+    position: relative;
+    padding: 0 18px;
+    background: @bg;
+  }
+}
+
+h2 {
+  font-size: 26px;
+  &.dashed {
+    @style: 2px dashed lighten(@brand-primary, 20%);
+    .dashed(500px, 26px, #fff, @style);
+  }
+}
+
+h3 {
+  font-size: 18px;
+  letter-spacing: 3px;
+
+  &.dashed {
+    .dashed(400px, 18px, @section-dark-bg, 2px solid #828282); // TODO - use vars
+  }
+}
+
+h6 {
+  font-size: 16px
+}
+
+p {
+  &.sm {
+    font-size: 14px;
+  }
+}
+
 /*
 * Colors
 */
@@ -39,6 +80,8 @@ h3 {
 @section-dark-bg: #707070;
 @section-blue-bg: #d2eef8;
 
+@icon-grey-color: #cdd2d6;
+@icon-grey-color-hover: darken(@icon-grey-color, 10%);
 
 /*
 * Components
@@ -152,7 +195,7 @@ h3 {
       padding: 40px 30% 0 50px;
       p {
         margin-bottom: 40px;
-        font-size: 2em;
+        font-size: 25px;
         line-height: 1.5;
       }
     }
@@ -183,7 +226,7 @@ h3 {
       padding: 40px;
       p {
         margin: 0;
-        font-size: initial;
+        font-size: inherit;
         font-weight: inherit;
       }
     }
@@ -205,6 +248,8 @@ h3 {
         .rotate(@angle);
         .translate(0, -@icon-offset);
         .rotate(-@angle);*/
+
+        // TODO - add prefixes
         transform: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
       }
       &.pos0 { .pos-around(0); }
@@ -218,8 +263,14 @@ h3 {
 
 /*Sections*/
 .section {
-  padding-top: 40px;
+  padding-top: 60px;
   padding-bottom: 50px;
+  &.section-header {
+    padding-bottom: 0;
+  }
+  &.section-footer {
+    padding-top: 0;
+  }
 
   .panel {
     &.transparent {
@@ -232,12 +283,14 @@ h3 {
     background-color: @section-dark-bg;
     h3 {
       color: #fff;
+      margin-bottom: 30px;
     }
   }
 
   &.section-white {
     background-color: #fff;
     h2 {
+      margin: 0 0 20px 0;
       color: @brand-primary;
       &.dark {
         color: #000;
@@ -270,7 +323,6 @@ h3 {
       color: #fff;
     }
     h6 {
-      font-size: 14px;
       color: #fff;
       margin-bottom: 50px;
     }
@@ -291,7 +343,7 @@ h3 {
 
 }
 
-/*Buttons*/
+/*Controls*/
 .btn {
   font-family: @font-family-sans-serif-bold;
   font-size: 14px;
@@ -305,6 +357,26 @@ h3 {
   }
   &.btn-primary {
     text-shadow: 0 1px darken(@btn-primary-bg, 10%);
+  }
+}
+
+// Social links
+a.social {
+  font-size: 20px;
+  line-height: 40px;
+  color: @icon-grey-color;
+  &:hover {
+    color: @icon-grey-color-hover;
+  }
+}
+
+//Footer
+.footer-logo {
+  margin-bottom: 15px;
+}
+.footer-menu {
+  > li {
+    margin-bottom: 15px;
   }
 }
 

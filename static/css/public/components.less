@@ -1,0 +1,350 @@
+/*-------------------------------------
+* Components
+----------------------------------------*/
+
+/* Move down content because we have a fixed navbar height*/
+body {
+  padding-top: @navbar-height;
+}
+
+
+/* Navbar */
+.navbar {
+  .box-shadow(~"0 1px 15px 1px rgba(0, 0, 0, 0.15)");
+
+  .navbar-brand {
+    position: absolute;
+    top: -25px; left: 50%;
+    margin-left: -70px !important;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    padding: 40px 28px;
+    background: #fff;
+    .box-shadow(~"0 15px 22px -16px rgba(0, 0, 0, 0.2)");
+  }
+
+  /* Nav Links */
+  .navbar-nav {
+    &.navbar-left {
+      position: absolute;
+      right: 50%;
+      margin-right: 70px;
+    }
+    &.navbar-right {
+      position: absolute;
+      left: 50%;
+      margin-left: 70px;
+    }
+
+    @media (min-width: @grid-float-breakpoint) {
+      > li {
+        > a {
+          text-transform: uppercase;
+          padding-top: 40px;
+          padding-bottom: 18px;
+        }
+      }
+    }
+  }
+}
+
+/* Slider */
+.section-slider {
+  //Controls
+  .slider-controls {
+    position: relative;
+    float: left;
+    width: 80px;
+    border: 1px solid @slider-line-color;
+    border-radius: 5px;
+    padding: 100px 20px;
+
+    .btn {
+      color: @slider-btn-color;
+      background: transparent;
+      border-radius: 50%;
+      border: 1px solid @slider-btn-color;
+      &.up {
+        position: absolute;
+        top: 20px;
+      }
+      &.down {
+        position: absolute;
+        bottom: 20px;
+      }
+    }
+
+    ul.steps {
+      padding: 12px;
+      margin: 0;
+      .bullet {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-bottom: 20px;
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+        border: 2px solid #fff;
+        &.active {
+          background: #fff;
+        }
+      }
+    }
+  }
+
+  // Content
+  .slider-content {
+    margin: 0 30px 0 100px;
+    border-radius: 3px;
+    .box-shadow(~"none");
+    color: #fff;
+    background-color: @slider-content-bg;
+    background-image: url('/images/logo-fig-x250.png');
+    background-repeat: no-repeat;
+    background-position: top -15px right -20px;
+    .panel-body {
+      padding: 40px 30% 0 50px;
+      p {
+        margin-bottom: 40px;
+        font-size: 25px;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  // Right-side figure
+  .circle-figure {
+    @outer-size: 400px;
+    @outer-border-size: 3px;
+    @inner-size: 230px;
+    @inner-margin: (400px - 2*@outer-border-size - 230px) / 2;
+
+    width: @outer-size;
+    height: @outer-size;
+    border-radius: 50%;
+
+    margin: 0 auto;
+    border: @outer-border-size dashed #fff;
+
+    .content-round {
+      background-color: @brand-warning;
+      width: @inner-size;
+      height: @inner-size;
+      border-radius: 50%;
+
+      margin: @inner-margin auto;
+      text-align: center;
+      padding: 40px;
+      p {
+        margin: 0;
+        font-size: inherit;
+        font-weight: inherit;
+      }
+    }
+
+    /*Icons*/
+    .icon-lg {
+      @icon-size: 104px;
+      @icon-half-size: @icon-size / 2;
+      @icon-offset: @outer-size / 2;
+
+      position: absolute;
+      top: 50%; left: 50%;
+      margin-top: -@icon-half-size;
+      margin-left: -@icon-half-size;
+
+      .pos-around(@num) {
+        @angle: (360deg / 5) * @num;
+        /* Doesn't work:
+        .rotate(@angle);
+        .translate(0, -@icon-offset);
+        .rotate(-@angle);*/
+
+        // TODO - add prefixes
+        transform: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
+      }
+      &.pos0 { .pos-around(0); }
+      &.pos1 { .pos-around(1); }
+      &.pos2 { .pos-around(2); }
+      &.pos3 { .pos-around(3); }
+      &.pos4 { .pos-around(4); }
+    }
+  }
+}
+
+
+/*-------------------------------------
+* Layout
+----------------------------------------*/
+
+/*Sections*/
+.section {
+  padding-top: 60px;
+  padding-bottom: 50px;
+  &.section-header {
+    padding-bottom: 0;
+  }
+  &.section-footer {
+    padding-top: 0;
+  }
+
+  &.section-slider {
+    background-color: @brand-primary;
+    @media screen and (min-width: @screen-sm-min) {
+      padding-top:    (@jumbotron-padding * 3.25);
+      padding-bottom: (@jumbotron-padding * 3.25);
+    }
+    margin-bottom: 0;
+  }
+
+  &.section-dark {
+    background-color: @section-dark-bg;
+    h3 {
+      color: #fff;
+      margin-bottom: 30px;
+    }
+  }
+
+  &.section-white {
+    background-color: #fff;
+    h2 {
+      margin: 0 0 20px 0;
+      color: @brand-primary;
+      &.dark {
+        color: #000;
+      }
+    }
+    h4.blue {
+      color: @brand-primary;
+    }
+  }
+
+  &.section-blue {
+    background-color: @section-blue-bg;
+    h4 {
+      color: @header-dark-color;
+    }
+    .panel {
+      padding: 0 20px;
+    }
+  }
+
+  &.section-black {
+    background-color: @section-black-bg;
+    p {
+      color: #fff;
+    }
+    h6 {
+      color: #fff;
+      margin-bottom: 50px;
+    }
+    input {
+      margin-bottom: 20px;
+    }
+    a {
+      color: #fff;
+    }
+    .panel-menu {
+      padding: 0 0 0 50px;
+    }
+    .copyright {
+      margin-top: 150px;
+      color: @copy-color;
+    }
+  }
+
+  &.section-5col {
+    .row {
+      margin-top: 20px;
+      .panel {
+        min-height: 300px;
+        .panel-body {
+          padding: 30px 10% 5px;
+        }
+      }
+    }
+    /*
+     5 column layout - courtesy:
+     http://stackoverflow.com/questions/10387740/five-equal-columns-in-twitter-bootstrap/22799354#22799354
+    */
+    .col-lg-5th {
+      .make-lg-column(2.4)
+    }
+    .col-md-5th {
+      .make-md-column(2.4)
+    }
+    .col-sm-5th {
+      .make-sm-column(2.4)
+    }
+  }
+
+}
+
+// Buttons
+.btn {
+  font-family: @font-family-sans-serif-bold;
+  font-size: 14px;
+  &.btn-lg {
+    font-size: 15px;
+    border-radius: 50px;
+    padding: 25px 60px;
+  }
+  &.btn-warning {
+    text-shadow: 1px 1px lighten(@btn-warning-bg, 10%);
+  }
+  &.btn-primary {
+    text-shadow: 0 1px darken(@btn-primary-bg, 10%);
+  }
+}
+
+// Social links
+a.social {
+  font-size: 20px;
+  line-height: 40px;
+  color: @icon-grey-color;
+  &:hover {
+    color: @icon-grey-color-hover;
+  }
+}
+
+//Footer
+.footer-logo {
+  margin-bottom: 15px;
+}
+.footer-menu {
+  > li {
+    margin-bottom: 15px;
+  }
+}
+
+/*Forms/Inputs*/
+input.signup-lg {
+  width: 300px !important;
+}
+
+//Panels
+.panel {
+  &.transparent {
+    background: none;
+    .box-shadow(~"none");
+  }
+
+  &.dark {
+    background-color: @panel-dark-bg;
+    h5 {
+      color: #fff;
+    }
+    p {
+      color: @panel-dark-color;
+    }
+  }
+}
+
+//Dash
+hr {
+  &.dark {
+    width: 40px;
+    border-top-color: @dash-color;
+  }
+}

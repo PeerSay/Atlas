@@ -5,14 +5,10 @@ body {
   padding-top: @navbar-height;
 }
 
-h1, h2, h3, h5,
-.btn {
-  text-transform: uppercase;
-}
 
-/*
+/*-------------------------------------
 * Type
-*/
+----------------------------------------*/
 
 @font-face {
   font-family: 'Quicksand';
@@ -46,6 +42,11 @@ h1, h2, h3, h5,
   }
 }
 
+h1, h2, h3, h5,
+.btn {
+  text-transform: uppercase;
+}
+
 h2 {
   font-size: 26px;
   &.dashed {
@@ -57,9 +58,8 @@ h2 {
 h3 {
   font-size: 18px;
   letter-spacing: 3px;
-
   &.dashed {
-    .dashed(400px, 18px, @section-dark-bg, 2px solid #828282); // TODO - use vars
+    .dashed(400px, 18px, @section-dark-bg, 2px solid @dash-color); // TODO - use vars
   }
 }
 
@@ -74,7 +74,7 @@ p {
 }
 
 /*
-* Colors
+* Colors / Vars
 */
 
 @section-dark-bg: #707070;
@@ -83,13 +83,13 @@ p {
 @icon-grey-color: #cdd2d6;
 @icon-grey-color-hover: darken(@icon-grey-color, 10%);
 
-/*
-* Components
-*/
+@dash-color: #828282;
 
-/*
-* Navbar
-*/
+/*-------------------------------------
+* Components
+----------------------------------------*/
+
+/* Navbar */
 .navbar {
   .box-shadow(~"0 1px 15px 1px rgba(0, 0, 0, 0.15)");
 
@@ -103,44 +103,36 @@ p {
     background: #fff;
     .box-shadow(~"0 15px 22px -16px rgba(0, 0, 0, 0.2)");
   }
-}
 
-/*Nav Links*/
-.navbar-nav {
-  &.navbar-left {
-    position: absolute;
-    right: 50%;
-    margin-right: 70px;
-  }
-  &.navbar-right {
-    position: absolute;
-    left: 50%;
-    margin-left: 70px;
-  }
+  /* Nav Links */
+  .navbar-nav {
+    &.navbar-left {
+      position: absolute;
+      right: 50%;
+      margin-right: 70px;
+    }
+    &.navbar-right {
+      position: absolute;
+      left: 50%;
+      margin-left: 70px;
+    }
 
-  @media (min-width: @grid-float-breakpoint) {
-    > li {
-      > a {
-        text-transform: uppercase;
-        padding-top: 40px;
-        padding-bottom: 20px;
+    @media (min-width: @grid-float-breakpoint) {
+      > li {
+        > a {
+          text-transform: uppercase;
+          padding-top: 40px;
+          padding-bottom: 18px;
+        }
       }
     }
   }
 }
 
-/*
-* Jumbotron
-*/
-
-.jumbotron {
-  @media screen and (min-width: @screen-sm-min) {
-    padding-top:    (@jumbotron-padding * 3.25);
-    padding-bottom: (@jumbotron-padding * 3.25);
-  }
-  margin-bottom: 0;
-
-  .controls {
+/* Slider */
+.section-slider {
+  //Controls
+  .slider-controls {
     @line-color: #6abdd9;
     @btn-color: rgba(255,255,255, 0.6);
 
@@ -185,7 +177,8 @@ p {
     }
   }
 
-  .panel-money-form {
+  // Content
+  .slider-content {
     margin: 0 30px 0 100px;
     border-radius: 3px;
     .box-shadow(~"none");
@@ -261,6 +254,26 @@ p {
   }
 }
 
+
+//Misc
+.panel {
+  &.transparent {
+    background: none;
+    .box-shadow(~"none");
+  }
+}
+
+hr {
+  &.dark {
+    width: 40px;
+    border-top-color: @dash-color;
+  }
+}
+
+/*-------------------------------------
+* Layout
+----------------------------------------*/
+
 /*Sections*/
 .section {
   padding-top: 60px;
@@ -272,11 +285,13 @@ p {
     padding-top: 0;
   }
 
-  .panel {
-    &.transparent {
-      background: none;
-      .box-shadow(~"none");
+  &.section-slider {
+    background-color: @brand-primary;
+    @media screen and (min-width: @screen-sm-min) {
+      padding-top:    (@jumbotron-padding * 3.25);
+      padding-bottom: (@jumbotron-padding * 3.25);
     }
+    margin-bottom: 0;
   }
 
   &.section-dark {
@@ -341,6 +356,31 @@ p {
     }
   }
 
+  &.section-5col {
+    .row {
+      margin-top: 20px;
+      .panel {
+        min-height: 300px;
+        .panel-body {
+          padding: 30px 10%;
+        }
+      }
+    }
+    /*
+     5 column layout - courtesy:
+     http://stackoverflow.com/questions/10387740/five-equal-columns-in-twitter-bootstrap/22799354#22799354
+    */
+    .col-lg-5th {
+      .make-lg-column(2.4)
+    }
+    .col-md-5th {
+      .make-md-column(2.4)
+    }
+    .col-sm-5th {
+      .make-sm-column(2.4)
+    }
+  }
+
 }
 
 /*Controls*/
@@ -379,6 +419,7 @@ a.social {
     margin-bottom: 15px;
   }
 }
+
 
 /*Forms/Inputs*/
 input.signup-lg {

@@ -183,9 +183,8 @@ module.exports = function (grunt) {
                     'bower_components/font-awesome/css/font-awesome.{css,min.css}',
                     'bower_components/font-awesome/fonts/*.*',
                     'html/*.html',
-                    'fonts/*.ttf',
-                    'images/*.{png,jpg}',
-                    'functions.js'
+                    'fonts/*.{ttf,otf}',
+                    'images/**/*.{png,jpg}'
                 ],
                 dest: 'dist/'
             },

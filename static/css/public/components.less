@@ -98,8 +98,11 @@ body {
     margin: 0 30px 0 100px;
     border-radius: 3px;
     .box-shadow(~"none");
-    background: @slider-content-bg url('/images/logo-fig-x250.png') top -15px right -20px no-repeat;
     color: #fff;
+    background-color: @slider-content-bg;
+    background-image: url('/images/logo-fig-x250.png');
+    background-repeat: no-repeat;
+    background-position: top -15px right -20px;
     .panel-body {
       padding: 40px 30% 0 50px;
       p {

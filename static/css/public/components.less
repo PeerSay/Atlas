@@ -25,18 +25,18 @@ body {
 
   /* Nav Links */
   .navbar-nav {
-    &.navbar-left {
-      position: absolute;
-      right: 50%;
-      margin-right: 70px;
-    }
-    &.navbar-right {
-      position: absolute;
-      left: 50%;
-      margin-left: 70px;
-    }
-
     @media (min-width: @grid-float-breakpoint) {
+      &.navbar-left {
+        position: absolute;
+        right: 50%;
+        margin-right: 70px;
+      }
+      &.navbar-right {
+        position: absolute;
+        left: 50%;
+        margin-left: 70px;
+      }
+
       > li {
         > a {
           text-transform: uppercase;
@@ -45,6 +45,16 @@ body {
         }
       }
     }
+  }
+
+  .navbar-collapse {
+    // Hack - not sure why Bootstrap fails/refuses to do that!
+    overflow-y: hidden;
+  }
+
+  // Navbar toggle
+  .navbar-toggle {
+    background-color: @brand-primary;
   }
 }
 
@@ -237,7 +247,9 @@ body {
     }
     h6 {
       color: #fff;
-      margin-bottom: 50px;
+      @media (min-width: @grid-float-breakpoint) {
+        margin-bottom: 50px;
+      }
     }
     input {
       margin-bottom: 20px;
@@ -246,10 +258,14 @@ body {
       color: #fff;
     }
     .panel-menu {
-      padding: 0 0 0 50px;
+      @media (min-width: @grid-float-breakpoint) {
+        padding: 0 0 0 50px;
+      }
     }
     .copyright {
-      margin-top: 150px;
+      @media (min-width: @grid-float-breakpoint) {
+        margin-top: 150px;
+      }
       color: @copy-color;
     }
   }
@@ -258,9 +274,11 @@ body {
     .row {
       margin-top: 20px;
       .panel {
-        min-height: 300px;
+        @media (min-width: @grid-float-breakpoint) {
+          min-height: 320px;
+        }
         .panel-body {
-          padding: 30px 10% 5px;
+          padding: 30px 10% 20px;
         }
       }
     }
@@ -317,11 +335,17 @@ a.social {
     margin-bottom: 15px;
   }
 }
+.footer-col {
+  margin-bottom: 20px;
+}
 
 /*Forms/Inputs*/
-input.signup-lg {
-  width: 300px !important;
+@media (min-width: @grid-float-breakpoint) {
+  input.signup-lg {
+    width: 300px !important;
+  }
 }
+
 
 //Panels
 .panel {

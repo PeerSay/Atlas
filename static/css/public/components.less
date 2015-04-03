@@ -45,12 +45,12 @@ body {
           padding-top: 40px;
           padding-bottom: 18px;
         }
-
-        // Hack from here: http://stackoverflow.com/questions/14511045/twitter-bootstrap-scrollspy-not-working-at-all
-        &.ignore {
-          visibility: hidden;
-        }
       }
+    }
+
+    // Hack from here: http://stackoverflow.com/questions/14511045/twitter-bootstrap-scrollspy-not-working-at-all
+    > li.ignore {
+      visibility: hidden;
     }
   }
 
@@ -133,26 +133,33 @@ body {
   // Right-side figure
   .circle-figure {
     @outer-size: 400px;
-    @outer-border-size: 3px;
     @inner-size: 230px;
-    @inner-margin: (400px - 2*@outer-border-size - 230px) / 2;
 
     width: @outer-size;
     height: @outer-size;
     border-radius: 50%;
-
     margin: 0 auto;
-    border: @outer-border-size dashed #fff;
+    border: 3px dashed #fff;
 
     .content-round {
-      background-color: @brand-warning;
+      position: absolute;
       width: @inner-size;
       height: @inner-size;
+      top: 50%; left: 50%;
+      margin: -(@inner-size/2) 0 0 -(@inner-size/2);
       border-radius: 50%;
-
-      margin: @inner-margin auto;
       text-align: center;
       padding: 40px;
+
+      opacity: 0;
+      &.active { opacity: 1; }
+      transition: opacity .3s;
+
+      &.content-talk { background-color: @icon-bg-pink; }
+      &.content-present { background-color: @icon-bg-green; }
+      &.content-time { background-color: @icon-bg-blue; }
+      &.content-requirements { background-color: @icon-bg-yellow; }
+      &.content-products { background-color: @icon-bg-cyan; }
       p {
         margin: 0;
         font-size: inherit;
@@ -170,6 +177,7 @@ body {
       top: 50%; left: 50%;
       margin-top: -@icon-half-size;
       margin-left: -@icon-half-size;
+      cursor: pointer;
 
       .pos-around(@num) {
         @angle: (360deg / 5) * @num;

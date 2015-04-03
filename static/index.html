@@ -92,16 +92,36 @@
     <!--Col #2: Graphics-->
     <div class="hidden-xs hidden-sm col-md-6 col-lg-4">
         <div class="circle-figure">
-            <div class="content-round">
+            <div class="content-round content-talk">
+                <h5>Talk With Reference</h5>
+                <hr class="dark">
+                <p>Unbiased and objective reference users</p>
+            </div>
+            <div class="content-round content-present">
+                <h5>Present to Manager</h5>
+                <hr class="dark">
+                <p>A report that managers love</p>
+            </div>
+            <div class="content-round content-time">
+                <h5>Save Time</h5>
+                <hr class="dark">
+                <p>From weeks to days</p>
+            </div>
+            <div class="content-round content-requirements">
                 <h5>Popular Requirements</h5>
                 <hr class="dark">
                 <p>Never miss an important criteria</p>
             </div>
-            <span class="icon-lg icon-talk pos0"></span>
-            <span class="icon-lg icon-present pos1"></span>
-            <span class="icon-lg icon-time pos2"></span>
-            <span class="icon-lg icon-requirements pos3"></span>
-            <span class="icon-lg icon-products pos4"></span>
+            <div class="content-round content-products">
+                <h5>Relevant Products</h5>
+                <hr class="dark">
+                <p>Discover products you should consider</p>
+            </div>
+            <span class="icon-lg icon-talk pos0" data-target=".content-talk"></span>
+            <span class="icon-lg icon-present pos1" data-target=".content-present"></span>
+            <span class="icon-lg icon-time pos2" data-target=".content-time"></span>
+            <span class="icon-lg icon-requirements pos3" data-target=".content-requirements"></span>
+            <span class="icon-lg icon-products pos4" data-target=".content-products"></span>
         </div>
     </div>
 </div>
@@ -403,6 +423,7 @@
     $(function () {
 
         // Smooth-scroll to a section on click
+        //
         $('a.page-scroll').on('click', function (event) {
             var menuOffsetTop = 80;
             var $anchor = $(this);
@@ -418,6 +439,19 @@
             // Prevent location change
             event.preventDefault();
         });
+
+
+        // Circle Figure control
+        //
+        $('.icon-lg')
+                .hover(toggleContentFn(true), toggleContentFn(false));
+
+        function toggleContentFn(on) {
+            return function () {
+                var $target = $($(this).attr('data-target'));
+                $target.toggleClass('active', on);
+            };
+        }
     });
 </script>
 </body>

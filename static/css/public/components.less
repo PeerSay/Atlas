@@ -2,9 +2,11 @@
 * Components
 ----------------------------------------*/
 
-/* Move down content because we have a fixed navbar height*/
 body {
+  // Move down content because we have a fixed navbar height
   padding-top: @navbar-height;
+  // Required for scrollspy
+  position: relative;
 }
 
 
@@ -42,6 +44,11 @@ body {
           text-transform: uppercase;
           padding-top: 40px;
           padding-bottom: 18px;
+        }
+
+        // Hack from here: http://stackoverflow.com/questions/14511045/twitter-bootstrap-scrollspy-not-working-at-all
+        &.ignore {
+          visibility: hidden;
         }
       }
     }

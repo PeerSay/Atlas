@@ -68,7 +68,8 @@
 ------------------------------------------->
 <div class="row section section-slider" id="no-spy-top">
     <!--Col #1: Controls & Slides-->
-    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-lg-offset-2 carousel slide" id="slider-container" data-ride="carousel">
+    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-lg-offset-2 carousel slide" id="slider-container"
+            data-ride="carousel">
         <div class="slider-controls">
             <a href="#slider-container" class="btn up" role="button" data-slide="prev">
                 <span class="fa fa-chevron-up"></span>
@@ -101,7 +102,9 @@
             </div>
 
             <form>
-                <a href="#" class="btn btn-warning btn-lg">Start an Evaluation</a>
+                <a href="#" class="btn btn-warning btn-lg"
+                        data-toggle="modal"
+                        data-target="#modal-eval">Start an Evaluation</a>
             </form>
         </div>
     </div>
@@ -406,12 +409,14 @@
     <!--Col-1 - Legal-->
     <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 col-lg-offset-2 footer-col">
         <img class="footer-logo" src="/images/logo-bw-x105.png" width="105" height="105" alt="Logo">
+
         <p class="sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
             ut labore et dolore magna aliqua.</p>
     </div>
     <!--Col-2 - Subscribe-->
     <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 footer-col">
         <h6>Subscribe</h6>
+
         <form class="form-inline">
             <input type="email" class="form-control" placeholder="Email Address">
         </form>
@@ -430,6 +435,141 @@
         <p class="copyright sm">© 2015 PeerSay. All Rights Reserved.</p>
     </div>
 </div>
+</div>
+
+<!----------------------------------------
+ Modal - Evaluation dialog
+------------------------------------------->
+
+<div class="modal fade" id="modal-eval">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title text-center">Welcome to PeerSay</h4>
+            </div>
+            <div class="modal-body">
+                <div class="carousel slide" id="modal-slides"
+                        data-interval="0">
+                    <!-- Indicators -->
+                    <ol class="carousel-indicators">
+                        <li data-target="#modal-slides" data-slide-to="0" class="active"></li>
+                        <li data-target="#modal-slides" data-slide-to="1"></li>
+                    </ol>
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner" role="listbox">
+                        <div class="item active">
+                            <!--Form 1-->
+                            <form>
+                                <!--Email-->
+                                <div class="form-group">
+                                    <label for="ev-name">
+                                        <span class="badge">1</span>
+                                        Email address
+                                    </label>
+                                    <input type="text" id="ev-name" class="form-control" placeholder="johh@example.com"
+                                            required/>
+                                    <span class="help-block warning">
+                                        <span class="">Required</span>
+                                    </span>
+                                </div>
+                                <!--Problems-->
+                                <div class="form-group">
+                                    <label for="ev-problems">
+                                        <span class="badge">2</span>
+                                        What problems are you trying to solve? What products are you evaluating?
+                                    </label>
+                                    <textarea id="ev-problems" class="form-control"
+                                            placeholder="Examle: I have to add an extra 10TB to the enterprise storage. I'm evaluating HP vs. NetApp."
+                                            ></textarea>
+                                </div>
+                                <!--Requirements-->
+                                <div class="form-group">
+                                    <label for="ev-reqs">
+                                        <span class="badge">3</span>
+                                        What are some of the requirements from the chosen solution?
+                                    </label>
+                                    <textarea id="ev-reqs" class="form-control"
+                                            placeholder="Example: Must be a single box with SCSI interface (to connectto our automatic backup system)."
+                                            ></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="item">
+                            <!--Form 2-->
+                            <p>PerSay's suggestions improve based on your company's location, industry and size.
+                            We keep all information strictly confidential and anonymous.</p>
+                            <form class="form-horizontal">
+                                <!--Name-->
+                                <div class="form-group">
+                                    <label for="ev-name" class="col-sm-4 control-label">
+                                        <span class="badge">1</span>
+                                        Your name:
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" id="ev-email" class="form-control" placeholder="Paul Newman"/>
+                                    </div>
+                                </div>
+                                <!--Organization-->
+                                <div class="form-group">
+                                    <label for="ev-org" class="col-sm-4 control-label">
+                                        <span class="badge">2</span>
+                                        Your organization:
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" id="ev-org" class="form-control" placeholder="ACME INc."/>
+                                    </div>
+                                </div>
+                                <!--Role-->
+                                <div class="form-group">
+                                    <label for="ev-role" class="col-sm-4 control-label">
+                                        <span class="badge">3</span>
+                                        Your role:
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" id="ev-role" class="form-control" placeholder="IT infrastructure Team Leader"/>
+                                    </div>
+                                </div>
+                                <!--Size-->
+                                <div class="form-group">
+                                    <label for="ev-size" class="col-sm-4 control-label">
+                                        <span class="badge">4</span>
+                                        Organization size and industry:
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" id="ev-size" class="form-control" placeholder="Medium size company (~3000 enployees) in the manufacturing business"/>
+                                    </div>
+                                </div>
+                                <!--Location-->
+                                <div class="form-group">
+                                    <label for="ev-location" class="col-sm-4 control-label">
+                                        <span class="badge">5</span>
+                                        Geographical location:
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" id="ev-location" class="form-control" placeholder="Boston, MA"/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Controls -->
+                    <a class="left carousel-control" href="#modal-slides" role="button" data-slide="prev">
+                        <span class="fa fa-chevron-left" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="right carousel-control" href="#modal-slides" role="button" data-slide="next">
+                        <span class="fa fa-chevron-right" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Show me relevant suggestions</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!--Scripts-->
@@ -468,6 +608,10 @@
                 $target.toggleClass('active', on);
             };
         }
+
+        // Modal
+        //
+        //$('#modal-eval').modal('show');
     });
 </script>
 </body>

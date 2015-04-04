@@ -400,3 +400,51 @@ hr {
     border-top-color: @dash-color;
   }
 }
+
+
+//Modal
+//
+.modal-dialog {
+  font-size: 14px;
+  .modal-body {
+    padding: 15px 30px;
+  }
+  .modal-footer {
+    text-align: center;
+  }
+
+  // Carousel
+  .carousel {
+    min-height: 350px;
+    .carousel-control {
+      top: 150px;
+      width: 30px; height: 35px;
+      line-height: 33px;
+      background: @brand-primary;
+      &:hover, &:focus {
+        opacity: 1;
+        background: darken(@brand-primary, 10%);
+      }
+      &.left {
+        left: -45px;
+        border-radius: 3px 0 0 3px;
+      }
+      &.right {
+        right: -45px;
+        border-radius: 0 3px 3px 0;
+      }
+    }
+    .carousel-indicators {
+      bottom: -20px;
+    }
+  }
+
+  textarea {
+    .resizable(vertical);
+    max-height: 120px;
+  }
+
+  .control-label {
+    text-align: left;
+  }
+}

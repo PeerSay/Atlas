@@ -406,23 +406,28 @@ hr {
 //
 .modal-dialog {
   font-size: 14px;
+  margin-top: 60px;
+  .modal-header {
+    min-height: 50px;
+  }
   .modal-body {
     padding: 15px 30px;
   }
   .modal-footer {
+    min-height: 50px;
     text-align: center;
   }
 
   // Carousel
   .carousel {
-    min-height: 350px;
+    min-height: 400px;
     .carousel-control {
-      top: 150px;
+      top: 200px;
       width: 30px; height: 35px;
       line-height: 33px;
       background: @brand-primary;
       &:hover, &:focus {
-        opacity: 1;
+        opacity: 1; //override
         background: darken(@brand-primary, 10%);
       }
       &.left {
@@ -446,5 +451,10 @@ hr {
 
   .control-label {
     text-align: left;
+  }
+
+  .thank-you-page {
+    display: none;
+    padding: 100px 0;
   }
 }

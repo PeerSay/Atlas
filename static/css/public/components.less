@@ -351,6 +351,15 @@ body {
   &.btn-primary {
     text-shadow: 0 1px darken(@btn-primary-bg, 10%);
   }
+
+  //Override .tab-focus() mixin
+  &,
+  &:active,
+  &.active {
+    &:focus {
+      outline: 0;
+    }
+  }
 }
 
 // Social links

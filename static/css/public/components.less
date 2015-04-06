@@ -48,6 +48,15 @@ body {
       }
     }
 
+    // Active menu
+    > .active > a {
+      &,
+      &:hover,
+      &:focus {
+        text-decoration: underline;
+      }
+    }
+
     // Hack from here: http://stackoverflow.com/questions/14511045/twitter-bootstrap-scrollspy-not-working-at-all
     > li.ignore {
       visibility: hidden;

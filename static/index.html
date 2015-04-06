@@ -596,8 +596,8 @@
             var newScrollTop = uri ? $(uri).offset().top - menuOffsetTop : 0;
 
             $('html, body').stop().animate({scrollTop: newScrollTop}, 800, function () {
-                // Change location manually
-                window.location.hash = uri;
+                // XXX - this causes scroll in FF, which hides part of the header - #59
+                //window.location.hash = uri;
             });
 
             // Prevent location change

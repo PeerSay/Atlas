@@ -359,7 +359,14 @@ body {
   }
 }
 
-// Social links
+// Links
+a {
+  &:focus {
+    //Override .tab-focus() mixin
+    outline: 0;
+  }
+}
+
 a.social {
   font-size: 20px;
   line-height: 40px;

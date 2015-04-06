@@ -1,0 +1,90 @@
+/*-------------------------------------
+* Typography
+----------------------------------------*/
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand-Regular.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Quicksand Bold';
+  src: url('/fonts/Quicksand-Bold.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+h1, h2, h3, h5,
+.btn {
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: 26px;
+  &.dashed {
+    @style: 2px dashed lighten(@brand-primary, 20%);
+    .dashed(500px, 26px, #fff, @style);
+
+    &.dashed-grey {
+      .dashed(500px, 26px, @section-grey-bg, @style);
+    }
+  }
+}
+
+h3 {
+  font-size: 18px;
+  letter-spacing: 3px;
+  &.dashed {
+    .dashed(400px, 18px, @section-dark-bg, 2px solid @dash-color); // TODO - use vars
+  }
+}
+
+h6 {
+  font-size: 16px
+}
+
+p {
+  &.sm {
+    font-size: 14px;
+  }
+}
+
+// Colors
+h2, h3, h4, h5 {
+  &.white {
+    color: #fff;
+  }
+  &.blue {
+    color: @brand-primary;
+  }
+  &.dark {
+    color: @header-dark-color;
+  }
+  &.black {
+    color: #000;
+  }
+}
+
+
+// Utility: adds dashed decorations to headers
+// Requires header to have content in <span> child
+.dashed(@width, @height, @bg, @line-style) {
+  position: relative;
+  &:before {
+    content: "";
+    position: absolute;
+    width: @width;
+    left: 50%;
+    top: @height / 2;
+    margin-left: -(@width / 2);
+    border-bottom: @line-style;
+  }
+  span {
+    position: relative;
+    padding: 0 18px;
+    background: @bg;
+  }
+}

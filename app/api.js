@@ -46,19 +46,26 @@ function RestApi(app) {
 
     function addToWaitingUsers(req, res, next) {
         var data = req.body;
+        var email = data.email;
 
-        console.log('[API] Adding user to waiting list [%s]', data.email);
+        console.log('[API] Adding user to waiting list [%s]', email);
 
-        WaitingUser.add(data.email, data, function (err, user, code) {
+        WaitingUser.add(email, data, function (err, user, code) {
             if (err) { next(err); }
 
             if (code === errorcodes.WAITING_DUPLICATE) {
-                console.log('[API] User ' + data.email + ' is already in list');
-                return res.json({error: data.email + ' is already registered!'});
+                console.log('[API] User [%s] is already in list - updated', email);
+                return res.json({
+                    error: email + ' is already registered!',
+                    email: email
+                });
             }
 
-            console.log('[API] User ' + data.email + ' has been added to the waiting list');
-            return res.json({result: true});
+            console.log('[API] User [%s] has been added to the waiting list', email);
+            return res.json({
+                result: true,
+                email: email
+            });
         });
     }
 

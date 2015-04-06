@@ -155,7 +155,9 @@
                 <label class="sr-only" for="signup-email">Name</label>
                 <input type="email" class="form-control signup-lg" placeholder="Email Address" id="signup-email">
             </div>
-            <a href="#" class="btn btn-warning">Go</a>
+            <a href="#" class="btn btn-warning"
+                    data-toggle="modal"
+                    data-target="#modal-eval">Go</a>
         </form>
     </div>
 </div>
@@ -638,10 +640,12 @@
 
         // Modal: Forms
         //
-        var $modal = $('#modal-eval').modal({
-            backdrop: 'static',
-            show: false
-        });
+        var $modal = $('#modal-eval')
+                .modal({
+                    backdrop: 'static',
+                    show: false
+                })
+                .on('show.bs.modal', initForm);
         var $form = $('#reg-form').submit(submitForm);
         var $submitBtn = $modal.find('.js-submit')
                 .click(function () {
@@ -650,6 +654,17 @@
         var $email = $('#ev-email').keyup(function () {
             toggleFormWarning(false);
         });
+        var $pageEmail = $('#signup-email');
+
+        function initForm() {
+            $email.val($pageEmail.val().trim());
+
+            toggleThanksPage(false);
+        }
+
+        function updatePage() {
+            $pageEmail.val($email.val());
+        }
 
         function submitForm() {
             if (!validateForm()) {
@@ -669,7 +684,8 @@
                 dataType: "json",
                 success: function (res) {
                     console.log('>> Response: ', res);
-                    toggleThanksPage(res.email);
+                    toggleThanksPage(true, res.email);
+                    updatePage();
                 },
                 error: function () {
                     //TODO
@@ -713,12 +729,16 @@
             }
         }
 
-        function toggleThanksPage(email) {
-            $submitBtn.hide();
-            $modal.find('.carousel').hide();
+        function toggleThanksPage(on, email) {
+            var $page = $modal.find('.thanks-page');
 
-            var $page = $modal.find('.thanks-page').show();
-            $page.find('.email-subst').text(email);
+            $submitBtn.toggle(!on);
+            $modal.find('.carousel').toggle(!on);
+
+            $page.toggle(on);
+            if (on) {
+                $page.find('.email-subst').text(email);
+            }
         }
     });
 </script>

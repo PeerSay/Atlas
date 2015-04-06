@@ -248,7 +248,6 @@ body {
   &.section-dark {
     background-color: @section-dark-bg;
     h3 {
-      color: #fff;
       margin-bottom: 30px;
     }
   }
@@ -257,10 +256,6 @@ body {
     background-color: #fff;
     h2 {
       margin: 0 0 20px 0;
-      color: @brand-primary;
-      &.dark {
-        color: #000;
-      }
     }
     h4.blue {
       color: @brand-primary;
@@ -269,15 +264,13 @@ body {
 
   &.section-blue {
     background-color: @section-blue-bg;
-    h4 {
-      color: @header-dark-color;
-    }
     .panel {
       padding: 0 20px;
     }
   }
 
   &.section-black {
+    padding-bottom: 70px;
     background-color: @section-black-bg;
     p {
       color: #fff;
@@ -305,6 +298,10 @@ body {
       }
       color: @copy-color;
     }
+  }
+
+  &.section-grey {
+    background-color: @section-grey-bg;
   }
 
   &.section-5col {
@@ -402,9 +399,6 @@ a.social {
 
   &.dark {
     background-color: @panel-dark-bg;
-    h5 {
-      color: #fff;
-    }
     p {
       color: @panel-dark-color;
     }

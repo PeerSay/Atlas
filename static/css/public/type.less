@@ -27,6 +27,10 @@ h2 {
   &.dashed {
     @style: 2px dashed lighten(@brand-primary, 20%);
     .dashed(500px, 26px, #fff, @style);
+
+    &.dashed-grey {
+      .dashed(500px, 26px, @section-grey-bg, @style);
+    }
   }
 }
 
@@ -45,6 +49,22 @@ h6 {
 p {
   &.sm {
     font-size: 14px;
+  }
+}
+
+// Colors
+h2, h3, h4, h5 {
+  &.white {
+    color: #fff;
+  }
+  &.blue {
+    color: @brand-primary;
+  }
+  &.dark {
+    color: @header-dark-color;
+  }
+  &.black {
+    color: #000;
   }
 }
 

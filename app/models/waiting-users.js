@@ -11,7 +11,14 @@ var errors = require('../../app/errors');
 //
 
 var waitingUserSchema = new Schema({
-    email: { type: String, required: true, unique: true }
+    email: { type: String, required: true, unique: true },
+    name: { type: String },
+    role: { type: String },
+    organization: { type: String },
+    organizationSizeIndustry: { type: String },
+    location: { type: String },
+    inputOnProducts: { type: String },
+    inputOnRequirements: { type: String }
 });
 
 waitingUserSchema.statics.findByEmail = function (email, cb) {
@@ -23,7 +30,15 @@ waitingUserSchema.statics.add = function (email, data, cb) {
         if (err) { return cb(err); }
 
         if (user) { // user already registered
-            return cb(null, user, errors.WAITING_DUPLICATE);
+
+            // Update as it may have more/changed data from new WaitingUsers form
+            _.extend(user, data);
+
+            return user.save(function (eer, user) {
+                if (err) { return cb(err); }
+
+                return cb(null, user, errors.WAITING_DUPLICATE);
+            });
         }
 
         // new registration - create new waiting user

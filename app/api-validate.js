@@ -17,8 +17,11 @@ function ApiValidate(app) {
         // Auth
         app.post('/api/auth/login', jsonParser, validateAuthLogin);
         app.post('/api/auth/signup', jsonParser, validateAuthSignup);
-        app.post('/api/auth/restore', jsonParser, validateAuthRestore);
+        app.post('/api/auth/restore', jsonParser, validateEmailRequired);
         app.post('/api/auth/restore/complete', jsonParser, validateAuthRestoreComplete);
+
+        //Waiting-users
+        app.post('/api/waiting-users', jsonParser, validateEmailRequired);
 
         return V;
     }
@@ -77,13 +80,14 @@ function ApiValidate(app) {
         });
     }
 
-    function validateAuthRestore(req, res, next) {
+    function validateEmailRequired(req, res, next) {
         var data = req.body;
         var schema = {
             email: Joi.string().email().required()
         };
+        var options = {allowUnknown: true}; // used only to validate required email - ignore the rest
 
-        Joi.validate(data, schema, function (err) {
+        Joi.validate(data, schema, options, function (err) {
             if (err) {
                 var msg = err.details[0].message;
                 return errRes.notValid(res, msg);

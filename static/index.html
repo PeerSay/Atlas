@@ -434,12 +434,8 @@
         <ul class="list-unstyled footer-menu">
             <li><a href="#how-it-works" class="page-scroll">How it works</a></li>
             <li><a href="#contact" class="page-scroll">Contact</a></li>
-            <li><a href="privacy-policy.html"
-                    data-toggle="modal"
-                    data-target="#modal-privacy-policy">Privacy Policy</a></li>
-            <li><a href="terms.html"
-                    data-toggle="modal"
-                    data-target="#modal-terms">Terms and Conditions</a></li>
+            <li><a href="#privacy-policy">Privacy Policy</a></li>
+            <li><a href="#terms">Terms and Conditions</a></li>
         </ul>
     </div>
     <!--Col-4 - Copyright-->
@@ -594,7 +590,7 @@
  Modal - Privacy Policy
 ------------------------------------------->
 
-<div class="modal fade" id="modal-privacy-policy">
+<div class="modal fade js-deep-link" id="privacy-policy" data-remote="privacy-policy.html">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <!--Content injected here-->
@@ -606,7 +602,7 @@
  Modal - Terms
 ------------------------------------------->
 
-<div class="modal fade" id="modal-terms">
+<div class="modal fade js-deep-link" id="terms" data-remote="terms.html">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <!--Content injected here-->
@@ -770,6 +766,56 @@
             $page.toggle(on);
             if (on) {
                 $page.find('.email-subst').text(email);
+            }
+        }
+
+        // Deel-linking for Modals
+        //
+        $('.modal.js-deep-link')
+                .on('shown.bs.modal', toggleLocationHashFn(true))
+                .on('hidden.bs.modal', toggleLocationHashFn(false));
+
+        $(window).on('hashchange', showDialogOnHashChange);
+        showDialogOnHashChange(); // hashchange not triggered on page load
+
+        function showDialogOnHashChange() {
+            var $modal = $(window.location.hash);
+            var $openModal = $('.modal.in');
+            var hasOpenModal = !!$openModal.length;
+
+            if (!$modal.length) {
+                // No modals with such hash exists - close modal if open
+                $openModal.modal('hide');
+                return;
+            }
+
+            // If some dialog is open already (which means it is a link click from that dialog),
+            // then we reload the page to let dialog go, because show/close dialog works badly in Bootstrap.
+            if (hasOpenModal) {
+                window.location.reload(true);
+            }
+            else {
+                $modal.modal('show');
+            }
+        }
+
+        function toggleLocationHashFn(on) {
+            return function () {
+                var $modal = $(this);
+                var id = $modal.get(0).id;
+                var hash = '#' + id;
+
+                toggleLocationHash(on, hash);
+            };
+        }
+
+        function toggleLocationHash(on, hash) {
+            if (window.location.hash !== hash) { return; }
+
+            if (on) {
+                window.location.hash = hash;
+            } else {
+                history.pushState("", document.title, window.location.pathname);
             }
         }
     });

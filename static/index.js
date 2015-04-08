@@ -59,12 +59,13 @@ $(function () {
      Modal: Forms
      -------------------------------------------------*/
 
-    var $modal = $('#modal-eval')
+    var $modal = $('#start')
         .modal({
             backdrop: 'static',
             show: false
         })
-        .on('show.bs.modal', initForm);
+        .on('show.bs.modal', initForm)
+        .on('shown.bs.modal', initFormShown);
     var $form = $('#reg-form').submit(submitForm);
     var $submitBtn = $modal.find('.js-submit')
         .click(function () {
@@ -77,8 +78,11 @@ $(function () {
 
     function initForm() {
         $email.val($pageEmail.val().trim());
-
         toggleThanksPage(false);
+    }
+
+    function initFormShown() {
+        $email.get(0).focus();
     }
 
     function updatePage() {

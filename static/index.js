@@ -71,7 +71,7 @@ $(function () {
         $regForm.submit();
     });
     var $email = $('#ev-email').keyup(function () {
-        toggleFormWarning(false);
+        toggleFormWarning($(this), false);
     });
     var $pageEmail = $('#signup-email');
 
@@ -89,11 +89,9 @@ $(function () {
     }
 
     function submitRegForm() {
-        if (!validateForm()) {
-            toggleFormWarning(true);
+        if (!validateRegForm()) {
             return false;
         }
-
 
         var url = "/api/waiting-users";
         submitForm($regForm, url, function (err, res) {
@@ -109,28 +107,18 @@ $(function () {
         return false; // prevent default
     }
 
-    function validateForm() {
-        return validateEmail($email.val());
-    }
+    function validateRegForm() {
+        var res = validateForm($email);
+        if (res.length) {
+            var err = res[0]; // can be only one
+            toggleFormWarning(err.$el, true, err.error);
 
-    function validateEmail(val) {
-        val = val.trim();
-        if (!val) { return false; } // required!
-
-        var simpleEmailRe = /\S+@\S+\.\S+/;
-        return simpleEmailRe.test(val);
-    }
-
-    function toggleFormWarning(on) {
-        var $group = $email.closest('.form-group');
-        if (on) {
             $slider.carousel(0);
-            $group.addClass('has-error');
             $email.focus();
+            return false;
         }
-        else {
-            $group.removeClass('has-error');
-        }
+
+        return true;
     }
 
     function toggleThanksPage(on, email) {
@@ -212,10 +200,13 @@ $(function () {
         $contactForm.submit();
     });
     var $progress = $contactForm.find('.progress');
+    var $fields = $contactForm.find('[name]')
+        .keyup(function () {
+            toggleFormWarning($(this), false);
+        });
 
     function submitContactForm() {
         if (!validateContactForm()) {
-            //toggleFormWarning(true);
             return false;
         }
 
@@ -228,16 +219,24 @@ $(function () {
 
             if (err) {
                 console.log('>>Err: ', err.xhr.responseText);
-                return;
             }
 
-            // Nothing
+            // Nothing by design
         });
 
         return false; // prevent default
     }
 
     function validateContactForm() {
+        var res = validateForm($fields);
+        if (res.length) {
+            $.each(res, function (i, it) {
+                toggleFormWarning(it.$el, true, it.error);
+            });
+            res[0].$el.focus();
+            return false;
+        }
+
         return true;
     }
 
@@ -256,11 +255,11 @@ $(function () {
         }
     }
 
-
     /*-----------------------------------------------
      Util
      -------------------------------------------------*/
 
+    // Ajax
     function submitForm($form, url, cb) {
         var data = getFormData($form);
         console.log('>> POST: ', data);
@@ -298,4 +297,46 @@ $(function () {
         }
     }
 
+    // Form Validation
+    function validateForm($fields) {
+        // Returns: [ {$el: $(), error: 'required' | 'email'}, ...]
+        var result = [];
+        $fields.each(function (i, el) {
+            var $el = $(el), error = null;
+            if ($el.data('required') && !validateRequired($el.val())) {
+                error = 'required';
+            }
+            else if ($el.data('email') && !validateEmail($el.val())) {
+                error = 'email';
+            }
+
+            if (error) {
+                result.push({
+                    $el: $el,
+                    error: error
+                });
+            }
+        });
+        return result;
+    }
+
+    function validateRequired(val) {
+        val = val.trim();
+        return !!val;
+    }
+
+    function validateEmail(val) {
+        val = val.trim();
+        var simpleEmailRe = /\S+@\S+\.\S+/;
+        return simpleEmailRe.test(val);
+    }
+
+    function toggleFormWarning($el, on, errorClass) {
+        var $group = $el.closest('.form-group');
+        if (on) {
+            $group.addClass('has-error ' + errorClass);
+        } else {
+            $group.removeClass('has-error email required');
+        }
+    }
 });

@@ -364,14 +364,20 @@
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="form-group">
                         <label class="sr-only" for="contact-name">Name</label>
-                        <input type="text" name="name" class="form-control contacts-lg" placeholder="Name" id="contact-name">
+                        <input type="text" name="name" class="form-control contacts-lg" placeholder="Name" id="contact-name"
+                                data-required="true">
+                        <div class="help-block required">Required</div>
                     </div>
                 </div>
                 <!--Col1 - Email-->
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="form-group">
                         <label class="sr-only" for="contact-email">Name</label>
-                        <input type="email" name="email" class="form-control contacts-lg" placeholder="Email" id="contact-email">
+                        <input type="email" name="email" class="form-control contacts-lg" placeholder="Email" id="contact-email"
+                                data-required="true"
+                                data-email="true">
+                        <div class="help-block required">Required</div>
+                        <div class="help-block email">Invalid email</div>
                     </div>
                 </div>
             </div>
@@ -379,7 +385,9 @@
                 <div class="col-xs-12">
                     <div class="form-group">
                         <label class="sr-only" for="contact-msg">Name</label>
-                        <textarea name="message" class="form-control contacts-lg" placeholder="Message" id="contact-msg"></textarea>
+                        <textarea name="message" class="form-control contacts-lg" placeholder="Message" id="contact-msg"
+                                data-required="true"></textarea>
+                        <div class="help-block required">Required</div>
                     </div>
                 </div>
             </div>
@@ -493,8 +501,10 @@
                                         Email address
                                     </label>
                                     <input type="email" name="email" id="ev-email" class="form-control" placeholder="johh@example.com"
-                                            required/>
-                                    <span class="help-block">Required</span>
+                                            data-required="true"
+                                            data-email="true"/>
+                                    <span class="help-block required">Required</span>
+                                    <span class="help-block email">Invalid email</span>
                                 </div>
                                 <!--Problems-->
                                 <div class="form-group">

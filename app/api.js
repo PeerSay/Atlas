@@ -2,12 +2,14 @@ var _ = require('lodash');
 var util = require('util');
 var jsonParser = require('body-parser').json();
 var jsonpatch = require('json-patch');
+var swig = require('swig');
 
 // App dependencies
 var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
 var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
+var mailer = require('../app/email/mailer');
 
 var errorcodes = require('../app/errors');
 
@@ -22,6 +24,7 @@ function RestApi(app) {
 
         // Adding user (email) to waiting list
         app.post('/api/waiting-users', jsonParser, addToWaitingUsers);
+        app.post('/api/say-hello', jsonParser, sendHelloMessage);
 
         // user
         app.get('/api/user', readUser);
@@ -67,6 +70,34 @@ function RestApi(app) {
                 email: email
             });
         });
+    }
+
+    // Say Hello
+
+    function sendHelloMessage(req, res, next) {
+        var data = req.body;
+        var from = getFullEmail(data.email, data.name);
+        var to = 'contact@peer-say.com';
+        var locals = {
+            from: from,
+            to: to,
+            name: data.name,
+            message: data.message
+        };
+        var tpl = 'say-hello';
+        console.log('[AUTH] Sending [%s] email from [%s]', tpl, from);
+
+        mailer.send(tpl, locals); // async!
+
+        return res.json({ result: true });
+    }
+
+    function getFullEmail(email, name) {
+        var locals = {
+            name: name,
+            email: email
+        };
+        return swig.render('{{ name }} <{{ email }}>', {locals: locals});
     }
 
     // User

@@ -358,20 +358,20 @@
     <div class="col-xs-12 col-sm-8 col-md-8 col-lg-5">
         <h4 class="blue">Say Hello!</h4>
 
-        <form>
+        <form id="contact-form">
             <div class="row">
                 <!--Col1 - Name-->
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="form-group">
                         <label class="sr-only" for="contact-name">Name</label>
-                        <input type="text" class="form-control contacts-lg" placeholder="Name" id="contact-name">
+                        <input type="text" name="name" class="form-control contacts-lg" placeholder="Name" id="contact-name">
                     </div>
                 </div>
                 <!--Col1 - Email-->
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="form-group">
                         <label class="sr-only" for="contact-email">Name</label>
-                        <input type="email" class="form-control contacts-lg" placeholder="Email" id="contact-email">
+                        <input type="email" name="email" class="form-control contacts-lg" placeholder="Email" id="contact-email">
                     </div>
                 </div>
             </div>
@@ -379,14 +379,21 @@
                 <div class="col-xs-12">
                     <div class="form-group">
                         <label class="sr-only" for="contact-msg">Name</label>
-                        <textarea class="form-control contacts-lg" placeholder="Message" id="contact-msg"></textarea>
+                        <textarea name="message" class="form-control contacts-lg" placeholder="Message" id="contact-msg"></textarea>
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-default btn-lg pull-right">
+            <button type="button" class="btn btn-default btn-lg pull-right js-submit">
                 <span class="fa fa-envelope-o"></span>
                 Send message
             </button>
+            <span class="help-block progress">
+                <span class="sending">
+                    Sending message
+                    <img src="/images/reload.svg" alt="Progress">
+                </span>
+                <span class="sent">Message is sent</span>
+            </span>
         </form>
     </div>
     <!--Col 3 - Social-->
@@ -487,7 +494,7 @@
                                     </label>
                                     <input type="email" name="email" id="ev-email" class="form-control" placeholder="johh@example.com"
                                             required/>
-                                <span class="help-block">Required</span>
+                                    <span class="help-block">Required</span>
                                 </div>
                                 <!--Problems-->
                                 <div class="form-group">

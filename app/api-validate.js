@@ -20,8 +20,9 @@ function ApiValidate(app) {
         app.post('/api/auth/restore', jsonParser, validateEmailRequired);
         app.post('/api/auth/restore/complete', jsonParser, validateAuthRestoreComplete);
 
-        //Waiting-users
+        // Public (don't require auth)
         app.post('/api/waiting-users', jsonParser, validateEmailRequired);
+        app.post('/api/say-hello', jsonParser, validateSayHello);
 
         return V;
     }
@@ -101,6 +102,23 @@ function ApiValidate(app) {
         var schema = {
             code: Joi.string().alphanum().min(6).required(),
             password: Joi.string().min(6).required()
+        };
+
+        Joi.validate(data, schema, function (err) {
+            if (err) {
+                var msg = err.details[0].message;
+                return errRes.notValid(res, msg);
+            }
+            next();
+        });
+    }
+
+    function validateSayHello(req, res, next) {
+        var data = req.body;
+        var schema = {
+            email: Joi.string().email().required(),
+            name: Joi.string(),
+            message: Joi.string().required()
         };
 
         Joi.validate(data, schema, function (err) {

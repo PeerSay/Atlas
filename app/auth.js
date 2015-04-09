@@ -18,6 +18,7 @@ var constant = {
     SESS_RESTORE: 1000 * 60 * 20 // 20min
 };
 var defAppEntryUrl = '/projects';
+var companyEmail = 'PeerSay Team <team@peersay.com>';
 
 
 function Auth(app) {
@@ -424,14 +425,17 @@ function Auth(app) {
             '?email=' + encodeURIComponent(user.email) +
             "&id=" + encodeURIComponent(user.needVerify);
         var fullName = (user.name || {}).full || '';
+        var to = user.email;
         var locals = {
+            from: companyEmail,
+            to: to,
             name: fullName,
             url: verify_url
         };
         var tpl = 'account-activation';
-        console.log('[AUTH] Sending [%s] email to [%s], url=[%s]', tpl, user.email, verify_url);
+        console.log('[AUTH] Sending [%s] email to [%s], url=[%s]', tpl, to, verify_url);
 
-        mailer.send(user.email, tpl, locals); // async!
+        mailer.send(tpl, locals); // async!
         // TODO: err handling
     }
 
@@ -440,13 +444,16 @@ function Auth(app) {
     }
 
     function mailRestoreAsync(data) {
+        var to = data.email;
         var locals = {
+            from: companyEmail,
+            to: to,
             code: data.code
         };
         var tpl = 'restore-pwd';
-        console.log('[AUTH] Sending [%s] email to [%s], code=[%s]', tpl, data.email, data.code);
+        console.log('[AUTH] Sending [%s] email to [%s], code=[%s]', tpl, to, data.code);
 
-        mailer.send(data.email, tpl, locals); // async!
+        mailer.send(tpl, locals); // async!
         // TODO: err handling
     }
 

@@ -330,8 +330,26 @@ body {
       .make-sm-column(2.4)
     }
   }
-
 }
+
+// Contact form
+#contact-form {
+  textarea {
+    .resizable(vertical);
+    max-height: 120px;
+  }
+
+  .progress {
+    margin-top: 0;
+    span {
+      display: none;
+      line-height: 32px;
+    }
+    &.sending span.sending { display: inline-block; }
+    &.sent span.sent { display: inline-block; }
+  }
+}
+
 
 // Buttons
 .btn {

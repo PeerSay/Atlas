@@ -1,7 +1,7 @@
 $(function () {
     /*-----------------------------------------------
      Smooth-scroll to a section on anchor click
-    -------------------------------------------------*/
+     -------------------------------------------------*/
 
     $('a.page-scroll').on('click', function (event) {
         var menuOffsetTop = 80;
@@ -64,68 +64,49 @@ $(function () {
             backdrop: 'static',
             show: false
         })
-        .on('show.bs.modal', initForm)
-        .on('shown.bs.modal', initFormShown);
-    var $form = $('#reg-form').submit(submitForm);
-    var $submitBtn = $modal.find('.js-submit')
-        .click(function () {
-            $form.submit();
-        });
+        .on('show.bs.modal', initRegForm)
+        .on('shown.bs.modal', initRegFormShown);
+    var $regForm = $('#reg-form').submit(submitRegForm);
+    var $submitBtn = $modal.find('.js-submit').click(function () {
+        $regForm.submit();
+    });
     var $email = $('#ev-email').keyup(function () {
         toggleFormWarning(false);
     });
     var $pageEmail = $('#signup-email');
 
-    function initForm() {
+    function initRegForm() {
         $email.val($pageEmail.val().trim());
         toggleThanksPage(false);
     }
 
-    function initFormShown() {
-        $email.get(0).focus();
+    function initRegFormShown() {
+        $email.focus();
     }
 
-    function updatePage() {
+    function updatePageVal() {
         $pageEmail.val($email.val());
     }
 
-    function submitForm() {
+    function submitRegForm() {
         if (!validateForm()) {
             toggleFormWarning(true);
             return false;
         }
 
-        var path = "/api/waiting-users";
-        var data = getFormData();
-        console.log('>> POST: ', data);
 
-        $.ajax({
-            url: path,
-            type: "POST",
-            data: JSON.stringify(data),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (res) {
-                console.log('>> Response: ', res);
-                toggleThanksPage(true, res.email);
-                updatePage();
-            },
-            error: function () {
-                //TODO
+        var url = "/api/waiting-users";
+        submitForm($regForm, url, function (err, res) {
+            if (err) {
+                // todo?
+                return;
             }
+
+            toggleThanksPage(true, res.email);
+            updatePageVal();
         });
 
-        return false;
-    }
-
-    function getFormData() {
-        var arr = $form.serializeArray();
-        var result = {};
-
-        $.each(arr, function (i, o) {
-            result[o.name] = o.value;
-        });
-        return result;
+        return false; // prevent default
     }
 
     function validateForm() {
@@ -145,7 +126,7 @@ $(function () {
         if (on) {
             $slider.carousel(0);
             $group.addClass('has-error');
-            $email.get(0).focus();
+            $email.focus();
         }
         else {
             $group.removeClass('has-error');
@@ -221,4 +202,100 @@ $(function () {
             history.pushState("", document.title, window.location.pathname);
         }
     }
+
+    /*-----------------------------------------------
+     Contact - Send Email
+     -------------------------------------------------*/
+
+    var $contactForm = $('#contact-form').submit(submitContactForm);
+    var $contactFormBtn = $contactForm.find('.js-submit').click(function () {
+        $contactForm.submit();
+    });
+    var $progress = $contactForm.find('.progress');
+
+    function submitContactForm() {
+        if (!validateContactForm()) {
+            //toggleFormWarning(true);
+            return false;
+        }
+
+        toggleSendProgress('sending');
+        toggleSendProgress('sent', 1000);
+
+        var url = "/api/say-hello";
+        submitForm($contactForm, url, function (err, res) {
+            toggleSendProgress(false, 5000);
+
+            if (err) {
+                console.log('>>Err: ', err.xhr.responseText);
+                return;
+            }
+
+            // Nothing
+        });
+
+        return false; // prevent default
+    }
+
+    function validateContactForm() {
+        return true;
+    }
+
+    function toggleSendProgress(className, delay) {
+        var toggle = function () {
+            $progress.toggleClass('sending sent', false);
+            if (className) {
+                $progress.toggleClass(className, true);
+            }
+        };
+
+        if (delay) {
+            setTimeout(toggle, delay);
+        } else {
+            toggle();
+        }
+    }
+
+
+    /*-----------------------------------------------
+     Util
+     -------------------------------------------------*/
+
+    function submitForm($form, url, cb) {
+        var data = getFormData($form);
+        console.log('>> POST: ', data);
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                console.log('>> Response: ', res);
+                cb(null, res)
+            },
+            error: function (jqXHR, textStatus, errorThrown ) {
+                var err = {
+                    status: textStatus,
+                    httpStatus: errorThrown,
+                    xhr: jqXHR
+                };
+                cb(err, null);
+            }
+        });
+
+        //////
+
+        function getFormData($form) {
+            var arr = $form.serializeArray();
+            var result = {};
+
+            $.each(arr, function (i, o) {
+                result[o.name] = o.value;
+            });
+            return result;
+        }
+    }
+
 });

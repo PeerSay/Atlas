@@ -294,7 +294,7 @@ body {
     }
     .copyright {
       @media (min-width: @grid-float-breakpoint) {
-        margin-top: 150px;
+        margin-top: 190px;
       }
       color: @copy-color;
     }
@@ -330,8 +330,47 @@ body {
       .make-sm-column(2.4)
     }
   }
-
 }
+
+// Contact form
+#contact-form {
+  textarea {
+    .resizable(vertical);
+    max-height: 120px;
+  }
+
+  .progress {
+    margin-top: 0;
+    span {
+      display: none;
+      line-height: 32px;
+    }
+    &.sending span.sending { display: inline-block; }
+    &.sent span.sent { display: inline-block; }
+  }
+
+  .form-group {
+    position: relative;
+    margin-bottom: 20px;
+    .help-block {
+      display: none;
+      position: absolute;
+      right: 0; top: -25px;
+      font-size: 14px;
+      color: @state-danger-text;
+    }
+
+    &.email .help-block {
+      &.required { display: none; }
+      &.email { display: block; }
+    }
+    &.required .help-block {
+      &.required { display: block; }
+      &.email { display: none; }
+    }
+  }
+}
+
 
 // Buttons
 .btn {
@@ -396,7 +435,6 @@ a.social {
   }
 }
 
-
 //Panels
 .panel {
   &.transparent {
@@ -434,7 +472,6 @@ hr {
   }
   .modal-footer {
     min-height: 50px;
-    text-align: center;
   }
 
   // Carousel
@@ -477,7 +514,17 @@ hr {
     padding: 100px 0;
   }
 
-  .help-block {
-    color: @state-danger-text;
+  // Form validation
+  .form-group {
+    .help-block {
+      color: @state-danger-text;
+      // Required is always shown in this form
+      &.email { display: none; }
+    }
+
+    &.email .help-block {
+      &.required { display: none; }
+      &.email { display: block; }
+    }
   }
 }

@@ -23,6 +23,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 var agent = request.agent(app);
 
+var companyEmail = 'PeerSay Team <team@peersay.com>';
+
 // Mock config
 process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
 var config = require('../app/config');
@@ -207,7 +209,7 @@ describe('Auth', function () {
 
         it('should send restore-pwd email with restore key on POST /api/auth/restore', function (done) {
             mailerStub
-                .withArgs('a@a', 'restore-pwd', {code: '123'})
+                .withArgs('restore-pwd', {from: companyEmail, to: 'a@a', code: '123'})
                 .calledOnce.should.equal(true);
 
             agent

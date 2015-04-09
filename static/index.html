@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>PeerSay - Launching Soon</title>
+    <link rel="icon" href="images/PeerSayLogo65x65.png">
+    <title>PeerSay - Choosing Right</title>
     <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css">
     <!-- build:css css/index.css -->
     <link rel="stylesheet" href="/css/index.css">
@@ -104,7 +105,7 @@
             <form>
                 <a href="#" class="btn btn-warning btn-lg"
                         data-toggle="modal"
-                        data-target="#modal-eval">Start an Evaluation</a>
+                        data-target="#start">Start an Evaluation</a>
             </form>
         </div>
     </div>
@@ -136,11 +137,11 @@
                 <hr class="dark">
                 <p>Discover products you should consider</p>
             </div>
-            <span class="icon-lg icon-talk pos0" data-target=".content-talk"></span>
-            <span class="icon-lg icon-present pos1" data-target=".content-present"></span>
-            <span class="icon-lg icon-time pos2" data-target=".content-time"></span>
-            <span class="icon-lg icon-requirements pos3" data-target=".content-requirements"></span>
-            <span class="icon-lg icon-products pos4" data-target=".content-products"></span>
+            <span class="icon-lg lg-icon-talk pos0" data-target=".content-talk"></span>
+            <span class="icon-lg lg-icon-present pos1" data-target=".content-present"></span>
+            <span class="icon-lg lg-icon-time pos2" data-target=".content-time"></span>
+            <span class="icon-lg lg-icon-requirements pos3" data-target=".content-requirements"></span>
+            <span class="icon-lg lg-icon-products pos4" data-target=".content-products"></span>
         </div>
     </div>
 </div>
@@ -157,7 +158,7 @@
             </div>
             <a href="#" class="btn btn-warning"
                     data-toggle="modal"
-                    data-target="#modal-eval">Go</a>
+                    data-target="#start">Go</a>
         </form>
     </div>
 </div>
@@ -233,7 +234,7 @@
         <form>
             <a href="#" class="btn btn-warning btn-lg"
                     data-toggle="modal"
-                    data-target="#modal-eval">Start an Evaluation</a>
+                    data-target="#start">Start an Evaluation</a>
         </form>
     </div>
 </div>
@@ -260,7 +261,7 @@
             <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
                 <div class="panel dark">
                     <div class="panel-body text-center">
-                        <span class="icon-sm icon-requirements"></span>
+                        <span class="icon-sm sm-icon-requirements"></span>
                         <h5 class="white">Popular Requirements</h5>
                         <hr class="dark">
                         <p>Never miss an important criteria</p>
@@ -271,7 +272,7 @@
             <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
                 <div class="panel dark">
                     <div class="panel-body text-center">
-                        <span class="icon-sm icon-products"></span>
+                        <span class="icon-sm sm-icon-products"></span>
                         <h5 class="white">Relevant Products</h5>
                         <hr class="dark">
                         <p>Discover products you should consider</p>
@@ -282,7 +283,7 @@
             <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
                 <div class="panel dark">
                     <div class="panel-body text-center">
-                        <span class="icon-sm icon-talk"></span>
+                        <span class="icon-sm sm-icon-talk"></span>
                         <h5 class="white">Talk With Reference</h5>
                         <hr class="dark">
                         <p>Unbiased and objective reference users</p>
@@ -293,7 +294,7 @@
             <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
                 <div class="panel dark">
                     <div class="panel-body text-center">
-                        <span class="icon-sm icon-time"></span>
+                        <span class="icon-sm sm-icon-time"></span>
                         <h5 class="white">Save Time</h5>
                         <hr class="dark">
                         <p>From weeks to days</p>
@@ -304,7 +305,7 @@
             <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
                 <div class="panel dark">
                     <div class="panel-body text-center">
-                        <span class="icon-sm icon-present"></span>
+                        <span class="icon-sm sm-icon-present"></span>
                         <h5 class="white">Present to Manager</h5>
                         <hr class="dark">
                         <p>A report that managers love</p>
@@ -321,7 +322,7 @@
         <form>
             <a href="#" class="btn btn-warning btn-lg"
                     data-toggle="modal"
-                    data-target="#modal-eval">Start an Evaluation</a>
+                    data-target="#start">Start an Evaluation</a>
         </form>
     </div>
 </div>
@@ -357,20 +358,26 @@
     <div class="col-xs-12 col-sm-8 col-md-8 col-lg-5">
         <h4 class="blue">Say Hello!</h4>
 
-        <form>
+        <form id="contact-form">
             <div class="row">
                 <!--Col1 - Name-->
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="form-group">
                         <label class="sr-only" for="contact-name">Name</label>
-                        <input type="text" class="form-control contacts-lg" placeholder="Name" id="contact-name">
+                        <input type="text" name="name" class="form-control contacts-lg" placeholder="Name" id="contact-name"
+                                data-required="true">
+                        <div class="help-block required">Required</div>
                     </div>
                 </div>
                 <!--Col1 - Email-->
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="form-group">
                         <label class="sr-only" for="contact-email">Name</label>
-                        <input type="email" class="form-control contacts-lg" placeholder="Email" id="contact-email">
+                        <input type="email" name="email" class="form-control contacts-lg" placeholder="Email" id="contact-email"
+                                data-required="true"
+                                data-email="true">
+                        <div class="help-block required">Required</div>
+                        <div class="help-block email">Invalid email</div>
                     </div>
                 </div>
             </div>
@@ -378,14 +385,23 @@
                 <div class="col-xs-12">
                     <div class="form-group">
                         <label class="sr-only" for="contact-msg">Name</label>
-                        <textarea class="form-control contacts-lg" placeholder="Message" id="contact-msg"></textarea>
+                        <textarea name="message" class="form-control contacts-lg" placeholder="Message" id="contact-msg"
+                                data-required="true"></textarea>
+                        <div class="help-block required">Required</div>
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-default btn-lg pull-right">
+            <button type="button" class="btn btn-default btn-lg pull-right js-submit">
                 <span class="fa fa-envelope-o"></span>
                 Send message
             </button>
+            <span class="help-block progress">
+                <span class="sending">
+                    Sending message
+                    <img src="/images/reload.svg" alt="Progress">
+                </span>
+                <span class="sent">Message is sent</span>
+            </span>
         </form>
     </div>
     <!--Col 3 - Social-->
@@ -413,31 +429,24 @@
 
 <div class="row section section-black">
     <!--Col-1 - Legal-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 col-lg-offset-2 footer-col">
+    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-lg-offset-2 footer-col">
         <img class="footer-logo" src="/images/logo-bw-x105.png" width="105" height="105" alt="Logo">
 
         <p class="sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
             ut labore et dolore magna aliqua.</p>
     </div>
-    <!--Col-2 - Subscribe-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 footer-col">
-        <h6>Subscribe</h6>
-
-        <form class="form-inline">
-            <input type="email" class="form-control" placeholder="Email Address">
-        </form>
-        <p class="sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
-    </div>
-    <!--Col-3 - Menu-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 footer-col">
+    <!--Col-2 - Menu-->
+    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 footer-col">
         <h6>Home</h6>
         <ul class="list-unstyled footer-menu">
             <li><a href="#how-it-works" class="page-scroll">How it works</a></li>
             <li><a href="#contact" class="page-scroll">Contact</a></li>
+            <li><a href="#privacy-policy">Privacy Policy</a></li>
+            <li><a href="#terms">Terms and Conditions</a></li>
         </ul>
     </div>
-    <!--Col-4 - Copyright-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 footer-col">
+    <!--Col-3 - Copyright-->
+    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 footer-col">
         <p class="copyright sm">© 2015 PeerSay. All Rights Reserved.</p>
     </div>
 </div>
@@ -447,7 +456,7 @@
  Modal - Evaluation dialog
 ------------------------------------------->
 
-<div class="modal fade" id="modal-eval">
+<div class="modal fade js-deep-link" id="start">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -483,8 +492,10 @@
                                         Email address
                                     </label>
                                     <input type="email" name="email" id="ev-email" class="form-control" placeholder="johh@example.com"
-                                            required/>
-                                <span class="help-block">Required</span>
+                                            data-required="true"
+                                            data-email="true"/>
+                                    <span class="help-block required">Required</span>
+                                    <span class="help-block email">Invalid email</span>
                                 </div>
                                 <!--Problems-->
                                 <div class="form-group">
@@ -576,171 +587,43 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary js-submit">Show me relevant suggestions</button>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary js-submit">Show me relevant suggestions</button>
+                </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!----------------------------------------
+ Modal - Privacy Policy
+------------------------------------------->
+
+<div class="modal fade js-deep-link" id="privacy-policy" data-remote="privacy-policy.html">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!--Content injected here-->
+        </div>
+    </div>
+</div>
+
+<!----------------------------------------
+ Modal - Terms
+------------------------------------------->
+
+<div class="modal fade js-deep-link" id="terms" data-remote="terms.html">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!--Content injected here-->
         </div>
     </div>
 </div>
 
 <!--Scripts-->
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<script>
-    $(function () {
-
-        // Smooth-scroll to a section on click
-        //
-        $('a.page-scroll').on('click', function (event) {
-            var menuOffsetTop = 80;
-            var $anchor = $(this);
-            var uri = $anchor.attr('href');
-            uri = (uri !== '/') ? uri : '';
-            var newScrollTop = uri ? $(uri).offset().top - menuOffsetTop : 0;
-
-            $('html, body').stop().animate({scrollTop: newScrollTop}, 800, function () {
-                // XXX - this causes scroll in FF, which hides part of the header - #59
-                //window.location.hash = uri;
-            });
-
-            // Prevent location change
-            event.preventDefault();
-        });
-
-
-        // Circle Figure control
-        //
-        $('.icon-lg')
-                .hover(toggleContentFn(true), toggleContentFn(false));
-
-        function toggleContentFn(on) {
-            return function () {
-                var $target = $($(this).attr('data-target'));
-                $target.toggleClass('active', on);
-            };
-        }
-
-
-        // Modal: Slider
-        //
-        var $slider = $('#modal-slides').on('slide.bs.carousel', function (evt) {
-            toggleSliderControl(evt.direction);
-        });
-        var $controls = $slider.find('.carousel-control');
-        toggleSliderControl('right');
-
-        function toggleSliderControl(direction) {
-            var oppositeClass = {
-                left: '.right',
-                right: '.left'
-            };
-            $controls.show();
-            $controls.filter(oppositeClass[direction]).hide();
-        }
-
-
-        // Modal: Forms
-        //
-        var $modal = $('#modal-eval')
-                .modal({
-                    backdrop: 'static',
-                    show: false
-                })
-                .on('show.bs.modal', initForm);
-        var $form = $('#reg-form').submit(submitForm);
-        var $submitBtn = $modal.find('.js-submit')
-                .click(function () {
-                    $form.submit();
-                });
-        var $email = $('#ev-email').keyup(function () {
-            toggleFormWarning(false);
-        });
-        var $pageEmail = $('#signup-email');
-
-        function initForm() {
-            $email.val($pageEmail.val().trim());
-
-            toggleThanksPage(false);
-        }
-
-        function updatePage() {
-            $pageEmail.val($email.val());
-        }
-
-        function submitForm() {
-            if (!validateForm()) {
-                toggleFormWarning(true);
-                return false;
-            }
-
-            var path = "/api/waiting-users";
-            var data = getFormData();
-            console.log('>> POST: ', data);
-
-            $.ajax({
-                url: path,
-                type: "POST",
-                data: JSON.stringify(data),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (res) {
-                    console.log('>> Response: ', res);
-                    toggleThanksPage(true, res.email);
-                    updatePage();
-                },
-                error: function () {
-                    //TODO
-                }
-            });
-
-            return false;
-        }
-
-        function getFormData() {
-            var arr = $form.serializeArray();
-            var result = {};
-
-            $.each(arr, function (i, o) {
-                result[o.name] = o.value;
-            });
-            return result;
-        }
-
-        function validateForm() {
-            return validateEmail($email.val());
-        }
-
-        function validateEmail(val) {
-            val = val.trim();
-            if (!val) { return false; } // required!
-
-            var simpleEmailRe = /\S+@\S+\.\S+/;
-            return simpleEmailRe.test(val);
-        }
-
-        function toggleFormWarning(on) {
-            var $group = $email.closest('.form-group');
-            if (on) {
-                $slider.carousel(0);
-                $group.addClass('has-error');
-                $email.get(0).focus();
-            }
-            else {
-                $group.removeClass('has-error');
-            }
-        }
-
-        function toggleThanksPage(on, email) {
-            var $page = $modal.find('.thanks-page');
-
-            $submitBtn.toggle(!on);
-            $modal.find('.carousel').toggle(!on);
-
-            $page.toggle(on);
-            if (on) {
-                $page.find('.email-subst').text(email);
-            }
-        }
-    });
-</script>
+<!-- build:js js/index.js -->
+<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/index.js"></script>
+<!-- endbuild -->
 </body>
 </html>

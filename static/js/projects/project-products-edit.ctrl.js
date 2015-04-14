@@ -57,11 +57,12 @@ function ProjectProductsEditCtrl($scope, $stateParams, $timeout, Table, Wizard) 
             },
             {
                 selector: null, // virtual
-                columnModel: { field: '...', value: ''}, // addNew
+                columnModel: { field: 'Add', value: ''}, // addNew
                 column: {
                     editable: true,
                     placeholder: 'Add product...',
-                    last: true
+                    last: true,
+                    'add-column': true
                 },
                 cell: {
                     type: 'static',
@@ -118,12 +119,7 @@ function ProjectProductsEditCtrl($scope, $stateParams, $timeout, Table, Wizard) 
         addCol.edited = true; // invite to edit
     }
 
-
     /////////////////////////////
-
-    //TODO:
-    //m.savingData = false; // show indicator
-
 
     /*function onFullView() {
         var view = m.tableView;

@@ -82,11 +82,18 @@
         }
       }
       &.last {
-        width: 36px;
-        min-width: 36px;
-        max-width: 36px;
+        .width-full(36px);
+      }
+      &.add-column {
+        .width-full(50px);
         text-align: center;
         padding: 7px 5px;
+
+        a {
+          color: #999;
+          font-weight: normal;
+          font-style: italic;
+        }
       }
     }
 

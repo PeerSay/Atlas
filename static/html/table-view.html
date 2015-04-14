@@ -161,7 +161,7 @@
         </tr>
         </tbody>
         <!--Empty table row -->
-        <tr ng-show="!view.rows.length">
+        <tr ng-show="view.hasAddLink">
             <td class="attention">
                 <span class="clickable"
                         ng-click="view.addEmptyRow()">Click to add</span>

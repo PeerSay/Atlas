@@ -309,7 +309,8 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 'sort-desc': V.tableParams.isSortBy(col.key, 'desc'),
                 'editable': col.editable,
                 'edited': edited,
-                'last': col.last && !edited
+                'last': col.last && !edited,
+                'add-column': col['add-column'] && !edited
             };
         }
 

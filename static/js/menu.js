@@ -19,6 +19,8 @@ function MenuCtrl($state, User, Projects) {
     activate();
 
     function activate() {
+        if (!isLoggedState()) { return; }
+
         User.readUser()
             .then(function (user) {
                 m.user.displayName = user.name || user.email;
@@ -32,6 +34,10 @@ function MenuCtrl($state, User, Projects) {
                 // Go to state and prevent Back
                 $state.go('auth.login', null, { location: 'replace' });
             });
+    }
+
+    function isLoggedState() {
+        return $state.includes('project');
     }
 }
 

@@ -82,6 +82,7 @@ function ProjectRequirementsEditCtrl($scope, $stateParams, $timeout, Table, Wiza
         enabled: menuItemEnabled,
         doAction: menuDoAction
     };
+    m.tableView.hasAddLink = true;
     m.tableView.menu = m.menu; // expose to Table directive
 
     function menuDoAction(action) {

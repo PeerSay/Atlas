@@ -67,88 +67,91 @@
 <!----------------------------------------
  Slider + Circle Figure
 ------------------------------------------->
-<div class="row section section-slider" id="no-spy-top">
-    <!--Col #1: Controls & Slides-->
-    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 col-lg-offset-2 carousel slide" id="slider-container"
-            data-ride="carousel">
-        <div class="slider-controls">
-            <a href="#slider-container" class="btn up" role="button" data-slide="prev">
-                <span class="fa fa-chevron-up"></span>
-            </a>
-            <a href="#slider-container" class="btn down" role="button" data-slide="next">
-                <span class="fa fa-chevron-down"></span>
-            </a>
+<div class="section section-slider" id="no-spy-top">
+    <div class="col-wrapper">
+        <div class="row">
+            <!--Col #1: Controls & Slides-->
+            <div class="col-1-2 carousel slide" id="slider-container" data-ride="carousel">
+                <div class="slider-controls">
+                    <a href="#slider-container" class="btn up" role="button" data-slide="prev">
+                        <span class="fa fa-chevron-up"></span>
+                    </a>
+                    <a href="#slider-container" class="btn down" role="button" data-slide="next">
+                        <span class="fa fa-chevron-down"></span>
+                    </a>
 
-            <ul class="carousel-indicators">
-                <li class="bullet active" data-target="#slider-container" data-slide-to="0"></li>
-                <li class="bullet" data-target="#slider-container" data-slide-to="1"></li>
-                <li class="bullet" data-target="#slider-container" data-slide-to="2"></li>
-                <li class="bullet" data-target="#slider-container" data-slide-to="3"></li>
-            </ul>
-        </div>
-        <div class="slider-content">
-            <div class="carousel-inner">
-                <div class="item active">
-                    <p>Product evaluations done <strong>right</strong></p>
+                    <ul class="carousel-indicators">
+                        <li class="bullet active" data-target="#slider-container" data-slide-to="0"></li>
+                        <li class="bullet" data-target="#slider-container" data-slide-to="1"></li>
+                        <li class="bullet" data-target="#slider-container" data-slide-to="2"></li>
+                        <li class="bullet" data-target="#slider-container" data-slide-to="3"></li>
+                    </ul>
                 </div>
-                <div class="item">
-                    <p>Harnessing the <strong>wisdom</strong> of your Peers</p>
-                </div>
-                <div class="item">
-                    <p>Discovering <strong>relevant</strong> Products and Criteria</p>
-                </div>
-                <div class="item">
-                    <p>Guaranteeing your <strong>success</strong></p>
-                </div>
-            </div>
+                <div class="slider-content">
+                    <div class="carousel-inner">
+                        <div class="item active">
+                            <p>Product evaluations done <strong>right</strong></p>
+                        </div>
+                        <div class="item">
+                            <p>Harnessing the <strong>wisdom</strong> of your Peers</p>
+                        </div>
+                        <div class="item">
+                            <p>Discovering <strong>relevant</strong> Products and Criteria</p>
+                        </div>
+                        <div class="item">
+                            <p>Guaranteeing your <strong>success</strong></p>
+                        </div>
+                    </div>
 
-            <form>
-                <a href="#" class="btn btn-warning btn-lg"
-                        data-toggle="modal"
-                        data-target="#start">Start an Evaluation</a>
-            </form>
-        </div>
-    </div>
-    <!--Col #2: Circle Figure-->
-    <div class="hidden-xs hidden-sm col-md-6 col-lg-4">
-        <div class="circle-figure">
-            <div class="content-round content-talk">
-                <h5>Talk With Reference</h5>
-                <hr class="dark">
-                <p>Objective reference users</p>
+                    <form>
+                        <a href="#" class="btn btn-warning btn-lg"
+                                data-toggle="modal"
+                                data-target="#start">Start an Evaluation</a>
+                    </form>
+                </div>
             </div>
-            <div class="content-round content-present">
-                <h5>Present to Manager</h5>
-                <hr class="dark">
-                <p>A report that managers love</p>
+            <!--Col #2: Circle Figure-->
+            <div class="col-1-2 hidden-xs hidden-sm">
+                <div class="circle-figure">
+                    <div class="content-round content-talk">
+                        <h5>Talk With Reference</h5>
+                        <hr class="dark">
+                        <p>Objective reference users</p>
+                    </div>
+                    <div class="content-round content-present">
+                        <h5>Present to Manager</h5>
+                        <hr class="dark">
+                        <p>A report that managers love</p>
+                    </div>
+                    <div class="content-round content-time">
+                        <h5>Save Time</h5>
+                        <hr class="dark">
+                        <p>From several weeks to few    days</p>
+                    </div>
+                    <div class="content-round content-requirements">
+                        <h5>Popular Requirements</h5>
+                        <hr class="dark">
+                        <p>Never miss an important criteria</p>
+                    </div>
+                    <div class="content-round content-products">
+                        <h5>Relevant Products</h5>
+                        <hr class="dark">
+                        <p>Discover products you should consider</p>
+                    </div>
+                    <span class="icon-lg lg-icon-talk pos0" data-target=".content-talk"></span>
+                    <span class="icon-lg lg-icon-present pos1" data-target=".content-present"></span>
+                    <span class="icon-lg lg-icon-time pos2" data-target=".content-time"></span>
+                    <span class="icon-lg lg-icon-requirements pos3" data-target=".content-requirements"></span>
+                    <span class="icon-lg lg-icon-products pos4" data-target=".content-products"></span>
+                </div>
             </div>
-            <div class="content-round content-time">
-                <h5>Save Time</h5>
-                <hr class="dark">
-                <p>From several weeks to few    days</p>
-            </div>
-            <div class="content-round content-requirements">
-                <h5>Popular Requirements</h5>
-                <hr class="dark">
-                <p>Never miss an important criteria</p>
-            </div>
-            <div class="content-round content-products">
-                <h5>Relevant Products</h5>
-                <hr class="dark">
-                <p>Discover products you should consider</p>
-            </div>
-            <span class="icon-lg lg-icon-talk pos0" data-target=".content-talk"></span>
-            <span class="icon-lg lg-icon-present pos1" data-target=".content-present"></span>
-            <span class="icon-lg lg-icon-time pos2" data-target=".content-time"></span>
-            <span class="icon-lg lg-icon-requirements pos3" data-target=".content-requirements"></span>
-            <span class="icon-lg lg-icon-products pos4" data-target=".content-products"></span>
         </div>
     </div>
 </div>
 
 <!--Sign Up Form-->
-<div class="row section section-dark">
-    <div class="col-xs-12">
+<div class="section section-dark">
+    <div class="col-wrapper">
         <h3 class="text-center white dashed"><span>Sign up as a beta tester</span></h3>
 
         <form class="form-inline text-center">
@@ -168,69 +171,73 @@
 ------------------------------------------->
 
 <!--How it works - Title-->
-<div id="how-it-works" class="row section section-header section-white">
-    <div class="col-xs-12">
+<div id="how-it-works" class="section section-header section-white">
+    <div class="col-wrapper">
         <h2 class="text-center blue dashed"><span>This is how we do it</span></h2>
     </div>
 </div>
 
 <!--How it works - Content-->
-<div class="row section section-header section-blue">
-    <!--Col 1-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 col-lg-offset-2">
-        <div class="panel transparent">
-            <div class="panel-body text-center">
-                <span class="icon icon-online"></span>
-                <h4 class="dark">Online Platform</h4>
+<div class="section section-header section-blue">
+    <div class="col-wrapper">
+        <div class="row">
+            <!--Col 1-->
+            <div class="col-1-4">
+                <div class="panel transparent">
+                    <div class="panel-body text-center">
+                        <span class="icon icon-online"></span>
+                        <h4 class="dark">Online Platform</h4>
 
-                <p>Manage the evaluation process online. Always on, backed-up and secured.
-                    Evaluate, Choose and Present.</p>
+                        <p>Manage the evaluation process online. Always on, backed-up and secured.
+                            Evaluate, Choose and Present.</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <!--Col 2-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
-        <div class="panel transparent">
-            <div class="panel-body text-center">
-                <span class="icon icon-peer"></span>
-                <h4 class="dark">Peer Knowledge</h4>
+            <!--Col 2-->
+            <div class="col-1-4">
+                <div class="panel transparent">
+                    <div class="panel-body text-center">
+                        <span class="icon icon-peer"></span>
+                        <h4 class="dark">Peer Knowledge</h4>
 
-                <p>Communicate with teammates. Consult with colleagues. Get reference opinion on selected products.</p>
+                        <p>Communicate with teammates. Consult with colleagues. Get reference opinion on selected products.</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div class="clearfix visible-xs-block"></div>
+            <div class="clearfix visible-xs-block"></div>
 
-    <!--Col 3-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
-        <div class="panel transparent">
-            <div class="panel-body text-center">
-                <span class="icon icon-big-data"></span>
-                <h4 class="dark">Big Data Analysis</h4>
+            <!--Col 3-->
+            <div class="col-1-4">
+                <div class="panel transparent">
+                    <div class="panel-body text-center">
+                        <span class="icon icon-big-data"></span>
+                        <h4 class="dark">Big Data Analysis</h4>
 
-                <p>Statistical analytics on domain, products, industries and locations.
-                    Get only the relevant information!</p>
+                        <p>Statistical analytics on domain, products, industries and locations.
+                            Get only the relevant information!</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <!--Col 4-->
-    <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
-        <div class="panel transparent">
-            <div class="panel-body text-center">
-                <span class="icon icon-personal"></span>
-                <h4 class="dark">Tailored to You</h4>
+            <!--Col 4-->
+            <div class="col-1-4">
+                <div class="panel transparent">
+                    <div class="panel-body text-center">
+                        <span class="icon icon-personal"></span>
+                        <h4 class="dark">Tailored to You</h4>
 
-                <p>Relevant products for your organization. Near by resellers and consultants.
-                    Reference from your industry!</p>
+                        <p>Relevant products for your organization. Near by resellers and consultants.
+                            Reference from your industry!</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!--Sign Up Btn-->
-<div class="row section section-footer section-blue">
-    <div class="col-xs-12 text-center">
+<div class="section section-footer section-blue">
+    <div class="col-wrapper text-center">
         <form>
             <a href="#" class="btn btn-warning btn-lg"
                     data-toggle="modal"
@@ -244,21 +251,20 @@
 ------------------------------------------->
 
 <!--Evaluation - Title-->
-<div class="row section section-header section-white">
-    <div class="col-xs-12">
+<div class="section section-header section-white">
+    <div class="col-wrapper">
         <h2 class="black text-center">Evaluations Made Simple</h2>
-
         <p class="text-center">List the requirements and add products that you consider.
             PeerSay will bring you value from the first step throughout the evaluation process.</p>
     </div>
 </div>
 
 <!--Evaluation Content - 5 cols!-->
-<div class="row section section-footer section-white section-5col">
-    <div class="col-xs-6 col-xs-offset-3 col-sm-12 col-sm-offset-0 col-md-12 col-md-offset-0 col-lg-8 col-lg-offset-2">
+<div class="section section-footer section-white section-5col">
+    <div class="col-wrapper-5col">
         <div class="row">
             <!--Col 1-->
-            <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
+            <div class="col-1-5">
                 <div class="panel dark">
                     <div class="panel-body text-center">
                         <span class="icon-sm sm-icon-requirements"></span>
@@ -269,7 +275,7 @@
                 </div>
             </div>
             <!--Col 2-->
-            <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
+            <div class="col-1-5">
                 <div class="panel dark">
                     <div class="panel-body text-center">
                         <span class="icon-sm sm-icon-products"></span>
@@ -280,7 +286,7 @@
                 </div>
             </div>
             <!--Col 3-->
-            <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
+            <div class="col-1-5">
                 <div class="panel dark">
                     <div class="panel-body text-center">
                         <span class="icon-sm sm-icon-talk"></span>
@@ -291,7 +297,7 @@
                 </div>
             </div>
             <!--Col 4-->
-            <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
+            <div class="col-1-5">
                 <div class="panel dark">
                     <div class="panel-body text-center">
                         <span class="icon-sm sm-icon-time"></span>
@@ -302,7 +308,7 @@
                 </div>
             </div>
             <!--Col 5-->
-            <div class="col-xs-12 col-sm-5th col-md-5th col-lg-5th">
+            <div class="col-1-5">
                 <div class="panel dark">
                     <div class="panel-body text-center">
                         <span class="icon-sm sm-icon-present"></span>
@@ -317,8 +323,8 @@
 </div>
 
 <!--Sign Up Btn-->
-<div class="row section section-footer section-white">
-    <div class="col-xs-12 text-center">
+<div class="section section-footer section-white">
+    <div class="col-wrapper text-center">
         <form>
             <a href="#" class="btn btn-warning btn-lg"
                     data-toggle="modal"
@@ -332,35 +338,22 @@
 ------------------------------------------->
 
 <!--Contacts - Title-->
-<div id="contact" class="row section section-header section-grey">
-    <div class="col-xs-12">
+<div id="contact" class="section section-header section-grey">
+    <div class="col-wrapper">
         <h2 class="text-center blue dashed dashed-grey"><span>Get to Know us Better</span></h2>
-
         <p class="text-center">Don't be a stranger, drop us a line...</p>
     </div>
 </div>
 
 <!--Contacts - Form-->
-<div class="row section section-grey">
-    <!--Col 1 - Address-->
-    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2 col-lg-offset-2">
-        <!--div class="h4">Cras at ultrices erat, sed vulputate!</div-->
-        <!--p class="sm">2345 Dolripsum natrer, 1234,
-            Washington. United States.
-            (401) 1234 567</p-->
-
-        <!--p class="sm">contact@peer-say.com</p-->
-
-        <!--p class="sm">www.peer-say.com</p-->
-    </div>
-    <!--Col 2 - Form-->
-    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-5">
+<div class="section section-grey">
+    <div class="col-wrapper-narrow">
         <h4 class="blue">Say Hello!</h4>
 
         <form id="contact-form">
             <div class="row">
                 <!--Col1 - Name-->
-                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <div class="col-1-2">
                     <div class="form-group">
                         <label class="sr-only" for="contact-name">Name</label>
                         <input type="text" name="name" class="form-control contacts-lg" placeholder="Name" id="contact-name"
@@ -369,7 +362,7 @@
                     </div>
                 </div>
                 <!--Col1 - Email-->
-                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <div class="col-1-2">
                     <div class="form-group">
                         <label class="sr-only" for="contact-email">Name</label>
                         <input type="email" name="email" class="form-control contacts-lg" placeholder="Email" id="contact-email"
@@ -403,52 +396,37 @@
             </span>
         </form>
     </div>
-    <!--Col 3 - Social-->
-    <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1">
-        <!-- No social yet...
-        <ul class="list-unstyled">
-            <li>
-                <a href="#" class="social"><span class="fa fa-linkedin"></span></a>
-            </li>
-            <li>
-                <a href="#" class="social"><span class="fa fa-twitter"></span></a>
-            </li>
-            <li>
-                <a href="#" class="social"><span class="fa fa-google-plus"></span></a>
-            </li>
-            <li>
-                <a href="#" class="social"><span class="fa fa-facebook"></span></a>
-            </li>
-        </ul>
-        -->
-    </div>
 </div>
 
 <!----------------------------------------
  Footer
 ------------------------------------------->
 
-<div class="row section section-black">
-    <!--Col-1 - Home-->
-    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-lg-offset-2 footer-col">
-        <h6>Home</h6>
-        <ul class="list-unstyled footer-menu">
-            <li><a href="#how-it-works" class="page-scroll">How it works</a></li>
-            <li><a href="#contact" class="page-scroll">Contact</a></li>
-        </ul>
-    </div>
-    <!--Col-2 - Menu-->
-    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 footer-col">
-        <h6>Legal</h6>
-        <ul class="list-unstyled footer-menu">
-            <li><a href="#privacy-policy">Privacy Policy</a></li>
-            <li><a href="#terms">Terms and Conditions</a></li>
-        </ul>
-    </div>
-    <!--Col-3 - Copyright-->
-    <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 footer-col">
-        <img class="footer-logo" src="/images/logo-bw-x105.png" width="105" height="105" alt="Logo">
-        <p class="copyright sm">© 2015 PeerSay. All Rights Reserved.</p>
+<div class="section section-black">
+    <div class="col-wrapper">
+        <div class="row">
+            <!--Col-1 - Home-->
+            <div class="col-1-3 footer-col">
+                <h6>Home</h6>
+                <ul class="list-unstyled footer-menu">
+                    <li><a href="#how-it-works" class="page-scroll">How it works</a></li>
+                    <li><a href="#contact" class="page-scroll">Contact</a></li>
+                </ul>
+            </div>
+            <!--Col-2 - Menu-->
+            <div class="col-1-3 footer-col">
+                <h6>Legal</h6>
+                <ul class="list-unstyled footer-menu">
+                    <li><a href="#privacy-policy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms and Conditions</a></li>
+                </ul>
+            </div>
+            <!--Col-3 - Copyright-->
+            <div class="col-1-3 footer-col">
+                <img class="footer-logo" src="/images/logo-bw-x105.png" width="105" height="105" alt="Logo">
+                <p class="copyright sm">© 2015 PeerSay. All Rights Reserved.</p>
+            </div>
+        </div>
     </div>
 </div>
 </div>

@@ -92,6 +92,7 @@ $(function () {
         if (!validateRegForm()) {
             return false;
         }
+        updatePageVal();
 
         var url = "/api/waiting-users";
         submitForm($regForm, url, function (err, res) {
@@ -101,7 +102,7 @@ $(function () {
             }
 
             toggleThanksPage(true, res.email);
-            updatePageVal();
+            trackPage('/#start-thanks');
         });
 
         return false; // prevent default
@@ -186,6 +187,7 @@ $(function () {
 
         if (on) {
             window.location.hash = hash;
+            trackPage('/' + hash);
         } else {
             history.pushState("", document.title, window.location.pathname);
         }
@@ -262,7 +264,7 @@ $(function () {
     // Ajax
     function submitForm($form, url, cb) {
         var data = getFormData($form);
-        console.log('>> POST: ', data);
+        //console.log('>> POST: ', data);
 
         $.ajax({
             url: url,
@@ -271,7 +273,7 @@ $(function () {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (res) {
-                console.log('>> Response: ', res);
+                //console.log('>> Response: ', res);
                 cb(null, res)
             },
             error: function (jqXHR, textStatus, errorThrown ) {
@@ -337,6 +339,17 @@ $(function () {
             $group.addClass('has-error ' + errorClass);
         } else {
             $group.removeClass('has-error email required');
+        }
+    }
+
+    /*-----------------------------------------------
+     Analytics
+     -------------------------------------------------*/
+
+    function trackPage(page) {
+        console.log('>>GA tracking [%s] ', page, !window.ga ? '(skipped)' : '');
+        if (window.ga) {
+            ga('send', 'pageview', page);
         }
     }
 });

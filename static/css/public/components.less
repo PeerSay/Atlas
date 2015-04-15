@@ -154,24 +154,36 @@ body {
 
   // Right-side figure
   .circle-figure {
-    @outer-size: 400px;
-    @inner-size: 230px;
+    @outer-size-lg: 400px;
+    @outer-size-sm: 320px;
+    @inner-size-lg: 230px;
+    @inner-size-sm: 180px;
 
-    width: @outer-size;
-    height: @outer-size;
-    border-radius: 50%;
     margin: 0 auto;
     border: 3px dashed #fff;
+    .round(@outer-size-lg);
+    @media (max-width: @screen-lg) {
+      .square(@outer-size-sm);
+    }
 
     .content-round {
-      position: absolute;
-      width: @inner-size;
-      height: @inner-size;
-      top: 50%; left: 50%;
-      margin: -(@inner-size/2) 0 0 -(@inner-size/2);
-      border-radius: 50%;
       text-align: center;
+
+      .center-square(@inner-size-lg);
+      .round(@inner-size-lg);
       padding: 40px;
+      @media (max-width: @screen-lg) {
+        .center-square(@inner-size-sm);
+        .square(@inner-size-sm);
+        padding: 25px;
+        h5 {
+          margin-top: 5px;
+        }
+        hr {
+          margin-top: 0;
+          margin-bottom: 10px;
+        }
+      }
 
       opacity: 0;
       &.active { opacity: 1; }
@@ -192,30 +204,54 @@ body {
     /*Icons*/
     .icon-lg {
       @icon-size: 104px;
-      @icon-half-size: @icon-size / 2;
-      @icon-offset: @outer-size / 2;
 
-      position: absolute;
-      top: 50%; left: 50%;
-      margin-top: -@icon-half-size;
-      margin-left: -@icon-half-size;
+      .center-square(@icon-size);
       cursor: pointer;
 
-      .pos-around(@num) {
-        @angle: (360deg / 5) * @num;
-        /* Doesn't work:
-        .rotate(@angle);
-        .translate(0, -@icon-offset);
-        .rotate(-@angle);*/
-
-        // TODO - add prefixes
-        transform: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
+      .transform-x(@operations) {
+        // from Bootstrap cause applying transform with mixins one after one desn't work
+        -webkit-transform: @operations;
+            -ms-transform: @operations; // IE9 only
+             -o-transform: @operations;
+                transform: @operations;
       }
-      &.pos0 { .pos-around(0); }
-      &.pos1 { .pos-around(1); }
-      &.pos2 { .pos-around(2); }
-      &.pos3 { .pos-around(3); }
-      &.pos4 { .pos-around(4); }
+      .pos-around(@num, @sz) {
+        @icon-offset: @sz / 2;
+        @angle: (360deg / 5) * @num;
+        @oprations: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
+
+        .transform-x(@oprations);
+      }
+      &.pos0 {
+        .pos-around(0, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(0, @outer-size-sm);
+        }
+      }
+      &.pos1 {
+        .pos-around(1, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(1, @outer-size-sm);
+        }
+      }
+      &.pos2 {
+        .pos-around(2, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(2, @outer-size-sm);
+        }
+      }
+      &.pos3 {
+        .pos-around(3, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(3, @outer-size-sm);
+        }
+      }
+      &.pos4 {
+        .pos-around(4, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(4, @outer-size-sm);
+        }
+      }
     }
   }
 }

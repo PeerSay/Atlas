@@ -97,12 +97,12 @@ $(function () {
         var url = "/api/waiting-users";
         submitForm($regForm, url, function (err, res) {
             if (err) {
-                // todo?
+                trackPageEvent(null, 'Evaluation Submit Error');
                 return;
             }
 
             toggleThanksPage(true, res.email);
-            trackPage('/#start-thanks');
+            trackPageEvent('/#start-thanks', 'Evaluation submitted');
         });
 
         return false; // prevent default
@@ -183,11 +183,15 @@ $(function () {
 
     function toggleLocationHash(on, hash) {
         var same = (window.location.hash === hash);
+
+        if (same && on && hash === '#start') {
+            trackPageEvent('/#start', 'Start an Evaluation');
+        }
+
         if (same === !!on) { return; }
 
         if (on) {
             window.location.hash = hash;
-            trackPage('/' + hash);
         } else {
             history.pushState("", document.title, window.location.pathname);
         }
@@ -346,10 +350,15 @@ $(function () {
      Analytics
      -------------------------------------------------*/
 
-    function trackPage(page) {
-        console.log('>>GA tracking [%s] ', page, !window.ga ? '(skipped)' : '');
-        if (window.ga) {
-            ga('send', 'pageview', page);
+    function trackPageEvent(url, text) {
+        if (window.ga && url) {
+            ga('send', 'pageview', url);
         }
+
+        if (window.mixpanel && text) {
+            mixpanel.track(text);
+        }
+
+        //console.log('>> Tracking [%s] [%s]', url, text, !window.ga ? '(skipped)' : '');
     }
 });

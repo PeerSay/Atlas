@@ -10,7 +10,6 @@
 .round(@size) {
   .square(@size);
   border-radius: 50%;
-  line-height: @size;
 }
 
 .progress(@percent) {
@@ -51,4 +50,11 @@
   width: @sz;
   min-width: @sz;
   max-width: @sz;
+}
+
+/* Positioning */
+.center-square(@sz) {
+  position: absolute;
+  top: 50%; left: 50%;
+  margin: -(@sz/2) 0 0 -(@sz/2);
 }

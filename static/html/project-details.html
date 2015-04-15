@@ -42,7 +42,7 @@
                         ng-if="cm.project.startDate || cm.project.duration"
                         ng-click="cm.openEditDialog('startDate')">
                     <span ng-if="cm.project.startDate">Starting {{ cm.project.startDate }}</span>
-                    <span ng-if="cm.project.duration">for {{ cm.project.duration }}</span>
+                    <span ng-if="cm.project.duration">{{ cm.project.startDate ? 'f': 'F' }}or {{ cm.project.duration }}</span>
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
 

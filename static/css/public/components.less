@@ -154,24 +154,36 @@ body {
 
   // Right-side figure
   .circle-figure {
-    @outer-size: 400px;
-    @inner-size: 230px;
+    @outer-size-lg: 400px;
+    @outer-size-sm: 320px;
+    @inner-size-lg: 230px;
+    @inner-size-sm: 180px;
 
-    width: @outer-size;
-    height: @outer-size;
-    border-radius: 50%;
     margin: 0 auto;
     border: 3px dashed #fff;
+    .round(@outer-size-lg);
+    @media (max-width: @screen-lg) {
+      .square(@outer-size-sm);
+    }
 
     .content-round {
-      position: absolute;
-      width: @inner-size;
-      height: @inner-size;
-      top: 50%; left: 50%;
-      margin: -(@inner-size/2) 0 0 -(@inner-size/2);
-      border-radius: 50%;
       text-align: center;
+
+      .center-square(@inner-size-lg);
+      .round(@inner-size-lg);
       padding: 40px;
+      @media (max-width: @screen-lg) {
+        .center-square(@inner-size-sm);
+        .square(@inner-size-sm);
+        padding: 25px;
+        h5 {
+          margin-top: 5px;
+        }
+        hr {
+          margin-top: 0;
+          margin-bottom: 10px;
+        }
+      }
 
       opacity: 0;
       &.active { opacity: 1; }
@@ -192,30 +204,54 @@ body {
     /*Icons*/
     .icon-lg {
       @icon-size: 104px;
-      @icon-half-size: @icon-size / 2;
-      @icon-offset: @outer-size / 2;
 
-      position: absolute;
-      top: 50%; left: 50%;
-      margin-top: -@icon-half-size;
-      margin-left: -@icon-half-size;
+      .center-square(@icon-size);
       cursor: pointer;
 
-      .pos-around(@num) {
-        @angle: (360deg / 5) * @num;
-        /* Doesn't work:
-        .rotate(@angle);
-        .translate(0, -@icon-offset);
-        .rotate(-@angle);*/
-
-        // TODO - add prefixes
-        transform: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
+      .transform-x(@operations) {
+        // from Bootstrap cause applying transform with mixins one after one desn't work
+        -webkit-transform: @operations;
+            -ms-transform: @operations; // IE9 only
+             -o-transform: @operations;
+                transform: @operations;
       }
-      &.pos0 { .pos-around(0); }
-      &.pos1 { .pos-around(1); }
-      &.pos2 { .pos-around(2); }
-      &.pos3 { .pos-around(3); }
-      &.pos4 { .pos-around(4); }
+      .pos-around(@num, @sz) {
+        @icon-offset: @sz / 2;
+        @angle: (360deg / 5) * @num;
+        @oprations: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
+
+        .transform-x(@oprations);
+      }
+      &.pos0 {
+        .pos-around(0, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(0, @outer-size-sm);
+        }
+      }
+      &.pos1 {
+        .pos-around(1, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(1, @outer-size-sm);
+        }
+      }
+      &.pos2 {
+        .pos-around(2, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(2, @outer-size-sm);
+        }
+      }
+      &.pos3 {
+        .pos-around(3, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(3, @outer-size-sm);
+        }
+      }
+      &.pos4 {
+        .pos-around(4, @outer-size-lg);
+        @media (max-width: @screen-lg) {
+          .pos-around(4, @outer-size-sm);
+        }
+      }
     }
   }
 }
@@ -227,6 +263,50 @@ body {
 
 /*Sections*/
 .section {
+  .make-row();
+  .col-wrapper {
+    .make-lg-column(8);
+    .make-lg-column-offset(2);
+  }
+  .col-wrapper-5col {
+    .make-xs-column(6);
+    .make-xs-column-offset(3);
+    .make-sm-column(12);
+    .make-sm-column-offset(0);
+    .make-md-column(12);
+    .make-md-column-offset(0);
+    .make-lg-column(8);
+    .make-lg-column-offset(2);
+  }
+  .col-wrapper-narrow {
+    .make-sm-column(10);
+    .make-sm-column-offset(1);
+    .make-md-column(8);
+    .make-md-column-offset(2);
+    .make-lg-column(6);
+    .make-lg-column-offset(3);
+  }
+  .col-1-2 {
+    .make-md-column(6);
+  }
+  .col-1-3 {
+    .make-sm-column(4);
+  }
+  .col-1-4 {
+    .make-sm-column(6);
+    .make-md-column(3);
+    .make-lg-column(3);
+  }
+  /*
+     5 column layout - courtesy:
+     http://stackoverflow.com/questions/10387740/five-equal-columns-in-twitter-bootstrap/22799354#22799354
+    */
+  .col-1-5 {
+    .make-lg-column(2.4);
+    .make-md-column(2.4);
+    .make-sm-column(2.4);
+  }
+
   padding-top: 60px;
   padding-bottom: 50px;
   &.section-header {
@@ -292,12 +372,14 @@ body {
         padding: 0 0 0 50px;
       }
     }
+    /*
     .copyright {
       @media (min-width: @grid-float-breakpoint) {
         margin-top: 190px;
       }
       color: @copy-color;
     }
+    */
   }
 
   &.section-grey {
@@ -315,19 +397,6 @@ body {
           padding: 30px 10% 20px;
         }
       }
-    }
-    /*
-     5 column layout - courtesy:
-     http://stackoverflow.com/questions/10387740/five-equal-columns-in-twitter-bootstrap/22799354#22799354
-    */
-    .col-lg-5th {
-      .make-lg-column(2.4)
-    }
-    .col-md-5th {
-      .make-md-column(2.4)
-    }
-    .col-sm-5th {
-      .make-sm-column(2.4)
     }
   }
 }
@@ -406,14 +475,14 @@ a {
   }
 }
 
-a.social {
+/*a.social {
   font-size: 20px;
   line-height: 40px;
   color: @icon-grey-color;
   &:hover {
     color: @icon-grey-color-hover;
   }
-}
+}*/
 
 //Footer
 .footer-logo {
@@ -425,7 +494,7 @@ a.social {
   }
 }
 .footer-col {
-  margin-bottom: 20px;
+  margin-bottom: 80px;
 }
 
 /*Forms/Inputs*/

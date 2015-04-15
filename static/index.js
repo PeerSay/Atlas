@@ -92,16 +92,17 @@ $(function () {
         if (!validateRegForm()) {
             return false;
         }
+        updatePageVal();
 
         var url = "/api/waiting-users";
         submitForm($regForm, url, function (err, res) {
             if (err) {
-                // todo?
+                trackPageEvent(null, 'Evaluation Submit Error');
                 return;
             }
 
             toggleThanksPage(true, res.email);
-            updatePageVal();
+            trackPageEvent('/#start-thanks', 'Evaluation submitted');
         });
 
         return false; // prevent default
@@ -182,6 +183,12 @@ $(function () {
 
     function toggleLocationHash(on, hash) {
         var same = (window.location.hash === hash);
+
+        if (on && hash === '#start') {
+            trackPageEvent('/#start', 'Start an Evaluation');
+            trackGoogleConversion();
+        }
+
         if (same === !!on) { return; }
 
         if (on) {
@@ -262,7 +269,7 @@ $(function () {
     // Ajax
     function submitForm($form, url, cb) {
         var data = getFormData($form);
-        console.log('>> POST: ', data);
+        //console.log('>> POST: ', data);
 
         $.ajax({
             url: url,
@@ -271,7 +278,7 @@ $(function () {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (res) {
-                console.log('>> Response: ', res);
+                //console.log('>> Response: ', res);
                 cb(null, res)
             },
             error: function (jqXHR, textStatus, errorThrown ) {
@@ -338,5 +345,37 @@ $(function () {
         } else {
             $group.removeClass('has-error email required');
         }
+    }
+
+    /*-----------------------------------------------
+     Analytics
+     -------------------------------------------------*/
+
+    function trackPageEvent(url, text) {
+        if (window.ga && url) {
+            ga('send', 'pageview', url);
+        }
+        if (window.mixpanel && text) {
+            mixpanel.track(text);
+        }
+        console.log('>> Tracking [%s] [%s]', url, text, !window.ga ? '(skipped)' : '');
+    }
+
+    function trackGoogleConversion() {
+        var w = window;
+        if (w.google_conversion_id) { return; }
+
+        w.google_remarketing_only = false;
+        w.google_conversion_language = "en";
+        w.google_conversion_format = "3";
+        w.google_conversion_color = "ffffff";
+        w.google_conversion_label = "d4AmCNzWgVoQ166ryAM";
+
+        // Trick by: http://articles.adamwrobel.com/2010/12/23/trigger-adwords-conversion-on-javascript-event
+        // Not needed by new version of conversion.js? TODO - test different browsers.
+        /*document.write = function(text) {
+            $('body').append(text);
+        };*/
+        $.getScript('//www.googleadservices.com/pagead/conversion.js');
     }
 });

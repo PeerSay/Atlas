@@ -184,8 +184,9 @@ $(function () {
     function toggleLocationHash(on, hash) {
         var same = (window.location.hash === hash);
 
-        if (same && on && hash === '#start') {
+        if (on && hash === '#start') {
             trackPageEvent('/#start', 'Start an Evaluation');
+            trackGoogleConversion();
         }
 
         if (same === !!on) { return; }
@@ -354,11 +355,27 @@ $(function () {
         if (window.ga && url) {
             ga('send', 'pageview', url);
         }
-
         if (window.mixpanel && text) {
             mixpanel.track(text);
         }
+        console.log('>> Tracking [%s] [%s]', url, text, !window.ga ? '(skipped)' : '');
+    }
 
-        //console.log('>> Tracking [%s] [%s]', url, text, !window.ga ? '(skipped)' : '');
+    function trackGoogleConversion() {
+        var w = window;
+        if (w.google_conversion_id) { return; }
+
+        w.google_remarketing_only = false;
+        w.google_conversion_language = "en";
+        w.google_conversion_format = "3";
+        w.google_conversion_color = "ffffff";
+        w.google_conversion_label = "d4AmCNzWgVoQ166ryAM";
+
+        // Trick by: http://articles.adamwrobel.com/2010/12/23/trigger-adwords-conversion-on-javascript-event
+        // Not needed by new version of conversion.js? TODO - test different browsers.
+        /*document.write = function(text) {
+            $('body').append(text);
+        };*/
+        $.getScript('//www.googleadservices.com/pagead/conversion.js');
     }
 });

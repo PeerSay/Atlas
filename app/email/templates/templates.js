@@ -7,7 +7,7 @@ function getTemplateFile(subdir) {
 }
 
 function getTemplateStr(str) {
-    return swig.precompile(str);
+    return swig.compile(str, {autoescape: false});
 }
 
 

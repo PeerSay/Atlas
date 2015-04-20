@@ -80,6 +80,7 @@ body {
 /* Slider */
 .section-slider {
   @slider-height: 300px;
+  @slider-height-xs: 250px;
 
   .col-slider-controls {
     .make-xs-column(12);
@@ -161,9 +162,12 @@ body {
 
   .slider-content {
     position: relative;
-    height: @slider-height;
-    margin: 0 -15px;
+    height: @slider-height-xs;
+    @media (min-width: @grid-float-breakpoint) {
+      height: @slider-height;
+    }
 
+    margin: 0 -15px;
     .box-shadow(~"none");
     color: #fff;
     background-color: @slider-content-bg;
@@ -187,7 +191,7 @@ body {
       }
 
       .item {
-        padding: 20px;
+        padding: 0 15px;
         @media (min-width: @grid-float-breakpoint) {
           padding: 40px 15% 0 50px;
         }
@@ -201,7 +205,7 @@ body {
     }
     form {
       position: absolute;
-      .size(100%, 120px);
+      .size(100%, 110px);
       bottom: 0; left: 0;
       text-align: center;
     }
@@ -575,7 +579,10 @@ hr {
 //
 .modal-dialog {
   font-size: 14px;
-  margin-top: 60px;
+  @media (min-width: @grid-float-breakpoint) {
+    margin-top: 60px;
+  }
+
   .modal-header {
     min-height: 50px;
   }
@@ -599,11 +606,11 @@ hr {
         background: darken(@brand-primary, 10%);
       }
       &.left {
-        left: -45px;
+        left: -40px;
         border-radius: 3px 0 0 3px;
       }
       &.right {
-        right: -45px;
+        right: -40px;
         border-radius: 0 3px 3px 0;
       }
     }

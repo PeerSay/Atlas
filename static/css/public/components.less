@@ -28,6 +28,12 @@ body {
 
   /* Nav Links */
   .navbar-nav {
+    &.navbar-left {
+      margin-bottom: 0;
+    }
+    &.navbar-right {
+      margin-top: 0;
+    }
     @media (min-width: @grid-float-breakpoint) {
       &.navbar-left {
         position: absolute;
@@ -61,6 +67,7 @@ body {
     // Hack from here: http://stackoverflow.com/questions/14511045/twitter-bootstrap-scrollspy-not-working-at-all
     > li.ignore {
       visibility: hidden;
+      height: 1px;
     }
   }
 

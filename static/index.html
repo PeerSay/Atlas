@@ -75,42 +75,50 @@
         <div class="row">
             <!--Col #1: Controls & Slides-->
             <div class="col-1-2 carousel slide" id="slider-container" data-ride="carousel">
-                <div class="slider-controls">
-                    <a href="#slider-container" class="btn up" role="button" data-slide="prev">
-                        <span class="fa fa-chevron-up"></span>
-                    </a>
-                    <a href="#slider-container" class="btn down" role="button" data-slide="next">
-                        <span class="fa fa-chevron-down"></span>
-                    </a>
+                <div class="row">
+                    <!--Content-->
+                    <div class="col-slider-content">
+                        <div class="slider-content">
+                            <div class="carousel-inner">
+                                <div class="item active">
+                                    <p>Product evaluations done <strong class="large">right</strong></p>
+                                </div>
+                                <div class="item">
+                                    <p>Using the <strong class="large">wisdom</strong> of your Peers</p>
+                                </div>
+                                <div class="item">
+                                    <p>Finding <strong class="large">relevant</strong> Products and Criteria</p>
+                                </div>
+                                <div class="item">
+                                    <p>Guaranteeing your <strong class="large">success</strong></p>
+                                </div>
+                            </div>
 
-                    <ul class="carousel-indicators">
-                        <li class="bullet active" data-target="#slider-container" data-slide-to="0"></li>
-                        <li class="bullet" data-target="#slider-container" data-slide-to="1"></li>
-                        <li class="bullet" data-target="#slider-container" data-slide-to="2"></li>
-                        <li class="bullet" data-target="#slider-container" data-slide-to="3"></li>
-                    </ul>
-                </div>
-                <div class="slider-content">
-                    <div class="carousel-inner">
-                        <div class="item active">
-                            <p>Product evaluations done <strong class="large">right</strong></p>
-                        </div>
-                        <div class="item">
-                            <p>Using the <strong class="large">wisdom</strong> of your Peers</p>
-                        </div>
-                        <div class="item">
-                            <p>Finding <strong class="large">relevant</strong> Products and Criteria</p>
-                        </div>
-                        <div class="item">
-                            <p>Guaranteeing your <strong class="large">success</strong></p>
+                            <form>
+                                <a href="#" class="btn btn-warning btn-lg"
+                                        data-toggle="modal"
+                                        data-target="#start">Start an Evaluation</a>
+                            </form>
                         </div>
                     </div>
+                    <!--Controls Col-->
+                    <div class="col-slider-controls">
+                        <div class="slider-controls">
+                            <a href="#slider-container" class="btn up" role="button" data-slide="prev">
+                                <span class="fa fa-chevron-up"></span>
+                            </a>
+                            <a href="#slider-container" class="btn down" role="button" data-slide="next">
+                                <span class="fa fa-chevron-down"></span>
+                            </a>
 
-                    <form>
-                        <a href="#" class="btn btn-warning btn-lg"
-                                data-toggle="modal"
-                                data-target="#start">Start an Evaluation</a>
-                    </form>
+                            <ul class="carousel-indicators">
+                                <li class="bullet active" data-target="#slider-container" data-slide-to="0"></li>
+                                <li class="bullet" data-target="#slider-container" data-slide-to="1"></li>
+                                <li class="bullet" data-target="#slider-container" data-slide-to="2"></li>
+                                <li class="bullet" data-target="#slider-container" data-slide-to="3"></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!--Col #2: Circle Figure-->
@@ -427,7 +435,7 @@
             <!--Col-3 - Copyright-->
             <div class="col-1-3 footer-col">
                 <img class="footer-logo" src="/images/logo-bw-x105.png" width="105" height="105" alt="Logo">
-                <p class="copyright sm">© 2015 PeerSay. All Rights Reserved.</p>
+                <p class="sm">© 2015 PeerSay. All Rights Reserved.</p>
             </div>
         </div>
     </div>

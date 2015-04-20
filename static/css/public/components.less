@@ -64,11 +64,6 @@ body {
     }
   }
 
-  .navbar-collapse {
-    // Hack - not sure why Bootstrap fails/refuses to do that!
-    overflow-y: hidden;
-  }
-
   // Navbar toggle
   .navbar-toggle {
     background-color: @brand-primary;
@@ -77,44 +72,70 @@ body {
 
 /* Slider */
 .section-slider {
-  //Controls
-
   @slider-height: 300px;
 
+  .col-slider-controls {
+    .make-xs-column(12);
+    .make-sm-column(2);
+    .make-sm-column-pull(10);
+  }
+
+  //Controls
   .slider-controls {
     position: relative;
-    float: left;
-    height: @slider-height;
-    width: 80px;
+    height: 80px;
+    @media (min-width: @grid-float-breakpoint) {
+      float: left;
+      .size(80px, @slider-height);
+    }
+
+    padding: 19px;
     border: 1px solid @slider-line-color;
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 5px;
 
     .btn {
-      position: absolute;
       left: 20px;
       color: @slider-btn-color;
       background: transparent;
       border-radius: 50%;
       border: 1px solid @slider-btn-color;
+
+      transform: rotate(-90deg);
+      @media (min-width: @grid-float-breakpoint) {
+        transform: none;
+      }
+
       &.up {
-        top: 20px; bottom: auto;
+        float: left;
       }
       &.down {
-        top: auto; bottom: 20px;
+        float: right;
+        @media (min-width: @grid-float-breakpoint) {
+          margin-top: 180px;
+        }
       }
     }
 
     ul.carousel-indicators {
-      top: 90px; bottom: auto;
-      left: 0;
-      padding: 0 33px;
-      margin: 0;
+      position: static;
+      width: 140px;
+      margin: 0 auto;
+      padding: 13px 0;
+      @media (min-width: @grid-float-breakpoint) {
+        position: absolute;
+        width: 1px;
+        top: 50%; left: 0;
+        margin: -65px 0 0 32px;
+      }
+
       .bullet {
         width: 15px; height: 15px;
-        margin: 0 0 15px;
+        margin: 0 15px 10px 0;
         border-radius: 50%;
         &:last-of-type {
-          margin-bottom: 0;
+          margin-top: 0;
+          margin-right: 0;
         }
         border: 2px solid #fff;
         &.active {
@@ -125,31 +146,57 @@ body {
   }
 
   // Content
+  .col-slider-content {
+    .make-xs-column(12);
+    .make-sm-column(10);
+    .make-sm-column-push(2);
+  }
+
   .slider-content {
     position: relative;
     height: @slider-height;
-    width: 450px;
-    margin: 0 30px 0 100px;
-    border-radius: 3px;
+    margin: 0 -15px;
+
     .box-shadow(~"none");
     color: #fff;
     background-color: @slider-content-bg;
     background-image: url('/images/logo-fig-x250.png');
     background-repeat: no-repeat;
-    background-position: top -15px right -20px;
+    background-position: top 0 right -20px;
 
-    .item {
-      padding: 40px 30% 0 50px;
-      p {
-        margin-bottom: 40px;
-        font-size: 25px;
-        line-height: 1.5;
+    @media (min-width: @grid-float-breakpoint) {
+      border-radius: 3px;
+      background-position: top -15px right -20px;
+      margin: 0;
+    }
+
+    .carousel-inner {
+      margin: 0 auto;
+      width: 280px;
+      text-align: center;
+      @media (min-width: @grid-float-breakpoint) {
+        width: 360px;
+        text-align: left;
+      }
+
+      .item {
+        padding: 20px;
+        @media (min-width: @grid-float-breakpoint) {
+          padding: 40px 15% 0 50px;
+        }
+
+        p {
+          margin-bottom: 40px;
+          font-size: 25px;
+          line-height: 1.5;
+        }
       }
     }
     form {
       position: absolute;
-      bottom: 0;
-      margin: 0 0 50px 50px;
+      .size(100%, 120px);
+      bottom: 0; left: 0;
+      text-align: center;
     }
   }
 
@@ -209,18 +256,10 @@ body {
       .center-square(@icon-size);
       cursor: pointer;
 
-      .transform-x(@operations) {
-        // from Bootstrap cause applying transform with mixins one after one desn't work
-        -webkit-transform: @operations;
-            -ms-transform: @operations; // IE9 only
-             -o-transform: @operations;
-                transform: @operations;
-      }
       .pos-around(@num, @sz) {
         @icon-offset: @sz / 2;
         @angle: (360deg / 5) * @num;
         @oprations: rotate(@angle) translateY(-@icon-offset) rotate(-@angle);
-
         .transform-x(@oprations);
       }
       &.pos0 {
@@ -270,8 +309,8 @@ body {
     .make-lg-column-offset(2);
   }
   .col-wrapper-5col {
-    .make-xs-column(6);
-    .make-xs-column-offset(3);
+    .make-xs-column(12*6/10);
+    .make-xs-column-offset(12*2/10);
     .make-sm-column(12);
     .make-sm-column-offset(0);
     .make-md-column(12);
@@ -318,7 +357,11 @@ body {
   }
 
   &.section-slider {
-    background-color: @brand-primary;
+    background-color: @slider-content-bg;
+    @media (min-width: @grid-float-breakpoint) {
+      background-color: @brand-primary;
+    }
+
     @media screen and (min-width: @screen-sm-min) {
       padding-top:    (@jumbotron-padding * 3.25);
       padding-bottom: (@jumbotron-padding * 3.25);
@@ -373,14 +416,6 @@ body {
         padding: 0 0 0 50px;
       }
     }
-    /*
-    .copyright {
-      @media (min-width: @grid-float-breakpoint) {
-        margin-top: 190px;
-      }
-      color: @copy-color;
-    }
-    */
   }
 
   &.section-grey {
@@ -572,7 +607,7 @@ hr {
 
   textarea {
     .resizable(vertical);
-    max-height: 120px;
+    max-height: 125px;
   }
 
   .control-label {

@@ -58,3 +58,12 @@
   top: 50%; left: 50%;
   margin: -(@sz/2) 0 0 -(@sz/2);
 }
+
+/* Prefixes*/
+.transform-x(@operations) {
+  // from Bootstrap cause applying transform with mixins one after one doesn't work
+  -webkit-transform: @operations;
+  -ms-transform: @operations; // IE9 only
+  -o-transform: @operations;
+  transform: @operations;
+}

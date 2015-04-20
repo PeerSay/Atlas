@@ -78,20 +78,23 @@ h2, h3, h4, h5 {
 
 // Utility: adds dashed decorations to headers
 // Requires header to have content in <span> child
+// Note: non-mobile only due to fixed width
 .dashed(@width, @height, @bg, @line-style) {
-  position: relative;
-  &:before {
-    content: "";
-    position: absolute;
-    width: @width;
-    left: 50%;
-    top: @height / 2;
-    margin-left: -(@width / 2);
-    border-bottom: @line-style;
-  }
-  span {
+  @media (min-width: @grid-float-breakpoint) {
     position: relative;
-    padding: 0 18px;
-    background: @bg;
+    &:before {
+      content: "";
+      position: absolute;
+      width: @width;
+      left: 50%;
+      top: @height / 2;
+      margin-left: -(@width / 2);
+      border-bottom: @line-style;
+    }
+    span {
+      position: relative;
+      padding: 0 18px;
+      background: @bg;
+    }
   }
 }

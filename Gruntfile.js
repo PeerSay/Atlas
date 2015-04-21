@@ -184,7 +184,7 @@ module.exports = function (grunt) {
                     'bower_components/font-awesome/fonts/*.*',
                     'html/*.html',
                     'fonts/*.{ttf,otf}',
-                    'images/**/*.{png,jpg,gif}'
+                    'images/{,*/}*.{png,jpg,gif}'
                 ],
                 dest: 'dist/'
             },
@@ -206,12 +206,10 @@ module.exports = function (grunt) {
                     parseTag: 'htmlbuild', // avoid conflict with usemin
                     scripts: {
                         ga: ['static/ga.js'],
-                        mixpanel: ['static/mixpanel.js'],
-                        GoogleConversion: ['static/GoogleConversion.js']
+                        mixpanel: ['static/mixpanel.js']
                     },
                     sections: {
-                        GoogleRemarketing: ['static/GoogleRemarketing.html'],
-                        GoogleRemarketingWithConversion: ['static/GoogleRemarketingWithConversion.html']
+                        GoogleRemarketing: ['static/GoogleRemarketing.html']
                     }
                 }
             }

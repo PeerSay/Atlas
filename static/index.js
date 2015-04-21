@@ -369,19 +369,13 @@ $(function () {
 
     function trackGoogleConversion() {
         var w = window;
-        if (w.google_conversion_id) { return; }
+        if (typeof w.google_conversion_id === 'undefined') { return; }
 
-        w.google_remarketing_only = false;
-        w.google_conversion_language = "en";
-        w.google_conversion_format = "3";
-        w.google_conversion_color = "ffffff";
-        w.google_conversion_label = "d4AmCNzWgVoQ166ryAM";
-
-        // Trick by: http://articles.adamwrobel.com/2010/12/23/trigger-adwords-conversion-on-javascript-event
-        // Not needed by new version of conversion.js? TODO - test different browsers.
-        /*document.write = function(text) {
-            $('body').append(text);
-        };*/
-        $.getScript('//www.googleadservices.com/pagead/conversion.js');
+        // Courtesy by Oz Wintrob
+        var google_conversion_id = 957011799;
+        var google_conversion_label = "d4AmCNzWgVoQ166ryAM";
+        var image = new Image(1, 1);
+        image.src = "//www.googleadservices.com/pagead/conversion/" + google_conversion_id
+            + "/?label=" + google_conversion_label;
     }
 });

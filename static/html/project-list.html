@@ -6,11 +6,12 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in m.projects">
-            <a class="panel panel-default tile" href="/projects/{{prj.id}}">
+            <a class="panel panel-default tile" ui-sref="project.details({  projectId: prj.id })">
                 <div class="panel-body">
-                    <h4 class="name">{{prj.title}}</h4>
+                    <h4 class="name">{{ prj.title }}</h4>
                 </div>
             </a>
+            <!--Menu-->
             <div class="btn-menu-wrap bottom">
                 <div class="btn-group menu" ng-click="$event.preventDefault();">
                     <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
@@ -18,7 +19,11 @@
                         <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li role="presentation" class="disabled">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" ui-sref="project.details({  projectId: prj.id })">Edit</a>
+                        </li>
+                        <li role="presentation" class="divider"></li>
+                        <!--<li role="presentation" class="disabled">
                             <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
                         </li>
                         <li role="presentation" class="disabled">
@@ -27,7 +32,7 @@
                         <li role="presentation" class="disabled">
                             <a role="menuitem" tabindex="-1" href="#">Debrief</a>
                         </li>
-                        <li role="presentation" class="divider"></li>
+                        <li role="presentation" class="divider"></li>-->
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj.id)">Remove</a>
                         </li>

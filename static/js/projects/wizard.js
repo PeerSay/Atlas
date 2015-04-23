@@ -77,6 +77,7 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
 
     function load(projectId) {
         W.current.projectId = projectId;
+
         return Projects.readProjectProgress(projectId)
             .then(function (res) {
                 var curStepNum = W.current.stepNum = String(res.result.progress);
@@ -91,8 +92,11 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
                 });
 
                 if ($stateParams.step !== curStepNum) {
-                    // Fixing step num loaded from server
-                    $state.go('project.details.steps', {step: curStepNum}, {location: 'replace'});
+                    // Due to replace, we need to make sure that previous state change is complete,
+                    // thus deferring the call
+                    $timeout(function () {
+                        $state.go('project.details.steps', {step: curStepNum}, {location: 'replace'});
+                    }, 0);
                 }
             });
     }
@@ -108,7 +112,7 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
         next({to: step, child: true}, {edit: field});
     }
 
-    function closeDialog(step) {
+    function closeDialog() {
         if (!$state.is('project.details.steps')) {
             // Can be closed already by navigating Back => then no need to change $state
             $state.go('^');

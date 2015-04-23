@@ -101,7 +101,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             resolve: {
                 Wizard: 'Wizard'
             },
-            onEnter: ['$stateParams', '$state', '$timeout', 'Wizard', function($stateParams, $state, $timeout, Wizard){
+            onEnter: ['$stateParams', 'Wizard', function($stateParams, Wizard){
                 Wizard.load($stateParams.projectId);
             }]
         })

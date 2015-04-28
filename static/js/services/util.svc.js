@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .factory('Util', Util);
 
-Util.$inject = ['jQuery'];
-function Util($) {
+Util.$inject = ['jQuery', '$state'];
+function Util($, $state) {
     var U = {};
     // List
     U.forEach = angular.forEach.bind(angular);
@@ -14,6 +14,7 @@ function Util($) {
     // Time
     U.now = getNow();
     U.timeIt = timeIt;
+    U.stateDbg = stateDbg;
 
     var timed = {};
 
@@ -91,6 +92,21 @@ function Util($) {
             }
             return true;
         });
+    }
+
+    /**
+     * Debug utility: logging wrapper for ui-router $state.go()
+     * */
+    function stateDbg(toStateName, params, options) {
+        console.log('>> Loading [%s]...', toStateName);
+
+        return $state.go(toStateName, params, options)
+            .then(function () {
+                console.log('>>>> [%s] loaded, state:', toStateName, $state.current);
+            })
+            .catch(function (res) {
+                console.log('>>>> [%s] FAILED:', toStateName, res);
+            });
     }
 
     return U;

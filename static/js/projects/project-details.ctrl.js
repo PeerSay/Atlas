@@ -33,6 +33,7 @@ function ProjectDetailsCtrl($stateParams, Wizard, Projects, _) {
                 initFields(res);
                 return (m.project = res);
             });
+
     }
 
     function stepClass(step) {

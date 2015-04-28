@@ -56,23 +56,27 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
     W.prev = prev;
 
     $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
-        if (!$state.includes('**.steps.*')) { return; }
+        //console.log('!!! $stateChangeStart: from=[%s] to=[%s]', fromState.name, toState.name);
 
-        // Prevent back-step on Back
-        if (toParams.step !== W.current.stepNum) {
-            event.preventDefault();
-            $state.go(toState.name, {step: W.current.stepNum});
+        if ($state.includes('**.steps.*')) {
+            // Prevent back-step on Back
+            if (toParams.step !== W.current.stepNum) {
+                event.preventDefault();
+                $state.go(toState.name, {step: W.current.stepNum});
+            }
         }
     });
 
     $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
-        if (!$state.includes('**.details.**')) { return; }
+        //console.log('!!! $stateChangeSuccess: from=[%s] to=[%s]', fromState.name, toState.name);
 
-        // Set current
-        _.forEach(W.steps, function (step) {
-            var re = new RegExp(step.state);
-            step.current = re.test(toState.url);
-        });
+        if ($state.includes('**.details.**')) {
+            // Sync 'current' prop with state
+            _.forEach(W.steps, function (step) {
+                var re = new RegExp(step.state);
+                step.current = re.test(toState.url);
+            });
+        }
     });
 
     function load(projectId) {
@@ -80,25 +84,25 @@ function Wizard($rootScope, $state, $stateParams, $timeout, _, Projects) {
 
         return Projects.readProjectProgress(projectId)
             .then(function (res) {
-                var curStepNum = W.current.stepNum = String(res.result.progress);
+                W.current.stepNum = String(res.result.progress);
 
-                // Set initial reached
-                _.forEach(W.steps, function (step) {
-                    step.reached = (step.idx <= Number(curStepNum));
-                    if (step.reached) {
-                        // Enable this & next
-                        step.enabled = (W.steps[step.idx] || {}).enabled = true;
-                    }
-                });
+                initSteps();
 
-                if ($stateParams.step !== curStepNum) {
-                    // Due to replace, we need to make sure that previous state change is complete,
-                    // thus deferring the call
-                    $timeout(function () {
-                        $state.go('project.details.steps', {step: curStepNum}, {location: 'replace'});
-                    }, 0);
-                }
+                return W.current;
             });
+    }
+
+    function initSteps() {
+        var curStepNum = Number(W.current.stepNum);
+
+        // Set initial reached & enabled props
+        _.forEach(W.steps, function (step) {
+            step.reached = (step.idx <= curStepNum);
+            if (step.reached) {
+                // Enable this & next
+                step.enabled = (W.steps[step.idx] || {}).enabled = true;
+            }
+        });
     }
 
     function isReached(stepNum) {

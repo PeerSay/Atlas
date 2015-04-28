@@ -109,6 +109,7 @@ $(function () {
 
             toggleThanksPage(true, res.email);
             trackPageEvent('/#start-thanks', 'Evaluation submitted');
+            trackGoogleConversion();
         });
 
         return false; // prevent default
@@ -192,7 +193,6 @@ $(function () {
 
         if (on && hash === '#start') {
             trackPageEvent('/#start', 'Start an Evaluation');
-            trackGoogleConversion();
         }
 
         if (same === !!on) { return; }

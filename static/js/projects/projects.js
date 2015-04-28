@@ -50,6 +50,7 @@ function Projects(Backend, User, _) {
         return Backend.create(['projects'], { title: P.create.title })
             .then(function (data) {
                 P.projects.push(data.result);
+                return data.result;
             })
             .finally(function () {
                 P.create.showDlg = false;

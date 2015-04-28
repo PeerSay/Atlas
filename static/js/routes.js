@@ -71,6 +71,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             url: '/restore/complete',
             templateUrl: '/html/auth-restore-complete.html'
         })
+
         // Project
         //
         .state('project', {
@@ -99,11 +100,10 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             templateUrl: '/html/project-details.html',
             controller: 'ProjectDetailsCtrl as cm',
             resolve: {
-                Wizard: 'Wizard'
-            },
-            onEnter: ['$stateParams', '$state', '$timeout', 'Wizard', function($stateParams, $state, $timeout, Wizard){
-                Wizard.load($stateParams.projectId);
-            }]
+                wizardCurrent: ['$stateParams', 'Wizard', function($stateParams, Wizard){
+                    return Wizard.load($stateParams.projectId);
+                }]
+            }
         })
         // Project > Details > Steps
         //

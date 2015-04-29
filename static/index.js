@@ -42,26 +42,6 @@ $(function () {
 
 
     /*-----------------------------------------------
-     Modal: Slider
-     -------------------------------------------------*/
-
-    var $slider = $('#modal-slides').on('slide.bs.carousel', function (evt) {
-        toggleSliderControl(evt.direction);
-    });
-    var $controls = $slider.find('.carousel-control');
-    toggleSliderControl('right');
-
-    function toggleSliderControl(direction) {
-        var oppositeClass = {
-            left: '.right',
-            right: '.left'
-        };
-        $controls.show();
-        $controls.filter(oppositeClass[direction]).hide();
-    }
-
-
-    /*-----------------------------------------------
      Modal: Forms
      -------------------------------------------------*/
 
@@ -121,7 +101,6 @@ $(function () {
             var err = res[0]; // can be only one
             toggleFormWarning(err.$el, true, err.error);
 
-            $slider.carousel(0);
             $email.focus();
             return false;
         }
@@ -133,7 +112,7 @@ $(function () {
         var $page = $modal.find('.thanks-page');
 
         $submitBtn.toggle(!on);
-        $modal.find('.carousel').toggle(!on);
+        $modal.find('form').toggle(!on);
 
         $page.toggle(on);
         if (on) {
@@ -364,7 +343,7 @@ $(function () {
         if (window.mixpanel && text) {
             mixpanel.track(text);
         }
-        console.log('>> Tracking [%s] [%s]', url, text, !window.ga ? '(skipped)' : '');
+        //console.log('>> Tracking [%s] [%s]', url, text, !window.ga ? '(skipped)' : '');
     }
 
     function trackGoogleConversion() {

@@ -593,32 +593,6 @@ hr {
     min-height: 50px;
   }
 
-  // Carousel
-  .carousel {
-    min-height: 400px;
-    .carousel-control {
-      top: 200px;
-      width: 30px; height: 35px;
-      line-height: 33px;
-      background: @brand-primary;
-      &:hover, &:focus {
-        opacity: 1; //override
-        background: darken(@brand-primary, 10%);
-      }
-      &.left {
-        left: -40px;
-        border-radius: 3px 0 0 3px;
-      }
-      &.right {
-        right: -40px;
-        border-radius: 0 3px 3px 0;
-      }
-    }
-    .carousel-indicators {
-      bottom: -20px;
-    }
-  }
-
   textarea {
     .resizable(vertical);
     max-height: 125px;

@@ -5,7 +5,10 @@ var path = require('path');
 // Passed by Heroku
 var ENV_PORT = Number(process.env.PORT);
 var ENV_DB_URL = process.env.MONGOHQ_URL;
-
+var ENV_LINKEDIN_API_KEY = process.env.LINKEDIN_API_KEY;
+var ENV_LINKEDIN_SECRET_KEY = process.env.LINKEDIN_SECRET_KEY;
+var ENV_SENDGRID_API_USER = process.env.SENDGRID_API_USER;
+var ENV_SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
 // For local deploy override:
 //  create non-committed file in root named config.{deploy}.js
@@ -59,15 +62,15 @@ function getConfig(param) {
         },
         auth: {
             linkedin: {
-                api_key: '77st41xz0halpu',
-                secret_key: 'nVcfUeYOJSx8vEaP'
+                api_key: local.auth.linkedin.api_key || ENV_LINKEDIN_API_KEY,
+                secret_key: local.auth.linkedin.secret_key || ENV_LINKEDIN_SECRET_KEY
             }
         },
         email: {
             enable: (local.email || {enable: true}).enable,
             auth: {
-                api_user: 'peersaymailer',
-                api_key: 'Peersay1'
+                api_user: local.email.auth.api_user ||  ENV_SENDGRID_API_USER,
+                api_key: local.email.auth.api_key || ENV_SENDGRID_API_KEY
             }
         }
     };

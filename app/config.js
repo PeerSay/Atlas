@@ -35,7 +35,7 @@ function readConfig(name) {
 //
 function getConfig(param) {
     var deploy, local;
-    var empty = {web: {}, db: {}};
+    var empty = {web: {}, db: {}, auth: {linkedin : {}}, email: {auth: {}}};
 
     if (!param) {
         deploy = 'prod';

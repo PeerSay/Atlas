@@ -35,7 +35,7 @@ function readConfig(name) {
 //
 function getConfig(param) {
     var deploy, local;
-    var empty = {web: {}, db: {}, auth: {linkedin : {}}, email: {auth: {}}};
+    var empty = {web: {}, db: {}, auth: {linkedin : {}}, email: {enable: true, auth: {}}};
 
     if (!param) {
         deploy = 'prod';
@@ -67,7 +67,7 @@ function getConfig(param) {
             }
         },
         email: {
-            enable: (local.email || {enable: true}).enable,
+            enable: local.email.enable,
             auth: {
                 api_user: local.email.auth.api_user ||  ENV_SENDGRID_API_USER,
                 api_key: local.email.auth.api_key || ENV_SENDGRID_API_KEY

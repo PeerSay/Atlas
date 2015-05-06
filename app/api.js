@@ -114,7 +114,7 @@ function RestApi(app) {
             }
 
             var result = user.toJSON({transform: xformUser, virtuals: true}); // need virtuals for name.full
-            console.log('[API] Reading user[%s] result:', email, result);
+            console.log('[API] Reading user[%s] result: %s', email, JSON.stringify(result));
 
             return res.json({result: result});
         });
@@ -139,7 +139,7 @@ function RestApi(app) {
                 if (err) { return next(err); }
 
                 var result = stubPrj.toJSON({transform: xformStubPrj}); // stub is enough for create
-                console.log('[API] Creating project result:', result);
+                console.log('[API] Creating project result: %s', JSON.stringify(result));
 
                 return res.json({result: result});
             });
@@ -163,7 +163,7 @@ function RestApi(app) {
                 if (err) { return next(err); }
 
                 var result = {id: project_id, removed: true};
-                console.log('[API] Removing project[%s] result:', project_id, result);
+                console.log('[API] Removing project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
             });
@@ -190,7 +190,7 @@ function RestApi(app) {
                 }
 
                 var result = prj.toJSON({transform: xformProject});
-                console.log('[API] Reading project[%s] result:', project_id, result);
+                console.log('[API] Reading project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
             });
@@ -256,7 +256,7 @@ function RestApi(app) {
                 }
 
                 var result = prj.toJSON({transform: xformProject});
-                console.log('[API] Reading progress of project[%s] result:', project_id, result);
+                console.log('[API] Reading progress of project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
             });
@@ -269,7 +269,7 @@ function RestApi(app) {
         var email = user.email;
         var data = req.body;
 
-        console.log('[API] Updating progress of project [%s] for user=[%s]', project_id, email);
+        console.log('[API] Updating progress of project [%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
         User.findOne({email: email}, 'projects.progress', function (err, user) {
             if (err) { return next(err); }
@@ -317,7 +317,7 @@ function RestApi(app) {
                 }
 
                 var result = prj.toJSON({transform: xformProjectCriteria});
-                console.log('[API] Reading criteria of project[%s] result:', project_id, result);
+                console.log('[API] Reading criteria of project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
             });
@@ -330,7 +330,7 @@ function RestApi(app) {
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Patching criteria of project[%s] for user=[%s]', project_id, email);
+        console.log('[API] Patching criteria of project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
         User.findOne({email: email}, 'projects.criteria', function (err, user) {
             if (err) { return next(err); }
@@ -370,7 +370,7 @@ function RestApi(app) {
      * ]
      * */
     function applyPatch(obj, patch, cb) {
-        console.log('[API] Applying patch: ', patch);
+        //console.log('[API] Applying patch: ', patch);
         try {
             jsonpatch.apply(obj, patch);
         }

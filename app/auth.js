@@ -405,6 +405,9 @@ function Auth(app) {
     // Logout / expire
     //
     function logout(req, res) {
+        var email = req.user.email;
+        console.log('[AUTH] Logging out user [%s]', email);
+
         req.logout();
         res.json({result: true});
     }

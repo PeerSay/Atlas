@@ -167,6 +167,9 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 V.popoverOn = null;
             }
         };
+        //Hovering
+        V.isHover = isHover;
+        V.toggleHover = toggleHover;
         // For ctrl:
         V.grouping = grouping;
         V.sorting = sorting;
@@ -425,6 +428,22 @@ function Table($rootScope, $filter, ngTableParams, Backend, TableModel, _) {
                 value: model.criteria[groupedBy] // No vendors!
             };
             return predicate;
+        }
+
+        // Hovering
+        function isHover(model) {
+            // The only thing shared by all row's cells is criteria, thus adding prop to it
+            return model.criteria.hovered;
+        }
+
+        function toggleHover(model, on) {
+            if (on) {
+                model.criteria.hovered = true;
+            }
+            else {
+                // Must delete, because criteria is observed object and this produces broken patches & exceptions
+                delete model.criteria.hovered;
+            }
         }
 
         return V;

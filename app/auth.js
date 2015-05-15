@@ -251,7 +251,8 @@ function Auth(app) {
             {
                 // Note: I failed to find the list of available scope values in LinkedIn docs,
                 // These are gathered from different answers on StackOverflow:
-                scope: ['r_basicprofile', 'r_emailaddress', 'r_contactinfo', 'r_network'],
+                // Note2: new LinkedIn policy disallows 'r_contactinfo', 'r_network': https://developer.linkedin.com/support/developer-program-transition
+                scope: ['r_basicprofile', 'r_emailaddress'],
                 callbackURL: '/auth/linkedin/callback' // relative URL is OK
             }
         )(req, res, next);

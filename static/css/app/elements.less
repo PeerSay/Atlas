@@ -1,12 +1,27 @@
+/*
+* Standard elements
+*/
+
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 70px;
+  background: #ececec;
 }
 
 ul {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+textarea {
+  resize: both; /* none|horizontal|vertical|both */
+  &.vert {
+    resize: vertical;
+  }
+  &.noresize {
+    resize: none;
+  }
 }
 
 .modal-dialog {
@@ -22,7 +37,7 @@ ul {
 }
 
 /*
-* Controls
+* Buttons
 */
 .btn {
   &.full-width {
@@ -52,36 +67,4 @@ ul {
   &.checked {
     background-color: #eee;
   }
-}
-
-textarea {
-  resize: both; /* none|horizontal|vertical|both */
-  &.vert {
-    resize: vertical;
-  }
-  &.noresize {
-    resize: none;
-  }
-}
-
-/*
-* Useful utils
-*/
-
-.no-select {
-  user-select: none;
-  -o-user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-}
-
-.ellipsis {
-  /*requires width!*/
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pointer {
-  cursor: pointer;
 }

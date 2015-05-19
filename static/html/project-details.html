@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <!--Project Progress / Wizard-->
     <div class="row">
-        <nav class="col-xs-10 col-xs-offset-1 col-sm-10 col-md-10 col-lg-10 project-progress">
+        <nav class="col-xs-10 col-xs-offset-1 project-progress">
             <ul class="nav nav-pills nav-justified">
                 <li class="tail">
                     <span class="chevron"></span>
@@ -19,7 +19,7 @@
     </div>
     <!--Title / description-->
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="col-xs-12">
             <h3 class="page-title pull-left toggle-edit">
                 <a href class="toggle-value"
                         ng-click="cm.openEditDialog('title')"
@@ -35,7 +35,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="col-xs-12">
             <h5 class="page-spacer pull-left toggle-edit">
                 <!--Start date / duration-->
                 <a href class="toggle-value"
@@ -61,15 +61,15 @@
 
     <!--Tiles-->
     <div class="row">
-        <div ng-if="cm.isReached(2)" ui-view="step2"></div>
-        <div ng-if="cm.isReached(3)" ui-view="step3"></div>
-        <div ng-if="cm.isReached(4)" ui-view="step4"></div>
+        <div ng-if="cm.isReached(2)" ui-view="step2" class="col-xs-12 col-sm-4 tile-container"></div>
+        <div ng-if="cm.isReached(3)" ui-view="step3" class="col-xs-12 col-sm-4 tile-container"></div>
+        <div ng-if="cm.isReached(4)" ui-view="step4" class="col-xs-12 col-sm-4 tile-container"></div>
     </div>
 
     <!--Summary / Notes-->
     <div class="row">
         <!--Summary / Recommendations-->
-        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tile-container">
+        <div class="col-xs-12 col-sm-6 tile-container">
             <div class="panel panel-default tile">
                 <div class="panel-body">
                     <ps-edit-inline
@@ -84,7 +84,7 @@
             </div>
         </div>
         <!--Notes-->
-        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tile-container">
+        <div class="col-xs-12 col-sm-6 tile-container">
             <div class="panel panel-default tile">
                 <div class="panel-body">
                     <ps-edit-inline
@@ -101,7 +101,7 @@
 
     <!--DBG-->
     <div class="row debug">
-        <pre>
+        <pre class="col-xs-12">
           $state = {{$state.current.name}}
           $stateParams = {{$stateParams}}
           $state full url = {{ $state.$current.url.source }}
@@ -109,7 +109,7 @@
     </div>
 
     <div class="row debug" ng-init="dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">
-        <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-repeat="it in dbg">
+        <div class="col-xs-1" ng-repeat="it in dbg">
             <div class="col">{{ it }}</div>
         </div>
     </div>

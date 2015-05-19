@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="col-xs-12">
             <h3 class="page-title"><span class="glyphicon glyphicon-list-alt"></span> My projects</h3>
         </div>
     </div>
@@ -15,7 +15,7 @@
             <div class="btn-menu-wrap bottom">
                 <div class="btn-group menu" ng-click="$event.preventDefault();">
                     <button type="button" class="btn btn-default dropdown-toggle hint" data-toggle="dropdown">
-                        <span data-toggle="tooltip" title="Menu" ps-tooltip></span>
+                        <span data-toggle="tooltip" title="Menu" ps-tooltip data-container="body"></span>
                         <span aria-hidden="true" class="caret"></span><span class="sr-only">Menu</span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
@@ -65,7 +65,7 @@
                                     ng-model="m.create.title"
                                     ps-focus-on="m.create.showDlg">
                         </div>
-                        <button class="btn btn-success"
+                        <button type="button" class="btn btn-success"
                                 ng-disabled="m.form.$invalid"
                                 ng-click="m.createProject()"
                                 >Create

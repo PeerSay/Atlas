@@ -1,6 +1,6 @@
 <div class="container-fluid" ng-controller="AuthCtrl as m">
     <div class="row">
-        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+        <div class="col-sm-6 col-sm-offset-3 col-lg-4 col-lg-offset-4">
             <div class="panel panel-default auth">
                 <div class="panel-heading">
                     <h2 class="panel-title">Login</h2>
@@ -66,7 +66,7 @@
                             <a href="/auth/restore">Forgot password?</a>
                         </div>
 
-                        <button class="btn btn-lg btn-primary pull-right"
+                        <button type="submit" class="btn btn-lg btn-primary pull-right"
                                 ng-disabled="m.form.$invalid">
                             Login
                         </button>

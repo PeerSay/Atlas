@@ -67,3 +67,21 @@
   -o-transform: @operations;
   transform: @operations;
 }
+
+.no-select {
+  user-select: none;
+  -o-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.ellipsis {
+  /*requires width!*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pointer {
+  cursor: pointer;
+}

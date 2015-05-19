@@ -11,7 +11,6 @@ angular.module('PeerSay', [
     'ngMessages',
     'ngSanitize',
     'ngTable',
-    'ngTableResizableColumns',
     'monospaced.elastic',
     'ng-context-menu'
 ]);

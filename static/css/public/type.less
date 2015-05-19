@@ -50,6 +50,10 @@ p {
   &.sm {
     font-size: 14px;
   }
+  &.quote {
+    font-size: 20px;
+    font-style: italic;
+  }
 }
 
 b, strong {
@@ -60,7 +64,7 @@ b, strong {
 }
 
 // Colors
-h2, h3, h4, h5 {
+h2, h3, h4, h5, p {
   &.white {
     color: #fff;
   }
@@ -72,6 +76,12 @@ h2, h3, h4, h5 {
   }
   &.black {
     color: #000;
+  }
+  &.grey {
+    color: @p-grey-color;
+  }
+  &.dark-grey {
+    color: @header-dark-grey-color;
   }
 }
 

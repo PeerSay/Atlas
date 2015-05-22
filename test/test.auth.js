@@ -26,7 +26,7 @@ var agent = request.agent(app);
 var companyEmail = 'PeerSay Team <team@peersay.com>';
 
 // Mock config
-process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
+process.deploy = {web: {}, db: {hash_iters: 100}, auth: {linkedin : {api_key: 'x', secret_key: 'x'}}, email: {enable: false, auth: {}}};
 var config = require('../app/config');
 
 // Dependencies to Mock

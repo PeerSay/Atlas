@@ -5,7 +5,9 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in m.projects">
+        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in m.projects"
+                ng-class="{'muted': prj.muted}">
+            <span ng-if="prj.muted" class="fa fa-spinner fa-spin"></span>
             <a class="panel panel-default tile" href ng-click="m.editProject(prj.id)">
                 <div class="panel-body">
                     <h4 class="name">{{ prj.title }}</h4>
@@ -34,7 +36,7 @@
                         </li>
                         <li role="presentation" class="divider"></li>-->
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj.id)">Remove</a>
+                            <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj)">Remove</a>
                         </li>
                     </ul>
                 </div>

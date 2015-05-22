@@ -126,6 +126,19 @@ describe('Project Model', function () {
             });
         });
 
+        it('Should return null on removing project with invalid id', function (done) {
+            var userQ = User.findByEmail('some@email.com');
+            var notExistingId = 'abcd';
+
+            userQ.exec(function (err, user) {
+                Project.removeByUser(notExistingId, user, function (err, doc) {
+                    should.not.exist(err);
+                    should.not.exist(doc);
+                    done();
+                });
+            });
+        });
+
         it('Project should be removed from collaborators stubs as well');
     });
 });

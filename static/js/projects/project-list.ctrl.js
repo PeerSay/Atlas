@@ -10,7 +10,7 @@ function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
     m.projects = [];
     m.create = Projects.create;
     m.toggleCreateDlg = Projects.toggleCreateDlg.bind(Projects);
-    m.removeProject = Projects.removeProject.bind(Projects);
+    m.removeProject = removeProject;
     m.createProject = createProject;
     m.editProject = editProject;
 
@@ -44,6 +44,10 @@ function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
                         });
                 }, 0)
             });
+    }
 
+    function removeProject(prj) {
+        prj.muted = true;
+        Projects.removeProject(prj.id);
     }
 }

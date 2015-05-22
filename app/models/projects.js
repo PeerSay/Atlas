@@ -89,8 +89,10 @@ projectSchema.statics.createByUser = function (project, user, next) {
 
 
 projectSchema.statics.removeByUser = function (project_id, user, next) {
-    Project.findOneAndRemove({_id: project_id}, function (err) {
+    Project.findOneAndRemove({_id: project_id}, function (err, doc) {
         if (err) { return next(err); }
+
+        if (!doc) { return next(null, null); } // Not found!
 
         // Remove stub sub-doc
         var stubPrj = _.find(user.projects, {_ref: project_id});

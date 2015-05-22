@@ -159,8 +159,13 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.removeByUser(project_id, user, function (err) {
+            Project.removeByUser(project_id, user, function (err, doc) {
                 if (err) { return next(err); }
+
+                if (!doc) {
+                    console.log('[API] Removing project[%s] failed - not found!', project_id);
+                    return errRes.notFound(res, project_id);
+                }
 
                 var result = {id: project_id, removed: true};
                 console.log('[API] Removing project[%s] result: %s', project_id, JSON.stringify(result));

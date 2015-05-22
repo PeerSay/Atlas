@@ -346,19 +346,73 @@
 </div>
 
 <!--=======================================
+ Testimonials
+========================================-->
+
+<!--Title-->
+<div id="testimonials" class="section section-header section-grey">
+    <div class="col-wrapper">
+        <h2 class="text-center blue dashed dashed-grey"><span>Testimonials</span></h2>
+    </div>
+</div>
+<!--Slider-->
+<div class="section section-grey">
+    <div class="col-wrapper-narrow">
+        <div class="carousel slide" id="quote-slider" data-ride="carousel">
+            <!--Content-->
+            <div class="carousel-inner text-center">
+                <div class="item active">
+                    <p class="quote grey">“PeerSay enabled me to see a statistical analysis of Payment Gateways making our vetting process data driven, simpler and much faster.
+                        It is a key component in my toolbox when evaluating and integrating IT solutions".</p>
+                    <h5 class="dark-grey">Gilad Gat</h5>
+                    <h7 class="dark-grey">CTO, TipRanks</h7>
+                </div>
+                <div class="item">
+                    <p class="quote grey">“Looking for the best live chat for my website can be a pain.
+                        With PeerSay I know that I have chosen the best live chat solution. Thumbs up!"</p>
+                    <h5 class="dark-grey">Gili Golander</h5>
+                    <h7 class="dark-grey">CMO, Bazaart</h7>
+                </div>
+                <div class="item">
+                    <p class="quote grey">“When we started looking for the best virtual machine solution for our
+                        service, we where overwhelmed with all the options. PeerSay made it easy and simple for
+                        us to understand. We loved it.”</p>
+                    <h5 class="dark-grey">Gal Nirel</h5>
+                    <h7 class="dark-grey">CEO, Mailarix</h7>
+                </div>
+            </div>
+            <!--Indicators-->
+            <ol class="carousel-indicators">
+                <li data-target="#quote-slider" data-slide-to="0" class="active"></li>
+                <li data-target="#quote-slider" data-slide-to="1"></li>
+                <li data-target="#quote-slider" data-slide-to="2"></li>
+            </ol>
+            <!--Buttons-->
+            <a class="btn left" href="#quote-slider" role="button" data-slide="prev">
+                <span class="fa fa-chevron-left"></span>
+            </a>
+            <a class="btn right" href="#quote-slider" role="button" data-slide="next">
+                <span class="fa fa-chevron-right"></span>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<!--=======================================
  Contacts
 ========================================-->
 
 <!--Contacts - Title-->
-<div id="contact" class="section section-header section-grey">
+<div id="contact" class="section section-header">
     <div class="col-wrapper">
-        <h2 class="text-center blue dashed dashed-grey"><span>Get to Know us Better</span></h2>
+        <h2 class="text-center blue dashed"><span>Get to Know us Better</span></h2>
         <p class="text-center">Don't be a stranger, drop us a line...</p>
     </div>
 </div>
 
 <!--Contacts - Form-->
-<div class="section section-grey">
+<div class="section section-white">
     <div class="col-wrapper-narrow">
         <h4 class="blue">Say Hello!</h4>
 
@@ -457,15 +511,15 @@
             </div>
             <div class="modal-body">
                 <form id="reg-form">
-                    <h4 class="modal-title text-center">Give us a few details, and we'll get right to it:</h4>
+                    <h4 class="modal-title text-center">Give us few details, and we'll get right to it:</h4>
                     <h4></h4>
                     <!--Email-->
                     <div class="form-group">
                         <label for="ev-email">
                             <span class="badge">1</span>
-                            Email address
+                            Email address (we will never share it!)
                         </label>
-                        <input type="email" name="email" id="ev-email" class="form-control" placeholder="johh@example.com"
+                        <input type="email" name="email" id="ev-email" class="form-control" placeholder="john@example.com"
                                 data-required="true"
                                 data-email="true"/>
                         <span class="help-block required">Required</span>

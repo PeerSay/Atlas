@@ -8,7 +8,7 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.title = 'Project Essentials 2';
+    m.title = 'Essentials';
     m.focusField = null;
     m.onShow = onShow;
     m.onClose = onClose;

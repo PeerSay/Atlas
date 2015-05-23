@@ -35,10 +35,6 @@ function RestApi(app) {
         app.delete('/api/projects/:id', removeProject);
         app.patch('/api/projects/:id', jsonParser, patchProject);
 
-        // project's progress
-        app.get('/api/projects/:id/progress', readProjectProgress);
-        app.put('/api/projects/:id/progress', jsonParser, updateProjectProgress);
-
         // project's criteria
         app.get('/api/projects/:id/criteria', readProjectCriteria);
         app.patch('/api/projects/:id/criteria', jsonParser, patchProjectCriteria);
@@ -188,7 +184,7 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators -criteria -progress', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators -criteria', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);
@@ -234,67 +230,6 @@ function RestApi(app) {
 
                         return res.json({result: result});
                     });
-                });
-            });
-        });
-    }
-
-    // Progress
-
-    function readProjectProgress(req, res, next) {
-        var project_id = req.params.id;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Reading progress of project [%s] for user=[%s]', project_id, email);
-
-        User.findOne({email: email}, 'projects.progress', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.findById(project_id, '-_id progress', function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                var result = prj.toJSON({transform: xformProject});
-                console.log('[API] Reading progress of project[%s] result: %s', project_id, JSON.stringify(result));
-
-                return res.json({result: result});
-            });
-        });
-    }
-
-    function updateProjectProgress(req, res, next) {
-        var project_id = req.params.id;
-        var user = req.user;
-        var email = user.email;
-        var data = req.body;
-
-        console.log('[API] Updating progress of project [%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
-
-        User.findOne({email: email}, 'projects.progress', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) { return errRes.notFound(res, email); }
-
-            Project.findById(project_id, 'progress', function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                prj.progress = data.progress; // update!
-
-                prj.save(function (err) {
-                    if (err) { return modelError(res, err); }
-
-                    var result = true; // no need to send data back
-                    console.log('[API] Updating progress of project[%s] result:', project_id, result);
-
-                    return res.json({result: result});
                 });
             });
         });

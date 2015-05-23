@@ -17,9 +17,6 @@ function Projects(Backend, User, _) {
     P.getProjectStubs = getProjectStubs;
     P.createProject = createProject;
     P.removeProject = removeProject;
-    //Progress
-    P.readProjectProgress = readProjectProgress;
-    P.updateProjectProgress = updateProjectProgress;
     // Details
     P.current = {
         project: {
@@ -96,18 +93,6 @@ function Projects(Backend, User, _) {
         console.log('Project patch: ', JSON.stringify(data));
         return Backend.patch(['projects', id], data);
     }
-
-    // Project progress
-    //
-    function readProjectProgress(id) {
-        return Backend.read(['projects', id, 'progress']);
-    }
-
-    function updateProjectProgress (id, data) {
-        Backend.invalidateCache(['projects', id, 'progress']);
-        return Backend.update(['projects', id, 'progress'], data);
-    }
-
 
     function getIdxById(id) {
         var prj = _.findWhere(P.projects, { id: id });

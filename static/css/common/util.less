@@ -12,18 +12,6 @@
   border-radius: 50%;
 }
 
-.progress(@percent) {
-  @bg-hue-start: 10;
-  @bg-hue-stop: 120;
-  @bg-hue: @bg-hue-start + floor((@bg-hue-stop - @bg-hue-start) * @percent / 100);
-  @bg-color: hsv(@bg-hue, 50%, 72%);
-
-  //width: ~`console.log("@{bg-hue}"), "@{bg-hue}"`;
-
-  background-color: @bg-color;
-  color: contrast(@bg-color, #555, #f5f5f5);
-}
-
 .block {
   display: block;
 }

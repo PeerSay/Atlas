@@ -162,6 +162,7 @@
   &.border {
     border: 1px solid #ddd;
     border-radius: 4px;
+    background: #fff;
     overflow-x: auto; /* scroll for wide tables!*/
   }
 }
@@ -395,119 +396,6 @@ table.rc-table-resizing {
   display: none;
   .col {
     outline: 1px solid #00a98d;
-  }
-}
-/*
-* Progress / Wizard
-*/
-.project-progress {
-  margin-bottom: 20px;
-  .nav-pills > li {
-    /* Invert natural z-order, so that chevrons can be on top of next el */
-    z-index: 6;
-    & + li {
-      z-index: 5;
-      & + li {
-        z-index: 4;
-        & + li {
-          z-index: 3;
-          & + li {
-            z-index: 2;
-          }
-        }
-      }
-    }
-
-    /* Color vars/utils */
-    @body-color: #ececec;
-    @pb-color: #f8f8f8;
-    @pb-hover-color: #fff;
-    @pb-active-color: #428BCA;
-    @bp-chevron-space-color: rgba(100, 100, 100, 0.2);
-    .pb-colorize-chevron(@color) {
-      &:after {
-        border-top-color: @color;
-      }
-      @media (min-width: 768px) {
-        &:after {
-          border-color: transparent; /*reset above*/
-          border-left-color: @color;
-        }
-      }
-    }
-    .hide-for-mobile {
-      visibility: hidden;
-      @media (min-width: 768px) {
-        visibility: visible;
-      }
-    }
-
-    &.current {
-      box-shadow: 0 -5px 0 rgba(0, 0, 0, 0.1);
-    }
-
-    .chevron {
-      /* Extra small devices (phones, less than 768px) - chevron at the bottom*/
-      display: block;
-      position: absolute;
-      z-index: 1;
-      right: 47%; top: 45px;
-      .triangle(top, bottom, 10px, @bp-chevron-space-color);
-      &:after {
-        content: "";
-        position: absolute;
-        left: -10px; top: -15px;
-        .triangle(top, bottom, 10px, @pb-active-color);
-      }
-
-      /* Small devices (tablets, 768px and up) */
-      @media (min-width: 768px) {
-        right: -20px;
-        top: 0;
-        .triangle(left, right, 20px, @bp-chevron-space-color);
-        &:after {
-          content: "";
-          position: absolute;
-          left: -24px; top: -20px;
-          .triangle(left, right, 20px, @pb-active-color);
-        }
-      }
-
-      &.last {
-        .hide-for-mobile();
-      }
-    }
-    &.active:hover {
-      text-decoration: underline;
-    }
-    &:not(.active) {
-      a {
-        background-color: @pb-color;
-      }
-      .chevron {
-        .pb-colorize-chevron(@pb-color);
-      }
-      &:hover:not(.disabled) {
-        a {
-          background-color: @pb-hover-color;
-        }
-        .chevron {
-          .pb-colorize-chevron(@pb-hover-color);
-        }
-      }
-    }
-
-    &.tail {
-      .hide-for-mobile();
-      width: 0.0001%;
-      .chevron {
-        right: -22px;
-      }
-      .chevron:after,
-      &:hover .chevron:after{
-        border-left-color: @body-color !important;
-      }
-    }
   }
 }
 

@@ -1,33 +1,49 @@
 angular.module('PeerSay')
-    .controller('ProjectShortlistCtrl', ProjectShortlistCtrl);
+    .controller('ProjectTableCtrl', ProjectTableCtrl);
 
-ProjectShortlistCtrl.$inject = ['$scope', '$stateParams', '$interpolate', 'Table', 'TableModel', 'Util', 'Wizard'];
-function ProjectShortlistCtrl($scope, $stateParams, $interpolate, Table, TableModel, _, Wizard) {
+ProjectTableCtrl.$inject = ['$scope', '$interpolate', '$stateParams', 'Table', 'TableModel'];
+function ProjectTableCtrl($scope, $interpolate, $stateParams, Table, TableModel) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.step = Wizard.steps[3];
-    m.title = m.step.title;
-    m.openDialog = Wizard.openDialog.bind(Wizard);
+    m.openDialog = openDialog;
     m.info = getInfoFn();
 
-    // Table views
-    m.tableView = Table.addView(m, 'sh-norm', getViewConfig)
+    // Table view
+    m.tableView = Table.addView(m, 'main', getViewConfig)
         //.debug()
-        .grouping()
-        .sorting({active: false})
-        .watching() //!
-        .hovering()
+        //.grouping()
+        //.sorting({active: false})
+        //.hovering()
         .done();
 
     $scope.$on('$destroy', function () {
         m.tableView.destroy();
     });
 
-
     function getViewConfig(model) {
-        // Columns: Score1, [Score2, Score3] | {Products}
+        // Columns: Criteria, Weight, [Prod1-input, Prod1-grade], ...
         var res = [
+            {
+                selector: 'name',
+                cell: {
+                    type: 'ordinary',
+                    emptyValue: 'No name?'
+                }
+            },
+            {
+                selector: 'weight',
+                cell: {
+                    type: 'number-static'
+                }
+            },
+            {
+                selector: 'vendors/.*?/input',
+                limit: 3,
+                cell: {
+                    type: 'ordinary'
+                }
+            },
             {
                 selector: 'vendors/.*?/score',
                 limit: 3,
@@ -48,10 +64,9 @@ function ProjectShortlistCtrl($scope, $stateParams, $interpolate, Table, TableMo
 
         var vendors = model.vendors;
         if (!vendors.length) {
-            // show at least one column if no vendors added yet
             res.push({
                 selector: null,
-                columnModel: { field: 'Products', value: 'Products'},
+                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
                 cellModels: ['name'] // first cell is used for grouping and must have criteria
             });
         }
@@ -70,5 +85,9 @@ function ProjectShortlistCtrl($scope, $stateParams, $interpolate, Table, TableMo
                 text: exp({shown: shown, total: total})
             };
         };
+    }
+
+    function openDialog() {
+        //TODO
     }
 }

@@ -3,19 +3,26 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$stateParams', 'Wizard', 'Projects', 'Util'];
-function ProjectDetailsCtrl($stateParams, Wizard, Projects, _) {
+ProjectDetailsCtrl.$inject = ['$stateParams', '$state', 'Projects', 'Util'];
+function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    // Wizard
-    m.steps = Wizard.steps;
-    m.isReached = Wizard.isReached.bind(Wizard);
-    m.openDialog = Wizard.openDialog.bind(Wizard);
-    m.stepClass = stepClass;
+
     //Model
     m.project = null;
-    m.openEditDialog = openEditDialog;
+    //XXX
+    m.products = [
+        {name: 'ABC'},
+        {name: 'New Product1'},
+        {name: 'One'}
+    ];
+
+    m.requirements = [
+        {title: 'Free as beer'},
+        {title: 'Legendary support'}
+    ];
+
     // Footer fields
     m.fields = {
         summary: {},
@@ -24,6 +31,9 @@ function ProjectDetailsCtrl($stateParams, Wizard, Projects, _) {
     };
     m.initFields = initFields;
     m.updateField = updateField;
+    //Navigation
+    m.openEditDialog = openEditDialog;
+
 
     activate();
 
@@ -34,18 +44,6 @@ function ProjectDetailsCtrl($stateParams, Wizard, Projects, _) {
                 return (m.project = res);
             });
 
-    }
-
-    function stepClass(step) {
-        return {
-            active: step.reached,
-            disabled: !step.enabled,
-            current: step.current
-        };
-    }
-
-    function openEditDialog(field) {
-        m.openDialog(m.steps[0], field);
     }
 
     function initFields(project) {
@@ -65,5 +63,9 @@ function ProjectDetailsCtrl($stateParams, Wizard, Projects, _) {
             value: model.value
         };
         return Projects.patchProject(m.projectId, [patch]);
+    }
+
+    function openEditDialog(field) {
+        $state.go('.essentials', {edit: field});
     }
 }

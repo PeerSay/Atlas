@@ -1,24 +1,18 @@
 /*global angular:true*/
 
 angular.module('PeerSay')
-    .controller('ProjectEssentialsEditCtrl', ProjectEssentialsEditCtrl);
+    .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
 
-ProjectEssentialsEditCtrl.$inject = ['$scope', '$stateParams', 'Wizard', 'Projects', 'jsonpatch'];
-function ProjectEssentialsEditCtrl($scope, $stateParams, Wizard, Projects, jsonpatch) {
+ProjectEssentialsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'jsonpatch'];
+function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.step = Wizard.steps[0];
-    m.title = m.step.title;
-    //Wizard
-    m.onClose = function () {
-        Wizard.closeDialog(m.step);
-    };
-    m.goNext = function () {
-        Wizard.next({from: m.step});
-    };
-    m.onShow = onShow;
+    m.title = 'Project Essentials 2';
     m.focusField = null;
+    m.onShow = onShow;
+    m.onClose = onClose;
+    m.goNext = goNext;
     // Edits
     m.patchObserver = null;
     m.project = null;
@@ -48,5 +42,13 @@ function ProjectEssentialsEditCtrl($scope, $stateParams, Wizard, Projects, jsonp
 
     function onShow() {
         m.focusField = $stateParams.edit;
+    }
+
+    function onClose() {
+        $state.go('^');
+    }
+
+    function goNext() {
+        $state.go('^.requirements');
     }
 }

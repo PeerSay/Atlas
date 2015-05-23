@@ -1,26 +1,9 @@
 <div class="container-fluid">
-    <!--Project Progress / Wizard-->
     <div class="row">
-        <nav class="col-xs-10 col-xs-offset-1 project-progress">
-            <ul class="nav nav-pills nav-justified">
-                <li class="tail">
-                    <span class="chevron"></span>
-                </li>
-                <li role="presentation"
-                        ng-repeat="step in cm.steps"
-                        ng-init="num = $index+1"
-                        ng-class="cm.stepClass(step)">
-                    <a href
-                            ng-click="cm.openDialog(step)">{{:: num }}. {{:: step.shortTitle }}</a>
-                    <span class="chevron" ng-class="{ last: (num === 4) }"></span>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <!--Title / description-->
-    <div class="row">
-        <div class="col-xs-12">
-            <h3 class="page-title pull-left toggle-edit">
+        <!--Left side-bar: Summary-->
+        <div class="col-xs-12 col-sm-2">
+            <!--Title-->
+            <h3 class="page-title toggle-edit">
                 <a href class="toggle-value"
                         ng-click="cm.openEditDialog('title')"
                         data-placement="right"
@@ -32,65 +15,84 @@
                     <span class="glyphicon glyphicon-edit hover-edit"></span>
                 </a>
             </h3>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <h5 class="page-spacer pull-left toggle-edit">
-                <!--Start date / duration-->
-                <a href class="toggle-value"
-                        ng-if="cm.project.startDate || cm.project.duration"
-                        ng-click="cm.openEditDialog('startDate')">
-                    <span ng-if="cm.project.startDate">Starting {{ cm.project.startDate }}</span>
-                    <span ng-if="cm.project.duration">{{ cm.project.startDate ? 'f': 'F' }}or {{ cm.project.duration }}</span>
-                    <span class="glyphicon glyphicon-edit hover-edit"></span>
-                </a>
-
+            <ul>
                 <!--Budget-->
-                <span class="label-text"
-                        ng-if="cm.project.budget">Estimated Budget:</span>
-                <a href class="toggle-value"
-                        ng-if="cm.project.budget"
-                        ng-click="cm.openEditDialog('budget')"
-                        >{{ cm.project.budget }}
-                    <span class="glyphicon glyphicon-edit hover-edit"></span>
-                </a>
-            </h5>
+                <li ng-if="cm.project.budget">
+                    Budget:
+                    <a href ng-click="cm.openEditDialog('budget')">
+                        {{ cm.project.budget }}
+                    </a>
+                </li>
+                <!--Resources-->
+                <li ng-if="cm.project.budget">
+                    Resources:
+                    <a href ng-click="cm.openEditDialog('budget')">
+                        {{ cm.project.budget }}
+                    </a>
+                </li>
+                <!--Time frame-->
+                <li ng-if="cm.project.startDate || cm.project.duration">
+                    Time frame:
+                    <a href ng-click="cm.openEditDialog('startDate')">
+                        {{ cm.project.startDate }}
+                    </a>
+                </li>
+            </ul>
+            <hr>
+
+            <h4>Products</h4>
+            <ul>
+                <li ng-repeat="product in cm.products">
+                    <a href>{{ product.name }}</a>
+                </li>
+            </ul>
+            <hr>
+
+            <h4>Criteria</h4>
+            <ul>
+                <li ng-repeat="req in cm.requirements">
+                    <a href>{{ req.title }}</a>
+                </li>
+            </ul>
         </div>
-    </div>
 
-    <!--Tiles-->
-    <div class="row">
-        <div ng-if="cm.isReached(2)" ui-view="step2" class="col-xs-12 col-sm-4 tile-container"></div>
-        <div ng-if="cm.isReached(3)" ui-view="step3" class="col-xs-12 col-sm-4 tile-container"></div>
-        <div ng-if="cm.isReached(4)" ui-view="step4" class="col-xs-12 col-sm-4 tile-container"></div>
-    </div>
-
-    <!--Summary / Notes-->
-    <div class="row">
-        <!--Summary / Recommendations-->
-        <div class="col-xs-12 col-sm-6 tile-container">
-            <div class="panel panel-default tile">
-                <div class="panel-body">
-                    <ps-edit-inline
-                            data-label="Summary"
-                            data-model="cm.fields.summary"
-                            data-on-save="cm.updateField(cm.fields.summary)"></ps-edit-inline>
-                    <ps-edit-inline
-                            data-label="Recommendations"
-                            data-model="cm.fields.recommendations"
-                            data-on-save="cm.updateField(cm.fields.recommendations)"></ps-edit-inline>
+        <!--Center Col-->
+        <div class="col-xs-12 col-sm-10">
+            <!--MainTable-->
+            <div class="row">
+                <div class="col-xs-12 page-spacer" ng-controller="ProjectTableCtrl as cm">
+                    <div class="tile-section border">
+                        <ps-table-view ps-view="cm.tableView"></ps-table-view>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!--Notes-->
-        <div class="col-xs-12 col-sm-6 tile-container">
-            <div class="panel panel-default tile">
-                <div class="panel-body">
-                    <ps-edit-inline
-                            data-label="Notes"
-                            data-model="cm.fields.notes"
-                            data-on-save="cm.updateField(cm.fields.notes)"></ps-edit-inline>
+            <!--Summary / Notes-->
+            <div class="row">
+                <!--Summary / Recommendations-->
+                <div class="col-xs-12 col-sm-6 tile-container">
+                    <div class="panel panel-default tile">
+                        <div class="panel-body">
+                            <ps-edit-inline
+                                    data-label="Summary"
+                                    data-model="cm.fields.summary"
+                                    data-on-save="cm.updateField(cm.fields.summary)"></ps-edit-inline>
+                            <ps-edit-inline
+                                    data-label="Recommendations"
+                                    data-model="cm.fields.recommendations"
+                                    data-on-save="cm.updateField(cm.fields.recommendations)"></ps-edit-inline>
+                        </div>
+                    </div>
+                </div>
+                <!--Notes-->
+                <div class="col-xs-12 col-sm-6 tile-container">
+                    <div class="panel panel-default tile">
+                        <div class="panel-body">
+                            <ps-edit-inline
+                                    data-label="Notes"
+                                    data-model="cm.fields.notes"
+                                    data-on-save="cm.updateField(cm.fields.notes)"></ps-edit-inline>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,11 +108,5 @@
           $stateParams = {{$stateParams}}
           $state full url = {{ $state.$current.url.source }}
         </pre>
-    </div>
-
-    <div class="row debug" ng-init="dbg = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">
-        <div class="col-xs-1" ng-repeat="it in dbg">
-            <div class="col">{{ it }}</div>
-        </div>
     </div>
 </div>

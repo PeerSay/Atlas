@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectListCtrl', ProjectListCtrl);
 
-ProjectListCtrl.$inject = ['$state', '$timeout', 'Projects', 'Wizard', 'Util'];
-function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
+ProjectListCtrl.$inject = ['$state', '$timeout', 'Projects'];
+function ProjectListCtrl($state, $timeout, Projects) {
     var m = this;
 
     m.projects = [];
@@ -29,11 +29,13 @@ function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
     function editProject(id, isNew) {
         $state.go('project.details', {projectId: id})
             .then(function () {
-                var curStepNum = Wizard.current.stepNum; // resolved by now
+                //var curStepNum = Wizard.current.stepNum; // resolved by now
 
                 // $timeout prevents a case when location replace wipes previous state and
                 // incorrect navigation on back button, sometimes even out of the app
-                $timeout(function () {
+                // TODO
+
+                /*$timeout(function () {
                     $state.go('.steps', {step: curStepNum}, {location: 'replace'})
                         .then(function () {
                             if (!isNew) { return; }
@@ -42,7 +44,7 @@ function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
                                 $state.go('.essentials');
                             })
                         });
-                }, 0)
+                }, 0)*/
             });
     }
 

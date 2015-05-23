@@ -1,22 +1,20 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$interpolate', '$stateParams', 'Wizard', 'Table', 'TableModel'];
-function ProjectProductsCtrl($scope, $interpolate, $stateParams, Wizard, Table, TableModel) {
+ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', '$timeout', 'Table'];
+function ProjectProductsCtrl($scope, $state, $stateParams, $timeout, Table) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.step = Wizard.steps[2];
-    m.title = m.step.title;
-    m.openDialog = Wizard.openDialog.bind(Wizard);
-    m.info = getInfoFn();
-
-    // Table view
-    m.tableView = Table.addView(m, 'pi-norm', getViewConfig)
-        //.debug()
+    m.title = 'Project Products 2';
+    m.onClose = onClose;
+    m.goPrev = goPrev;
+    // Table views
+    m.groupBy = Table.groupBy;
+    m.tableView = Table.addView(m, 'vi-full', getViewConfig)
+        //.debug() // opt
         .grouping()
-        .sorting({active: false})
-        .hovering()
+        .sorting({active: true})
         .done();
 
     $scope.$on('$destroy', function () {
@@ -24,40 +22,99 @@ function ProjectProductsCtrl($scope, $interpolate, $stateParams, Wizard, Table, 
     });
 
 
-    function getViewConfig(model) {
-        // Columns: Prod1, [Prod2, Prod3] | {Products}
-        var res = [
+    function getViewConfig() {
+        // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}
+        return [
+            {
+                selector: 'name',
+                column: {
+                    sortable: true
+                },
+                cell: {
+                    editable: true,
+                    type: 'multiline'
+                }
+            },
             {
                 selector: 'vendors/.*?/input',
-                limit: 3,
+                column: {
+                    editable: true,
+                    sortable: true
+                },
                 cell: {
-                    type: 'ordinary'
+                    editable: true,
+                    type: 'multiline'
+                }
+            },
+            {
+                selector: null, // virtual
+                columnModel: { field: 'Add', value: ''}, // addNew
+                column: {
+                    editable: true,
+                    placeholder: 'Add product...',
+                    last: true,
+                    'add-column': true
+                },
+                cell: {
+                    type: 'static',
+                    noMenu: true
                 }
             }
         ];
-
-        var vendors = model.vendors;
-        if (!vendors.length) {
-            res.push({
-                selector: null,
-                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
-                cellModels: ['name'] // first cell is used for grouping and must have criteria
-            });
-        }
-         return res;
     }
 
+    //Menu
+    m.menu = {
+        id: 'vi-context-menu',
+        context: null,
+        view: m.tableView,
+        setContext: function (context) {
+            this.context = context;
+        },
+        enabled: menuItemEnabled,
+        doAction: menuDoAction
+    };
+    m.tableView.menu = m.menu; // expose to Table directive
 
-    function getInfoFn() {
-        var exp = $interpolate('Showing {{ shown }} out of {{ total }}');
-        return function () {
-            var shown = (m.tableView.rows[0] || []).length;
-            var total = (TableModel.model.vendors || []).length;
+    function menuDoAction(action) {
+        if (!this.enabled(action)) { return; }
 
-            return {
-                show: (total > shown),
-                text: exp({shown: shown, total: total})
-            };
-        };
+        var view = this.view;
+        var cell = this.context.cell;
+
+        $timeout(function () {
+            if (action === 'remove') {
+                view.removeColumn(cell.model);
+            }
+            else if (action === 'add'){
+                inviteToEdit(view);
+            }
+        }, 0, false);
+    }
+
+    function menuItemEnabled(item) {
+        var cell = this.context && this.context.cell;
+        if (!cell) { return true; }
+
+        if (item === 'remove') {
+            if (!(cell.model && /^vendors/.test(cell.model.key))) {
+                // disable remove on non-vendor columns
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function inviteToEdit(view) {
+        var addCol = view.columns[view.columns.length - 1]; //last is addNew
+        addCol.edited = true; // invite to edit
+    }
+
+    function onClose() {
+        $state.go('^');
+    }
+
+    function goPrev() {
+        $state.go('^.requirements');
     }
 }

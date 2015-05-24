@@ -31,19 +31,24 @@
                             <div class="col-sm-10">
                                 <ui-select ng-model="cm.category.selected" theme="bootstrap"
                                         tagging="cm.addCategory"
-                                        tagging-label="(adding new)"> <!--Label don't work-->
+                                        tagging-tokens="ENTER"
+                                        tagging-label="(adding new)"
+                                        on-select="cm.selectCategory($model)">
+                                    <!--Label don't work-->
                                     <ui-select-match placeholder="Select or search a category or domain...">{{ $select.selected.name }}</ui-select-match>
                                     <ui-select-choices repeat="category in cm.categories | filter: $select.search"
-                                            group-by="'domain'"
-                                            refresh="cm.refreshAddLabel($select)"
-                                            refresh-delay="0">
+                                            group-by="'domain'">
                                         <span ng-bind-html="category.name | highlight: $select.search"></span>
-                                        <span ng-if="category.local" class="edit">Edit</span>
+                                        <span ng-if="category.local" class="delete-category"
+                                                ng-click="cm.deleteCategory(category)">
+                                            <span class="fa fa-trash"></span> <span class="link">Delete</span>
+                                        </span>
                                     </ui-select-choices>
                                 </ui-select>
                             </div>
                         </div>
                     </div>
+                    <!--<p>Selected: {{ cm.category.selected }}</p>-->
                     <div class="row page-spacer"></div>
 
                     <!--Goals-->

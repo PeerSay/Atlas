@@ -26,6 +26,8 @@ function Projects(Backend, User, _, $q) {
     P.readProject = readProject;
     P.patchProject = patchProject;
 
+    P.readCategories = readCategories;
+
     var empty = {
         title: '',
         reasons: '',
@@ -58,7 +60,8 @@ function Projects(Backend, User, _, $q) {
         resources: {
             description: '2 half-men',
             budget: '100M'
-        }
+        },
+        selectedCategory: {name: 'VPN', domain: 'Networking'}
     };
 
     var fakeCategories = [
@@ -114,9 +117,8 @@ function Projects(Backend, User, _, $q) {
     // Project details
     //
     function readProject(id) {
-
         return $q(function (resolve) {
-            angular.extend(P.current.project, empty, fakeProject, {categories: fakeCategories});
+            angular.extend(P.current.project, empty, fakeProject);
             resolve(P.current.project);
         });
 
@@ -145,6 +147,14 @@ function Projects(Backend, User, _, $q) {
         var prj = _.findWhere(P.projects, { id: id });
         var idx = P.projects.indexOf(prj);
         return idx < 0 ? P.projects.length : idx;
+    }
+
+    // Categories
+    //
+    function readCategories() {
+        return $q(function (resolve) {
+            resolve(fakeCategories);
+        });
     }
 
     return P;

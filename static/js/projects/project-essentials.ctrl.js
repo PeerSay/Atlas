@@ -21,9 +21,11 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     m.project = null;
     m.patchProject = patchProject;
     // Categories
-    m.category = {}; // selection
+    m.category = {};
     m.categories = [];
+    m.selectCategory = selectCategory;
     m.addCategory = addCategory;
+    m.deleteCategory = deleteCategory;
 
     activate();
 
@@ -31,7 +33,7 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         Projects.readProject($stateParams.projectId)
             .then(function (res) {
                 m.project = res;
-                m.categories = res.categories;
+                m.category.selected = res.selectedCategory || {};
 
                 m.patchObserver = jsonpatch.observe(m.project);
                 return m.project;
@@ -40,6 +42,11 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         $scope.$on('$destroy', function () {
             jsonpatch.unobserve(m.project, m.patchObserver);
         });
+
+        Projects.readCategories()
+            .then(function (res) {
+                m.categories = res;
+            });
     }
 
     function patchProject() {
@@ -58,6 +65,25 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         m.categories.unshift(item);
 
         return item;
+    }
+
+    function selectCategory(category) {
+        console.log('>>Selected: ', category);
+
+        //TODO: server
+    }
+
+    function deleteCategory(category) {
+        var idx = m.categories.indexOf(category);
+        if (idx >= 0) {
+            m.categories.splice(idx, 1);
+        }
+
+        if (category.name === m.category.selected.name) {
+            m.category = {};
+        }
+
+        //TODO: server
     }
 
     function onShow() {

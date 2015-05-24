@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['Backend', 'User', 'Util'];
-function Projects(Backend, User, _) {
+Projects.$inject = ['Backend', 'User', 'Util', '$q'];
+function Projects(Backend, User, _, $q) {
     var P = {};
 
     // List
@@ -20,15 +20,64 @@ function Projects(Backend, User, _) {
     // Details
     P.current = {
         project: {
-            title: '',
-            description: '',
-            budget: '',
-            startDate: '',
-            duration: ''
+            title: ''
         }
     };
     P.readProject = readProject;
     P.patchProject = patchProject;
+
+    var empty = {
+        title: '',
+        reasons: '',
+        goals: '',
+        summary: '',
+        recommendations: '',
+        notes: '',
+        // Time
+        time: {
+            startDate: '',
+            duration: 0,
+            durationLabel: 'days'
+        },
+        // Resources
+        resources: {
+            description: '',
+            budget: '',
+            budgetCurrency: 'USD'
+        }
+    };
+
+    /// XXX - fake data
+    var fakeProject = {
+        title: 'ABC project',
+        reasons: 'I want a new car.',
+        goals: 'Must have wheels.',
+        time: {
+            duration: 10
+        },
+        resources: {
+            description: '2 half-men',
+            budget: '100M'
+        }
+    };
+
+    var fakeCategories = [
+        {name: 'Category of VM1', domain: 'Virtualization'},
+        {name: 'Category of VM2', domain: 'Virtualization'},
+        {name: 'Some etc vm', domain: 'Virtualization'},
+        {name: 'Hypervizors', domain: 'Virtualization'},
+        {name: 'IPv6', domain: 'Networking'},
+        {name: 'VPN', domain: 'Networking'},
+        {name: 'Some netw', domain: 'Networking'},
+        {name: 'xxx', domain: 'Networking'},
+        {name: 'Firewalls', domain: 'Security'},
+        {name: 'Fw1', domain: 'Security'},
+        {name: 'Email securoty', domain: 'Security'},
+        {name: 'SSD', domain: 'Storage'},
+        {name: 'RAID', domain: 'Storage'},
+        {name: 'Some storage', domain: 'Storage'}
+    ];
+
 
     // Project list
     //
@@ -65,21 +114,19 @@ function Projects(Backend, User, _) {
     // Project details
     //
     function readProject(id) {
-        return Backend.read(['projects', id])
+
+        return $q(function (resolve) {
+            angular.extend(P.current.project, empty, fakeProject, {categories: fakeCategories});
+            resolve(P.current.project);
+        });
+
+
+        /*return Backend.read(['projects', id])
             .then(function (data) {
-                var empty = {
-                    title: '',
-                    description: '',
-                    budget: '',
-                    startDate: '',
-                    duration: '',
-                    summary: '',
-                    recommendations: '',
-                    notes: ''
-                };
+
                 angular.extend(P.current.project, empty, data.result);
                 return P.current.project;
-            });
+            });*/
     }
 
     function patchProject(id, data) {
@@ -91,7 +138,7 @@ function Projects(Backend, User, _) {
         Backend.invalidateCache(['projects', id]);
 
         console.log('Project patch: ', JSON.stringify(data));
-        return Backend.patch(['projects', id], data);
+        //XXX - return Backend.patch(['projects', id], data);
     }
 
     function getIdxById(id) {

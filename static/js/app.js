@@ -12,5 +12,6 @@ angular.module('PeerSay', [
     'ngSanitize',
     'ngTable',
     'monospaced.elastic',
-    'ng-context-menu'
+    'ng-context-menu',
+    'ui.select'
 ]);

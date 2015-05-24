@@ -8,6 +8,8 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     var m = this;
 
     m.projectId = $stateParams.projectId;
+    m.project = {};
+
     m.title = 'Essentials';
     m.focusField = null;
     m.onShow = onShow;
@@ -17,6 +19,10 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     m.patchObserver = null;
     m.project = null;
     m.patchProject = patchProject;
+    // Categories
+    m.category = {}; // selection
+    m.categories = [];
+    m.addCategory = addCategory;
 
     activate();
 
@@ -24,6 +30,8 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         Projects.readProject($stateParams.projectId)
             .then(function (res) {
                 m.project = res;
+                m.categories = res.categories;
+
                 m.patchObserver = jsonpatch.observe(m.project);
                 return m.project;
             });
@@ -38,6 +46,17 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         if (!patch.length) { return; }
 
         Projects.patchProject(m.projectId, patch);
+    }
+
+    function addCategory(val) {
+        var item = {
+            name: val,
+            domain: 'Default',
+            local: true
+        };
+        m.categories.unshift(item);
+
+        return item;
     }
 
     function onShow() {

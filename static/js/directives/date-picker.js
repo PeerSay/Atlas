@@ -11,7 +11,12 @@ function psDatePicker($timeout) {
         restrict: 'A',
         link: function (scope, element, attrs, ngModelCtrl) {
             var options = {
-                format: 'DD/MM/YYYY'
+                format: 'DD/MM/YYYY',
+                icons: {
+                    date: 'fa fa-calendar',
+                    next: 'fa fa-chevron-right',
+                    previous: 'fa fa-chevron-left'
+                }
             };
             element
                 .on('dp.change', function (e) {

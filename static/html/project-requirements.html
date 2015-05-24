@@ -46,6 +46,7 @@
                 <div class="tile-section border">
                     <ps-table-view ps-export-csv="csv" ps-view="cm.tableView"></ps-table-view>
                 </div>
+                <div class="row page-spacer"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" ng-click="cm.goPrev()">
@@ -57,6 +58,12 @@
                     Products
                     <span class="fa fa-forward btn-icon"></span>
                 </button>
+
+                <ol class="carousel-indicators">
+                    <li ng-click="cm.goPrev()"></li>
+                    <li class="active"></li>
+                    <li ng-click="cm.goNext()"></li>
+                </ol>
             </div>
         </div>
     </div>

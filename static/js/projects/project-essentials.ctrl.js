@@ -15,6 +15,7 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     m.onShow = onShow;
     m.onClose = onClose;
     m.goNext = goNext;
+    m.goLast = goLast;
     // Edits
     m.patchObserver = null;
     m.project = null;
@@ -69,5 +70,9 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
 
     function goNext() {
         $state.go('^.requirements');
+    }
+
+    function goLast() {
+        $state.go('^.products');
     }
 }

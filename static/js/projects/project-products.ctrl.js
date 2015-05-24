@@ -9,6 +9,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, $timeout, Table) {
     m.title = 'Project Products 2';
     m.onClose = onClose;
     m.goPrev = goPrev;
+    m.goFirst = goFirst;
     // Table views
     m.groupBy = Table.groupBy;
     m.tableView = Table.addView(m, 'vi-full', getViewConfig)
@@ -116,5 +117,9 @@ function ProjectProductsCtrl($scope, $state, $stateParams, $timeout, Table) {
 
     function goPrev() {
         $state.go('^.requirements');
+    }
+
+    function goFirst() {
+        $state.go('^.essentials');
     }
 }

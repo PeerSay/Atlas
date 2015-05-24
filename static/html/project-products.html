@@ -46,6 +46,7 @@
                 <div class="tile-section border">
                     <ps-table-view ps-export-csv="csv" ps-view="cm.tableView"></ps-table-view>
                 </div>
+                <div class="row page-spacer"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" ng-click="cm.goPrev()">
@@ -53,6 +54,12 @@
                     Requirements
                 </button>
                 <button class="btn" data-dismiss="modal">Done</button>
+
+                <ol class="carousel-indicators">
+                    <li ng-click="cm.goFirst()"></li>
+                    <li ng-click="cm.goPrev()"></li>
+                    <li class="active"></li>
+                </ol>
             </div>
         </div>
     </div>

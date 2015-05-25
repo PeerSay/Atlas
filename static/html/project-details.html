@@ -5,11 +5,10 @@
             <!--Title-->
             <h3 class="page-title toggle-edit">
                 <a href class="toggle-value"
-                        ng-click="cm.openEditDialog()"
+                        ng-click="cm.openEditDialog('reasons')"
                         data-placement="right"
                         ps-tooltip
-                        ps-tooltip-title="cm.project.description"
-                        >
+                        ps-tooltip-title="cm.project.reasons">
                     <span class="fa fa-cubes"></span>
                     {{ cm.project.title }}
                     <span class="fa fa-edit hover-edit"></span>
@@ -17,24 +16,32 @@
             </h3>
             <ul>
                 <!--Budget-->
-                <li ng-if="cm.project.budget">
-                    Budget:
-                    <a href ng-click="cm.openEditDialog('budget')">
-                        {{ cm.project.budget }}
+                <li ng-if="cm.project.resources.budget">
+                    <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
+                    <a href class="side-link ellipsis"
+                            ng-click="cm.openEditDialog('budget')">
+                        {{ cm.project.resources.budget }}
                     </a>
                 </li>
                 <!--Resources-->
-                <li ng-if="cm.project.budget">
-                    Resources:
-                    <a href ng-click="cm.openEditDialog('budget')">
-                        {{ cm.project.budget }}
+                <li ng-if="cm.project.resources.description">
+                    <span class="fa fa-fw fa-users"></span>
+                    <a href class="side-link ellipsis"
+                            ng-click="cm.openEditDialog('resources')">
+                        {{ cm.project.resources.description }}
                     </a>
                 </li>
                 <!--Time frame-->
-                <li ng-if="cm.project.startDate || cm.project.duration">
-                    Time frame:
-                    <a href ng-click="cm.openEditDialog('startDate')">
-                        {{ cm.project.startDate }}
+                <li ng-if="cm.project.time.duration || cm.project.time.startDate">
+                    <span class="fa fa-fw fa-clock-o"></span>
+                    <a href class="side-link ellipsis"
+                            ng-click="cm.openEditDialog(cm.project.time.duration && 'duration' || 'startDate')">
+                        <span ng-if="cm.project.time.duration" >
+                            {{ cm.project.time.duration }} {{ cm.project.time.durationLabel }}
+                        </span>
+                        <span ng-if="cm.project.time.startDate">
+                            @ {{ cm.project.time.startDate }}
+                        </span>
                     </a>
                 </li>
             </ul>

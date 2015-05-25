@@ -22,6 +22,7 @@
                                 placeholder="I want to add an extra 10TB storage to the companies backup server"
                                 ng-model="cm.project.reasons"
                                 ng-blur="cm.patchProject()"
+                                ps-focus-on="cm.focusField === 'reasons'"
                                 ></textarea>
                     </div>
                     <!--Category-->
@@ -101,7 +102,7 @@
                                         placeholder="2 employees part time for 2 months"
                                         ng-model="cm.project.resources.description"
                                         ng-blur="cm.patchProject()"
-                                        ps-focus-on="cm.focusField === 'startDate'"
+                                        ps-focus-on="cm.focusField === 'resources'"
                                         />
                             </div>
                         </div>
@@ -134,6 +135,7 @@
                                         <input id="es-duration" type="text" class="form-control" placeholder="6"
                                                 ng-model="cm.project.time.duration"
                                                 ng-blur="cm.patchProject()"
+                                                ps-focus-on="cm.focusField === 'duration'"
                                                 />
                                         <!--Label Select-->
                                         <div class="input-group-btn">

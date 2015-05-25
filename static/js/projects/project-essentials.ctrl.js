@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
 
-ProjectEssentialsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'jsonpatch'];
-function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch) {
+ProjectEssentialsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'jsonpatch', 'Util'];
+function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -36,7 +36,7 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     activate();
 
     function activate() {
-        Projects.readProject($stateParams.projectId)
+        Projects.readProject(m.projectId)
             .then(function (res) {
                 m.project = res;
                 m.category.selected = res.selectedCategory || {};
@@ -49,7 +49,7 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
             jsonpatch.unobserve(m.project, m.patchObserver);
         });
 
-        Projects.readCategories()
+        Projects.readCategories(m.projectId)
             .then(function (res) {
                 m.categories = res;
             });
@@ -64,34 +64,53 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
 
     // Category
     //
+    function selectCategory(category) {
+        m.project.selectedCategory = category;
+        patchProject();
+
+        //TODO: server
+    }
+
     function addCategory(val) {
         var item = {
+            id: nextId(m.categories),
             name: val,
             domain: 'Default',
             local: true
         };
-        m.categories.unshift(item);
+        m.categories.unshift(item); // all
+        m.project.categories.unshift(item); // local
+        patchProject();
 
         return item;
     }
 
-    function selectCategory(category) {
-        console.log('>>Selected: ', category);
-
-        //TODO: server
-    }
-
     function deleteCategory(category) {
-        var idx = m.categories.indexOf(category);
-        if (idx >= 0) {
-            m.categories.splice(idx, 1);
-        }
+        removeItem(m.categories, category);
+        removeItem(m.project.categories, category);
 
         if (category.name === m.category.selected.name) {
             m.category = {};
+            m.project.selectedCategory = null;
         }
 
-        //TODO: server
+        patchProject();
+    }
+
+    function removeItem(arr, item) {
+        var idx = arr.indexOf(item);
+        if (idx >= 0) {
+            arr.splice(idx, 1);
+        }
+        return item;
+    }
+
+    function nextId(arr) {
+        var res = 0;
+        _.forEach(arr, function (it) {
+            res = Math.max(it.id, res) + 1;
+        });
+        return res;
     }
 
     // Currency / Labels

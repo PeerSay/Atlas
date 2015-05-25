@@ -67,19 +67,22 @@
                             <label for="es-budget" class="col-sm-2 control-label left">Budget:</label>
                             <div class="col-sm-10">
                                 <div class="input-group">
+                                    <!--Currency Select-->
                                     <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle"
                                                 data-toggle="dropdown" aria-expanded="false">
-                                            <span class="fa fa-usd"></span>
-                                            USD
+                                            <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
+                                            {{ cm.project.resources.budgetCurrency }}
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu">
-                                            <li><a href><span class="fa fa-eur"></span> EUR</a></li>
-                                            <li><a href><span class="fa fa-gbp"></span> GBP</a></li>
-                                            <li><a href><span class="fa fa-ils"></span> ILS</a></li>
-                                            <li><a href><span class="fa fa-rub"></span> RUB</a></li>
-                                            <li><a href><span class="fa fa-btc"></span> BTC</a></li>
+                                            <li ng-repeat="currency in cm.currencies"
+                                                    ng-class="{active: (currency === cm.project.resources.budgetCurrency)}">
+                                                <a href ng-click="cm.selectCurrency(currency)">
+                                                    <span class="fa fa-{{:: currency | lowercase}}"></span>
+                                                    {{:: currency }}
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                     <input id="es-budget" type="text" class="form-control" placeholder="10K"
@@ -132,15 +135,20 @@
                                                 ng-model="cm.project.time.duration"
                                                 ng-blur="cm.patchProject()"
                                                 />
+                                        <!--Label Select-->
                                         <div class="input-group-btn">
                                             <button type="button" class="btn btn-default dropdown-toggle"
                                                     data-toggle="dropdown" aria-expanded="false">
-                                                days
+                                                {{ cm.project.time.durationLabel }}
                                                 <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                                <li><a href>weeks</a></li>
-                                                <li><a href>months</a></li>
+                                                <li ng-repeat="label in cm.durationLabels"
+                                                        ng-class="{active: (label === cm.project.time.durationLabel)}">
+                                                    <a href ng-click="cm.selectDurationLabel(label)">
+                                                        {{:: label }}
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -152,7 +160,7 @@
                 <div class="row page-spacer"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn" data-dismiss="modal"
+                <button class="btn btn-default" data-dismiss="modal"
                         ng-disabled="cm.form.$invalid">Done</button>
                 <button class="btn btn-primary"
                         ng-disabled="cm.form.$invalid"

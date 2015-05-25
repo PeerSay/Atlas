@@ -26,6 +26,12 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     m.selectCategory = selectCategory;
     m.addCategory = addCategory;
     m.deleteCategory = deleteCategory;
+    // Currency
+    m.currencies = ['USD', 'EUR', 'GBP', 'ILS', 'RUB','BTC'];
+    m.selectCurrency = selectCurrency;
+    // Time
+    m.durationLabels = ['days', 'weeks', 'months'];
+    m.selectDurationLabel = selectDurationLabel;
 
     activate();
 
@@ -56,6 +62,8 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         Projects.patchProject(m.projectId, patch);
     }
 
+    // Category
+    //
     function addCategory(val) {
         var item = {
             name: val,
@@ -86,6 +94,20 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         //TODO: server
     }
 
+    // Currency / Labels
+    //
+    function selectCurrency(currency) {
+        m.project.resources.budgetCurrency = currency;
+        patchProject();
+    }
+
+    function selectDurationLabel(label) {
+        m.project.time.durationLabel = label;
+        patchProject();
+    }
+
+    // Navigation
+    //
     function onShow() {
         m.focusField = $stateParams.edit;
     }

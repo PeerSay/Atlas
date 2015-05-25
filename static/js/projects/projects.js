@@ -55,11 +55,13 @@ function Projects(Backend, User, _, $q) {
         reasons: 'I want a new car.',
         goals: 'Must have wheels.',
         time: {
-            duration: 10
+            duration: 10,
+            durationLabel: 'days'
         },
         resources: {
             description: '2 half-men',
-            budget: '100M'
+            budget: '100M',
+            budgetCurrency: 'USD'
         },
         selectedCategory: {name: 'VPN', domain: 'Networking'}
     };
@@ -118,7 +120,7 @@ function Projects(Backend, User, _, $q) {
     //
     function readProject(id) {
         return $q(function (resolve) {
-            angular.extend(P.current.project, empty, fakeProject);
+            P.current.project = angular.extend({}, empty, fakeProject);
             resolve(P.current.project);
         });
 

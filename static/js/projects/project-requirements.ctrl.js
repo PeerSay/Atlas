@@ -55,11 +55,12 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     function activate() {
         Projects.readRequirements(m.projectId).then(function (res) {
             m.requirements = res.reqs;
-            m.groups.add(res.reqs);
+            m.groups.addGroups(res.topics);
+            m.groups.addItems(res.reqs);
 
             //console.log('>>', res);
 
-            m.project = res.project;
+            m.project = res.project; // XXX - separate read
             m.patchObserver = jsonpatch.observe(m.project);
         });
 
@@ -113,7 +114,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     }
 
     function toggleGroupByReq(req) {
-        var group = m.groups.list[req.topic];
+        var group = m.groups.get(req.topic);
         var reqs = group.reqs;
         var len = reqs.length;
         var selectedLen = 0;
@@ -163,7 +164,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         req.id = nextId(m.requirements);
         cancelAddNew();
 
-        m.groups.add([req]);
+        m.groups.addItems([req]);
 
         addRemoveLocal(req); // always selected!
         patchProject();
@@ -173,17 +174,38 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     //
     function GroupBy(prop) {
         var G = {};
-        G.list = {};
-        G.add = add;
+        var index = {};
+        G.list = [];
+        G.get = getGroup;
+        G.addGroups = addGroups;
+        G.addItems = addItems;
 
-        function add(arr) {
+        function getGroup(topic) {
+            return index[topic];
+        }
+
+        function addGroups(groups) {
+            _.forEach(groups, function (it) {
+                it.reqs = [];
+                index[it.name] = it;
+                G.list.push(it);
+            });
+        }
+
+        function addItems(arr) {
             _.forEach(arr, function (it) {
                 var key = it[prop];
-                var group = G.list[key] = G.list[key] || {
+                var group = index[key];
+                if (!group) {
+                    group = {
                         reqs: [],
                         name: key,
+                        popularity: 100,
                         selected: false
                     };
+                    G.list.unshift(group);
+                }
+
                 group.reqs.push(it);
             });
         }

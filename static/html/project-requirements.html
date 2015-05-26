@@ -86,15 +86,17 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <ul class="selection-list">
-                            <li class="has-hover" ng-repeat="(key, group) in cm.groups.list"
+                            <li ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
                                     ng-class="{selected: group.selected}"
                                     ng-show="cm.showFilteredGroup(group)">
-                                <label class="grouped clickable"><input type="checkbox"
+                                <label class="cell grouped clickable"><input type="checkbox"
                                         ng-model="group.selected"
-                                        ng-click="cm.toggleGroup(group)"> {{ key }}</label>
+                                        ng-click="cm.toggleGroup(group)"> {{ group.name }}</label>
+                                <div class="cell last">{{ group.popularity }}%</div>
 
                                 <ul class="inner">
-                                    <li ng-repeat="req in group.reqs | filter:cm.filter.expr track by req.id"
+                                    <li ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' track by req.id"
+                                            class="has-hover"
                                             ng-class="{selected: req.selected}"
                                             ng-class-odd="'odd'">
                                         <label class="cell first clickable"><input type="checkbox"

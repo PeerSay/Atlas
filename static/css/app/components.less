@@ -427,28 +427,30 @@ table.rc-table-resizing {
   border-radius: 4px;
   padding: 5px 2px;
 
-  .grouped {
-    padding: 0 20px 0 5px;
+  // Common
+  .cell {
+    display: table-cell;
+    padding: 5px;
+
+    &.first {
+      width: 35%;
+      padding-left: 25px;
+    }
+    &.last {
+      width: 5%;
+    }
+    &.grouped {
+      width: 95.555555555%
+    }
   }
 
+  // Inner
   li > ul {
     display: table;
     width: 100%;
     > li {
       display: table-row;
-      .cell {
-        display: table-cell;
-        padding: 5px;
 
-        &.first {
-          width: 35%;
-          padding-left: 25px;
-        }
-        &.last {
-          width: 5%;
-        }
-
-      }
       label.cell {
         font-weight: normal;
       }

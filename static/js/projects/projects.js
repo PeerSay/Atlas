@@ -89,20 +89,20 @@ function Projects(Backend, User, _, $q, Storage) {
         {id: 14, name: 'Some storage', domain: 'Storage'}
     ];
     var fakeRequirements = [
-        {id: 1, name: 'Req1', description: 'Some longer descriptio for Req1', topic: 'Support', popularity: 10},
-        {id: 2, name: 'Some requiremement', description: 'Some longer descriptio forsdfsdf as', topic: 'Support', popularity: 10},
-        {id: 3, name: 'All week long', description: 'Some longer descriptio for sdfs', topic: 'Support', popularity: 10},
-        {id: 4, name: 'Legendary', description: 'Some longer descriptio for FDFF', topic: 'Support', popularity: 10},
-        {id: 5, name: 'Free', description: 'Some longer descriptio for sd', topic: 'Price', popularity: 10},
-        {id: 6, name: 'Almost free', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 10},
-        {id: 7, name: 'Vistually free', description: 'Some short', topic: 'Price', popularity: 10},
-        {id: 8, name: 'xxx', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 10},
-        {id: 9, name: 'Firewalls', description: 'Some longer descriptio for ', topic: 'Security', popularity: 10},
-        {id: 10, name: 'Fw1', description: 'Some longer descriptio for sdf', topic: 'Security', popularity: 10},
-        {id: 11, name: 'Email securoty', description: 'Some longer descriptio for sdfsdf', topic: 'Security', popularity: 10},
-        {id: 12, name: 'Bigger', description: 'Some longer descriptio for sefwsd', topic: 'Some', popularity: 10},
-        {id: 13, name: 'Better', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 10},
-        {id: 14, name: 'Higher', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 10}
+        {id: 1, name: 'Req1', description: 'Some longer descriptio for Req1', topic: 'Support', popularity: 88},
+        {id: 2, name: 'Some requiremement', description: 'Some longer descriptio forsdfsdf as', topic: 'Support', popularity: 75},
+        {id: 3, name: 'All week long', description: 'Some longer descriptio for sdfs', topic: 'Support', popularity: 90},
+        {id: 4, name: 'Legendary', description: 'Some longer descriptio for FDFF', topic: 'Support', popularity: 82},
+        {id: 5, name: 'Free', description: 'Some longer descriptio for sd', topic: 'Price', popularity: 80},
+        {id: 6, name: 'Almost free', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 77},
+        {id: 7, name: 'Vistually free', description: 'Some short', topic: 'Price', popularity: 71},
+        {id: 8, name: 'xxx', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 74},
+        {id: 9, name: 'Firewalls', description: 'Some longer descriptio for ', topic: 'Security', popularity: 92},
+        {id: 10, name: 'Fw1', description: 'Some longer descriptio for sdf', topic: 'Security', popularity: 99},
+        {id: 11, name: 'Email securoty', description: 'Some longer descriptio for sdfsdf', topic: 'Security', popularity: 94},
+        {id: 12, name: 'Bigger', description: 'Some longer descriptio for sefwsd', topic: 'Some', popularity: 75},
+        {id: 13, name: 'Better', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 80},
+        {id: 14, name: 'Higher', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 81}
     ];
     var fakeTopics = [
         {name: 'Support', popularity: 20, description: ''},
@@ -210,7 +210,8 @@ function Projects(Backend, User, _, $q, Storage) {
 
                 resolve({
                     project: res,
-                    reqs: reqs
+                    reqs: reqs,
+                    topics: fakeTopics
                 });
             });
         });
@@ -218,20 +219,20 @@ function Projects(Backend, User, _, $q, Storage) {
 
     function mergeReqs(localArr, globalArr) {
         var localIdx = {};
-        var selected = _.map(localArr, function (it) {
+        var local = _.map(localArr, function (it) {
             //it.selected = true; XXX - can be local & unselected?
             localIdx[it.id] = it;
             return it;
         });
-        var notSelected = _.filter(globalArr, function (it) {
+        var global = _.filter(globalArr, function (it) {
             return !localIdx[it.id];
         });
-        notSelected = _.map(notSelected, function (it) {
+        global = _.map(global, function (it) {
             it.selected = false;
             return it;
         });
 
-        return selected.concat(notSelected);
+        return local.concat(global);
     }
 
     return P;

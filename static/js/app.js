@@ -10,6 +10,7 @@ angular.module('PeerSay', [
     'ngRoute', // TODO - remove?
     'ngMessages',
     'ngSanitize',
+    'ngAnimate',
     'ngTable',
     'monospaced.elastic',
     'ng-context-menu',

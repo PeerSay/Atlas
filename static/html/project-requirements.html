@@ -24,7 +24,7 @@
                     </div>
                     <!--Filters-->
                     <div class="form-group">
-                        <label class="control-label">Filter by:</label>
+                        <label class="control-label">Filter:</label>
                         <div class="btn-group" role="group" aria-label="...">
                             <button type="button" class="btn btn-default"
                                     ng-class="cm.filterClass('all')"
@@ -36,6 +36,11 @@
                                     ng-class="cm.filterClass('not-selected')"
                                     ng-click="cm.toggleFilter('not-selected')">Not selected</button>
                         </div>
+                    </div>
+                    <!--Search-->
+                    <div class="form-group">
+                        <label class="control-label">Search:</label>
+                        <input type="search" class="form-control" placeholder="Demo only">
                     </div>
                     <!--Add-->
                     <div class="form-group pull-right">
@@ -108,13 +113,14 @@
                                     <li>
                                         <div class="cell first">
                                             <button type="button" class="btn btn-xs btn-default"
-                                                    title="Load more"
+                                                    title="Load more (demo only)"
                                                     ps-tooltip>...</button>
                                         </div>
                                     </li>
                                 </ul>
                             </li>
                         </ul>
+                        <!--Empty: TODO-->
                     </div>
                 </div>
                 <div class="row page-spacer"></div>

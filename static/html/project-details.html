@@ -4,8 +4,8 @@
         <div class="col-xs-12 col-sm-2">
             <!--Title-->
             <h3 class="page-title toggle-edit">
-                <a href class="toggle-value"
-                        ng-click="cm.openEditDialog('reasons')"
+                <a class="toggle-value"
+                        ui-sref=".essentials({edit: 'reasons'})"
                         data-placement="right"
                         ps-tooltip
                         ps-tooltip-title="cm.project.reasons">
@@ -18,24 +18,24 @@
                 <!--Budget-->
                 <li ng-if="cm.project.resources.budget">
                     <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
-                    <a href class="side-link ellipsis"
-                            ng-click="cm.openEditDialog('budget')">
+                    <a class="side-text ellipsis"
+                            ui-sref=".essentials({edit: 'budget'})">
                         {{ cm.project.resources.budget }}
                     </a>
                 </li>
                 <!--Resources-->
                 <li ng-if="cm.project.resources.description">
                     <span class="fa fa-fw fa-users"></span>
-                    <a href class="side-link ellipsis"
-                            ng-click="cm.openEditDialog('resources')">
+                    <a class="side-text ellipsis"
+                            ui-sref=".essentials({edit: 'resources'})">
                         {{ cm.project.resources.description }}
                     </a>
                 </li>
                 <!--Time frame-->
                 <li ng-if="cm.project.time.duration || cm.project.time.startDate">
                     <span class="fa fa-fw fa-clock-o"></span>
-                    <a href class="side-link ellipsis"
-                            ng-click="cm.openEditDialog(cm.project.time.duration && 'duration' || 'startDate')">
+                    <a class="side-text ellipsis"
+                            ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})">
                         <span ng-if="cm.project.time.duration" >
                             {{ cm.project.time.duration }} {{ cm.project.time.durationLabel }}
                         </span>
@@ -47,18 +47,28 @@
             </ul>
             <hr>
 
-            <h4>Products</h4>
+            <!--Products-->
+            <h4 class="toggle-edit">
+                <a class="toggle-value" ui-sref=".products">
+                    Products <span class="fa fa-edit hover-edit"></span>
+                </a>
+            </h4>
             <ul>
                 <li ng-repeat="product in cm.products">
-                    <a href>{{ product.name }}</a>
+                    <span class="side-text ellipsis">{{ product.name }}</span>
                 </li>
             </ul>
             <hr>
 
-            <h4>Criteria</h4>
+            <!--Criteria-->
+            <h4 class="toggle-edit">
+                <a class="toggle-value" ui-sref=".requirements">
+                    Criteria <span class="fa fa-edit hover-edit"></span>
+                </a>
+            </h4>
             <ul>
-                <li ng-repeat="req in cm.requirements">
-                    <a href>{{ req.title }}</a>
+                <li ng-repeat="req in cm.requirements | filter:{selected: true} track by req.id">
+                    <span class="side-text ellipsis">{{ req.name }}</span>
                 </li>
             </ul>
         </div>

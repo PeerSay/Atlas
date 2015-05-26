@@ -57,10 +57,14 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             m.requirements = res.reqs;
             m.groups.add(res.reqs);
 
-            console.log('>>', res);
+            //console.log('>>', res);
 
             m.project = res.project;
             m.patchObserver = jsonpatch.observe(m.project);
+        });
+
+        $scope.$on('$destroy', function () {
+            jsonpatch.unobserve(m.project, m.patchObserver);
         });
     }
 
@@ -141,7 +145,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     }
 
     function getTotalSelected() {
-        return filterFilter(m.requirements, filterExprs.selected).length;
+        return filterFilter(m.project.requirements, filterExprs.selected).length;
     }
 
     // Add new

@@ -11,16 +11,9 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
 
     //Model
     m.project = null;
-    //XXX
+    m.requirements = [];
     m.products = [
-        {name: 'ABC'},
-        {name: 'New Product1'},
-        {name: 'One'}
-    ];
-
-    m.requirements = [
-        {title: 'Free as beer'},
-        {title: 'Legendary support'}
+        {name: 'TODO'}
     ];
 
     // Footer fields
@@ -31,8 +24,6 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
     };
     m.initFields = initFields;
     m.updateField = updateField;
-    //Navigation
-    m.openEditDialog = openEditDialog;
 
 
     activate();
@@ -41,9 +32,10 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
         Projects.readProject(m.projectId)
             .then(function (res) {
                 initFields(res);
+                m.requirements = res.requirements;
+
                 return (m.project = res);
             });
-
     }
 
     function initFields(project) {
@@ -63,9 +55,5 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
             value: model.value
         };
         return Projects.patchProject(m.projectId, [patch]);
-    }
-
-    function openEditDialog(field) {
-        $state.go('.essentials', {edit: field});
     }
 }

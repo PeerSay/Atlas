@@ -210,7 +210,7 @@ function Projects(Backend, User, _, $q, Storage) {
 
                 resolve({
                     project: res,
-                    reqs: reqs,
+                    reqs: reqs
                 });
             });
         });

@@ -86,7 +86,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <ul class="selection-list">
-                            <li class="has-hover" ng-repeat="(key, group) in cm.groups"
+                            <li class="has-hover" ng-repeat="(key, group) in cm.groups.list"
                                     ng-class="{selected: group.selected}"
                                     ng-show="cm.showFilteredGroup(group)">
                                 <label class="grouped clickable"><input type="checkbox"
@@ -105,7 +105,9 @@
                                     </li>
                                     <li>
                                         <div class="cell first">
-                                            <button type="button" class="btn btn-xs btn-default">...</button>
+                                            <button type="button" class="btn btn-xs btn-default"
+                                                    title="Load more"
+                                                    ps-tooltip>...</button>
                                         </div>
                                     </li>
                                 </ul>
@@ -115,7 +117,7 @@
                 </div>
                 <div class="row page-spacer"></div>
             </div>
-            
+
             <!--Footer-->
             <div class="modal-footer">
                 <button class="btn btn-primary" ng-click="cm.goPrev()">

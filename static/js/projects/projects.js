@@ -207,12 +207,10 @@ function Projects(Backend, User, _, $q, Storage) {
             readProject(id).then(function (res) {
                 var localReqs = res.requirements;
                 var reqs = mergeReqs(localReqs, fakeRequirements);
-                var groups = groupReqs(reqs, 'topic');
 
                 resolve({
                     project: res,
                     reqs: reqs,
-                    groups: groups
                 });
             });
         });
@@ -234,21 +232,6 @@ function Projects(Backend, User, _, $q, Storage) {
         });
 
         return selected.concat(notSelected);
-    }
-
-    function groupReqs(arr, prop) {
-        var groups = {};
-        _.forEach(arr, function (it) {
-            var key = it[prop];
-            var group = groups[key] = groups[key] || {
-                    reqs: [],
-                    name: key,
-                    selected: false
-                };
-            group.reqs.push(it);
-        });
-
-        return groups;
     }
 
     return P;

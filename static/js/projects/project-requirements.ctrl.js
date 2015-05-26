@@ -13,7 +13,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     // Data / Edit
     m.project = null; // ref to shared
     m.requirements = [];
-    m.groups = {};
+    m.groups = GroupBy('topic');
     m.patchObserver = null;
     // Filters
     m.filter = {
@@ -38,6 +38,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         name: '',
         topic: '',
         description: '',
+        popularity: 100,
         selected: true,
         local: true
     };
@@ -54,7 +55,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     function activate() {
         Projects.readRequirements(m.projectId).then(function (res) {
             m.requirements = res.reqs;
-            m.groups = res.groups;
+            m.groups.add(res.reqs);
 
             console.log('>>', res);
 
@@ -92,9 +93,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     function toggleReq(req) {
         toggleGroupByReq(req);
 
-        if (req.selected && m.project.requirements.indexOf(req) < 0) {
-            m.project.requirements.unshift(req); // local
-        }
+        addRemoveLocal(req);
 
         patchProject();
     }
@@ -103,16 +102,14 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         var on = group.selected;
         _.forEach(group.reqs, function (req) {
             req.selected = on;
-            if (req.selected && m.project.requirements.indexOf(req) < 0) {
-                m.project.requirements.unshift(req); // local
-            }
+            addRemoveLocal(req);
         });
 
         patchProject();
     }
 
     function toggleGroupByReq(req) {
-        var group = m.groups[req.topic];
+        var group = m.groups.list[req.topic];
         var reqs = group.reqs;
         var len = reqs.length;
         var selectedLen = 0;
@@ -124,6 +121,23 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         });
 
         group.selected = (selectedLen === len);
+    }
+
+    function addRemoveLocal(req) {
+        var localIdx = m.project.requirements.indexOf(req);
+        var isAdded = (localIdx >= 0);
+
+        if (req.selected) {
+            if (!isAdded) {
+                m.project.requirements.unshift(req); // add to local
+            }
+        }
+        else {
+            if (!req.local && isAdded) {
+                // XXX - causes 'Object not found in root' exception in json-patch
+                //m.project.requirements.splice(localIdx, 1); // remove from local
+            }
+        }
     }
 
     function getTotalSelected() {
@@ -141,7 +155,44 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     }
 
     function saveAddNew() {
+        var req = angular.extend({}, emptyNew, m.addNew.req);
+        req.id = nextId(m.requirements);
+        cancelAddNew();
 
+        m.groups.add([req]);
+
+        addRemoveLocal(req); // always selected!
+        patchProject();
+    }
+
+    // Grouping
+    //
+    function GroupBy(prop) {
+        var G = {};
+        G.list = {};
+        G.add = add;
+
+        function add(arr) {
+            _.forEach(arr, function (it) {
+                var key = it[prop];
+                var group = G.list[key] = G.list[key] || {
+                        reqs: [],
+                        name: key,
+                        selected: false
+                    };
+                group.reqs.push(it);
+            });
+        }
+
+        return G;
+    }
+
+    function nextId(arr) {
+        var res = 0;
+        _.forEach(arr, function (it) {
+            res = Math.max(it.id, res) + 1;
+        });
+        return res;
     }
 
 

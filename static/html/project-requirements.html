@@ -8,46 +8,115 @@
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                 </button>
-                <!--Table menu / popover-->
-                <ps-table-popover class="header-btn last"
-                        ps-container=".modal-header"
-                        ps-viewport=".modal-header"
-                        ps-id="table"
-                        ps-popover-on="cm.popoverOn">
-                        <span class="popover-icon hamburger-icon">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </span>
-                    <form class="popover-form">
-                        <div class="form-group">
-                            <label>Group by:</label>
-                            <div class="list-group">
-                                <a href class="list-group-item"
-                                        ng-repeat="opt in cm.groupBy.options"
-                                        ng-class="{'active': opt === cm.groupBy.current}"
-                                        ng-click="cm.groupBy.set(opt)">
-                                    {{ cm.groupBy.displayName(opt) }}
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </ps-table-popover>
-                <a class="btn btn-default export header-btn"
-                        ng-mousedown="csv.generate()"
-                        ng-href="{{ csv.link() }}"
-                        download="export.csv">Export</a>
                 <h4 class="modal-title">
                     {{:: cm.title }}
-                    <small ng-show="cm.savingData">Saving...</small> <!--TODO-->
                 </h4>
             </div>
+            <!--Body-->
             <div class="modal-body">
-                <div class="tile-section border">
-                    <ps-table-view ps-export-csv="csv" ps-view="cm.tableView"></ps-table-view>
+                <!--Top Bar-->
+                <form class="form-inline selection-controls page-spacer">
+                    <div class="form-group selection-summary">
+                        <label class="control-label">Selected:</label>
+                        <span class="form-control-static">
+                            <span class="badge">{{ cm.getTotalSelected() }}</span>
+                        </span>
+                    </div>
+                    <!--Filters-->
+                    <div class="form-group">
+                        <label class="control-label">Filter by:</label>
+                        <div class="btn-group" role="group" aria-label="...">
+                            <button type="button" class="btn btn-default"
+                                    ng-class="cm.filterClass('all')"
+                                    ng-click="cm.toggleFilter('all')">All</button>
+                            <button type="button" class="btn btn-default"
+                                    ng-class="cm.filterClass('selected')"
+                                    ng-click="cm.toggleFilter('selected')">Selected</button>
+                            <button type="button" class="btn btn-default"
+                                    ng-class="cm.filterClass('not-selected')"
+                                    ng-click="cm.toggleFilter('not-selected')">Not selected</button>
+                        </div>
+                    </div>
+                    <!--Add-->
+                    <div class="form-group pull-right">
+                        <button type="button" class="form-control btn btn-primary"
+                                ng-click="cm.toggleAddNew()">
+                            <span class="fa fa-{{ cm.addNew.show && 'minus' || 'plus' }}-circle"></span> New
+                        </button>
+                    </div>
+                </form>
+
+                <!--Add form-->
+                <form class="form-horizontal page-spacer" ng-show="cm.addNew.show">
+                    <div class="form-group">
+                        <label for="req-name" class="col-sm-2 control-label">Name:</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="req-name" class="form-control" placeholder="Name"
+                                    ng-model="cm.addNew.req.name"
+                                    ps-focus-on="cm.addNew.show">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="req-topic" class="col-sm-2 control-label">Topic:</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="req-topic" class="form-control" placeholder="Topic"
+                                    ng-model="cm.addNew.req.topic">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="req-descr" class="col-sm-2 control-label">Description:</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="req-descr" class="form-control" placeholder="Description"
+                                    ng-model="cm.addNew.req.description">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" class="btn btn-primary"
+                                    ng-click="cm.saveAddNew()">Add</button>
+                            <button type="button" class="btn close inline-close"
+                                    ng-click="cm.cancelAddNew()">
+                                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!--Selection List-->
+                <div class="row">
+                    <div class="col-xs-12">
+                        <ul class="selection-list">
+                            <li class="has-hover" ng-repeat="(key, group) in cm.groups"
+                                    ng-class="{selected: group.selected}"
+                                    ng-show="cm.showFilteredGroup(group)">
+                                <label class="grouped clickable"><input type="checkbox"
+                                        ng-model="group.selected"
+                                        ng-click="cm.toggleGroup(group)"> {{ key }}</label>
+
+                                <ul class="inner">
+                                    <li ng-repeat="req in group.reqs | filter:cm.filter.expr track by req.id"
+                                            ng-class="{selected: req.selected}"
+                                            ng-class-odd="'odd'">
+                                        <label class="cell first clickable"><input type="checkbox"
+                                                ng-model="req.selected"
+                                                ng-click="cm.toggleReq(req)"> {{ req.name }}</label>
+                                        <div class="cell description">{{ req.description }}</div>
+                                        <div class="cell last">{{ req.popularity }}%</div>
+                                    </li>
+                                    <li>
+                                        <div class="cell first">
+                                            <button type="button" class="btn btn-xs btn-default">...</button>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="row page-spacer"></div>
             </div>
+            
+            <!--Footer-->
             <div class="modal-footer">
                 <button class="btn btn-primary" ng-click="cm.goPrev()">
                     <span class="fa fa-backward btn-icon"></span>
@@ -66,19 +135,5 @@
                 </ol>
             </div>
         </div>
-    </div>
-
-    <!--Menu-->
-    <div ng-attr-id="{{::cm.menu.id}}" class="context-menu dropdown clearfix">
-        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-            <li ng-class="{disabled: !cm.menu.enabled('add')}">
-                <a class="pointer" role="menuitem" tabindex="-1"
-                        ng-click="cm.menu.doAction('add')">Add criteria like this</a>
-            </li>
-            <li ng-class="{disabled: !cm.menu.enabled('remove')}">
-                <a class="pointer" role="menuitem" tabindex="-1"
-                        ng-click="cm.menu.doAction('remove')">Remove criteria</a>
-            </li>
-        </ul>
     </div>
 </div>

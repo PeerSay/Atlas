@@ -86,8 +86,8 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     }
 
     function deleteCategory(category) {
-        removeItem(m.categories, category);
-        removeItem(m.project.categories, category);
+        _.removeItem(m.categories, category);
+        _.removeItem(m.project.categories, category);
 
         if (category.name === m.category.selected.name) {
             m.category = {};
@@ -95,14 +95,6 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
         }
 
         patchProject();
-    }
-
-    function removeItem(arr, item) {
-        var idx = arr.indexOf(item);
-        if (idx >= 0) {
-            arr.splice(idx, 1);
-        }
-        return item;
     }
 
     function nextId(arr) {

@@ -27,6 +27,7 @@ function Projects(Backend, User, _, $q, Storage) {
     P.patchProject = patchProject;
 
     P.readCategories = readCategories;
+    P.readRequirements = readRequirements;
 
     var empty = {
         title: '',
@@ -48,7 +49,8 @@ function Projects(Backend, User, _, $q, Storage) {
             budgetCurrency: 'USD'
         },
         selectedCategory: null,
-        categories: []
+        categories: [],
+        requirements: []
     };
 
     /// XXX - fake data
@@ -66,7 +68,8 @@ function Projects(Backend, User, _, $q, Storage) {
             budgetCurrency: 'USD'
         },
         selectedCategory: {id: 6, name: 'VPN', domain: 'Networking'},
-        categories: []
+        categories: [],
+        requirements: []
     };
 
     var fakeCategories = [
@@ -85,7 +88,28 @@ function Projects(Backend, User, _, $q, Storage) {
         {id: 13, name: 'RAID', domain: 'Storage'},
         {id: 14, name: 'Some storage', domain: 'Storage'}
     ];
-
+    var fakeRequirements = [
+        {id: 1, name: 'Req1', description: 'Some longer descriptio for Req1', topic: 'Support', popularity: 10},
+        {id: 2, name: 'Some requiremement', description: 'Some longer descriptio forsdfsdf as', topic: 'Support', popularity: 10},
+        {id: 3, name: 'All week long', description: 'Some longer descriptio for sdfs', topic: 'Support', popularity: 10},
+        {id: 4, name: 'Legendary', description: 'Some longer descriptio for FDFF', topic: 'Support', popularity: 10},
+        {id: 5, name: 'Free', description: 'Some longer descriptio for sd', topic: 'Price', popularity: 10},
+        {id: 6, name: 'Almost free', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 10},
+        {id: 7, name: 'Vistually free', description: 'Some short', topic: 'Price', popularity: 10},
+        {id: 8, name: 'xxx', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 10},
+        {id: 9, name: 'Firewalls', description: 'Some longer descriptio for ', topic: 'Security', popularity: 10},
+        {id: 10, name: 'Fw1', description: 'Some longer descriptio for sdf', topic: 'Security', popularity: 10},
+        {id: 11, name: 'Email securoty', description: 'Some longer descriptio for sdfsdf', topic: 'Security', popularity: 10},
+        {id: 12, name: 'Bigger', description: 'Some longer descriptio for sefwsd', topic: 'Some', popularity: 10},
+        {id: 13, name: 'Better', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 10},
+        {id: 14, name: 'Higher', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 10}
+    ];
+    var fakeTopics = [
+        {name: 'Support', popularity: 20, description: ''},
+        {name: 'Price', popularity: 50, description: ''},
+        {name: 'Security', popularity: 10, description: ''},
+        {name: 'Some', popularity: 0, description: ''}
+    ];
 
     // Project list
     //
@@ -101,7 +125,7 @@ function Projects(Backend, User, _, $q, Storage) {
     }
 
     function createProject() {
-        return Backend.create(['projects'], { title: P.create.title })
+        return Backend.create(['projects'], {title: P.create.title})
             .then(function (data) {
                 P.projects.push(data.result);
                 return data.result;
@@ -131,11 +155,11 @@ function Projects(Backend, User, _, $q, Storage) {
 
 
         /*return Backend.read(['projects', id])
-            .then(function (data) {
+         .then(function (data) {
 
-                angular.extend(P.current.project, empty, data.result);
-                return P.current.project;
-            });*/
+         angular.extend(P.current.project, empty, data.result);
+         return P.current.project;
+         });*/
     }
 
     function patchProject(id, data) {
@@ -152,11 +176,11 @@ function Projects(Backend, User, _, $q, Storage) {
         Storage.set('project' + id, P.current.project);
 
         /*
-        return Backend.patch(['projects', id], data);*/
+         return Backend.patch(['projects', id], data);*/
     }
 
     function getIdxById(id) {
-        var prj = _.findWhere(P.projects, { id: id });
+        var prj = _.findWhere(P.projects, {id: id});
         var idx = P.projects.indexOf(prj);
         return idx < 0 ? P.projects.length : idx;
     }
@@ -173,6 +197,58 @@ function Projects(Backend, User, _, $q, Storage) {
                 resolve(categories);
             });
         });
+    }
+
+    //Requirements
+    //
+    function readRequirements(id) {
+        return $q(function (resolve) {
+
+            readProject(id).then(function (res) {
+                var localReqs = res.requirements;
+                var reqs = mergeReqs(localReqs, fakeRequirements);
+                var groups = groupReqs(reqs, 'topic');
+
+                resolve({
+                    project: res,
+                    reqs: reqs,
+                    groups: groups
+                });
+            });
+        });
+    }
+
+    function mergeReqs(localArr, globalArr) {
+        var localIdx = {};
+        var selected = _.map(localArr, function (it) {
+            //it.selected = true; XXX - can be local & unselected?
+            localIdx[it.id] = it;
+            return it;
+        });
+        var notSelected = _.filter(globalArr, function (it) {
+            return !localIdx[it.id];
+        });
+        notSelected = _.map(notSelected, function (it) {
+            it.selected = false;
+            return it;
+        });
+
+        return selected.concat(notSelected);
+    }
+
+    function groupReqs(arr, prop) {
+        var groups = {};
+        _.forEach(arr, function (it) {
+            var key = it[prop];
+            var group = groups[key] = groups[key] || {
+                    reqs: [],
+                    name: key,
+                    selected: false
+                };
+            group.reqs.push(it);
+        });
+
+        return groups;
     }
 
     return P;

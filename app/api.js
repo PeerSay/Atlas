@@ -63,6 +63,7 @@ function RestApi(app) {
                     email: email
                 });
             }
+            console.log('[API] User [%s] has been added to the waiting list', email);
 
             var from = getFullEmail(data.email, data.name);
             var to = 'contact@peer-say.com';
@@ -74,10 +75,9 @@ function RestApi(app) {
                 inputOnRequirements: data.inputOnRequirements
             };
             var tpl = 'waiting-user';
-            console.log('[AUTH] Sending [%s] email from [%s]', tpl, from);
+            console.log('[API] Sending [%s] email from [%s]', tpl, from);
             mailer.send(tpl, locals); // async!
 
-            console.log('[API] User [%s] has been added to the waiting list', email);
             return res.json({
                 result: true,
                 email: email
@@ -98,7 +98,7 @@ function RestApi(app) {
             message: data.message
         };
         var tpl = 'say-hello';
-        console.log('[AUTH] Sending [%s] email from [%s]', tpl, from);
+        console.log('[API] Sending [%s] email from [%s]', tpl, from);
 
         mailer.send(tpl, locals); // async!
 

@@ -27,5 +27,9 @@ module.exports = {
     'say-hello': {
         subj: getTemplateStr('[Landing Page] Hello from {{ from }}'),
         tpl: getTemplateFile('say-hello')
+    },
+    'waiting-user': {
+        subj: 'A user is waiting!',
+        tpl: getTemplateFile('waiting-user')
     }
 };

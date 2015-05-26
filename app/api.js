@@ -64,6 +64,19 @@ function RestApi(app) {
                 });
             }
 
+            var from = getFullEmail(data.email, data.name);
+            var to = 'contact@peer-say.com';
+            var locals = {
+                from: from,
+                to: to,
+                name: email,
+                inputOnProducts: data.inputOnProducts,
+                inputOnRequirements: data.inputOnRequirements
+            };
+            var tpl = 'waiting-user';
+            console.log('[AUTH] Sending [%s] email from [%s]', tpl, from);
+            mailer.send(tpl, locals); // async!
+
             console.log('[API] User [%s] has been added to the waiting list', email);
             return res.json({
                 result: true,

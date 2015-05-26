@@ -14,7 +14,7 @@ var config = require('./app/config');
 
 // Connect to DB
 console.log(' [DB] url: %s, security: %d', config.db.url, config.db.hash_iters);
-mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}});
+mongoose.connect(config.db.url, {server: {socketOptions: {keepAlive: 1}}}, onMongooseConnect);
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
 
 // Web config
@@ -47,28 +47,10 @@ require('./app/api')(app).setupRoutes();
 
 // Run
 //
-http.listen(config.web.port, function () {
-    console.log(" [Web] Listening on %s...", config.web.port);
-});
+function onMongooseConnect(err) {
+    if(err)  { throw err; }
 
-
-// Socket
-//
-/*
- var sio = require('socket.io')(http);
-sio.on('connection', function (socket) {
-    console.log('[Sock] New socket: client.id=[%s]', socket.client.id);
-
-    socket.emit('msg', 'hello');
-    socket.join('room');
-
-    socket.on('disconnect', function () {
-        console.log('[Sock] disconnect');
+    http.listen(config.web.port, function () {
+        console.log(" [Web] Listening on %s...", config.web.port);
     });
-});
-
-var counter = 0;
-setInterval(function () {
-    sio.to('room').emit('msg', {cnt: counter++});
-}, 2000);
-*/
+}

@@ -8,14 +8,10 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-
     //Model
     m.project = null;
     m.requirements = [];
-    m.products = [
-        {name: 'TODO'}
-    ];
-
+    m.products = [];
     // Footer fields
     m.fields = {
         summary: {},
@@ -33,6 +29,7 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
             .then(function (res) {
                 initFields(res);
                 m.requirements = res.requirements;
+                m.products = res.products;
 
                 return (m.project = res);
             });

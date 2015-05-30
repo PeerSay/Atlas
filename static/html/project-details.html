@@ -53,8 +53,8 @@
                     Products <span class="fa fa-edit hover-edit"></span>
                 </a>
             </h4>
-            <ul>
-                <li ng-repeat="product in cm.products">
+            <ul class="animate-ease-right">
+                <li ng-repeat="product in cm.products | filter:{selected: true} track by product.id">
                     <span class="side-text ellipsis">{{ product.name }}</span>
                 </li>
             </ul>
@@ -66,7 +66,7 @@
                     Criteria <span class="fa fa-edit hover-edit"></span>
                 </a>
             </h4>
-            <ul>
+            <ul class="animate-ease-right">
                 <li ng-repeat="req in cm.requirements | filter:{selected: true} track by req.id">
                     <span class="side-text ellipsis">{{ req.name }}</span>
                 </li>

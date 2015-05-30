@@ -22,11 +22,11 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.products = [];
     m.toggleProduct = toggleProduct;
     m.totalSelected = 0;
+    m.addNotFoundProduct = addNotFoundProduct;
+    m.selectProduct = selectProduct;
+    // Loading
     m.loadingProducts = true;
     m.loadMoreProducts = loadMoreProducts;
-    // Add new
-    m.addProduct = addProduct;
-    m.selectProduct = selectProduct;
     // Filters
     var filterExpr = {
         all: {},
@@ -40,6 +40,22 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.filterLiClass= filterLiClass;
     m.filterBtnClass= filterBtnClass;
     m.toggleFilter = toggleFilter;
+    // Add new
+    var emptyNew = {
+        name: '',
+        category: '',
+        description: '',
+        popularity: 100,
+        selected: true,
+        local: true
+    };
+    m.addNew = {
+        show: false,
+        model: angular.copy(emptyNew)
+    };
+    m.toggleAddNew = toggleAddNew;
+    m.cancelAddNew = cancelAddNew;
+    m.saveAddNew = saveAddNew;
 
 
     activate();
@@ -191,8 +207,13 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
     // Select / Add new
     //
-    function addProduct(val) {
-        console.log('>>addProduct: ', val);
+    function addNotFoundProduct(val) {
+        m.addNew.model.name = val;
+        m.addNew.show = true;
+
+        // TODO - this leads to bug: duble-add of new item + exception!!
+        //var product = angular.extend({}, emptyNew, m.addNew.model);
+        //return product; // returned is added to list
     }
 
     function selectProduct(product) {
@@ -207,7 +228,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         return {active: m.filter.name === name};
     }
 
-    function filterBtnClass(name) {
+    function filterBtnClass() {
         return {
             'fa-minus-square-o': m.filter.name === 'all',
             'fa-check-square-o': m.filter.name === 'selected',
@@ -218,6 +239,34 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     function toggleFilter(name) {
         m.filter.name = name;
         m.filter.expr = filterExpr[name];
+    }
+
+    // Add new
+    function toggleAddNew() {
+        m.addNew.show = !m.addNew.show;
+    }
+
+    function cancelAddNew() {
+        m.addNew.show = false;
+        angular.extend(m.addNew.model, emptyNew);
+    }
+
+    function saveAddNew() {
+        var product = angular.extend({}, emptyNew, m.addNew.model);
+        product.id = uniqueId(m.products);
+        product.category = (m.category.selected || {}).name;
+
+        addToProject(product);
+        addProductsToList([product]);
+        patchProject();
+
+        cancelAddNew();
+    }
+
+    function uniqueId(arr) {
+        return arr.reduce(function (prev, cur) {
+            return Math.max(prev, cur.id);
+        }, 0) + 1;
     }
 
 

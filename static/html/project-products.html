@@ -10,7 +10,7 @@
                 </button>
                 <h4 class="modal-title">
                     {{:: cm.title }}
-                    <small class="total-selected" ng-if="cm.totalSelected">({{ cm.totalSelected }})</small>
+                    <!--<small class="total-selected" ng-if="cm.totalSelected">({{ cm.totalSelected }})</small>-->
                 </h4>
             </div>
             <div class="modal-body">
@@ -37,7 +37,7 @@
                     <!--Select/Add Products-->
                     <div class="form-group">
                         <ui-select ng-model="cm.product.selected" theme="bootstrap"
-                                tagging="cm.addProduct"
+                                tagging="cm.addNotFoundProduct"
                                 tagging-tokens="ENTER"
                                 tagging-label="(adding new)"
                                 on-select="cm.selectProduct($model)">
@@ -49,7 +49,7 @@
                         </ui-select>
                     </div>
                     <!--Buttons-->
-                    <div class="form-group">
+                    <div class="form-group button-bar">
                         <div class="btn-group">
                             <button type="button" class="btn btn-default dropdown-toggle"
                                     data-toggle="dropdown">
@@ -69,7 +69,39 @@
                             </ul>
                         </div>
 
-                        <button type="button" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-default"
+                                ng-click="cm.toggleAddNew()">
+                            <span class="fa fa-{{ cm.addNew.show && 'minus' || 'plus' }}-circle"></span> New
+                        </button>
+                    </div>
+                </form>
+
+                <!--Add form-->
+                <form class="form-horizontal page-spacer" ng-show="cm.addNew.show">
+                    <div class="form-group">
+                        <label for="req-name" class="col-sm-2 control-label">Name:</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="req-name" class="form-control" placeholder="Name"
+                                    ng-model="cm.addNew.model.name"
+                                    ps-focus-on="cm.addNew.show">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="req-descr" class="col-sm-2 control-label">Description:</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="req-descr" class="form-control" placeholder="Description"
+                                    ng-model="cm.addNew.model.description">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    ng-click="cm.saveAddNew()">Add</button>
+                            <button type="button" class="btn close inline-close"
+                                    ng-click="cm.cancelAddNew()">
+                                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
 

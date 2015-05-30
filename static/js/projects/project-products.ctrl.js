@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter'];
-function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilter) {
+ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter', 'Util'];
+function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilter, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -22,6 +22,8 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.products = [];
     m.toggleProduct = toggleProduct;
     m.totalSelected = 0;
+    m.loadingProducts = true;
+    m.loadMoreProducts = loadMoreProducts;
     // Add new
     m.addProduct = addProduct;
     m.selectProduct = selectProduct;
@@ -42,24 +44,43 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            m.category.selected = res.selectedCategory || {};
+            m.patchObserver = jsonpatch.observe(m.project);
+
+            addProductsToList(res.products, true);
             m.totalSelected = getTotalSelected();
 
-            m.patchObserver = jsonpatch.observe(m.project);
-            return m.project;
+            var category = m.category.selected = res.selectedCategory || {};
+            var categoryName = !category.local ? category.name : null;
+            Projects.readPublicProducts({category: categoryName}).then(function (res) {
+                addProductsToList(res.products);
+                m.loadingProducts = false;
+            });
         });
 
         Projects.readCategories(m.projectId).then(function (res) {
             m.categories = res;
         });
 
-        Projects.readProducts(m.projectId).then(function (res) {
-            m.products = res.products;
-        });
-
         $scope.$on('$destroy', function () {
             jsonpatch.unobserve(m.project, m.patchObserver);
         });
+    }
+
+    var productIdx = {};
+    function addProductsToList(list, reset) {
+        if (reset) {
+            m.products = [];
+            productIdx = {};
+        }
+
+        _.forEach(list, function (it) {
+            var publicNotSelected = !reset && !productIdx[it.id];
+            var privateSelected = reset && it.selected;
+            if (privateSelected || publicNotSelected) {
+                m.products.push(it);
+            }
+            productIdx[it.id] = true;
+        })
     }
 
     function patchProject() {
@@ -69,11 +90,29 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         Projects.patchProject(m.projectId, patch);
     }
 
+    function loadMoreProducts() {
+        var maxPopularity = m.products.reduce(function (prev, cur) {
+            return Math.min(prev, cur.popularity);
+        }, 100);
+        var category = m.category.selected;
+        var categoryName = !category.local ? category.name : null;
+        var params = {category: categoryName, maxPopularity: maxPopularity};
+
+        m.loadingProducts = true;
+        Projects.readPublicProducts(params).then(function (res) {
+            addProductsToList(res.products);
+            m.loadingProducts = false;
+        });
+    }
+
     // Category
     //
     function selectCategory(category) {
         m.project.selectedCategory = category;
         patchProject();
+
+        addProductsToList(m.project.products, true); //reset!
+        loadMoreProducts();
     }
 
     function addCategory(val) {
@@ -94,7 +133,8 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         _.removeItem(m.categories, category);
         _.removeItem(m.project.categories, category);
 
-        if (category.name === m.category.selected.name) {
+        var categoryName = (m.category.selected || {}).name;
+        if (category.name === categoryName) {
             m.category = {};
             m.project.selectedCategory = null;
         }

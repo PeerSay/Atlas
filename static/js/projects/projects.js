@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['Backend', 'User', 'Util', '$q', 'Storage'];
-function Projects(Backend, User, _, $q, Storage) {
+Projects.$inject = ['Backend', 'User', 'Util', '$q', 'Storage', '$timeout'];
+function Projects(Backend, User, _, $q, Storage, $timeout) {
     var P = {};
 
     // List
@@ -28,7 +28,7 @@ function Projects(Backend, User, _, $q, Storage) {
 
     P.readCategories = readCategories;
     P.readRequirements = readRequirements;
-    P.readProducts = readProducts;
+    P.readPublicProducts = readPublicProducts;
 
     var empty = {
         title: '',
@@ -254,21 +254,46 @@ function Projects(Backend, User, _, $q, Storage) {
 
     //Products
     //
-    function readProducts(id) {
-        return readProject(id).then(function (res) {
-            var localProducts = res.products || [] ;
-
-            return readGlobalProductsData().then(function (globalProducts) {
-                var products = mergeLocalGlobal(localProducts, globalProducts);
-                return {products: products};
-            });
+    function readPublicProducts(params) {
+        return readPublicProductsDataDbg(params).then(function (res) {
+            return {products: res};
         });
     }
 
-    function readGlobalProductsData() {
-        return $q(function (resolve) {
-            resolve(fakeProducts);
+    function readPublicProductsDataDbg(params) {
+        var delay = 1000;
+
+        return $timeout(function () {
+        }, delay).then(function () {
+            return genFakeProducts(params);
         });
+    }
+
+    function genFakeProducts(params) {
+        var category = params.category;
+        var limit = params.limit || 10;
+        var maxPopularity = params.maxPopularity || 100;
+
+        if (!category) { return []; }
+
+        var res = [];
+        for (var i = 0, len = limit; i < len; i++) {
+            res.push(genFakeProduct(maxPopularity, category));
+        }
+        return res;
+    }
+
+    function genFakeProduct(maxPopularity, category) {
+        var name = Math.random().toString(36).slice(9);
+        var popularity = Math.max(0, maxPopularity - Math.round(Math.random() * 20));
+        var res = {
+            id: Math.round(Math.random() * 1000000000000),
+            name: name,
+            description: 'Some descr for ' + name,
+            category: category,
+            popularity: popularity
+        };
+        return res;
     }
 
     return P;

@@ -437,6 +437,10 @@ table.rc-table-resizing {
     border: 1px solid @table-border-color;
     border-radius: 4px;
   }
+  table {
+    // Override bootstrap
+    margin-bottom: 0;
+  }
 
   tr {
     &.selected {
@@ -459,7 +463,21 @@ table.rc-table-resizing {
   td {
     cursor: pointer;
   }
+
+  .btn.load-more {
+    padding: 1px 10px;
+    &:not(.loading) {
+      &:after {
+        content: '...';
+      }
+      .fa {
+        display: none;
+      }
+    }
+  }
 }
+
+
 
 .selection-list {
   border: 1px solid @modal-header-border-color;

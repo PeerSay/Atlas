@@ -36,8 +36,11 @@ function psTileDialog($, $timeout) {
                 });
             });
 
-            // Show
-            $el.modal('show'); // triggered manually to let show to trigger show event
+            // Show - async to let $destroy run first, otherwise modal('hide') removes .modal-open class
+            // and breaks scroll of long modals
+            $timeout(function () {
+                $el.modal('show'); // triggered manually to let show to trigger show event
+            }, 0, false);
 
             // Clean-up
             element.on('$destroy', function () {

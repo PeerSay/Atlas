@@ -37,6 +37,9 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         name: 'all',
         expr: {}
     };
+    m.filterLiClass= filterLiClass;
+    m.filterBtnClass= filterBtnClass;
+    m.toggleFilter = toggleFilter;
 
 
     activate();
@@ -77,6 +80,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             var publicNotSelected = !reset && !productIdx[it.id];
             var privateSelected = reset && it.selected;
             if (privateSelected || publicNotSelected) {
+                it.selected = it.selected || false; // add missing prop to public list items
                 m.products.push(it);
             }
             productIdx[it.id] = true;
@@ -153,6 +157,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     //Selection
     //
     $scope.products = m.products;
+    //XXX
     $scope.$watch('products.selected', function (newVal) {
         console.log('>> Watch: ', newVal)
     }, true);
@@ -194,6 +199,25 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         toggleProductVal(product, true);
 
         // TODO: focus (use ps-focus ?)
+    }
+
+    // Filters
+    //
+    function filterLiClass(name) {
+        return {active: m.filter.name === name};
+    }
+
+    function filterBtnClass(name) {
+        return {
+            'fa-minus-square-o': m.filter.name === 'all',
+            'fa-check-square-o': m.filter.name === 'selected',
+            'fa-square-o': m.filter.name === 'not-selected'
+        };
+    }
+
+    function toggleFilter(name) {
+        m.filter.name = name;
+        m.filter.expr = filterExpr[name];
     }
 
 

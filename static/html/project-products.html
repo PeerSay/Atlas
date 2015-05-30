@@ -14,7 +14,7 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <form>
+                <form class="selection-controls2">
                     <!--Select Category-->
                     <div class="form-group">
                         <ui-select ng-model="cm.category.selected" theme="bootstrap"
@@ -44,25 +44,28 @@
                             <ui-select-match placeholder="Select a product or add a new one...">{{ $select.selected.name }}</ui-select-match>
                             <ui-select-choices repeat="product in cm.products | filter: $select.search track by product.id">
                                 <span ng-bind-html="product.name | highlight: $select.search"></span>
+                                <span ng-if="product.selected" class="fa fa-check"></span>
                             </ui-select-choices>
                         </ui-select>
                     </div>
                     <!--Buttons-->
                     <div class="form-group">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default">
-                                <span class="fa fa-check-square-o checkbox-triple"></span>
-                                <span class="fa fa-minus-square-o"></span>
-                                <span class="fa fa-square-o"></span>
-                            </button>
                             <button type="button" class="btn btn-default dropdown-toggle"
                                     data-toggle="dropdown">
+                                <span class="fa" ng-class="cm.filterBtnClass()"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href>All</a></li>
-                                <li><a href>Selected</a></li>
-                                <li><a href>Not selected</a></li>
+                                <li ng-class="cm.filterLiClass('all')">
+                                    <a href ng-click="cm.toggleFilter('all')"><span class="fa fa-minus-square-o"></span> All</a>
+                                </li>
+                                <li ng-class="cm.filterLiClass('selected')">
+                                    <a href ng-click="cm.toggleFilter('selected')"><span class="fa fa-check-square-o"></span> Selected</a>
+                                </li>
+                                <li ng-class="cm.filterLiClass('not-selected')">
+                                    <a href ng-click="cm.toggleFilter('not-selected')"><span class="fa fa-square-o"></span> Not selected</a>
+                                </li>
                             </ul>
                         </div>
 

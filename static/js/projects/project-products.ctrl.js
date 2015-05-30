@@ -7,10 +7,12 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
     m.projectId = $stateParams.projectId;
     m.title = 'Products';
-    m.project = {};
     m.onClose = onClose;
     m.goPrev = goPrev;
     m.goFirst = goFirst;
+    // Data / Edit
+    m.project = {};
+    m.patchObserver = null;
     // Categories - TODO - unify with Essentials
     m.category = {}; // ui-select model
     m.categories = [];
@@ -25,7 +27,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.addNotFoundProduct = addNotFoundProduct;
     m.selectProduct = selectProduct;
     // Loading
-    m.loadingProducts = true;
+    m.loadingMore = true;
     m.loadMoreProducts = loadMoreProducts;
     // Filters
     var filterExpr = {
@@ -72,7 +74,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             var categoryName = !category.local ? category.name : null;
             Projects.readPublicProducts({category: categoryName}).then(function (res) {
                 addProductsToList(res.products);
-                m.loadingProducts = false;
+                m.loadingMore = false;
             });
         });
 
@@ -118,10 +120,10 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         var categoryName = !category.local ? category.name : null;
         var params = {category: categoryName, maxPopularity: maxPopularity};
 
-        m.loadingProducts = true;
+        m.loadingMore = true;
         Projects.readPublicProducts(params).then(function (res) {
             addProductsToList(res.products);
-            m.loadingProducts = false;
+            m.loadingMore = false;
         });
     }
 

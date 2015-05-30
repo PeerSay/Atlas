@@ -14,37 +14,49 @@
             </div>
             <!--Body-->
             <div class="modal-body">
-                <!--Top Bar-->
-                <form class="form-inline selection-controls page-spacer">
-                    <div class="form-group selection-summary">
-                        <label class="control-label">Selected:</label>
-                        <span class="form-control-static">
-                            <span class="badge" ng-if="">{{ cm.getTotalSelected() }}</span>
-                        </span>
-                    </div>
-                    <!--Filters-->
+                <form class="selection-controls2">
+                    <!--Select/Add Products-->
                     <div class="form-group">
-                        <label class="control-label">Filter:</label>
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" class="btn btn-default"
-                                    ng-class="cm.filterClass('all')"
-                                    ng-click="cm.toggleFilter('all')">All</button>
-                            <button type="button" class="btn btn-default"
-                                    ng-class="cm.filterClass('selected')"
-                                    ng-click="cm.toggleFilter('selected')">Selected</button>
-                            <button type="button" class="btn btn-default"
-                                    ng-class="cm.filterClass('not-selected')"
-                                    ng-click="cm.toggleFilter('not-selected')">Not selected</button>
+                        <ui-select ng-model="cm.requirement.selected" theme="bootstrap"
+                                tagging="cm.addNotFoundRequirement"
+                                tagging-tokens="ENTER"
+                                tagging-label="(adding new)"
+                                on-select="cm.selectRequirement($model)">
+                            <ui-select-match placeholder="Select a requirement or add a new one...">
+                                {{ $select.selected.name }}
+                            </ui-select-match>
+                            <ui-select-choices
+                                    repeat="req in cm.requirements | filter: $select.search track by req.id">
+                                <span ng-bind-html="req.name | highlight: $select.search"></span>
+                                <span ng-if="req.selected" class="fa fa-check"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <!--Buttons-->
+                    <div class="form-group button-bar">
+                        <!--Filter dropdown-->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle"
+                                    data-toggle="dropdown"
+                                    title="Filter"
+                                    ps-tooltip>
+                                <span class="fa" ng-class="cm.filterBtnClass()"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li ng-class="cm.filterLiClass('all')">
+                                    <a href ng-click="cm.toggleFilter('all')"><span class="fa fa-minus-square-o"></span> All</a>
+                                </li>
+                                <li ng-class="cm.filterLiClass('selected')">
+                                    <a href ng-click="cm.toggleFilter('selected')"><span class="fa fa-check-square-o"></span> Selected</a>
+                                </li>
+                                <li ng-class="cm.filterLiClass('not-selected')">
+                                    <a href ng-click="cm.toggleFilter('not-selected')"><span class="fa fa-square-o"></span> Not selected</a>
+                                </li>
+                            </ul>
                         </div>
-                    </div>
-                    <!--Search-->
-                    <div class="form-group">
-                        <label class="control-label">Search:</label>
-                        <input type="search" class="form-control" placeholder="Demo only">
-                    </div>
-                    <!--Add-->
-                    <div class="form-group pull-right">
-                        <button type="button" class="form-control btn btn-primary"
+                        <!--Add new-->
+                        <button type="button" class="btn btn-default"
                                 ng-click="cm.toggleAddNew()">
                             <span class="fa fa-{{ cm.addNew.show && 'minus' || 'plus' }}-circle"></span> New
                         </button>
@@ -78,7 +90,8 @@
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="button" class="btn btn-primary"
-                                    ng-click="cm.saveAddNew()">Add</button>
+                                    ng-click="cm.saveAddNew()">Add
+                            </button>
                             <button type="button" class="btn close inline-close"
                                     ng-click="cm.cancelAddNew()">
                                 <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
@@ -88,7 +101,61 @@
                 </form>
 
                 <!--Selection List-->
-                <div class="row">
+                <div class="table-responsive table-selection-list border">
+                    <table class="table table-hover table-striped no-select">
+                        <thead>
+                        <tr>
+                            <th class="first"></th>
+                            <th colspan="2" class="main">Name</th>
+                            <th>Description</th>
+                            <th class="last">Popularity</th>
+                        </tr>
+                        </thead>
+                        <!--Groups list-->
+                        <tbody ng-repeat="group in cm.groups.list | orderBy:'-popularity'">
+                        <!--Topic row-->
+                        <tr>
+                            <td>
+                                <input type="checkbox"
+                                        ng-model="group.selected"
+                                        ng-click="cm.toggleGroup(group)">
+                            </td>
+                            <td colspan="2" class="bold"><strong>{{:: group.name }}</strong></td>
+                            <td>{{:: group.description }}</td>
+                            <td class="last">{{:: group.popularity }}%</td>
+                        </tr>
+                        <!--Criteria list-->
+                        <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' track by req.id"
+                                ng-class="{selected: req.selected}"
+                                ng-click="cm.toggleReq(req, true)">
+                            <td></td>
+                            <td class="first">
+                                <input type="checkbox"
+                                        ng-model="req.selected"
+                                        ng-change="cm.toggleReq(req)"
+                                        ng-click="$event.stopPropagation()">
+                            </td>
+                            <td>{{ req.name}}</td>
+                            <td>{{ req.description}}</td>
+                            <td class="last">{{ req.popularity}}%</td>
+                        </tr>
+                        <!--Load more-->
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <button type="button" class="btn btn-xs btn-default load-more"
+                                        title="Load more"
+                                        ps-tooltip
+                                        ng-class="{loading: cm.loadingProducts}"
+                                        ng-click="cm.loadMoreProducts()">
+                                    <span class="fa fa-refresh fa-spin"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!--<div class="row">
                     <div class="col-xs-12">
                         <ul class="selection-list">
                             <li ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
@@ -120,9 +187,10 @@
                                 </ul>
                             </li>
                         </ul>
-                        <!--Empty: TODO-->
+                        &lt;!&ndash;Empty: TODO&ndash;&gt;
                     </div>
-                </div>
+                </div>-->
+
                 <div class="row page-spacer"></div>
             </div>
 

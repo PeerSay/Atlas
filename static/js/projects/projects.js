@@ -27,7 +27,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.patchProject = patchProject;
 
     P.readCategories = readCategories;
-    P.readRequirements = readRequirements;
+    P.readPublicRequirements = readPublicRequirements;
     P.readPublicProducts = readPublicProducts;
 
     var empty = {
@@ -219,37 +219,21 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     //Requirements
     //
-    function readRequirements(id) {
-        return $q(function (resolve) {
-            readProject(id).then(function (res) {
-                var localReqs = res.requirements;
-                var reqs = mergeLocalGlobal(localReqs, fakeRequirements);
-
-                resolve({
-                    project: res,
-                    reqs: reqs,
-                    topics: fakeTopics
-                });
-            });
-        });
+    function readPublicRequirements() {
+        return readPublicRequirementsDataDbg().then(function (res) {
+            return res;
+        })
     }
 
-    function mergeLocalGlobal(localArr, globalArr) {
-        var localIdx = {};
-        var local = _.map(localArr, function (it) {
-            //it.selected = true; XXX - can be local & unselected? Yes!
-            localIdx[it.id] = it;
-            return it;
-        });
-        var global = _.filter(globalArr, function (it) {
-            return !localIdx[it.id];
-        });
-        global = _.map(global, function (it) {
-            it.selected = false;
-            return it;
-        });
+    function readPublicRequirementsDataDbg() {
+        var delay = 1000;
 
-        return [].concat(local, global); //  new array!
+        return $timeout(function () {}, delay).then(function () {
+            return {
+                topics: fakeTopics,
+                requirements: fakeRequirements
+            };
+        });
     }
 
     //Products
@@ -263,8 +247,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     function readPublicProductsDataDbg(params) {
         var delay = 1000;
 
-        return $timeout(function () {
-        }, delay).then(function () {
+        return $timeout(function () {}, delay).then(function () {
             return genFakeProducts(params);
         });
     }

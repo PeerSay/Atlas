@@ -12,27 +12,31 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.goPrev = goPrev;
     // Data / Edit
     m.project = null; // ref to shared
-    m.requirements = [];
-    m.groups = GroupBy('topic');
     m.patchObserver = null;
-    // Filters
-    m.filter = {
-        name: 'all',
-        expr: {}
-    };
-    m.filterClass = filterClass;
-    m.toggleFilter = toggleFilter;
-    m.showFilteredGroup = showFilteredGroup;
-    // Selections
+    m.groups = GroupBy('topic');
+    // Table selection
+    m.requirement = {}; // ui-select model
+    m.requirements = [];
     m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
     m.getTotalSelected = getTotalSelected;
-
-    var filterExprs = {
+    // Search selection
+    m.addNotFoundRequirement = addNotFoundRequirement;
+    m.selectRequirement = selectRequirement;
+    // Filters
+    var filterExpr = {
         all: {},
         selected: {selected: true},
         'not-selected': {selected: false}
     };
+    m.filter = {
+        name: 'all',
+        expr: {}
+    };
+    m.filterLiClass = filterLiClass;
+    m.filterBtnClass = filterBtnClass;
+    m.toggleFilter = toggleFilter;
+    m.showFilteredGroup = showFilteredGroup;
     // Add new
     var emptyNew = {
         name: '',
@@ -44,24 +48,26 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     };
     m.addNew = {
         show: false,
-        requirement: emptyNew
+        requirement: angular.copy(emptyNew)
     };
     m.toggleAddNew = toggleAddNew;
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
 
+
     activate();
 
     function activate() {
-        Projects.readRequirements(m.projectId).then(function (res) {
-            m.requirements = res.reqs;
-            m.groups.addGroups(res.topics);
-            m.groups.addItems(res.reqs);
-
-            //console.log('>>', res);
-
-            m.project = res.project; // XXX - separate read
+        Projects.readProject(m.projectId).then(function (res) {
+            m.project = res;
             m.patchObserver = jsonpatch.observe(m.project);
+
+            m.groups.addItems(res.requirements, true); // reset
+        });
+
+        Projects.readPublicRequirements().then(function (res) {
+            m.groups.addGroups(res.topics);
+            m.groups.addItems(res.requirements);
         });
 
         $scope.$on('$destroy', function () {
@@ -79,13 +85,21 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     // Filters
     //
-    function filterClass(name) {
+    function filterLiClass(name) {
         return {active: m.filter.name === name};
+    }
+
+    function filterBtnClass() {
+        return {
+            'fa-minus-square-o': m.filter.name === 'all',
+            'fa-check-square-o': m.filter.name === 'selected',
+            'fa-square-o': m.filter.name === 'not-selected'
+        };
     }
 
     function toggleFilter(name) {
         m.filter.name = name;
-        m.filter.expr = filterExprs[name];
+        m.filter.expr = filterExpr[name];
     }
 
     function showFilteredGroup(group) {
@@ -95,11 +109,17 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     // Selection
     //
-    function toggleReq(req) {
+    function toggleReq(req, invert) {
+        var val = invert ? !req.selected : req.selected;
+        toggleReqVal(req, val);
+    }
+
+    function toggleReqVal(req, val) {
+        req.selected = val;
+
         toggleGroupByReq(req);
 
         addRemoveLocal(req);
-
         patchProject();
     }
 
@@ -146,7 +166,17 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     }
 
     function getTotalSelected() {
-        return filterFilter(m.project.requirements, filterExprs.selected).length;
+        return filterFilter(m.project.requirements, filterExpr.selected).length;
+    }
+
+    // Search
+    //
+    function addNotFoundRequirement() {
+        // TODO
+    }
+
+    function selectRequirement() {
+
     }
 
     // Add new
@@ -174,28 +204,55 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     //
     function GroupBy(prop) {
         var G = {};
-        var index = {};
         G.list = [];
         G.get = getGroup;
         G.addGroups = addGroups;
         G.addItems = addItems;
 
+        var groupIdx = {};
+        var itemIdx = {};
+
         function getGroup(topic) {
-            return index[topic];
+            return groupIdx[topic];
         }
 
         function addGroups(groups) {
             _.forEach(groups, function (it) {
-                it.reqs = [];
-                index[it.name] = it;
-                G.list.push(it);
+                var group = groupIdx[it.name];
+                if (group) {
+                    // add props from global list missing in groups created from private items
+                    angular.extend(group, it);
+                } else {
+                    it.reqs = it.reqs || [];
+                    groupIdx[it.name] = it;
+                    G.list.push(it);
+                }
             });
         }
 
-        function addItems(arr) {
-            _.forEach(arr, function (it) {
+        function addItems(list, reset) {
+            if (reset) {
+                m.requirements = [];
+                itemIdx = {};
+            }
+
+            _.forEach(list, function (it) {
+                // Add to Search list - flat
+                var skip = true;
+                var publicNotSelected = !reset && !itemIdx[it.id];
+                var privateSelected = reset && it.selected;
+                if (privateSelected || publicNotSelected) {
+                    it.selected = it.selected || false; // add missing prop to public list items
+                    m.requirements.push(it);
+                    skip = false;
+                }
+                itemIdx[it.id] = true;
+
+                if (skip) { return; }
+
+                // Add to group
                 var key = it[prop];
-                var group = index[key];
+                var group = groupIdx[key];
                 if (!group) {
                     group = {
                         reqs: [],
@@ -203,7 +260,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                         popularity: 100,
                         selected: false
                     };
-                    G.list.unshift(group);
+                    addGroups([group]);
                 }
 
                 group.reqs.push(it);

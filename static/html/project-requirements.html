@@ -19,7 +19,7 @@
                     <div class="form-group selection-summary">
                         <label class="control-label">Selected:</label>
                         <span class="form-control-static">
-                            <span class="badge">{{ cm.getTotalSelected() }}</span>
+                            <span class="badge" ng-if="">{{ cm.getTotalSelected() }}</span>
                         </span>
                     </div>
                     <!--Filters-->
@@ -94,7 +94,7 @@
                             <li ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
                                     ng-class="{selected: group.selected}"
                                     ng-show="cm.showFilteredGroup(group)">
-                                <label class="cell grouped clickable"><input type="checkbox"
+                                <label class="cell clickable"><input type="checkbox"
                                         ng-model="group.selected"
                                         ng-click="cm.toggleGroup(group)"> {{ group.name }}</label>
                                 <div class="cell last">{{ group.popularity }}%</div>
@@ -104,10 +104,10 @@
                                             class="has-hover"
                                             ng-class="{selected: req.selected}"
                                             ng-class-odd="'odd'">
-                                        <label class="cell first clickable"><input type="checkbox"
+                                        <label class="cell first padded not-bold clickable"><input type="checkbox"
                                                 ng-model="req.selected"
                                                 ng-click="cm.toggleReq(req)"> {{ req.name }}</label>
-                                        <div class="cell description">{{ req.description }}</div>
+                                        <div class="cell pale">{{ req.description }}</div>
                                         <div class="cell last">{{ req.popularity }}%</div>
                                     </li>
                                     <li>

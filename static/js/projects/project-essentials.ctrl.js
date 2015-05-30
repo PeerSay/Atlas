@@ -67,8 +67,6 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     function selectCategory(category) {
         m.project.selectedCategory = category;
         patchProject();
-
-        //TODO: server
     }
 
     function addCategory(val) {

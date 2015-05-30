@@ -403,6 +403,13 @@ table.rc-table-resizing {
  Selection lists
 */
 
+@selection-color: #17B7AD;
+
+.total-selected {
+  color: @selection-color;
+  font-weight: bold;
+}
+
 .selection-controls {
   border-radius: 3px;
   box-shadow: 0 0 2px 0;
@@ -425,41 +432,77 @@ table.rc-table-resizing {
   }
 }
 
+.table-selection-list {
+  &.border {
+    border: 1px solid @table-border-color;
+    border-radius: 4px;
+  }
+
+  tr {
+    &.selected {
+      color: @selection-color;
+    }
+  }
+
+  td, th {
+    &.first {
+      width: 1%;
+    }
+    &.main {
+      width: 35%;
+    }
+    &.last {
+      width: 5%;
+      text-align: right;
+    }
+  }
+  td {
+    cursor: pointer;
+  }
+}
+
 .selection-list {
   border: 1px solid @modal-header-border-color;
   border-radius: 4px;
-  padding: 5px 2px;
+
+  &, ul {
+    display: table;
+    width: 100%;
+    > li {
+      width: 100%;
+      display: table-row;
+    }
+  }
 
   // Common
   .cell {
     display: table-cell;
     padding: 5px;
+    width: 100%;
 
     &.first {
+      padding-left: 8px;
       width: 35%;
-      padding-left: 25px;
     }
     &.last {
       width: 5%;
+      text-align: right;
     }
-    &.grouped {
-      width: 100%
+    &.center {
+      width: 100%-35%-5%;
     }
-  }
-
-  // Inner
-  li > ul {
-    display: table;
-    width: 100%;
-    > li {
-      display: table-row;
-
-      label.cell {
-        font-weight: normal;
-      }
+    &.padded {
+      padding-left: 25px;
+    }
+    &.not-bold {
+      font-weight: normal;
+    }
+    &.bold {
+      font-weight: bold;
     }
   }
 
+  // Load more btn
   .btn {
     padding: 0 10px;
     opacity: .2;
@@ -469,31 +512,32 @@ table.rc-table-resizing {
     opacity: 1;
   }
 
-
   // Theme
   li {
     &.selected {
       color: #17B7AD;
     }
-    .odd {
+    &.odd {
       background: #fafaf9;
     }
-    &:not(.selected) > .description {
+    &:not(.selected) > .pale {
       color: @gray-light;
+    }
+    &.header {
+      .cell {
+        border-bottom: 2px solid @modal-header-border-color;
+      }
     }
   }
 
-  .inner > li.has-hover:hover {
+  li.has-hover:hover {
     background: @gray-lighter;
-    &:not(.selected) > .description {
+    &:not(.selected) > .pale {
       color: @text-color;
     }
   }
-
-  .name {
-    cursor: pointer;
-  }
 }
+
 /*Override Bootstrap*/
 .form-horizontal .control-label {
   &.left {

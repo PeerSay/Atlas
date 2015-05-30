@@ -8,44 +8,98 @@
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                 </button>
-                <!--Table menu / popover-->
-                <ps-table-popover class="header-btn last"
-                        ps-container=".modal-header"
-                        ps-viewport=".modal-header"
-                        ps-id="table"
-                        ps-popover-on="cm.popoverOn">
-                        <span class="popover-icon hamburger-icon">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </span>
-                    <form class="popover-form">
-                        <div class="form-group">
-                            <label>Group by:</label>
-                            <div class="list-group">
-                                <a href class="list-group-item"
-                                        ng-repeat="opt in cm.groupBy.options"
-                                        ng-class="{'active': opt === cm.groupBy.current}"
-                                        ng-click="cm.groupBy.set(opt)">
-                                    {{ cm.groupBy.displayName(opt) }}
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </ps-table-popover>
-                <a class="btn btn-default header-btn export"
-                        ng-mousedown="csv.generate()"
-                        ng-href="{{ csv.link() }}"
-                        download="export.csv">Export</a>
                 <h4 class="modal-title">
                     {{:: cm.title }}
-                    <small ng-show="cm.savingData">Saving...</small>
+                    <small class="total-selected" ng-if="cm.totalSelected">({{ cm.totalSelected }})</small>
                 </h4>
             </div>
             <div class="modal-body">
-                <div class="tile-section border">
-                    <ps-table-view ps-export-csv="csv" ps-view="cm.tableView"></ps-table-view>
+                <form>
+                    <!--Select Category-->
+                    <div class="form-group">
+                        <ui-select ng-model="cm.category.selected" theme="bootstrap"
+                                tagging="cm.addCategory"
+                                tagging-tokens="ENTER"
+                                tagging-label="(adding new)"
+                                on-select="cm.selectCategory($model)">
+                            <!--Label don't work-->
+                            <ui-select-match placeholder="Select or search a category or domain...">{{ $select.selected.name }}</ui-select-match>
+                            <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
+                                    group-by="'domain'">
+                                <span ng-bind-html="category.name | highlight: $select.search"></span>
+                                        <span ng-if="category.local" class="delete-category"
+                                                ng-click="cm.deleteCategory(category)">
+                                            <span class="fa fa-trash"></span> <span class="link">Delete</span>
+                                        </span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <!--Select/Add Products-->
+                    <div class="form-group">
+                        <ui-select ng-model="cm.product.selected" theme="bootstrap"
+                                tagging="cm.addProduct"
+                                tagging-tokens="ENTER"
+                                tagging-label="(adding new)"
+                                on-select="cm.selectProduct($model)">
+                            <ui-select-match placeholder="Select a product or add a new one...">{{ $select.selected.name }}</ui-select-match>
+                            <ui-select-choices repeat="product in cm.products | filter: $select.search track by product.id">
+                                <span ng-bind-html="product.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <!--Buttons-->
+                    <div class="form-group">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default">
+                                <span class="fa fa-check-square-o checkbox-triple"></span>
+                                <span class="fa fa-minus-square-o"></span>
+                                <span class="fa fa-square-o"></span>
+                            </button>
+                            <button type="button" class="btn btn-default dropdown-toggle"
+                                    data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href>All</a></li>
+                                <li><a href>Selected</a></li>
+                                <li><a href>Not selected</a></li>
+                            </ul>
+                        </div>
+
+                        <button type="button" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
+
+                <!--Selection List-->
+                <div class="table-responsive table-selection-list border">
+                    <table class="table table-hover table-striped no-select">
+                        <thead>
+                            <tr>
+                                <th class="first"></th>
+                                <th class="main">Name</th>
+                                <th>Description</th>
+                                <th class="last">Popularity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="product in cm.products | filter:cm.filter.expr | orderBy:'-popularity' track by product.id"
+                                    ng-class="{selected: product.selected}"
+                                    ng-click="cm.toggleProduct(product, true)"
+                                    >
+                                <td class="first">
+                                    <input type="checkbox"
+                                            ng-model="product.selected"
+                                            ng-change="cm.toggleProduct(product)"
+                                            ng-click="$event.stopPropagation()">
+                                </td>
+                                <td class="main">{{:: product.name }}</td>
+                                <td>{{:: product.description }}</td>
+                                <td class="last">{{:: product.popularity }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+
                 <div class="row page-spacer"></div>
             </div>
             <div class="modal-footer">
@@ -62,19 +116,5 @@
                 </ol>
             </div>
         </div>
-    </div>
-
-    <!--Menu-->
-    <div ng-attr-id="{{::cm.menu.id}}" class="context-menu dropdown clearfix">
-        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-            <li ng-class="{disabled: !cm.menu.enabled('add')}">
-                <a class="pointer" role="menuitem" tabindex="-1"
-                        ng-click="cm.menu.doAction('add')">Add Product</a>
-            </li>
-            <li ng-class="{disabled: !cm.menu.enabled('remove')}">
-                <a class="pointer" role="menuitem" tabindex="-1"
-                        ng-click="cm.menu.doAction('remove')">Remove Product</a>
-            </li>
-        </ul>
     </div>
 </div>

@@ -28,6 +28,7 @@ function Projects(Backend, User, _, $q, Storage) {
 
     P.readCategories = readCategories;
     P.readRequirements = readRequirements;
+    P.readProducts = readProducts;
 
     var empty = {
         title: '',
@@ -69,7 +70,8 @@ function Projects(Backend, User, _, $q, Storage) {
         },
         selectedCategory: {id: 6, name: 'VPN', domain: 'Networking'},
         categories: [],
-        requirements: []
+        requirements: [],
+        products: [] // XXX - inside requirements?
     };
 
     var fakeCategories = [
@@ -83,7 +85,7 @@ function Projects(Backend, User, _, $q, Storage) {
         {id: 8, name: 'xxx', domain: 'Networking'},
         {id: 9, name: 'Firewalls', domain: 'Security'},
         {id: 10, name: 'Fw1', domain: 'Security'},
-        {id: 11, name: 'Email securoty', domain: 'Security'},
+        {id: 11, name: 'Email security', domain: 'Security'},
         {id: 12, name: 'SSD', domain: 'Storage'},
         {id: 13, name: 'RAID', domain: 'Storage'},
         {id: 14, name: 'Some storage', domain: 'Storage'}
@@ -109,6 +111,20 @@ function Projects(Backend, User, _, $q, Storage) {
         {name: 'Price', popularity: 50, description: ''},
         {name: 'Security', popularity: 10, description: ''},
         {name: 'Some', popularity: 0, description: ''}
+    ];
+    var fakeProducts = [
+        {id: 1, name: 'Raid2', description: 'Some descr for 123', category: 'SSD', popularity: 70},
+        {id: 2, name: 'ipfilter', description: 'Some descr for 12123', category: 'Firewalls', popularity: 80},
+        {id: 3, name: 'ZoneAlarm', description: 'Some descr for 123 Some descr for 123', category: 'Email security', popularity: 90},
+        {id: 4, name: 'Drive1', description: 'Some descr for 123', category: 'SSD', popularity: 92},
+        {id: 5, name: 'VMWare', description: '', category: 'Hypervizors', popularity: 88},
+        {id: 6, name: 'Bayezian', description: 'Some descr for 123s', category: 'Email security', popularity: 94},
+        {id: 7, name: 'Some3', description: '', category: 'SSD', popularity: 76},
+        {id: 8, name: 'FW1', description: 'Some descr for sdfsdf', category: 'Firewalls', popularity: 74},
+        {id: 9, name: 'iptables', description: '', category: 'Firewalls', popularity: 87},
+        {id: 10, name: 'ZoneAlarm', description: 'Some descr for 1sdfsdf3', category: 'Firewalls', popularity: 95},
+        {id: 11, name: 'Xen', description: '', category: 'Hypervizors', popularity: 95},
+        {id: 12, name: 'SpamFilter', description: '', category: 'Email security', popularity: 79}
     ];
 
     // Project list
@@ -146,20 +162,22 @@ function Projects(Backend, User, _, $q, Storage) {
     // Project details
     //
     function readProject(id) {
+        return readProjectDataDbg(id)
+            .then(function (data) {
+                angular.extend(P.current.project, empty, data);
+                return P.current.project;
+            });
+    }
+
+    function readProjectData(id) {
+        return Backend.read(['projects', id]);
+    }
+
+    function readProjectDataDbg(id) {
         return $q(function (resolve) {
-            var project = Storage.get('project' + id) || fakeProject;
-            angular.extend(P.current.project, empty, project);
-
-            resolve(P.current.project);
+            var data = Storage.get('project' + id) || fakeProject;
+            resolve(data);
         });
-
-
-        /*return Backend.read(['projects', id])
-         .then(function (data) {
-
-         angular.extend(P.current.project, empty, data.result);
-         return P.current.project;
-         });*/
     }
 
     function patchProject(id, data) {
@@ -203,10 +221,9 @@ function Projects(Backend, User, _, $q, Storage) {
     //
     function readRequirements(id) {
         return $q(function (resolve) {
-
             readProject(id).then(function (res) {
                 var localReqs = res.requirements;
-                var reqs = mergeReqs(localReqs, fakeRequirements);
+                var reqs = mergeLocalGlobal(localReqs, fakeRequirements);
 
                 resolve({
                     project: res,
@@ -217,10 +234,10 @@ function Projects(Backend, User, _, $q, Storage) {
         });
     }
 
-    function mergeReqs(localArr, globalArr) {
+    function mergeLocalGlobal(localArr, globalArr) {
         var localIdx = {};
         var local = _.map(localArr, function (it) {
-            //it.selected = true; XXX - can be local & unselected?
+            //it.selected = true; XXX - can be local & unselected? Yes!
             localIdx[it.id] = it;
             return it;
         });
@@ -232,7 +249,26 @@ function Projects(Backend, User, _, $q, Storage) {
             return it;
         });
 
-        return local.concat(global);
+        return [].concat(local, global); //  new array!
+    }
+
+    //Products
+    //
+    function readProducts(id) {
+        return readProject(id).then(function (res) {
+            var localProducts = res.products || [] ;
+
+            return readGlobalProductsData().then(function (globalProducts) {
+                var products = mergeLocalGlobal(localProducts, globalProducts);
+                return {products: products};
+            });
+        });
+    }
+
+    function readGlobalProductsData() {
+        return $q(function (resolve) {
+            resolve(fakeProducts);
+        });
     }
 
     return P;

@@ -1,116 +1,164 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', '$timeout', 'Table'];
-function ProjectProductsCtrl($scope, $state, $stateParams, $timeout, Table) {
+ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter'];
+function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilter) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.title = 'Project Products 2';
+    m.title = 'Products';
+    m.project = {};
     m.onClose = onClose;
     m.goPrev = goPrev;
     m.goFirst = goFirst;
-    // Table views
-    m.groupBy = Table.groupBy;
-    m.tableView = Table.addView(m, 'vi-full', getViewConfig)
-        //.debug() // opt
-        .grouping()
-        .sorting({active: true})
-        .done();
-
-    $scope.$on('$destroy', function () {
-        m.tableView.destroy();
-    });
-
-
-    function getViewConfig() {
-        // Columns: Criteria, Prod1, [Prod2, Prod3, ...], {AddNew}
-        return [
-            {
-                selector: 'name',
-                column: {
-                    sortable: true
-                },
-                cell: {
-                    editable: true,
-                    type: 'multiline'
-                }
-            },
-            {
-                selector: 'vendors/.*?/input',
-                column: {
-                    editable: true,
-                    sortable: true
-                },
-                cell: {
-                    editable: true,
-                    type: 'multiline'
-                }
-            },
-            {
-                selector: null, // virtual
-                columnModel: { field: 'Add', value: ''}, // addNew
-                column: {
-                    editable: true,
-                    placeholder: 'Add product...',
-                    last: true,
-                    'add-column': true
-                },
-                cell: {
-                    type: 'static',
-                    noMenu: true
-                }
-            }
-        ];
-    }
-
-    //Menu
-    m.menu = {
-        id: 'vi-context-menu',
-        context: null,
-        view: m.tableView,
-        setContext: function (context) {
-            this.context = context;
-        },
-        enabled: menuItemEnabled,
-        doAction: menuDoAction
+    // Categories - TODO - unify with Essentials
+    m.category = {}; // ui-select model
+    m.categories = [];
+    m.selectCategory = selectCategory;
+    m.addCategory = addCategory;
+    m.deleteCategory = deleteCategory;
+    // Products / Selection
+    m.product = {}; // ui-select model
+    m.products = [];
+    m.toggleProduct = toggleProduct;
+    m.totalSelected = 0;
+    // Add new
+    m.addProduct = addProduct;
+    m.selectProduct = selectProduct;
+    // Filters
+    var filterExpr = {
+        all: {},
+        selected: {selected: true},
+        'not-selected': {selected: false}
     };
-    m.tableView.menu = m.menu; // expose to Table directive
+    m.filter = {
+        name: 'all',
+        expr: {}
+    };
 
-    function menuDoAction(action) {
-        if (!this.enabled(action)) { return; }
 
-        var view = this.view;
-        var cell = this.context.cell;
+    activate();
 
-        $timeout(function () {
-            if (action === 'remove') {
-                view.removeColumn(cell.model);
-            }
-            else if (action === 'add'){
-                inviteToEdit(view);
-            }
-        }, 0, false);
+    function activate() {
+        Projects.readProject(m.projectId).then(function (res) {
+            m.project = res;
+            m.category.selected = res.selectedCategory || {};
+            m.totalSelected = getTotalSelected();
+
+            m.patchObserver = jsonpatch.observe(m.project);
+            return m.project;
+        });
+
+        Projects.readCategories(m.projectId).then(function (res) {
+            m.categories = res;
+        });
+
+        Projects.readProducts(m.projectId).then(function (res) {
+            m.products = res.products;
+        });
+
+        $scope.$on('$destroy', function () {
+            jsonpatch.unobserve(m.project, m.patchObserver);
+        });
     }
 
-    function menuItemEnabled(item) {
-        var cell = this.context && this.context.cell;
-        if (!cell) { return true; }
+    function patchProject() {
+        var patch = jsonpatch.generate(m.patchObserver);
+        if (!patch.length) { return; }
 
-        if (item === 'remove') {
-            if (!(cell.model && /^vendors/.test(cell.model.key))) {
-                // disable remove on non-vendor columns
-                return false;
-            }
+        Projects.patchProject(m.projectId, patch);
+    }
+
+    // Category
+    //
+    function selectCategory(category) {
+        m.project.selectedCategory = category;
+        patchProject();
+    }
+
+    function addCategory(val) {
+        var item = {
+            id: nextId(m.categories),
+            name: val,
+            domain: 'Default',
+            local: true
+        };
+        m.categories.unshift(item); // all
+        m.project.categories.unshift(item); // local
+        patchProject();
+
+        return item;
+    }
+
+    function deleteCategory(category) {
+        _.removeItem(m.categories, category);
+        _.removeItem(m.project.categories, category);
+
+        if (category.name === m.category.selected.name) {
+            m.category = {};
+            m.project.selectedCategory = null;
         }
-        return true;
+
+        patchProject();
     }
 
-    function inviteToEdit(view) {
-        var addCol = view.columns[view.columns.length - 1]; //last is addNew
-        addCol.edited = true; // invite to edit
+    function nextId(arr) {
+        var res = 0;
+        _.forEach(arr, function (it) {
+            res = Math.max(it.id, res) + 1;
+        });
+        return res;
     }
 
+    //Selection
+    //
+    $scope.products = m.products;
+    $scope.$watch('products.selected', function (newVal) {
+        console.log('>> Watch: ', newVal)
+    }, true);
+
+    function toggleProduct(product, invert) {
+        var val = invert ? !product.selected : product.selected;
+        toggleProductVal(product, val);
+    }
+
+    function toggleProductVal(product, val) {
+        product.selected = val;
+
+        addToProject(product);
+        patchProject();
+
+        m.totalSelected = getTotalSelected();
+    }
+
+    function addToProject(product) {
+        var localIdx = m.project.products.indexOf(product);
+        var added = (localIdx >= 0);
+
+        if (product.selected && !added) {
+            m.project.products.unshift(product);
+        }
+    }
+
+    function getTotalSelected() {
+        return filterFilter(m.project.products, filterExpr.selected).length;
+    }
+
+    // Select / Add new
+    //
+    function addProduct(val) {
+        console.log('>>addProduct: ', val);
+    }
+
+    function selectProduct(product) {
+        toggleProductVal(product, true);
+
+        // TODO: focus (use ps-focus ?)
+    }
+
+
+    // Navigation
+    //
     function onClose() {
         $state.go('^');
     }

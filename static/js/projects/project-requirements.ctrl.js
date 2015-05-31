@@ -53,6 +53,9 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.toggleAddNew = toggleAddNew;
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
+    //Loading
+    m.loadingMore = true;
+    m.loadMore = loadMore;
 
 
     activate();
@@ -69,6 +72,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             m.groups.addGroups(res.topics, true);
             m.groups.addItems(res.requirements);
             toggleAllGroupsByReqs();
+            m.loadingMore = false;
         });
 
         $scope.$on('$destroy', function () {
@@ -83,6 +87,9 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         Projects.patchProject(m.projectId, patch);
     }
 
+    function loadMore() {
+        //TODO
+    }
 
     // Filters
     //

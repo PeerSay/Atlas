@@ -410,34 +410,11 @@ table.rc-table-resizing {
   font-weight: bold;
 }
 
-// TODO - unify with .selection-controls
-.selection-controls2 {
+.selection-controls {
   .button-bar {
     .btn {
       margin-right: 10px;
     }
-  }
-}
-
-.selection-controls {
-  border-radius: 3px;
-  box-shadow: 0 0 2px 0;
-
-  .form-group {
-    margin-right: 10px;
-    &.pull-right {
-      margin: 10px;
-    }
-  }
-  .selection-summary {
-    padding: 10px;
-    background-color: rgba(89, 209, 188, 0.3);
-    .badge {
-      background-color: #158F75;
-    }
-  }
-  input[type=search] {
-    border-radius: 20px;
   }
 }
 
@@ -482,85 +459,6 @@ table.rc-table-resizing {
       .fa {
         display: none;
       }
-    }
-  }
-}
-
-
-
-.selection-list {
-  border: 1px solid @modal-header-border-color;
-  border-radius: 4px;
-
-  &, ul {
-    display: table;
-    width: 100%;
-    > li {
-      width: 100%;
-      display: table-row;
-    }
-  }
-
-  // Common
-  .cell {
-    display: table-cell;
-    padding: 5px;
-    width: 100%;
-
-    &.first {
-      padding-left: 8px;
-      width: 35%;
-    }
-    &.last {
-      width: 5%;
-      text-align: right;
-    }
-    &.center {
-      width: 100%-35%-5%;
-    }
-    &.padded {
-      padding-left: 25px;
-    }
-    &.not-bold {
-      font-weight: normal;
-    }
-    &.bold {
-      font-weight: bold;
-    }
-  }
-
-  // Load more btn
-  .btn {
-    padding: 0 10px;
-    opacity: .2;
-    transition: opacity .5s ease;
-  }
-  > li:hover .btn {
-    opacity: 1;
-  }
-
-  // Theme
-  li {
-    &.selected {
-      color: #17B7AD;
-    }
-    &.odd {
-      background: #fafaf9;
-    }
-    &:not(.selected) > .pale {
-      color: @gray-light;
-    }
-    &.header {
-      .cell {
-        border-bottom: 2px solid @modal-header-border-color;
-      }
-    }
-  }
-
-  li.has-hover:hover {
-    background: @gray-lighter;
-    &:not(.selected) > .pale {
-      color: @text-color;
     }
   }
 }

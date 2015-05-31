@@ -14,7 +14,7 @@
             </div>
             <!--Body-->
             <div class="modal-body">
-                <form class="selection-controls2">
+                <form class="selection-controls">
                     <!--Select/Add Products-->
                     <div class="form-group">
                         <ui-select ng-model="cm.requirement.selected" theme="bootstrap"
@@ -150,8 +150,8 @@
                                 <button type="button" class="btn btn-xs btn-default load-more"
                                         title="Load more"
                                         ps-tooltip
-                                        ng-class="{loading: cm.loadingProducts}"
-                                        ng-click="cm.loadMoreProducts()">
+                                        ng-class="{loading: cm.loadingMore}"
+                                        ng-click="cm.loadMore()">
                                     <span class="fa fa-refresh fa-spin"></span>
                                 </button>
                             </td>

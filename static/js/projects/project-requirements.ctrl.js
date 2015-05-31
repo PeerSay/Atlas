@@ -48,11 +48,14 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     };
     m.addNew = {
         show: false,
-        requirement: angular.copy(emptyNew)
+        req: angular.copy(emptyNew),
+        topic: {} // ui-select model
     };
     m.toggleAddNew = toggleAddNew;
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
+    m.onSelectTopic = onSelectTopic;
+    m.addNotFoundTopic = addNotFoundTopic;
     //Loading
     m.loadingMore = true;
     m.loadMore = loadMore;
@@ -202,6 +205,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function saveAddNew() {
         var req = angular.extend({}, emptyNew, m.addNew.req);
+        req.topic = (m.addNew.topic.selected || {}).name || ' '; // XXX - group with name ' ' (space)
         req.id = nextId(m.requirements);
         cancelAddNew();
 
@@ -211,12 +215,21 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         patchProject();
     }
 
+    function onSelectTopic(group) {
+        m.addNew.req.topic = group.name;
+    }
+
+    function addNotFoundTopic(value) {
+        return m.groups.create(value);
+    }
+
     // Grouping
     //
     function GroupBy(prop) {
         var G = {};
         G.list = [];
         G.get = getGroup;
+        G.create = createNew;
         G.addGroups = addGroups;
         G.addItems = addItems;
 
@@ -248,6 +261,21 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             });
         }
 
+        function createNew(name) {
+            return {
+                reqs: [],
+                name: name,
+                popularity: 100,
+                selected: false
+            };
+        }
+
+        function addGroupByName(name) {
+            var group = createNew(name);
+            addGroups([group]);
+            return group;
+        }
+
         function addItems(list, local) {
             if (local) {
                 m.requirements = [];
@@ -269,13 +297,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                 var key = it[prop];
                 var group = groupIdx[key];
                 if (!group) {
-                    group = {
-                        reqs: [],
-                        name: key,
-                        popularity: 100,
-                        selected: false
-                    };
-                    addGroups([group]);
+                    group = addGroupByName(key);
                 }
 
                 //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);

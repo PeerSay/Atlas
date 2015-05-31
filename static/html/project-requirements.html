@@ -114,11 +114,14 @@
                         <!--Groups list-->
                         <tbody ng-repeat="group in cm.groups.list | orderBy:'-popularity'">
                         <!--Topic row-->
-                        <tr>
+                        <tr ng-show="cm.showFilteredGroup(group)"
+                                ng-class="{selected: group.selected}"
+                                ng-click="cm.toggleGroup(group, true)">
                             <td>
                                 <input type="checkbox"
                                         ng-model="group.selected"
-                                        ng-click="cm.toggleGroup(group)">
+                                        ng-change="cm.toggleGroup(group)"
+                                        ng-click="$event.stopPropagation()">
                             </td>
                             <td colspan="2" class="bold"><strong>{{:: group.name }}</strong></td>
                             <td>{{:: group.description }}</td>
@@ -139,6 +142,8 @@
                             <td>{{ req.description}}</td>
                             <td class="last">{{ req.popularity}}%</td>
                         </tr>
+                        </tbody>
+                        <tbody>
                         <!--Load more-->
                         <tr>
                             <td colspan="5" class="text-center">

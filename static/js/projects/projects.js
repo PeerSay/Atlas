@@ -107,10 +107,10 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         {id: 14, name: 'Higher', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 81}
     ];
     var fakeTopics = [
-        {name: 'Support', popularity: 20, description: ''},
-        {name: 'Price', popularity: 50, description: 'Topic description'},
-        {name: 'Security', popularity: 10, description: ''},
-        {name: 'Some', popularity: 0, description: ''}
+        {id: 1, name: 'Support', popularity: 20, description: ''},
+        {id: 2, name: 'Price', popularity: 50, description: 'Topic description'},
+        {id: 3, name: 'Security', popularity: 10, description: ''},
+        {id: 4, name: 'Some', popularity: 0, description: ''}
     ];
     var fakeProducts = [
         {id: 1, name: 'Raid2', description: 'Some descr for 123', category: 'SSD', popularity: 70},

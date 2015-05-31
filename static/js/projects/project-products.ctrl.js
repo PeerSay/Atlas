@@ -174,12 +174,6 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
     //Selection
     //
-    $scope.products = m.products;
-    //XXX
-    $scope.$watch('products.selected', function (newVal) {
-        console.log('>> Watch: ', newVal)
-    }, true);
-
     function toggleProduct(product, invert) {
         var val = invert ? !product.selected : product.selected;
         toggleProductVal(product, val);

@@ -67,7 +67,7 @@
                 </a>
             </h4>
             <ul class="animate-ease-right">
-                <li ng-repeat="req in cm.requirements | filter:{selected: true} track by req.id">
+                <li ng-repeat="req in cm.requirements | orderBy:'-popularity' track by req.id">
                     <span class="side-text ellipsis">{{ req.name }}</span>
                 </li>
             </ul>

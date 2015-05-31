@@ -68,6 +68,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         Projects.readPublicRequirements().then(function (res) {
             m.groups.addGroups(res.topics, true);
             m.groups.addItems(res.requirements);
+            toggleAllGroupsByReqs();
         });
 
         $scope.$on('$destroy', function () {
@@ -117,14 +118,19 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     function toggleReqVal(req, val) {
         req.selected = val;
 
-        toggleGroupByReq(req);
+        toggleGroupByReqs(m.groups.get(req.topic));
 
         addRemoveLocal(req);
         patchProject();
     }
 
-    function toggleGroup(group) {
-        var on = group.selected;
+    function toggleGroup(group, invert) {
+        var val = invert ? !group.selected : group.selected;
+        toggleGroupByVal(group, val);
+    }
+
+    function toggleGroupByVal(group, val) {
+        var on = group.selected = val;
         _.forEach(group.reqs, function (req) {
             req.selected = on;
             addRemoveLocal(req);
@@ -133,35 +139,33 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         patchProject();
     }
 
-    function toggleGroupByReq(req) {
-        var group = m.groups.get(req.topic);
+    function toggleGroupByReqs(group) {
         var reqs = group.reqs;
         var len = reqs.length;
-        var selectedLen = 0;
-
-        _.forEach(reqs, function (it) {
-            if (it.selected) {
-                selectedLen++;
-            }
-        });
+        var selectedLen = filterFilter(reqs, filterExpr.selected).length;
 
         group.selected = (selectedLen === len);
     }
 
-    function addRemoveLocal(req) {
-        var localIdx = m.project.requirements.indexOf(req);
-        var isAdded = (localIdx >= 0);
+    function toggleAllGroupsByReqs() {
+        _.forEach(m.groups.list, function (group) {
+            toggleGroupByReqs(group);
+        });
+    }
 
-        if (req.selected) {
-            if (!isAdded) {
-                m.project.requirements.unshift(req); // add to local
-            }
+    function addRemoveLocal(req) {
+        var localReqs = m.project.requirements;
+        var localReq = _.findWhere(localReqs, {id: req.id});
+        var localIdx = localReqs.indexOf(localReq);
+        var inLocal = (localIdx >= 0);
+
+        if (req.selected && !inLocal) {
+            localReqs.push(angular.copy(req)); // add to local (copy!)
+
         }
-        else {
-            if (!req.local && isAdded) {
-                // XXX - causes 'Object not found in root' exception in json-patch
-                //m.project.requirements.splice(localIdx, 1); // remove from local
-            }
+
+        if (!req.selected && inLocal) {
+            localReqs.splice(localIdx, 1); // remove from local
         }
     }
 
@@ -237,27 +241,22 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             });
         }
 
-        function addItems(list, reset) {
-            if (reset) {
+        function addItems(list, local) {
+            if (local) {
                 m.requirements = [];
                 itemIdx = {};
             }
 
             _.forEach(list, function (it) {
-                // Add to Search list - flat
-                var skip = true;
-                var publicNotSelected = !reset && !itemIdx[it.id];
-                var privateSelected = reset && it.selected;
-                if (privateSelected || publicNotSelected) {
-                    it.selected = it.selected || false; // add missing prop to public list items
-                    m.requirements.push(it);
-                    skip = false;
+                var publicNotSelected = !local && !itemIdx[it.id];
+                var skipItem = !(local || publicNotSelected);
 
-                    //console.log('>>Adding item to search list:', it.name);
-                }
+                if (skipItem) { return; }
+
+                // Add to search list
                 itemIdx[it.id] = true;
-
-                if (skip) { return; }
+                it.selected = it.selected || false; // add missing prop to public list items
+                m.requirements.push(it);
 
                 // Add to group
                 var key = it[prop];
@@ -273,7 +272,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                 }
 
                 //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);
-                group.reqs.push(it);
+                group.reqs.push(angular.copy(it));
             });
         }
 

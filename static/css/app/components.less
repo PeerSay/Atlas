@@ -404,6 +404,7 @@ table.rc-table-resizing {
 */
 
 @selection-color: #17B7AD;
+@remove-color: indianred;
 
 .total-selected {
   color: @selection-color;
@@ -459,6 +460,15 @@ table.rc-table-resizing {
       .fa {
         display: none;
       }
+    }
+  }
+
+  .remove-icon {
+    color: @remove-color;
+    opacity: .4;
+    transition: opacity .3s ease;
+    &:hover {
+      opacity: 1;
     }
   }
 }

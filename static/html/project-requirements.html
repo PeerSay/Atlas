@@ -125,7 +125,7 @@
                         <!--Groups list-->
                         <tbody ng-repeat="group in cm.groups.list | orderBy:'-popularity'">
                         <!--Topic row-->
-                        <tr ng-show="cm.showFilteredGroup(group)"
+                        <tr ng-show="group.name && cm.showFilteredGroup(group)"
                                 ng-class="{selected: group.selected}"
                                 ng-click="cm.toggleGroup(group, true)">
                             <td>
@@ -136,13 +136,16 @@
                             </td>
                             <td colspan="2" class="bold"><strong>{{:: group.name }}</strong></td>
                             <td>{{:: group.description }}</td>
-                            <td class="last">{{:: group.popularity }}%</td>
+                            <td class="last"><span ng-if="!group.custom">{{:: group.popularity }}%</span></td>
                         </tr>
                         <!--Criteria list-->
                         <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' track by req.id"
                                 ng-class="{selected: req.selected}"
                                 ng-click="cm.toggleReq(req, true)">
-                            <td></td>
+                            <td>
+                                <span class="fa fa-trash remove-icon" ng-if="req.custom"
+                                        ng-click="cm.removeCustomReq(req); $event.stopPropagation()"></span>
+                            </td>
                             <td class="first">
                                 <input type="checkbox"
                                         ng-model="req.selected"
@@ -151,7 +154,7 @@
                             </td>
                             <td>{{ req.name}}</td>
                             <td>{{ req.description}}</td>
-                            <td class="last">{{ req.popularity}}%</td>
+                            <td class="last"><span ng-if="!req.custom">{{:: req.popularity }}%</span></td>
                         </tr>
                         </tbody>
                         <tbody>
@@ -170,42 +173,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!--<div class="row">
-                    <div class="col-xs-12">
-                        <ul class="selection-list">
-                            <li ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
-                                    ng-class="{selected: group.selected}"
-                                    ng-show="cm.showFilteredGroup(group)">
-                                <label class="cell clickable"><input type="checkbox"
-                                        ng-model="group.selected"
-                                        ng-click="cm.toggleGroup(group)"> {{ group.name }}</label>
-                                <div class="cell last">{{ group.popularity }}%</div>
-
-                                <ul class="inner">
-                                    <li ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' track by req.id"
-                                            class="has-hover"
-                                            ng-class="{selected: req.selected}"
-                                            ng-class-odd="'odd'">
-                                        <label class="cell first padded not-bold clickable"><input type="checkbox"
-                                                ng-model="req.selected"
-                                                ng-click="cm.toggleReq(req)"> {{ req.name }}</label>
-                                        <div class="cell pale">{{ req.description }}</div>
-                                        <div class="cell last">{{ req.popularity }}%</div>
-                                    </li>
-                                    <li>
-                                        <div class="cell first">
-                                            <button type="button" class="btn btn-xs btn-default"
-                                                    title="Load more (demo only)"
-                                                    ps-tooltip>...</button>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                        &lt;!&ndash;Empty: TODO&ndash;&gt;
-                    </div>
-                </div>-->
 
                 <div class="row page-spacer"></div>
             </div>

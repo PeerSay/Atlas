@@ -25,26 +25,26 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.selectRequirement = selectRequirement;
     // Filters
     var filterExpr = {
-        all: {},
-        selected: {selected: true},
-        'not-selected': {selected: false}
+        all: {removed: '!true'},
+        selected: {selected: true, removed: '!true'},
+        'not-selected': {selected: false, removed: '!true'}
     };
     m.filter = {
         name: 'all',
-        expr: {}
+        expr: filterExpr.all
     };
     m.filterLiClass = filterLiClass;
     m.filterBtnClass = filterBtnClass;
     m.toggleFilter = toggleFilter;
     m.showFilteredGroup = showFilteredGroup;
-    // Add new
+    // Add/remove new
     var emptyNew = {
         name: '',
         topic: '',
         description: '',
         popularity: 100,
         selected: true,
-        local: true
+        custom: true
     };
     m.addNew = {
         show: false,
@@ -56,6 +56,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.saveAddNew = saveAddNew;
     m.onSelectTopic = onSelectTopic;
     m.addNotFoundTopic = addNotFoundTopic;
+    m.removeCustomReq = removeCustomReq;
     //Loading
     m.loadingMore = true;
     m.loadMore = loadMore;
@@ -163,20 +164,31 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         });
     }
 
-    function addRemoveLocal(req) {
+    function addRemoveLocal(req, forceRemove) {
         var localReqs = m.project.requirements;
         var localReq = _.findWhere(localReqs, {id: req.id});
         var localIdx = localReqs.indexOf(localReq);
-        var inLocal = (localIdx >= 0);
+        var inProject = (localIdx >= 0);
 
-        if (req.selected && !inLocal) {
-            localReqs.push(angular.copy(req)); // add to local (copy!)
-
+        if (req.selected && !inProject) {
+            localReqs.push(angular.copy(req)); // add copy!
         }
 
-        if (!req.selected && inLocal) {
-            localReqs.splice(localIdx, 1); // remove from local
+        if (!req.selected && inProject) {
+            if (!req.custom || forceRemove) {
+                localReqs.splice(localIdx, 1); // remove if not user-added
+            } else {
+                localReq.selected = false;
+            }
         }
+    }
+
+    function removeCustomReq(req) {
+        req.selected = false;
+        req.removed = true; // trick: hide with filter
+
+        addRemoveLocal(req, true/*force*/);
+        patchProject();
     }
 
     function getTotalSelected() {
@@ -193,7 +205,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     }
 
-    // Add new
+    // Add/Remove new
     function toggleAddNew() {
         m.addNew.show = !m.addNew.show;
     }
@@ -205,7 +217,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function saveAddNew() {
         var req = angular.extend({}, emptyNew, m.addNew.req);
-        req.topic = (m.addNew.topic.selected || {}).name || ' '; // XXX - group with name ' ' (space)
+        req.topic = (m.addNew.topic.selected || {}).name || ''; // XXX - empty str group name OK?
         req.id = nextId(m.requirements);
         cancelAddNew();
 
@@ -256,7 +268,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                     //console.log('>>Adding group exiting:', group.name);
 
                     // add props from global list missing in groups created from private items
-                    angular.extend(group, it);
+                    angular.extend(group, it, {custom: false});
                 }
             });
         }
@@ -266,7 +278,8 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                 reqs: [],
                 name: name,
                 popularity: 100,
-                selected: false
+                selected: false,
+                custom: true
             };
         }
 
@@ -277,11 +290,6 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         }
 
         function addItems(list, local) {
-            if (local) {
-                m.requirements = [];
-                itemIdx = {};
-            }
-
             _.forEach(list, function (it) {
                 var publicNotSelected = !local && !itemIdx[it.id];
                 var skipItem = !(local || publicNotSelected);

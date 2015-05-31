@@ -66,7 +66,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         });
 
         Projects.readPublicRequirements().then(function (res) {
-            m.groups.addGroups(res.topics);
+            m.groups.addGroups(res.topics, true);
             m.groups.addItems(res.requirements);
         });
 
@@ -216,16 +216,23 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             return groupIdx[topic];
         }
 
-        function addGroups(groups) {
+        function addGroups(groups, shared) {
             _.forEach(groups, function (it) {
                 var group = groupIdx[it.name];
-                if (group) {
+                if (!group) {
+                    //console.log('>>Adding group new:', it.name);
+
+                    // shared through Projects svc should be copied to prevent duplicates in reqs
+                    // across Ctrl instantiations
+                    group = shared ? angular.copy(it) : it;
+                    group.reqs = group.reqs || [];
+                    groupIdx[it.name] = group;
+                    G.list.push(group);
+                } else {
+                    //console.log('>>Adding group exiting:', group.name);
+
                     // add props from global list missing in groups created from private items
                     angular.extend(group, it);
-                } else {
-                    it.reqs = it.reqs || [];
-                    groupIdx[it.name] = it;
-                    G.list.push(it);
                 }
             });
         }
@@ -245,6 +252,8 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                     it.selected = it.selected || false; // add missing prop to public list items
                     m.requirements.push(it);
                     skip = false;
+
+                    //console.log('>>Adding item to search list:', it.name);
                 }
                 itemIdx[it.id] = true;
 
@@ -263,6 +272,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                     addGroups([group]);
                 }
 
+                //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);
                 group.reqs.push(it);
             });
         }

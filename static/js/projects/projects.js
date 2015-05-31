@@ -108,7 +108,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     ];
     var fakeTopics = [
         {name: 'Support', popularity: 20, description: ''},
-        {name: 'Price', popularity: 50, description: ''},
+        {name: 'Price', popularity: 50, description: 'Topic description'},
         {name: 'Security', popularity: 10, description: ''},
         {name: 'Some', popularity: 0, description: ''}
     ];

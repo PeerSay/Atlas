@@ -9,7 +9,63 @@
                 </h3>
             </div>
             <div class="panel-body">
-                TODO
+                <div class="row">
+                    <!--Essentials-->
+                    <div class="col-xs-12 col-sm-6">
+                        <h4 class="toggle-edit text-center">
+                            <a class="toggle-value" ui-sref="^.essentials({})">
+                                Essentials <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                        </h4>
+                        <p>
+                            There are some missing essential information for this project.
+                            Essential information  is required for PeerSay to suggest effective alternatives.
+                            Follow <a ui-sref="^.essentials({})">this link</a> to add Project essentials.
+                        </p>
+                    </div>
+                    <!--Products-->
+                    <div class="col-xs-12 col-sm-6">
+                        <h4 class="toggle-edit text-center">
+                            <a class="toggle-value" ui-sref="^.products">
+                                Products <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                        </h4>
+                        <p>
+                            There are no products selected yet. PeerSay presents popular products
+                            per category, and allows you to view grades and opinions based on different criteria.
+                            Follow <a ui-sref="^.products">this link</a> to add Products.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!--Criteria-->
+                    <div class="col-xs-12 col-sm-6">
+                        <h4 class="toggle-edit text-center">
+                            <a class="toggle-value" ui-sref="^.requirements">
+                                Criteria <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                        </h4>
+                        <p>
+                            There are not criteria selected yet. PeerSay presents popular criteria,
+                            and let you select or add criteria that are important for your project's success.
+                            Follow <a ui-sref="^.requirements">this link</a> to add Criteria.
+                        </p>
+                    </div>
+                    <!--Decision-->
+                    <div class="col-xs-12 col-sm-6">
+                        <h4 class="toggle-edit text-center">
+                            <a class="toggle-value" ui-sref="^.decisions">
+                                Decision Table <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                        </h4>
+                        <p>
+                            Please select <a ui-sref="^.products">Products</a>
+                            and <a ui-sref="^.requirements">Criteria</a> in order to make a decision,
+                            using <a ui-sref="^.decisions">the table</a>.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

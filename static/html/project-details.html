@@ -19,81 +19,95 @@
     <div class="row">
         <!--Left side-bar-->
         <div class="col-xs-12 col-sm-2">
-            <!--Overview-->
-            <h4>Overview</h4>
-            <ul>
-                <li>
-                    <a ui-sref=".dashboard">Dashboard</a>
-                </li>
-                <li>
-                    <a ui-sref=".decisions">Decision Table</a>
-                </li>
-            </ul>
-            <hr>
+            <div class="row page-spacer">
+                <!--Overview-->
+                <div class="col-xs-6 col-sm-12">
+                    <h4 class="toggle-edit">
+                        <a class="toggle-value" ui-sref=".dashboard">
+                            Overview <span class="fa fa-edit hover-edit"></span>
+                        </a>
+                    </h4>
+                    <ul>
+                        <li><a ui-sref=".dashboard">Dashboard</a></li>
+                        <li><a ui-sref=".decisions">Decision Table</a></li>
+                    </ul>
+                    <hr class="hidden-xs">
+                    <div class="page-spacer visible-xs-block"></div>
+                </div>
 
-            <!--Essentials-->
-            <h4 class="toggle-edit">
-                <a class="toggle-value" ui-sref=".essentials({})">
-                    Essentials <span class="fa fa-edit hover-edit"></span>
-                </a>
-            </h4>
-            <ul>
-                <!--Budget-->
-                <li ng-if="cm.project.resources.budget">
-                    <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
-                    <a class="side-text ellipsis"
-                            ui-sref=".essentials({edit: 'budget'})">
-                        {{ cm.project.resources.budget }}
-                    </a>
-                </li>
-                <!--Resources-->
-                <li ng-if="cm.project.resources.description">
-                    <span class="fa fa-fw fa-users"></span>
-                    <a class="side-text ellipsis"
-                            ui-sref=".essentials({edit: 'resources'})">
-                        {{ cm.project.resources.description }}
-                    </a>
-                </li>
-                <!--Time frame-->
-                <li ng-if="cm.project.time.duration || cm.project.time.startDate">
-                    <span class="fa fa-fw fa-clock-o"></span>
-                    <a class="side-text ellipsis"
-                            ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})">
+                <!--Essentials-->
+                <div class="col-xs-6 col-sm-12">
+                    <h4 class="toggle-edit">
+                        <a class="toggle-value" ui-sref=".essentials({})">
+                            Essentials <span class="fa fa-edit hover-edit"></span>
+                        </a>
+                    </h4>
+                    <ul>
+                        <!--Budget-->
+                        <li ng-if="cm.project.resources.budget">
+                            <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
+                            <a class="side-text ellipsis"
+                                    ui-sref=".essentials({edit: 'budget'})">
+                                {{ cm.project.resources.budget }}
+                            </a>
+                        </li>
+                        <!--Resources-->
+                        <li ng-if="cm.project.resources.description">
+                            <span class="fa fa-fw fa-users"></span>
+                            <a class="side-text ellipsis"
+                                    ui-sref=".essentials({edit: 'resources'})">
+                                {{ cm.project.resources.description }}
+                            </a>
+                        </li>
+                        <!--Time frame-->
+                        <li ng-if="cm.project.time.duration || cm.project.time.startDate">
+                            <span class="fa fa-fw fa-clock-o"></span>
+                            <a class="side-text ellipsis"
+                                    ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})">
                         <span ng-if="cm.project.time.duration" >
                             {{ cm.project.time.duration }} {{ cm.project.time.durationLabel }}
                         </span>
                         <span ng-if="cm.project.time.startDate">
                             @ {{ cm.project.time.startDate }}
                         </span>
-                    </a>
-                </li>
-            </ul>
-            <hr>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr class="hidden-xs">
+                    <div class="page-spacer visible-xs-block"></div>
+                </div>
 
-            <!--Products-->
-            <h4 class="toggle-edit">
-                <a class="toggle-value" ui-sref=".products">
-                    Products <span class="fa fa-edit hover-edit"></span>
-                </a>
-            </h4>
-            <ul class="animate-ease-right">
-                <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' track by product.id">
-                    <span class="side-text ellipsis">{{ product.name }}</span>
-                </li>
-            </ul>
-            <hr>
+                <div class="clearfix visible-xs-block"></div>
 
-            <!--Criteria-->
-            <h4 class="toggle-edit">
-                <a class="toggle-value" ui-sref=".requirements">
-                    Criteria <span class="fa fa-edit hover-edit"></span>
-                </a>
-            </h4>
-            <ul class="animate-ease-right">
-                <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' track by req.id">
-                    <span class="side-text ellipsis">{{ req.name }}</span>
-                </li>
-            </ul>
+                <!--Products-->
+                <div class="col-xs-6 col-sm-12">
+                    <h4 class="toggle-edit">
+                        <a class="toggle-value" ui-sref=".products">
+                            Products <span class="fa fa-edit hover-edit"></span>
+                        </a>
+                    </h4>
+                    <ul class="animate-ease-right">
+                        <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' track by product.id">
+                            <span class="side-text ellipsis">{{ product.name }}</span>
+                        </li>
+                    </ul>
+                    <hr class="hidden-xs">
+                </div>
+
+                <!--Criteria-->
+                <div class="col-xs-6 col-sm-12">
+                    <h4 class="toggle-edit">
+                        <a class="toggle-value" ui-sref=".requirements">
+                            Criteria <span class="fa fa-edit hover-edit"></span>
+                        </a>
+                    </h4>
+                    <ul class="animate-ease-right">
+                        <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' track by req.id">
+                            <span class="side-text ellipsis">{{ req.name }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!--Center Col: content-->

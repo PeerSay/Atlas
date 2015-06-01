@@ -1,19 +1,15 @@
-<!--Dialog-->
-<div class="modal full-view" tabindex="-1" role="dialog"
-        ps-tile-dialog
-        ps-on-close="cm.onClose">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title">
-                    {{:: cm.title }}
-                    <!--<small class="total-selected" ng-if="cm.totalSelected">({{ cm.totalSelected }})</small>-->
-                </h4>
+<div class="row">
+    <div class="col-xs-12 col-lg-9">
+        <!--Panel-->
+        <div class="panel panel-default tile" ng-controller="ProjectProductsCtrl as cm">
+            <div class="panel-heading">
+                <h3 class="text-center">
+                    <span class="fa fa-bar-chart"></span>
+                    Products
+                </h3>
             </div>
-            <div class="modal-body">
+            <div class="panel-body">
+                <!--Top form-->
                 <form class="selection-controls">
                     <!--Select Category-->
                     <div class="form-group">
@@ -112,66 +108,52 @@
                 <div class="table-responsive table-selection-list border">
                     <table class="table table-hover table-striped no-select">
                         <thead>
-                            <tr>
-                                <th class="min"></th>
-                                <th class="main">Name</th>
-                                <th>Description</th>
-                                <th class="last">Popularity</th>
-                                <th class="min"><span class="fa fa-trash"></span></th>
-                            </tr>
+                        <tr>
+                            <th class="min"></th>
+                            <th class="main">Name</th>
+                            <th>Description</th>
+                            <th class="last">Popularity</th>
+                            <th class="min"><span class="fa fa-trash"></span></th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="product in cm.products | filter:cm.filter.expr | orderBy:'-popularity' track by product.id"
-                                    ng-class="{selected: product.selected}"
-                                    ng-click="cm.toggleProduct(product, true)"
-                                    >
-                                <td class="min">
-                                    <input type="checkbox"
-                                            ng-model="product.selected"
-                                            ng-change="cm.toggleProduct(product)"
-                                            ng-click="$event.stopPropagation()">
-                                </td>
-                                <td class="main">{{:: product.name }}</td>
-                                <td>{{:: product.description }}</td>
-                                <td class="last">
-                                    <span ng-if="!product.custom">{{:: product.popularity }}</span>
-                                </td>
-                                <td>
+                        <tr ng-repeat="product in cm.products | filter:cm.filter.expr | orderBy:'-popularity' track by product.id"
+                                ng-class="{selected: product.selected}"
+                                ng-click="cm.toggleProduct(product, true)"
+                                >
+                            <td class="min">
+                                <input type="checkbox"
+                                        ng-model="product.selected"
+                                        ng-change="cm.toggleProduct(product)"
+                                        ng-click="$event.stopPropagation()">
+                            </td>
+                            <td class="main">{{:: product.name }}</td>
+                            <td>{{:: product.description }}</td>
+                            <td class="last">
+                                <span ng-if="!product.custom">{{:: product.popularity }}</span>
+                            </td>
+                            <td>
                                     <span class="fa fa-trash remove-icon" ng-if="product.custom"
                                             ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
-                                </td>
-                            </tr>
-                            <!--Load more-->
-                            <tr>
-                                <td colspan="5" class="text-center">
-                                    <button type="button" class="btn btn-xs btn-default load-more"
-                                            title="Load more"
-                                            ps-tooltip
-                                            ng-class="{loading: cm.loadingMore}"
-                                            ng-click="cm.loadMoreProducts()">
-                                        <span class="fa fa-refresh fa-spin"></span>
-                                    </button>
-                                </td>
-                            </tr>
+                            </td>
+                        </tr>
+                        <!--Load more-->
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <button type="button" class="btn btn-xs btn-default load-more"
+                                        title="Load more"
+                                        ps-tooltip
+                                        ng-class="{loading: cm.loadingMore}"
+                                        ng-click="cm.loadMoreProducts()">
+                                    <span class="fa fa-refresh fa-spin"></span>
+                                </button>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <div class="row page-spacer"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" ng-click="cm.goPrev()">
-                    <span class="fa fa-backward btn-icon"></span>
-                    Requirements
-                </button>
-                <button class="btn btn-default" data-dismiss="modal">Done</button>
-
-                <ol class="carousel-indicators">
-                    <li ng-click="cm.goFirst()"></li>
-                    <li ng-click="cm.goPrev()"></li>
-                    <li class="active"></li>
-                </ol>
             </div>
         </div>
+        <!--End: Panel-->
     </div>
 </div>

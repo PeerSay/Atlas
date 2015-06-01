@@ -10,15 +10,10 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     m.projectId = $stateParams.projectId;
     m.project = {};
 
-    m.title = 'Essentials';
     m.focusField = null;
-    m.onShow = onShow;
-    m.onClose = onClose;
-    m.goNext = goNext;
-    m.goLast = goLast;
     // Edits
-    m.patchObserver = null;
     m.project = null;
+    m.patchObserver = null;
     m.patchProject = patchProject;
     // Categories
     m.category = {};
@@ -53,6 +48,8 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
             .then(function (res) {
                 m.categories = res;
             });
+
+        m.focusField = $stateParams.edit;
     }
 
     function patchProject() {
@@ -113,23 +110,5 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     function selectDurationLabel(label) {
         m.project.time.durationLabel = label;
         patchProject();
-    }
-
-    // Navigation
-    //
-    function onShow() {
-        m.focusField = $stateParams.edit;
-    }
-
-    function onClose() {
-        $state.go('^');
-    }
-
-    function goNext() {
-        $state.go('^.requirements');
-    }
-
-    function goLast() {
-        $state.go('^.products');
     }
 }

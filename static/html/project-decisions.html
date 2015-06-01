@@ -1,0 +1,54 @@
+<div class="row">
+    <div class="col-xs-12 col-lg-9">
+        <!--Panel-->
+        <div class="panel panel-default tile" ng-controller="ProjectRequirementsCtrl as cm">
+            <div class="panel-heading">
+                <h3 class="text-center">
+                    <span class="fa fa-graduation-cap"></span>
+                    Decisions
+                </h3>
+            </div>
+            <div class="panel-body">
+                <!--MainTable-->
+                <div class="row">
+                    <div class="col-xs-12 page-spacer" ng-controller="ProjectTableCtrl as cm">
+                        <div class="tile-section border">
+                            <ps-table-view ps-view="cm.tableView"></ps-table-view>
+                        </div>
+                    </div>
+                </div>
+                <!--Summary / Notes-->
+                <div class="row">
+                    <!--Summary / Recommendations-->
+                    <div class="col-xs-12 col-sm-6 tile-container">
+                        <div class="panel panel-default tile">
+                            <div class="panel-body">
+                                <ps-edit-inline
+                                        data-label="Summary"
+                                        data-model="cm.fields.summary"
+                                        data-on-save="cm.updateField(cm.fields.summary)"></ps-edit-inline>
+                                <ps-edit-inline
+                                        data-label="Recommendations"
+                                        data-model="cm.fields.recommendations"
+                                        data-on-save="cm.updateField(cm.fields.recommendations)"></ps-edit-inline>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Notes-->
+                    <div class="col-xs-12 col-sm-6 tile-container">
+                        <div class="panel panel-default tile">
+                            <div class="panel-body">
+                                <ps-edit-inline
+                                        data-label="Notes"
+                                        data-model="cm.fields.notes"
+                                        data-on-save="cm.updateField(cm.fields.notes)"></ps-edit-inline>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End: Panel-->
+    </div>
+</div>
+

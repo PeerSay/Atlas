@@ -6,10 +6,6 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.title = 'Requirements';
-    m.onClose = onClose;
-    m.goNext = goNext;
-    m.goPrev = goPrev;
     // Data / Edit
     m.project = null; // ref to shared
     m.patchObserver = null;
@@ -351,18 +347,5 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             res = Math.max(it.id, res) + 1;
         });
         return res;
-    }
-
-
-    function onClose() {
-        $state.go('^');
-    }
-
-    function goNext() {
-        $state.go('^.products');
-    }
-
-    function goPrev() {
-        $state.go('^.essentials');
     }
 }

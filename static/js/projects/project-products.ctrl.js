@@ -6,10 +6,6 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.title = 'Products';
-    m.onClose = onClose;
-    m.goPrev = goPrev;
-    m.goFirst = goFirst;
     // Data / Edit
     m.project = {};
     m.patchObserver = null;
@@ -292,20 +288,5 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         return arr.reduce(function (prev, cur) {
             return Math.max(prev, cur.id);
         }, 0) + 1;
-    }
-
-
-    // Navigation
-    //
-    function onClose() {
-        $state.go('^');
-    }
-
-    function goPrev() {
-        $state.go('^.requirements');
-    }
-
-    function goFirst() {
-        $state.go('^.essentials');
     }
 }

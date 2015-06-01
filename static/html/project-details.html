@@ -1,8 +1,7 @@
 <div class="container-fluid">
+    <!--Title-->
     <div class="row">
-        <!--Left side-bar: Summary-->
-        <div class="col-xs-12 col-sm-2">
-            <!--Title-->
+        <div class="col-xs-12">
             <h3 class="page-title toggle-edit">
                 <a class="toggle-value"
                         ui-sref=".essentials({edit: 'reasons'})"
@@ -14,6 +13,30 @@
                     <span class="fa fa-edit hover-edit"></span>
                 </a>
             </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <!--Left side-bar-->
+        <div class="col-xs-12 col-sm-2">
+            <!--Overview-->
+            <h4>Overview</h4>
+            <ul>
+                <li>
+                    <a ui-sref=".dashboard">Dashboard</a>
+                </li>
+                <li>
+                    <a ui-sref=".decisions">Decision Table</a>
+                </li>
+            </ul>
+            <hr>
+
+            <!--Essentials-->
+            <h4 class="toggle-edit">
+                <a class="toggle-value" ui-sref=".essentials({})">
+                    Essentials <span class="fa fa-edit hover-edit"></span>
+                </a>
+            </h4>
             <ul>
                 <!--Budget-->
                 <li ng-if="cm.project.resources.budget">
@@ -73,50 +96,9 @@
             </ul>
         </div>
 
-        <!--Center Col-->
-        <div class="col-xs-12 col-sm-10">
-            <!--MainTable-->
-            <div class="row">
-                <div class="col-xs-12 page-spacer" ng-controller="ProjectTableCtrl as cm">
-                    <div class="tile-section border">
-                        <ps-table-view ps-view="cm.tableView"></ps-table-view>
-                    </div>
-                </div>
-            </div>
-            <!--Summary / Notes-->
-            <div class="row">
-                <!--Summary / Recommendations-->
-                <div class="col-xs-12 col-sm-6 tile-container">
-                    <div class="panel panel-default tile">
-                        <div class="panel-body">
-                            <ps-edit-inline
-                                    data-label="Summary"
-                                    data-model="cm.fields.summary"
-                                    data-on-save="cm.updateField(cm.fields.summary)"></ps-edit-inline>
-                            <ps-edit-inline
-                                    data-label="Recommendations"
-                                    data-model="cm.fields.recommendations"
-                                    data-on-save="cm.updateField(cm.fields.recommendations)"></ps-edit-inline>
-                        </div>
-                    </div>
-                </div>
-                <!--Notes-->
-                <div class="col-xs-12 col-sm-6 tile-container">
-                    <div class="panel panel-default tile">
-                        <div class="panel-body">
-                            <ps-edit-inline
-                                    data-label="Notes"
-                                    data-model="cm.fields.notes"
-                                    data-on-save="cm.updateField(cm.fields.notes)"></ps-edit-inline>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!--Center Col: content-->
+        <div class="col-xs-12 col-sm-10" ui-view></div>
     </div>
-
-    <!--Dialog-->
-    <div ui-view></div>
 
     <!--DBG-->
     <div class="row debug">

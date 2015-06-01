@@ -100,25 +100,34 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             templateUrl: '/html/project-details.html',
             controller: 'ProjectDetailsCtrl as cm'
         })
+        // Project > Details > Dashboard
+        //
+        .state('project.details.dashboard', {
+            url: '/dashboard',
+            templateUrl: '/html/project-dashboard.html'
+        })
+        // Project > Details > Decisions
+        //
+        .state('project.details.decisions', {
+            url: '/decisions',
+            templateUrl: '/html/project-decisions.html'
+        })
         // Project > Details > Essentials
         //
         .state('project.details.essentials', {
             url: '/essentials?edit={field}',
-            templateUrl: '/html/project-essentials.html',
-            controller: 'ProjectEssentialsCtrl as cm'
+            templateUrl: '/html/project-essentials.html'
         })
         // Project > Details > Requirements
         //
         .state('project.details.requirements', {
             url: '/requirements',
-            templateUrl: '/html/project-requirements.html',
-            controller: 'ProjectRequirementsCtrl as cm'
+            templateUrl: '/html/project-requirements.html'
         })
         // Project > Details > Products
         //
         .state('project.details.products', {
             url: '/products',
-            templateUrl: '/html/project-products.html',
-            controller: 'ProjectProductsCtrl as cm'
+            templateUrl: '/html/project-products.html'
         });
 }

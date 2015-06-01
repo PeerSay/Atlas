@@ -27,7 +27,7 @@ function ProjectListCtrl($state, $timeout, Projects) {
     }
 
     function editProject(id, isNew) {
-        $state.go('project.details', {projectId: id})
+        $state.go('project.details.dashboard', {projectId: id})
             .then(function () {
                 //var curStepNum = Wizard.current.stepNum; // resolved by now
 

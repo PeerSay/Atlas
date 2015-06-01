@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectEssentialsCtrl', ProjectEssentialsCtrl);
 
-ProjectEssentialsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'jsonpatch', 'Util'];
-function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch, _) {
+ProjectEssentialsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonpatch', 'Util'];
+function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -33,20 +33,21 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            m.category.selected = res.selectedCategory || {};
-
             m.patchObserver = jsonpatch.observe(m.project);
+
+            m.category.selected = res.selectedCategory || {};
+            m.categories = res.categories; // shared
+
+            Projects.readPublicCategories().then(function (res) {
+                m.categories = [].concat(m.categories, res.categories);
+            });
+
             return m.project;
         });
 
         $scope.$on('$destroy', function () {
             jsonpatch.unobserve(m.project, m.patchObserver);
         });
-
-        Projects.readCategories(m.projectId)
-            .then(function (res) {
-                m.categories = res;
-            });
 
         m.focusField = $stateParams.edit;
     }

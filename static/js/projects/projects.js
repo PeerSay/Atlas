@@ -26,7 +26,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.readProject = readProject;
     P.patchProject = patchProject;
 
-    P.readCategories = readCategories;
+    P.readPublicCategories = readPublicCategories;
     P.readPublicRequirements = readPublicRequirements;
     P.readPublicProducts = readPublicProducts;
 
@@ -50,8 +50,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
             budgetCurrency: 'USD'
         },
         selectedCategory: null,
-        categories: [],
-        requirements: []
+        /*categories: [],
+        requirements: [],
+        products: []*/
     };
 
     /// XXX - fake data
@@ -206,15 +207,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     // Categories
     //
-    function readCategories(id) {
-        return $q(function (resolve) {
-
-            readProject(id).then(function (res) {
-                var localCategories = res.categories;
-                var categories = localCategories.concat(fakeCategories);
-
-                resolve(categories);
-            });
+    function readPublicCategories() {
+        return $timeout(function () {
+            return {categories: fakeCategories};
         });
     }
 

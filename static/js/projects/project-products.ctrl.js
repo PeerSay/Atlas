@@ -73,10 +73,11 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
                 addProductsToList(res.products, false, {selected: false});
                 m.loadingMore = false;
             });
-        });
 
-        Projects.readCategories(m.projectId).then(function (res) {
-            m.categories = res;
+            m.categories = res.categories;
+            Projects.readPublicCategories(m.projectId).then(function (res) {
+                m.categories = [].concat(m.categories, res.categories);
+            });
         });
 
         $scope.$on('$destroy', function () {

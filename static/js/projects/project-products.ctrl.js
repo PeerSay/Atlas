@@ -74,7 +74,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             var category = m.category.selected = res.selectedCategory || {};
             var categoryName = !category.custom ? category.name : null;
             Projects.readPublicProducts({category: categoryName}).then(function (res) {
-                addProductsToList(res.products);
+                addProductsToList(res.products, false, {selected: false});
                 m.loadingMore = false;
             });
         });
@@ -89,7 +89,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     }
 
     var productIdx = {};
-    function addProductsToList(list, reset) {
+    function addProductsToList(list, reset, extend) {
         if (reset) {
             m.products = [];
             productIdx = {};
@@ -98,11 +98,14 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         _.forEach(list, function (it) {
             var publicNotSelected = !reset && !productIdx[it.id];
             var local = !!reset;
-            if (local || publicNotSelected) {
-                it.selected = it.selected || false; // add missing prop to public list items
-                m.products.push(angular.copy(it));
-                productIdx[it.id] = true;
-            }
+            var skipIt = !(local || publicNotSelected);
+
+            if (skipIt) { return; }
+
+            productIdx[it.id] = true;
+
+            var copy = angular.extend({}, it, extend);
+            m.products.push(copy);
         })
     }
 
@@ -123,7 +126,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
         m.loadingMore = true;
         Projects.readPublicProducts(params).then(function (res) {
-            addProductsToList(res.products);
+            addProductsToList(res.products, false, {selected: false});
             m.loadingMore = false;
         });
     }
@@ -196,15 +199,17 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     // Select / Add new
     //
     function addNotFoundProduct(val) {
-        m.addNew.model.name = val;
         m.addNew.show = true;
+        m.addNew.model.name = val;
 
-        // TODO - this leads to bug: duble-add of new item + exception!!
-        //var product = angular.extend({}, emptyNew, m.addNew.model);
-        //return product; // returned is added to list
+        var copy = angular.extend({}, emptyNew, m.addNew.model, {selected: false});
+        return copy; // added to list!
     }
 
     function selectProduct(product) {
+        // Item without id is newly added, it should not be propagated to table/project
+        if (!product.id) { return; }
+
         toggleProductVal(product, true);
 
         // TODO: focus (use ps-focus ?)

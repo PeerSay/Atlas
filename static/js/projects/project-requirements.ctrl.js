@@ -48,7 +48,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     };
     m.addNew = {
         show: false,
-        req: angular.copy(emptyNew),
+        model: angular.copy(emptyNew),
         topic: {} // ui-select model
     };
     m.toggleAddNew = toggleAddNew;
@@ -78,7 +78,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             m.nextPage++;
 
             m.groups.addGroups(res.topics, true);
-            m.groups.addItems(res.requirements);
+            m.groups.addItems(res.requirements, false, {selected: false});
             toggleAllGroupsByReqs();
         });
 
@@ -100,7 +100,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             m.loadingMore = false;
             m.nextPage++;
 
-            m.groups.addItems(res.requirements);
+            m.groups.addItems(res.requirements, false, {selected: false});
             toggleAllGroupsByReqs();
         });
 
@@ -179,14 +179,23 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         return filterFilter(m.project.requirements, filterExpr.selected).length;
     }
 
-    // Search
+    // Search Requirements
     //
-    function addNotFoundRequirement() {
-        // TODO
+    function addNotFoundRequirement(val) {
+        m.addNew.show = true;
+        m.addNew.model.name = val;
+
+        var copy = angular.extend({}, emptyNew, m.addNew.model, {selected: false});
+        return copy; // added to list!
     }
 
-    function selectRequirement() {
+    function selectRequirement(req) {
+        // Item without id is newly added, it should not be propagated to table/project
+        if (!req.id) { return; }
 
+        toggleReqVal(req, true);
+
+        // TODO: focus (use ps-focus ?)
     }
 
     // Add/Remove new
@@ -196,23 +205,25 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function cancelAddNew() {
         m.addNew.show = false;
-        angular.extend(m.addNew.req, emptyNew);
+        angular.extend(m.addNew.model, emptyNew);
     }
 
     function saveAddNew() {
-        var req = angular.extend({}, emptyNew, m.addNew.req);
-        req.topic = (m.addNew.topic.selected || {}).name || ''; // XXX - empty str group name OK?
+        var req = angular.extend({}, emptyNew, m.addNew.model);
+        req.topic = (m.addNew.topic.selected || {}).name || ''; // Empty topic is hidden in UI
         req.id = nextId(m.requirements);
         cancelAddNew();
 
-        m.groups.addItems([req]);
+        m.groups.addItems([req], true);
 
         addRemoveLocal(req); // always selected!
         patchProject();
     }
 
     function onSelectTopic(group) {
-        m.addNew.req.topic = group.name;
+        if (group) {
+            m.addNew.model.topic = group.name;
+        }
     }
 
     function addNotFoundTopic(value) {
@@ -234,10 +245,11 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         var inProject = (localIdx >= 0);
 
         if (req.selected) {
-            if (inProject && req.custom) {
-                localReq.selected = true;
-            } else {
+            if (!inProject) {
                 localReqs.push(angular.copy(req)); // copy!
+
+            } else if (localReq.custom) {
+                localReq.selected = true;
             }
         }
 
@@ -304,27 +316,29 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             return group;
         }
 
-        function addItems(list, local) {
+        function addItems(list, local, extend) {
             _.forEach(list, function (it) {
                 var publicNotSelected = !local && !itemIdx[it.id];
-                var skipItem = !(local || publicNotSelected);
+                var skipIt = !(local || publicNotSelected);
 
-                if (skipItem) { return; }
+                if (skipIt) { return; }
 
-                // Add to search list
                 itemIdx[it.id] = true;
-                it.selected = it.selected || false; // add missing prop to public list items
-                m.requirements.push(it);
 
-                // Add to group
+                // Add group
                 var key = it[prop];
                 var group = groupIdx[key];
                 if (!group) {
                     group = addGroupByName(key);
                 }
 
+                // Need a copy to separate project's items which are observable
+                var copy = angular.extend({}, it, extend);
+
+                m.requirements.push(copy); // search list
+                group.reqs.push(copy); // select table
+
                 //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);
-                group.reqs.push(angular.copy(it));
             });
         }
 

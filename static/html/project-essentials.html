@@ -14,7 +14,7 @@
                 <form name="cm.form">
                     <!--Reasons-->
                     <div class="form-group">
-                        <label for="es-reason" class="control-label">Please describe the reasons for this project evaluation</label>
+                        <label for="es-reason" class="control-label">Please describe the reasons for this project evaluation:</label>
                         <textarea id="es-reason" class="form-control vert"
                                 placeholder="I want to add an extra 10TB storage to the companies backup server"
                                 ng-model="cm.project.reasons"
@@ -23,32 +23,25 @@
                                 ></textarea>
                     </div>
                     <!--Category-->
-                    <div class="form-horizontal">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label left">Select category:</label>
-                            <div class="col-sm-10">
-                                <ui-select ng-model="cm.category.selected" theme="bootstrap"
-                                        tagging="cm.addCategory"
-                                        tagging-tokens="ENTER"
-                                        tagging-label="(adding new)"
-                                        on-select="cm.selectCategory($model)">
-                                    <!--Label don't work-->
-                                    <ui-select-match placeholder="Select or search a category or domain...">{{ $select.selected.name }}</ui-select-match>
-                                    <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
-                                            group-by="'domain'">
-                                        <span ng-bind-html="category.name | highlight: $select.search"></span>
-                                        <span ng-if="category.local" class="delete-category"
-                                                ng-click="cm.deleteCategory(category)">
-                                            <span class="fa fa-trash"></span> <span class="link">Delete</span>
-                                        </span>
-                                    </ui-select-choices>
-                                </ui-select>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label class="control-label">Select category:</label>
+                        <ui-select ng-model="cm.category.selected" theme="bootstrap"
+                                tagging="cm.addCategory"
+                                tagging-tokens="ENTER"
+                                tagging-label="(adding new)"
+                                on-select="cm.selectCategory($model)">
+                            <!--Label don't work-->
+                            <ui-select-match placeholder="Select or search a category or domain...">{{ $select.selected.name }}</ui-select-match>
+                            <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
+                                    group-by="'domain'">
+                                <span ng-bind-html="category.name | highlight: $select.search"></span>
+                                <span ng-if="category.local" class="delete-category"
+                                        ng-click="cm.deleteCategory(category)">
+                                    <span class="fa fa-trash"></span> <span class="link">Delete</span>
+                                </span>
+                            </ui-select-choices>
+                        </ui-select>
                     </div>
-                    <!--<p>Selected: {{ cm.category.selected }}</p>-->
-                    <div class="row page-spacer"></div>
-
                     <!--Goals-->
                     <div class="form-group">
                         <label for="es-goal" class="control-label">What are the project goals?</label>

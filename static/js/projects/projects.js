@@ -193,6 +193,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         //XXX
         Storage.set('project' + id, P.current.project);
 
+        return $timeout(function () {});
         /*
          return Backend.patch(['projects', id], data);*/
     }

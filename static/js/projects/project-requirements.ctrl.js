@@ -59,6 +59,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.removeCustomReq = removeCustomReq;
     //Loading
     m.loadingMore = true;
+    m.nextPage = 0;
     m.loadMore = loadMore;
 
 
@@ -72,11 +73,13 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             m.groups.addItems(res.requirements, true); // reset
         });
 
-        Projects.readPublicRequirements().then(function (res) {
+        Projects.readPublicRequirements({page: m.nextPage}).then(function (res) {
+            m.loadingMore = false;
+            m.nextPage++;
+
             m.groups.addGroups(res.topics, true);
             m.groups.addItems(res.requirements);
             toggleAllGroupsByReqs();
-            m.loadingMore = false;
         });
 
         $scope.$on('$destroy', function () {
@@ -92,7 +95,15 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     }
 
     function loadMore() {
-        //TODO
+        m.loadingMore = true;
+        Projects.readPublicRequirements({page: m.nextPage}).then(function (res) {
+            m.loadingMore = false;
+            m.nextPage++;
+
+            m.groups.addItems(res.requirements);
+            toggleAllGroupsByReqs();
+        });
+
     }
 
     // Filters

@@ -219,21 +219,46 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     //Requirements
     //
-    function readPublicRequirements() {
-        return readPublicRequirementsDataDbg().then(function (res) {
+    function readPublicRequirements(params) {
+        return readPublicRequirementsDataDbg(params).then(function (res) {
             return res;
         })
     }
 
-    function readPublicRequirementsDataDbg() {
+    function readPublicRequirementsDataDbg(params) {
         var delay = 1000;
+        var generate = (params.page > 0);
 
         return $timeout(function () {}, delay).then(function () {
             return {
                 topics: fakeTopics,
-                requirements: fakeRequirements
+                requirements: generate ? genFakeReqs(params) : fakeRequirements
             };
         });
+    }
+
+    function genFakeReqs(params) {
+        var limit = params.limit || 10;
+
+        var res = [];
+        for (var i = 0, len = limit; i < len; i++) {
+            res.push(genFakeReq());
+        }
+        return res;
+    }
+
+    function genFakeReq() {
+        var name = Math.random().toString(36).slice(9);
+        var topic = fakeTopics[randInt(fakeTopics.length - 1)].name;
+        var popularity = randInt(99);
+        var res = {
+            id: randInt(1000000000000),
+            name: name,
+            description: 'Some descr for ' + name,
+            topic: topic,
+            popularity: popularity
+        };
+        return res;
     }
 
     //Products
@@ -268,15 +293,19 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     function genFakeProduct(maxPopularity, category) {
         var name = Math.random().toString(36).slice(9);
-        var popularity = Math.max(0, maxPopularity - Math.round(Math.random() * 20));
+        var popularity = Math.max(0, maxPopularity - randInt(20));
         var res = {
-            id: Math.round(Math.random() * 1000000000000),
+            id: randInt(1000000000000),
             name: name,
             description: 'Some descr for ' + name,
             category: category,
             popularity: popularity
         };
         return res;
+    }
+
+    function randInt(max) {
+        return Math.round(Math.random() * max);
     }
 
     return P;

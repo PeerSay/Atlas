@@ -19,7 +19,10 @@
                                 tagging-label="(adding new)"
                                 on-select="cm.selectCategory($model)">
                             <!--Label don't work-->
-                            <ui-select-match placeholder="Select or search a category or domain...">{{ $select.selected.name }}</ui-select-match>
+                            <ui-select-match placeholder="Select or search a category or domain...">
+                                {{ $select.selected.name }}
+                                <span class="fa fa-check"></span>
+                            </ui-select-match>
                             <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
                                     group-by="'domain'">
                                 <span ng-bind-html="category.name | highlight: $select.search"></span>
@@ -37,7 +40,10 @@
                                 tagging-tokens="ENTER"
                                 tagging-label="(adding new)"
                                 on-select="cm.selectProduct($model)">
-                            <ui-select-match placeholder="Select a product or add a new one...">{{ $select.selected.name }}</ui-select-match>
+                            <ui-select-match placeholder="Select a product or add a new one...">
+                                {{ $select.selected.name }}
+                                <span class="fa fa-check"></span>
+                            </ui-select-match>
                             <ui-select-choices repeat="product in cm.products | filter: $select.search track by product.id">
                                 <span ng-bind-html="product.name | highlight: $select.search"></span>
                                 <span ng-if="product.selected" class="fa fa-check"></span>

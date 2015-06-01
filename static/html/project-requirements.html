@@ -20,6 +20,7 @@
                                 on-select="cm.selectRequirement($model)">
                             <ui-select-match placeholder="Select a requirement or add a new one...">
                                 {{ $select.selected.name }}
+                                <span class="fa fa-check"></span>
                             </ui-select-match>
                             <ui-select-choices
                                     repeat="req in cm.requirements | filter: $select.search track by req.id">

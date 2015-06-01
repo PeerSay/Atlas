@@ -31,7 +31,10 @@
                                 tagging-label="(adding new)"
                                 on-select="cm.selectCategory($model)">
                             <!--Label don't work-->
-                            <ui-select-match placeholder="Select or search a category or domain...">{{ $select.selected.name }}</ui-select-match>
+                            <ui-select-match placeholder="Select or search a category or domain...">
+                                {{ $select.selected.name }}
+                                <span class="fa fa-check"></span>
+                            </ui-select-match>
                             <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
                                     group-by="'domain'">
                                 <span ng-bind-html="category.name | highlight: $select.search"></span>

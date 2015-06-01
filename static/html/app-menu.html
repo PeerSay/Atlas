@@ -19,23 +19,11 @@
         <div class="navbar-collapse collapse">
             <p class="navbar-text visible-xs-block">Menu</p>
 
-            <!--Search-->
-            <!--<form class="navbar-form navbar-left" role="search">
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Search">
-                </div>
-            </form>-->
-
             <!--Auth Menu-->
             <ul class="nav navbar-nav navbar-right" ng-show="$state.includes('auth')">
                 <li ui-sref-active="active"><a ui-sref="auth.login">Login</a></li>
                 <li ui-sref-active="active"><a ui-sref="auth.signup">Signup</a></li>
             </ul>
-
-            <!--Center Home link-->
-            <h4 class="logo navbar-text hidden-xs" ng-show="$state.includes('project')">
-                <a href="/" class="navbar-link" target="_self">PeerSay</a>
-            </h4>
 
             <!--Main Menu-->
             <ul class="nav navbar-nav navbar-right" ng-show="$state.includes('project')">

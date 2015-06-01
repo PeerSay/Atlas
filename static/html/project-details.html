@@ -1,8 +1,13 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as cm">
     <!--Title-->
     <div class="row">
-        <div class="col-xs-12">
-            <h3 class="page-title toggle-edit">
+        <div class="col-xs-12 col-sm-2">
+            <a href="/" class="logo" target="_self">
+                <img height="30" src="/images/logo-horiz-126x30.png" alt="Logo">
+            </a>
+        </div>
+        <div class="col-xs-12 col-sm-10">
+            <h3 class="page-title toggle-edit text-center">
                 <a class="toggle-value"
                         ui-sref=".essentials({edit: 'reasons'})"
                         data-placement="right"

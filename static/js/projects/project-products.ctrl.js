@@ -31,25 +31,25 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.loadMoreProducts = loadMoreProducts;
     // Filters
     var filterExpr = {
-        all: {},
-        selected: {selected: true},
-        'not-selected': {selected: false}
+        all: {removed: '!true'},
+        selected: {selected: true, removed: '!true'},
+        'not-selected': {selected: false, removed: '!true'}
     };
     m.filter = {
         name: 'all',
-        expr: {}
+        expr: filterExpr.all
     };
     m.filterLiClass= filterLiClass;
     m.filterBtnClass= filterBtnClass;
     m.toggleFilter = toggleFilter;
-    // Add new
+    // Add/remove new
     var emptyNew = {
         name: '',
         category: '',
         description: '',
         popularity: 100,
         selected: true,
-        local: true
+        custom: true
     };
     m.addNew = {
         show: false,
@@ -58,6 +58,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.toggleAddNew = toggleAddNew;
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
+    m.removeCustomProduct = removeCustomProduct;
 
 
     activate();
@@ -71,7 +72,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             m.totalSelected = getTotalSelected();
 
             var category = m.category.selected = res.selectedCategory || {};
-            var categoryName = !category.local ? category.name : null;
+            var categoryName = !category.custom ? category.name : null;
             Projects.readPublicProducts({category: categoryName}).then(function (res) {
                 addProductsToList(res.products);
                 m.loadingMore = false;
@@ -96,12 +97,12 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
         _.forEach(list, function (it) {
             var publicNotSelected = !reset && !productIdx[it.id];
-            var privateSelected = reset && it.selected;
-            if (privateSelected || publicNotSelected) {
+            var local = !!reset;
+            if (local || publicNotSelected) {
                 it.selected = it.selected || false; // add missing prop to public list items
-                m.products.push(it);
+                m.products.push(angular.copy(it));
+                productIdx[it.id] = true;
             }
-            productIdx[it.id] = true;
         })
     }
 
@@ -117,7 +118,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             return Math.min(prev, cur.popularity);
         }, 100);
         var category = m.category.selected;
-        var categoryName = !category.local ? category.name : null;
+        var categoryName = !category.custom ? category.name : null;
         var params = {category: categoryName, maxPopularity: maxPopularity};
 
         m.loadingMore = true;
@@ -142,7 +143,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             id: nextId(m.categories),
             name: val,
             domain: 'Default',
-            local: true
+            custom: true
         };
         m.categories.unshift(item); // all
         m.project.categories.unshift(item); // local
@@ -182,19 +183,10 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     function toggleProductVal(product, val) {
         product.selected = val;
 
-        addToProject(product);
+        addRemoveLocal(product);
         patchProject();
 
         m.totalSelected = getTotalSelected();
-    }
-
-    function addToProject(product) {
-        var localIdx = m.project.products.indexOf(product);
-        var added = (localIdx >= 0);
-
-        if (product.selected && !added) {
-            m.project.products.unshift(product);
-        }
     }
 
     function getTotalSelected() {
@@ -252,11 +244,43 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         product.id = uniqueId(m.products);
         product.category = (m.category.selected || {}).name;
 
-        addToProject(product);
         addProductsToList([product]);
+
+        addRemoveLocal(product);
         patchProject();
 
         cancelAddNew();
+    }
+
+    function removeCustomProduct(product) {
+        product.selected = false;
+        product.removed = true;
+        addRemoveLocal(product, true);
+        patchProject();
+    }
+
+    function addRemoveLocal(prod, forceRemove) {
+        var localProds = m.project.products;
+        var localProd = _.findWhere(localProds, {id: prod.id});
+        var localIdx = localProds.indexOf(localProd);
+        var inProject = (localIdx >= 0);
+
+        if (prod.selected) {
+            if (inProject && prod.custom) {
+                localProd.selected = true;
+            } else {
+                localProds.push(angular.copy(prod)); // copy!
+            }
+        }
+
+        if (!prod.selected && inProject) {
+            if (!prod.custom || forceRemove) {
+                localProds.splice(localIdx, 1);
+            }
+            else {
+                localProd.selected = false;
+            }
+        }
     }
 
     function uniqueId(arr) {

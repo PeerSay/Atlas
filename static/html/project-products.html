@@ -27,7 +27,7 @@
                             <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
                                     group-by="'domain'">
                                 <span ng-bind-html="category.name | highlight: $select.search"></span>
-                                        <span ng-if="category.local" class="delete-category"
+                                        <span ng-if="category.custom" class="delete-category"
                                                 ng-click="cm.deleteCategory(category)">
                                             <span class="fa fa-trash"></span> <span class="link">Delete</span>
                                         </span>
@@ -113,10 +113,11 @@
                     <table class="table table-hover table-striped no-select">
                         <thead>
                             <tr>
-                                <th class="first"></th>
+                                <th class="min"></th>
                                 <th class="main">Name</th>
                                 <th>Description</th>
                                 <th class="last">Popularity</th>
+                                <th class="min"><span class="fa fa-trash"></span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -124,7 +125,7 @@
                                     ng-class="{selected: product.selected}"
                                     ng-click="cm.toggleProduct(product, true)"
                                     >
-                                <td class="first">
+                                <td class="min">
                                     <input type="checkbox"
                                             ng-model="product.selected"
                                             ng-change="cm.toggleProduct(product)"
@@ -132,11 +133,17 @@
                                 </td>
                                 <td class="main">{{:: product.name }}</td>
                                 <td>{{:: product.description }}</td>
-                                <td class="last">{{:: product.popularity }}%</td>
+                                <td class="last">
+                                    <span ng-if="!product.custom">{{:: product.popularity }}</span>
+                                </td>
+                                <td>
+                                    <span class="fa fa-trash remove-icon" ng-if="product.custom"
+                                            ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
+                                </td>
                             </tr>
                             <!--Load more-->
                             <tr>
-                                <td colspan="4" class="text-center">
+                                <td colspan="5" class="text-center">
                                     <button type="button" class="btn btn-xs btn-default load-more"
                                             title="Load more"
                                             ps-tooltip

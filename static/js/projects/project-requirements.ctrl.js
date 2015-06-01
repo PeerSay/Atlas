@@ -14,13 +14,13 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.project = null; // ref to shared
     m.patchObserver = null;
     m.groups = GroupBy('topic');
+    m.getTotalSelected = getTotalSelected;
     // Table selection
-    m.requirement = {}; // ui-select model
-    m.requirements = [];
     m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
-    m.getTotalSelected = getTotalSelected;
     // Search selection
+    m.requirement = {}; // ui-select model
+    m.requirements = []; // ui-select list
     m.addNotFoundRequirement = addNotFoundRequirement;
     m.selectRequirement = selectRequirement;
     // Filters
@@ -164,33 +164,6 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         });
     }
 
-    function addRemoveLocal(req, forceRemove) {
-        var localReqs = m.project.requirements;
-        var localReq = _.findWhere(localReqs, {id: req.id});
-        var localIdx = localReqs.indexOf(localReq);
-        var inProject = (localIdx >= 0);
-
-        if (req.selected && !inProject) {
-            localReqs.push(angular.copy(req)); // add copy!
-        }
-
-        if (!req.selected && inProject) {
-            if (!req.custom || forceRemove) {
-                localReqs.splice(localIdx, 1); // remove if not user-added
-            } else {
-                localReq.selected = false;
-            }
-        }
-    }
-
-    function removeCustomReq(req) {
-        req.selected = false;
-        req.removed = true; // trick: hide with filter
-
-        addRemoveLocal(req, true/*force*/);
-        patchProject();
-    }
-
     function getTotalSelected() {
         return filterFilter(m.project.requirements, filterExpr.selected).length;
     }
@@ -233,6 +206,37 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function addNotFoundTopic(value) {
         return m.groups.create(value);
+    }
+
+    function removeCustomReq(req) {
+        req.selected = false;
+        req.removed = true; // trick: hide with filter
+
+        addRemoveLocal(req, true/*force*/);
+        patchProject();
+    }
+
+    function addRemoveLocal(req, forceRemove) {
+        var localReqs = m.project.requirements;
+        var localReq = _.findWhere(localReqs, {id: req.id});
+        var localIdx = localReqs.indexOf(localReq);
+        var inProject = (localIdx >= 0);
+
+        if (req.selected) {
+            if (inProject && req.custom) {
+                localReq.selected = true;
+            } else {
+                localReqs.push(angular.copy(req)); // copy!
+            }
+        }
+
+        if (!req.selected && inProject) {
+            if (!req.custom || forceRemove) {
+                localReqs.splice(localIdx, 1); // remove if not user-added
+            } else {
+                localReq.selected = false;
+            }
+        }
     }
 
     // Grouping

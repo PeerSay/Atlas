@@ -116,10 +116,11 @@
                     <table class="table table-hover table-striped no-select">
                         <thead>
                         <tr>
-                            <th class="first"></th>
+                            <th class="min"></th>
                             <th colspan="2" class="main">Name</th>
                             <th>Description</th>
                             <th class="last">Popularity</th>
+                            <th class="min"><span class="fa fa-trash"></span></th>
                         </tr>
                         </thead>
                         <!--Groups list-->
@@ -137,30 +138,34 @@
                             <td colspan="2" class="bold"><strong>{{:: group.name }}</strong></td>
                             <td>{{:: group.description }}</td>
                             <td class="last"><span ng-if="!group.custom">{{:: group.popularity }}%</span></td>
+                            <td></td>
                         </tr>
                         <!--Criteria list-->
                         <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' track by req.id"
                                 ng-class="{selected: req.selected}"
                                 ng-click="cm.toggleReq(req, true)">
-                            <td>
-                                <span class="fa fa-trash remove-icon" ng-if="req.custom"
-                                        ng-click="cm.removeCustomReq(req); $event.stopPropagation()"></span>
-                            </td>
-                            <td class="first">
+                            <td></td>
+                            <td class="min">
                                 <input type="checkbox"
                                         ng-model="req.selected"
                                         ng-change="cm.toggleReq(req)"
                                         ng-click="$event.stopPropagation()">
                             </td>
-                            <td>{{ req.name}}</td>
-                            <td>{{ req.description}}</td>
-                            <td class="last"><span ng-if="!req.custom">{{:: req.popularity }}%</span></td>
+                            <td>{{:: req.name}}</td>
+                            <td>{{:: req.description}}</td>
+                            <td class="last">
+                                <span ng-if="!req.custom">{{:: req.popularity }}%</span>
+                            </td>
+                            <td>
+                                <span class="fa fa-trash remove-icon" ng-if="req.custom"
+                                    ng-click="cm.removeCustomReq(req); $event.stopPropagation()"></span>
+                            </td>
                         </tr>
                         </tbody>
                         <tbody>
                         <!--Load more-->
                         <tr>
-                            <td colspan="5" class="text-center">
+                            <td colspan="6" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default load-more"
                                         title="Load more"
                                         ps-tooltip

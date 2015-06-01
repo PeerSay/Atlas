@@ -54,7 +54,7 @@
                 </a>
             </h4>
             <ul class="animate-ease-right">
-                <li ng-repeat="product in cm.products | filter:{selected: true} track by product.id">
+                <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' track by product.id">
                     <span class="side-text ellipsis">{{ product.name }}</span>
                 </li>
             </ul>
@@ -67,7 +67,7 @@
                 </a>
             </h4>
             <ul class="animate-ease-right">
-                <li ng-repeat="req in cm.requirements | orderBy:'-popularity' track by req.id">
+                <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' track by req.id">
                     <span class="side-text ellipsis">{{ req.name }}</span>
                 </li>
             </ul>

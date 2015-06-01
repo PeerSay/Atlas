@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$stateParams', '$state', 'Projects', 'Util'];
-function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
+ProjectDetailsCtrl.$inject = ['$stateParams', 'Projects', 'Util'];
+function ProjectDetailsCtrl($stateParams, Projects, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -16,12 +16,11 @@ function ProjectDetailsCtrl($stateParams, $state, Projects, _) {
     activate();
 
     function activate() {
-        Projects.readProject(m.projectId)
-            .then(function (res) {
-                m.requirements = res.requirements;
-                m.products = res.products;
+        Projects.readProject(m.projectId).then(function (res) {
+            m.requirements = res.requirements;
+            m.products = res.products;
 
-                return (m.project = res);
-            });
+            return (m.project = res);
+        });
     }
 }

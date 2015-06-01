@@ -23,11 +23,10 @@ function ProjectSummaryCtrl($stateParams, Projects, _) {
     activate();
 
     function activate() {
-        Projects.readProject(m.projectId)
-            .then(function (res) {
-                initFields(res);
-                return (m.project = res);
-            });
+        Projects.readProject(m.projectId).then(function (res) {
+            initFields(res);
+            return (m.project = res);
+        });
     }
 
     function initFields(project) {

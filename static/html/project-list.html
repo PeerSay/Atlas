@@ -1,14 +1,14 @@
-<div class="container-fluid">
+<div class="container-fluid" ng-controller="ProjectListCtrl as list">
     <div class="row">
         <div class="col-xs-12">
             <h3 class="page-title"><span class="fa fa-list-alt"></span> My projects</h3>
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in m.projects"
+        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in list.projects"
                 ng-class="{'muted': prj.muted}">
             <span ng-if="prj.muted" class="fa fa-spinner fa-spin"></span>
-            <a class="panel panel-default tile" href ng-click="m.editProject(prj.id)">
+            <a class="panel panel-default tile" href ng-click="list.editProject(prj.id)">
                 <div class="panel-body">
                     <h4 class="name">{{ prj.title }}</h4>
                 </div>
@@ -22,7 +22,7 @@
                     </button>
                     <ul class="dropdown-menu" role="menu">
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href ng-click="m.editProject(prj.id)">Edit</a>
+                            <a role="menuitem" tabindex="-1" href ng-click="list.editProject(prj.id)">Edit</a>
                         </li>
                         <li role="presentation" class="divider"></li>
                         <!--<li role="presentation" class="disabled">
@@ -36,40 +36,40 @@
                         </li>
                         <li role="presentation" class="divider"></li>-->
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href ng-click="m.removeProject(prj)">Remove</a>
+                            <a role="menuitem" tabindex="-1" href ng-click="list.removeProject(prj)">Remove</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-            <a class="panel panel-default tile create-new" href ng-click="m.toggleCreateDlg(true)">
+            <a class="panel panel-default tile create-new" href ng-click="list.toggleCreateDlg(true)">
                 <div class="panel-body">
                     <h4 class="text-center">Create New...</h4>
                 </div>
             </a>
 
             <!--Create Project Dialog-->
-            <div class="panel panel-default dialog" ng-show="m.create.showDlg">
+            <div class="panel panel-default dialog" ng-show="list.create.showDlg">
                 <div class="panel-heading">
                     <h3 class="panel-title">Create Project</h3>
-                    <button type="button" class="btn close" ng-click="m.toggleCreateDlg(false)">
+                    <button type="button" class="btn close" ng-click="list.toggleCreateDlg(false)">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
                 </div>
                 <div class="panel-body">
-                    <form name="m.form">
+                    <form name="list.form">
                         <div class="form-group">
                             <label for="project-title" class="control-label">Title</label>
                             <input type="text" id="project-title" class="form-control"
                                     placeholder='Like "Storage Project" for example...'
                                     required
-                                    ng-model="m.create.title"
-                                    ps-focus-on="m.create.showDlg">
+                                    ng-model="list.create.title"
+                                    ps-focus-on="list.create.showDlg">
                         </div>
                         <button type="button" class="btn btn-success"
-                                ng-disabled="m.form.$invalid"
-                                ng-click="m.createProject()"
+                                ng-disabled="list.form.$invalid"
+                                ng-click="list.createProject()"
                                 >Create
                         </button>
                     </form>

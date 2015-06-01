@@ -22,7 +22,7 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     m.addCategory = addCategory;
     m.deleteCategory = deleteCategory;
     // Currency
-    m.currencies = ['USD', 'EUR', 'GBP', 'ILS', 'RUB','BTC'];
+    m.currencies = ['USD', 'EUR', 'GBP', 'ILS', 'RUB', 'BTC'];
     m.selectCurrency = selectCurrency;
     // Time
     m.durationLabels = ['days', 'weeks', 'months'];
@@ -31,14 +31,13 @@ function ProjectEssentialsCtrl($scope, $state, $stateParams, Projects, jsonpatch
     activate();
 
     function activate() {
-        Projects.readProject(m.projectId)
-            .then(function (res) {
-                m.project = res;
-                m.category.selected = res.selectedCategory || {};
+        Projects.readProject(m.projectId).then(function (res) {
+            m.project = res;
+            m.category.selected = res.selectedCategory || {};
 
-                m.patchObserver = jsonpatch.observe(m.project);
-                return m.project;
-            });
+            m.patchObserver = jsonpatch.observe(m.project);
+            return m.project;
+        });
 
         $scope.$on('$destroy', function () {
             jsonpatch.unobserve(m.project, m.patchObserver);

@@ -90,15 +90,13 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         //
         .state('project.list', {
             url: '/projects',
-            templateUrl: '/html/project-list.html',
-            controller: 'ProjectListCtrl as m'
+            templateUrl: '/html/project-list.html'
         })
         // Project > Details
         //
         .state('project.details', {
             url: '/projects/:projectId',
-            templateUrl: '/html/project-details.html',
-            controller: 'ProjectDetailsCtrl as cm'
+            templateUrl: '/html/project-details.html'
         })
         // Project > Details > Dashboard
         //

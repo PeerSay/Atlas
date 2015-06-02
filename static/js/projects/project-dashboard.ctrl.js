@@ -14,8 +14,14 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
         data: {},
         initialized: false
     };
-    m.products = {};
-    m.requirements = {};
+    m.products = {
+        data: [],
+        initialized: false
+    };
+    m.requirements = {
+        data: [],
+        initialized: false
+    };
 
 
     activate();
@@ -35,12 +41,16 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
             duration: project.time.duration,
             durationLabel: project.time.durationLabel
         });
-        m.essentials.initialized = isInitialized(m.essentials.data, ['goals', 'category', 'budget', 'duration']);
+        m.essentials.initialized = hasAnyValue(m.essentials.data, ['goals', 'category', 'budget', 'duration']);
 
+        m.products.data = project.products;
+        m.products.initialized = (project.products.length > 0);
 
+        m.requirements.data = project.requirements;
+        m.requirements.initialized = (project.requirements.length > 0);
     }
 
-    function isInitialized(obj, keys) {
+    function hasAnyValue(obj, keys) {
         var res = false;
         angular.forEach(keys, function (key) {
             if (obj[key]) {

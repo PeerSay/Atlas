@@ -149,7 +149,7 @@
                         <tfoot>
                         <!--Empty list-->
                         <tr class="empty-filter-content"
-                                ng-if="!filteredProducts.length">
+                                ng-if="!cm.loadingMore && !filteredProducts.length">
                             <td colspan="6" class="text-center">
                                 <span class="fa fa-info-circle"></span>
                                 <h4>Couldn't find anything.</h4>

@@ -136,11 +136,12 @@
                             <td class="main">{{:: product.name }}</td>
                             <td>{{:: product.description }}</td>
                             <td class="last">
-                                <span ng-if="!product.custom">{{:: product.popularity }}</span>
+                                <span ng-if="!product.custom">{{:: product.popularity }}%</span>
                             </td>
                             <td>
-                                    <span class="fa fa-trash remove-icon" ng-if="product.custom"
-                                            ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
+                                <span class="fa fa-trash remove-icon"
+                                        ng-if="product.custom"
+                                        ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
                             </td>
                         </tr>
                         </tbody>

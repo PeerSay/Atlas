@@ -50,7 +50,6 @@
                     <ul>
                         <!--Budget-->
                         <li ng-if="cm.project.resources.budget">
-                            <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: 'budget'})">
                                 {{ cm.project.resources.budget }}
@@ -58,7 +57,6 @@
                         </li>
                         <!--Resources-->
                         <li ng-if="cm.project.resources.description">
-                            <span class="fa fa-fw fa-users"></span>
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: 'resources'})">
                                 {{ cm.project.resources.description }}
@@ -66,7 +64,6 @@
                         </li>
                         <!--Time frame-->
                         <li ng-if="cm.project.time.duration || cm.project.time.startDate">
-                            <span class="fa fa-fw fa-clock-o"></span>
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})">
                         <span ng-if="cm.project.time.duration" >

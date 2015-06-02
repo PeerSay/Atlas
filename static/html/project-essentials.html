@@ -29,7 +29,8 @@
                                 tagging="cm.addCategory"
                                 tagging-tokens="ENTER"
                                 tagging-label="(adding new)"
-                                on-select="cm.selectCategory($model)">
+                                on-select="cm.selectCategory($model)"
+                                ps-focus-on="cm.focusField === 'category'">
                             <!--Label don't work-->
                             <ui-select-match placeholder="Select or search a category or domain...">
                                 {{ $select.selected.name }}

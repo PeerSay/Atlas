@@ -59,7 +59,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     var fakeProject = {
         title: 'ABC project',
         reasons: 'I want a new car.',
-        goals: 'Must have wheels.',
+        //goals: 'Must have wheels.',
         time: {
             duration: 10,
             durationLabel: 'days'

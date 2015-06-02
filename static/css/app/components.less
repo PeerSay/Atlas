@@ -482,9 +482,24 @@ table.rc-table-resizing {
 }
 
 /*Override Bootstrap*/
-.form-horizontal .control-label {
-  &.left {
-    text-align: left;
+.form-horizontal {
+  .control-label {
+    &.left {
+      text-align: left;
+    }
+  }
+
+  &.compact-form{
+    .form-control-static {
+      min-height: 30px;
+    }
+
+    @media (min-width: @grid-float-breakpoint) {
+      .control-label,
+      .form-control-static {
+        padding-top: 0;
+      }
+    }
   }
 }
 .ui-select-bootstrap > .ui-select-choices {
@@ -501,3 +516,4 @@ table.rc-table-resizing {
   display: inline-block;
   vertical-align: middle;
 }
+

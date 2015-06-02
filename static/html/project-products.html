@@ -131,7 +131,8 @@
                                 <input type="checkbox"
                                         ng-model="product.selected"
                                         ng-change="cm.toggleProduct(product)"
-                                        ng-click="$event.stopPropagation()">
+                                        ng-click="$event.stopPropagation()"
+                                        ps-focus-on="product.selected">
                             </td>
                             <td class="main">{{:: product.name }}</td>
                             <td>{{:: product.description }}</td>

@@ -123,7 +123,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="product in cm.products | filter:cm.filter.expr | orderBy:'-popularity' track by product.id"
+                        <tr ng-repeat="product in filteredProducts = (cm.products | filter:cm.filter.expr | orderBy:'-popularity') track by product.id"
                                 ng-class="{selected: product.selected}"
                                 ng-click="cm.toggleProduct(product, true)"
                                 >
@@ -143,8 +143,22 @@
                                             ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
                             </td>
                         </tr>
+                        </tbody>
+                        <tfoot>
+                        <!--Empty list-->
+                        <tr class="empty-filter-content"
+                                ng-if="!filteredProducts.length">
+                            <td colspan="6" class="text-center">
+                                <span class="fa fa-info-circle"></span>
+                                <h4>Couldn't find anything.</h4>
+                                <p>
+                                    Please chose another filter or
+                                    <a href ng-click="cm.toggleFilter('all')">show all</a>.
+                                </p>
+                            </td>
+                        </tr>
                         <!--Load more-->
-                        <tr>
+                        <tr ng-if="cm.filter.name !== 'selected'">
                             <td colspan="5" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default load-more"
                                         ng-class="{loading: cm.loadingMore}"
@@ -153,7 +167,7 @@
                                 </button>
                             </td>
                         </tr>
-                        </tbody>
+                        </tfoot>
                     </table>
                 </div>
             </div>

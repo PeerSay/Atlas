@@ -33,6 +33,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.filterBtnClass = filterBtnClass;
     m.toggleFilter = toggleFilter;
     m.showFilteredGroup = showFilteredGroup;
+    m.isEmptyTable = isEmptyTable;
     // Add/remove new
     var emptyNew = {
         name: '',
@@ -124,6 +125,16 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     function showFilteredGroup(group) {
         var arr = filterFilter(group.reqs, m.filter.expr);
         return (arr.length !== 0);
+    }
+
+    function isEmptyTable() {
+        var res = false;
+        var i = 0, group;
+        while (group = m.groups.list[i]) {
+            if (res = showFilteredGroup(group)) { break; }
+            i++;
+        }
+        return !res;
     }
 
     // Selection

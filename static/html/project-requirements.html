@@ -5,7 +5,7 @@
             <div class="panel-heading">
                 <h3 class="text-center">
                     <span class="fa fa-bars"></span>
-                    Requirements
+                    Requirements and Specifications
                 </h3>
             </div>
             <div class="panel-body">
@@ -159,9 +159,21 @@
                             </td>
                         </tr>
                         </tbody>
-                        <tbody>
+                        <tfoot>
+                        <!--Empty list-->
+                        <tr class="empty-filter-content"
+                                ng-if="cm.isEmptyTable()">
+                            <td colspan="6" class="text-center">
+                                <span class="fa fa-info-circle"></span>
+                                <h4>Couldn't find anything.</h4>
+                                <p>
+                                    Please chose another filter or
+                                    <a href ng-click="cm.toggleFilter('all')">show all</a>.
+                                </p>
+                            </td>
+                        </tr>
                         <!--Load more-->
-                        <tr>
+                        <tr ng-if="cm.filter.name !== 'selected'">
                             <td colspan="6" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default load-more"
                                         ng-class="{loading: cm.loadingMore}"
@@ -170,7 +182,7 @@
                                 </button>
                             </td>
                         </tr>
-                        </tbody>
+                        </tfoot>
                     </table>
                 </div>
 

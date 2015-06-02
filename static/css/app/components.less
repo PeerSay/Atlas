@@ -445,7 +445,7 @@ table.rc-table-resizing {
     padding: 1px 10px;
     &:not(.loading) {
       &:after {
-        content: 'Load more'; // XXX - localization
+        content: 'Load More...'; // XXX - localization
       }
       .fa {
         display: none;
@@ -461,12 +461,23 @@ table.rc-table-resizing {
       opacity: 1;
     }
   }
+
+  .empty-filter-content {
+    .fa {
+      font-size: 25px;
+    }
+    h4 {
+      font-size:  17px;
+      margin: 5px 0 5px;
+    }
+  }
 }
 
 /*Side-bar*/
 .side-bar {
   .active {
-    border-right: 4px solid @hr-border;
+    border-right: 4px solid #5c5c5c;
+    font-weight: bold;
   }
 }
 

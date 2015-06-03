@@ -64,7 +64,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         }
 
         function groupBy(row) {
-            return row.topic; // TODO - total group weight
+            return row.req.topic; // TODO - total group weight
         }
 
         // Model

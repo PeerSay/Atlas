@@ -6,7 +6,7 @@
         <thead>
         <tr>
             <th ng-repeat="col in view.columns">
-                <div>{{:: col.header.value }}</div>
+                <div>{{:: col.header.label }}</div>
             </th>
         </tr>
         </thead>
@@ -27,7 +27,7 @@
                     ng-click="focusInputEl(cell)">
                 {{cell.model | json}}
                 <!--Label cell-->
-                <div ng-if=":: cell.type === 'label' ">{{:: cell.model.value }}</div>
+                <div ng-if=":: cell.type === 'label' ">{{:: cell.label }}</div>
                 <!--Text cell-->
                 <div ng-if=":: cell.type === 'text' ">
                     <input type="text"
@@ -35,7 +35,8 @@
                             ps-table-input="cell.model">
                 </div>
                 <!--Number cell-->
-                <div ng-if=":: cell.type === 'number' ">
+                <div ng-if=":: cell.type === 'number' "
+                        ng-class="{'max' : cell.model.max()}">
                     <input type="number"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
@@ -60,9 +61,12 @@
         <tr>
             <th ng-repeat="col in view.columns">
                 <!--Label cell-->
-                <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.value }}</div>
+                <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.label }}</div>
                 <!--Func cell-->
-                <div ng-if=":: col.footer.type === 'func' ">{{ col.footer.value() }}</div>
+                <div ng-if=":: col.footer.type === 'func' "
+                        ng-class="{'max' : col.footer.model.max()}">
+                    {{ col.footer.model.value() }}
+                </div>
             </th>
         </tr>
         </tfoot>

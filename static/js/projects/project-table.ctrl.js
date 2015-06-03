@@ -80,19 +80,18 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         }
 
         function buildModel(reqs) {
-            addHeader({col: 'name', value: 'Requirement'});
-            addFooter({col: 'name', value: 'Total:', type: 'label'});
-            addHeader({col: 'weight', value: 'Weight'});
-            addFooter({col: 'weight', value: '100%', type: 'label'}); // observe
+            addHeader('name', {label: 'Requirement'});
+            addFooter('name', {label: 'Total:', type: 'label'});
+            
+            addHeader('weight', {label: 'Weight'});
+            addFooter('weight', {label: '100%', type: 'label'});
 
             _.forEach(reqs, function (req, rowIdx) {
-                addCell(rowIdx, req, {
-                    col: 'name',
-                    model: {value: req.name},
+                addCell('name', rowIdx, req, {
+                    label: req.name,
                     type: 'label'
                 });
-                addCell(rowIdx, req, {
-                    col: 'weight',
+                addCell('weight', rowIdx, req, {
                     model: CellModel(req, 'weight', {
                         tooltip: weightPercentComputeFn(req)
                     }),
@@ -103,59 +102,61 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                 _.forEach(req.products, function (prod) {
                     // Input
                     var colInputKey = 'prod-input-' + prod.id;
-                    addHeader({col: colInputKey, value: prod.name});
-                    addCell(rowIdx, req, {
-                        col: colInputKey,
+                    addHeader(colInputKey, {label: prod.name});
+                    addCell(colInputKey, rowIdx, req, {
                         model: CellModel(prod, 'input'),
                         type: 'text'
                     });
-                    addFooter({col: colInputKey, value: '', type: 'label'});
+                    addFooter(colInputKey, {label: '', type: 'label'});
 
                     // Grade
                     var colGradeKey = 'prod-grade-' + prod.id;
-                    addHeader({col: colGradeKey, value: 'Grade'});
-                    addCell(rowIdx, req, {
-                        col: colGradeKey,
-                        model: CellModel(prod, 'grade'),
+                    addHeader(colGradeKey, {label: 'Grade'});
+                    addCell(colGradeKey, rowIdx, req, {
+                        model: CellModel(prod, 'grade', {
+                            max: gradeMaxInRowFn(req, prod)
+                        }),
                         type: 'number', max: 10
                     });
-                    addFooter({col: colGradeKey, value: productGradeComputeFn(colGradeKey), type: 'func'});
+                    addFooter(colGradeKey, {
+                        model: {
+                            value: productGradeComputeFn(colGradeKey),
+                            max: totalGradeMaxFn(colGradeKey)
+                        },
+                        type: 'func'});
                 });
             });
         }
 
-        function addHeader(data) {
-            var col = columnIdx[data.col];
+        function addHeader(key, data) {
+            var col = columnIdx[key];
             if (!col) {
-                col = columnIdx[data.col] = {};
+                col = columnIdx[key] = {};
                 T.model.columns.push(col);
             }
-            col.header = { value: data.value };
+            col.header = data;
         }
 
-        function addFooter(data) {
-            var col = columnIdx[data.col];
+        function addFooter(key, data) {
+            var col = columnIdx[key];
             if (!col) {
-                col = columnIdx[data.col] = {};
+                col = columnIdx[key] = {};
                 T.model.columns.push(col);
             }
-            col.footer = {
-                value: data.value,
-                type: data.type
-            };
+            col.footer = data;
         }
 
-        function addColumnCell(colKey, cell) {
-            var col = columnIdx[colKey];
+        function addColumnCell(key, cell) {
+            var col = columnIdx[key];
             if (!col) {
-                col = columnIdx[colKey] = {};
+                col = columnIdx[key] = {};
                 T.model.columns.push(col);
             }
             col.cells = col.cells || [];
             col.cells.push(cell);
         }
 
-        function addCell(rowIdx, req, data) {
+        function addCell(colKey, rowIdx, req, data) {
             var row = T.model.rows[rowIdx];
             if (!row) {
                 row = {
@@ -164,15 +165,10 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                 };
                 T.model.rows.push(row);
             }
-            var cell = {
-                type: data.type,
-                value: data.value,
-                model: data.model,
-                max: data.max // XXX - to type
-            };
 
+            var cell = data;
             row.cells.push(cell);
-            addColumnCell(data.col, cell);
+            addColumnCell(colKey, cell);
         }
 
         // Binding/Models
@@ -181,6 +177,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             var M = {};
             M.value = obj[path]; // binded!
             M.tooltip = (addon || {}).tooltip;
+            M.max = (addon || {}).max;
             M.save = saveValue;
 
             var oldValue = m.value;
@@ -214,6 +211,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
                 var grades = columnIdx[colKey].cells;
                 var weights = columnIdx['weight'].cells;
+
                 var total = weights.reduce(function (prev, current, i) {
                     var weight = current.model.value;
                     var grade = grades[i].model.value;
@@ -235,6 +233,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             return function () {
                 var value = req.weight;
                 var weights = columnIdx['weight'].cells;
+
                 var totalWeight = weights.reduce(function (prev, current) {
                     var weight = current.model.value;
                     return prev + weight;
@@ -245,6 +244,34 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             };
         }
 
+        function gradeMaxInRowFn(req, prod) {
+            return function () {
+                var value = prod.grade;
+                if (!value) { return false;}
+
+                var max = req.products.reduce(function (prev, current) {
+                    var grade = current.grade;
+                    return Math.max(prev, grade);
+                }, 0);
+
+                return (value === max);
+            };
+        }
+
+        function totalGradeMaxFn(colKey) {
+            return function () {
+                var value = columnIdx[colKey].footer.model.value();
+                if (!value) { return false; }
+
+                var max = T.model.columns.reduce(function (prev, current) {
+                    var model = current.footer.model;
+                    var total = model ? model.value() : 0;
+                    return Math.max(prev, total);
+                }, 0);
+
+                return (value === max);
+            }
+        }
 
         return T;
     }

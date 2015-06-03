@@ -82,7 +82,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         function buildModel(reqs) {
             addHeader('name', {label: 'Requirement'});
             addFooter('name', {label: 'Total:', type: 'label'});
-            
+
             addHeader('weight', {label: 'Weight'});
             addFooter('weight', {label: '100%', type: 'label'});
 

@@ -22,8 +22,9 @@ function psTableInput() {
 
 
             $el.on('blur', function () {
-                console.log('>>Blur!', model);
-                model.save();
+                scope.$apply(function () {
+                    model.save();
+                });
             });
 
         }

@@ -22,22 +22,21 @@
         </tr>
         <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-                >
-            <td ng-repeat="cell in row.cells"
+                ng-class="{muted: !row.req.weight}">
+            <td class="cell {{:: cell.type }}" ng-repeat="cell in row.cells"
+                    ng-class="{'max' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
-                {{cell.model | json}}
                 <!--Label cell-->
                 <div ng-if=":: cell.type === 'label' ">{{:: cell.label }}</div>
                 <!--Text cell-->
                 <div ng-if=":: cell.type === 'text' ">
-                    <input type="text"
+                    <input type="text" class="cell-input"
                             ng-model="cell.model.value"
                             ps-table-input="cell.model">
                 </div>
                 <!--Number cell-->
-                <div ng-if=":: cell.type === 'number' "
-                        ng-class="{'max' : cell.model.max()}">
-                    <input type="number"
+                <div ng-if=":: cell.type === 'number' ">
+                    <input type="number" class="cell-input"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
                             ps-table-input="cell.model"
@@ -59,12 +58,12 @@
         <!--Footer-->
         <tfoot>
         <tr>
-            <th ng-repeat="col in view.columns">
+            <th ng-repeat="col in view.columns"
+                    ng-class="{'max' : col.footer.model.max()}">
                 <!--Label cell-->
                 <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.label }}</div>
                 <!--Func cell-->
-                <div ng-if=":: col.footer.type === 'func' "
-                        ng-class="{'max' : col.footer.model.max()}">
+                <div ng-if=":: col.footer.type === 'func' ">
                     {{ col.footer.model.value() }}
                 </div>
             </th>

@@ -27,7 +27,7 @@
                     ng-click="focusInputEl(cell)">
                 {{cell.model | json}}
                 <!--Label cell-->
-                <div ng-if=":: cell.type === 'label' ">{{:: cell.value }}</div>
+                <div ng-if=":: cell.type === 'label' ">{{:: cell.model.value }}</div>
                 <!--Text cell-->
                 <div ng-if=":: cell.type === 'text' ">
                     <input type="text"
@@ -40,7 +40,10 @@
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
                             ps-table-input="cell.model"
-                            ps-input-number>
+                            ps-input-number
+                            ps-tooltip
+                            ps-tooltip-title="cell.model.tooltip()"
+                            >
                 </div>
             </td>
         </tr>

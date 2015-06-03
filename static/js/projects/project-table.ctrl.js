@@ -86,20 +86,39 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             addFooter({col: 'weight', value: '100%', type: 'label'}); // observe
 
             _.forEach(reqs, function (req, rowIdx) {
-                addCell(rowIdx, req, { col: 'name', value: req.name, type: 'label' });
-                addCell(rowIdx, req, { col: 'weight', model: CellModel(req, 'weight', 'number'), type: 'number', max: 100 });
+                addCell(rowIdx, req, {
+                    col: 'name',
+                    model: {value: req.name},
+                    type: 'label'
+                });
+                addCell(rowIdx, req, {
+                    col: 'weight',
+                    model: CellModel(req, 'weight', {
+                        tooltip: weightPercentComputeFn(req)
+                    }),
+                    type: 'number',
+                    max: 100
+                });
 
                 _.forEach(req.products, function (prod) {
                     // Input
                     var colInputKey = 'prod-input-' + prod.id;
                     addHeader({col: colInputKey, value: prod.name});
-                    addCell(rowIdx, req, { col: colInputKey, model: CellModel(prod, 'input', 'text'), type: 'text' });
+                    addCell(rowIdx, req, {
+                        col: colInputKey,
+                        model: CellModel(prod, 'input'),
+                        type: 'text'
+                    });
                     addFooter({col: colInputKey, value: '', type: 'label'});
 
                     // Grade
                     var colGradeKey = 'prod-grade-' + prod.id;
                     addHeader({col: colGradeKey, value: 'Grade'});
-                    addCell(rowIdx, req, { col: colGradeKey, model: CellModel(prod, 'grade', 'number'), type: 'number', max: 10 });
+                    addCell(rowIdx, req, {
+                        col: colGradeKey,
+                        model: CellModel(prod, 'grade'),
+                        type: 'number', max: 10
+                    });
                     addFooter({col: colGradeKey, value: productGradeComputeFn(colGradeKey), type: 'func'});
                 });
             });
@@ -156,6 +175,37 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             addColumnCell(data.col, cell);
         }
 
+        // Binding/Models
+        //
+        function CellModel(obj, path, addon) {
+            var M = {};
+            M.value = obj[path]; // binded!
+            M.tooltip = (addon || {}).tooltip;
+            M.save = saveValue;
+
+            var oldValue = m.value;
+
+            function saveValue() {
+                console.log('>>Saving: ', M.value);
+
+                if (!validate()) {
+                    M.value = oldValue;
+                    return false;
+                }
+
+                obj[path] = oldValue = M.value;
+                m.patchProject();
+                return true
+            }
+
+            function validate() {
+                var invalid = (!M.value && M.value !== 0);
+                return !invalid;
+            }
+
+            return M;
+        }
+
         // Computed vals
         //
         function productGradeComputeFn(colKey) {
@@ -164,7 +214,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
                 var grades = columnIdx[colKey].cells;
                 var weights = columnIdx['weight'].cells;
-
                 var total = weights.reduce(function (prev, current, i) {
                     var weight = current.model.value;
                     var grade = grades[i].model.value;
@@ -182,36 +231,18 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             }
         }
 
+        function weightPercentComputeFn(req) {
+            return function () {
+                var value = req.weight;
+                var weights = columnIdx['weight'].cells;
+                var totalWeight = weights.reduce(function (prev, current) {
+                    var weight = current.model.value;
+                    return prev + weight;
+                }, 0);
 
-        // Binding/Types
-        //
-        function CellModel(obj, path /*,type*/) {
-            var M = {};
-            M.value = obj[path]; // binded!
-            M.save = save;
-            M.validate = validate;
-
-            var oldValue = m.value;
-
-            function save() {
-                console.log('>>Saving: ', M.value);
-
-                if (!validate()) {
-                    m.value = oldValue; // XXX- fix!
-                    return false;
-                }
-
-                obj[path] = oldValue = M.value;
-                m.patchProject();
-                return true
-            }
-
-            function validate() {
-                var invalid = (!M.value && M.value !== 0);
-                return !invalid;
-            }
-
-            return M;
+                var percent = totalWeight ? Math.round(value / totalWeight * 100) : 0;
+                return percent + '%';
+            };
         }
 
 

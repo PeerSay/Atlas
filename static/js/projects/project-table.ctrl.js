@@ -57,19 +57,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             count: 2 // must be at least one prop different from defaults!
         };
 
-        // fake data
-        var fakeHeaders = [
-            {key: 'name', name: 'Requirement'},
-            {key: 'weight', name: 'Weight'}
-        ];
-        var fakeRows = [
-            {id: 1, name: 'me', description: 'test', topic: 'Common'},
-            {id: 2, name: 'me2', description: 'test2', topic: 'Common'},
-            {id: 3, name: 'me2', description: 'test2', topic: ''},
-            {id: 4, name: 'me2', description: 'test2', topic: ''}
-        ];
-
-
         // ngTable stuff
         function getView() {
             view.tableParams = new ngTableParams(parameters, settings);
@@ -77,7 +64,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         }
 
         function groupBy(row) {
-            return row.topic;
+            return row.topic; // TODO - total group weight
         }
 
         // Model
@@ -113,7 +100,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     var colGradeKey = 'prod-grade-' + prod.id;
                     addHeader({col: colGradeKey, value: 'Grade'});
                     addCell(rowIdx, req, { col: colGradeKey, model: CellModel(prod, 'grade', 'number'), type: 'number', max: 10 });
-                    addFooter({col: colGradeKey, value: getComputedFn(colGradeKey, simpleReducer, '^'), type: 'func'});
+                    addFooter({col: colGradeKey, value: productGradeComputeFn(colGradeKey), type: 'func'});
                 });
             });
         }
@@ -171,18 +158,30 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
         // Computed vals
         //
-        function getComputedFn(colKey, reducer, init) {
+        function productGradeComputeFn(colKey) {
             return function () {
                 //console.log('>>Reduced!');
 
-                var arr = columnIdx[colKey].cells;
-                return arr.reduce(reducer, init);
+                var grades = columnIdx[colKey].cells;
+                var weights = columnIdx['weight'].cells;
+
+                var total = weights.reduce(function (prev, current, i) {
+                    var weight = current.model.value;
+                    var grade = grades[i].model.value;
+                    return {
+                        weight: prev.weight + weight,
+                        grade: prev.grade + grade * weight
+                    };
+                }, {weight: 0, grade: 0});
+
+                var ave = total.weight ? total.grade / total.weight : 0; // weighted average
+                if (ave) {
+                    ave = Math.round(ave * 10) / 10; // .1
+                }
+                return ave;
             }
         }
 
-        function simpleReducer(result, item) {
-            return [result, item.model.value].join('|');
-        }
 
         // Binding/Types
         //

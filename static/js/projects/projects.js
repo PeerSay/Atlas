@@ -316,7 +316,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         var prods = P.current.project.products;
 
         _.forEach(reqs, function (req) {
-            var reqCopy = angular.extend({name: '', weight: 0, products: []}, req);
+            var reqCopy = angular.extend({name: '', weight: 1, products: []}, req);
             _.forEach(prods, function (prod) {
                 var copyCell = angular.extend({name: '', input: '', grade: 0}, prod);
                 reqCopy.products.push(copyCell);

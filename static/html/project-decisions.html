@@ -13,7 +13,7 @@
                 <div class="row">
                     <div class="col-xs-12 page-spacer" ng-controller="ProjectTableCtrl as table">
                         <div class="tile-section border">
-                            <ps-table-view ps-view="table.tableView"></ps-table-view>
+                            <div ng-include="'/html/table-view2.html'" ng-init="view = table.tableView"></div>
                         </div>
                     </div>
                 </div>

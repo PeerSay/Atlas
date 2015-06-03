@@ -1,93 +1,221 @@
 angular.module('PeerSay')
     .controller('ProjectTableCtrl', ProjectTableCtrl);
 
-ProjectTableCtrl.$inject = ['$scope', '$interpolate', '$stateParams', 'Table', 'TableModel'];
-function ProjectTableCtrl($scope, $interpolate, $stateParams, Table, TableModel) {
+ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'jsonpatch', 'Util'];
+function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpatch,  _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.openDialog = openDialog;
-    m.info = getInfoFn();
+    m.project = null;
+    m.patchObserver = null;
+    m.patchProject = patchProject;
 
     // Table view
-    m.tableView = Table.addView(m, 'main', getViewConfig)
-        //.debug()
-        //.grouping()
-        //.sorting({active: false})
-        //.hovering()
-        .done();
+    m.activate = activate;
+    m.tableView = Table(m).getView();
 
-    $scope.$on('$destroy', function () {
-        m.tableView.destroy();
-    });
+    //activate();
 
-    function getViewConfig(model) {
-        // Columns: Criteria, Weight, [Prod1-input, Prod1-grade], ...
-        var res = [
-            {
-                selector: 'name',
-                cell: {
-                    type: 'ordinary',
-                    emptyValue: 'No name?'
-                }
-            },
-            {
-                selector: 'weight',
-                cell: {
-                    type: 'number-static'
-                }
-            },
-            {
-                selector: 'vendors/.*?/input',
-                limit: 3,
-                cell: {
-                    type: 'ordinary'
-                }
-            },
-            {
-                selector: 'vendors/.*?/score',
-                limit: 3,
-                cell: {
-                    type: 'number-static',
-                    computed: {
-                        max: ['row', Table.aggr.rowIsMax]
-                    }
-                },
-                footer: {
-                    computed: {
-                        total: ['col,col:weight', Table.aggr.columnTotalScore],
-                        max: ['footer', Table.aggr.rowIsMax]
-                    }
-                }
-            }
+    function activate() {
+        return Projects.readProjectTable(m.projectId).then(function (res) {
+            console.log('>>', res);
+
+            m.project = {requirements: res};
+            m.patchObserver = jsonpatch.observe(m.project);
+
+            return res;
+        });
+    }
+
+    function patchProject() {
+        var patch = jsonpatch.generate(m.patchObserver);
+        if (!patch.length) { return; }
+
+        Projects.patchProject(m.projectId, patch);
+    }
+
+
+    // Table Class
+    function Table(ctrl) {
+        var T = {};
+        T.getView = getView;
+        T.model = {
+            columns: [],
+            rows: []
+        };
+        var columnIdx = {};
+
+        var view = {};
+        // ngTable params
+        var settings = {
+            counts: [], // remove paging
+            defaultSort: 'asc',
+            getData: getData,
+            groupBy: groupBy
+        };
+        var parameters = {
+            count: 2 // must be at least one prop different from defaults!
+        };
+
+        // fake data
+        var fakeHeaders = [
+            {key: 'name', name: 'Requirement'},
+            {key: 'weight', name: 'Weight'}
+        ];
+        var fakeRows = [
+            {id: 1, name: 'me', description: 'test', topic: 'Common'},
+            {id: 2, name: 'me2', description: 'test2', topic: 'Common'},
+            {id: 3, name: 'me2', description: 'test2', topic: ''},
+            {id: 4, name: 'me2', description: 'test2', topic: ''}
         ];
 
-        var vendors = model.vendors;
-        if (!vendors.length) {
-            res.push({
-                selector: null,
-                columnModel: { field: 'Products', value: 'Products'}, // show at least on column
-                cellModels: ['name'] // first cell is used for grouping and must have criteria
+
+        // ngTable stuff
+        function getView() {
+            view.tableParams = new ngTableParams(parameters, settings);
+            return view;
+        }
+
+        function groupBy(row) {
+            return row.topic;
+        }
+
+        // Model
+
+        function getData($defer) {
+            ctrl.activate().then(function (reqs) {
+                buildModel(reqs);
+                view.columns = T.model.columns;
+                view.rows = T.model.rows;
+
+                $defer.resolve(T.model.rows);
             });
         }
-         return res;
-    }
 
+        function buildModel(reqs) {
+            addHeader({col: 'name', value: 'Requirement'});
+            addFooter({col: 'name', value: 'Total:', type: 'label'});
+            addHeader({col: 'weight', value: 'Weight'});
+            addFooter({col: 'weight', value: '100%', type: 'label'}); // observe
 
-    function getInfoFn() {
-        var exp = $interpolate('Showing {{ shown }} out of {{ total }}');
-        return function () {
-            var shown = (m.tableView.rows[0] || []).length;
-            var total = (TableModel.model.vendors || []).length;
+            _.forEach(reqs, function (req, rowIdx) {
+                addCell(rowIdx, req, { col: 'name', value: req.name, type: 'label' });
+                addCell(rowIdx, req, { col: 'weight', model: CellModel(req, 'weight', 'number'), type: 'number', max: 100 });
 
-            return {
-                show: (total > shown),
-                text: exp({shown: shown, total: total})
+                _.forEach(req.products, function (prod) {
+                    // Input
+                    var colInputKey = 'prod-input-' + prod.id;
+                    addHeader({col: colInputKey, value: prod.name});
+                    addCell(rowIdx, req, { col: colInputKey, model: CellModel(prod, 'input', 'text'), type: 'text' });
+                    addFooter({col: colInputKey, value: '', type: 'label'});
+
+                    // Grade
+                    var colGradeKey = 'prod-grade-' + prod.id;
+                    addHeader({col: colGradeKey, value: 'Grade'});
+                    addCell(rowIdx, req, { col: colGradeKey, model: CellModel(prod, 'grade', 'number'), type: 'number', max: 10 });
+                    addFooter({col: colGradeKey, value: getComputedFn(colGradeKey, simpleReducer, '^'), type: 'func'});
+                });
+            });
+        }
+
+        function addHeader(data) {
+            var col = columnIdx[data.col];
+            if (!col) {
+                col = columnIdx[data.col] = {};
+                T.model.columns.push(col);
+            }
+            col.header = { value: data.value };
+        }
+
+        function addFooter(data) {
+            var col = columnIdx[data.col];
+            if (!col) {
+                col = columnIdx[data.col] = {};
+                T.model.columns.push(col);
+            }
+            col.footer = {
+                value: data.value,
+                type: data.type
             };
-        };
-    }
+        }
 
-    function openDialog() {
-        //TODO
+        function addColumnCell(colKey, cell) {
+            var col = columnIdx[colKey];
+            if (!col) {
+                col = columnIdx[colKey] = {};
+                T.model.columns.push(col);
+            }
+            col.cells = col.cells || [];
+            col.cells.push(cell);
+        }
+
+        function addCell(rowIdx, req, data) {
+            var row = T.model.rows[rowIdx];
+            if (!row) {
+                row = {
+                    req: req,
+                    cells: []
+                };
+                T.model.rows.push(row);
+            }
+            var cell = {
+                type: data.type,
+                value: data.value,
+                model: data.model,
+                max: data.max // XXX - to type
+            };
+
+            row.cells.push(cell);
+            addColumnCell(data.col, cell);
+        }
+
+        // Computed vals
+        //
+        function getComputedFn(colKey, reducer, init) {
+            return function () {
+                //console.log('>>Reduced!');
+
+                var arr = columnIdx[colKey].cells;
+                return arr.reduce(reducer, init);
+            }
+        }
+
+        function simpleReducer(result, item) {
+            return [result, item.model.value].join('|');
+        }
+
+        // Binding/Types
+        //
+        function CellModel(obj, path /*,type*/) {
+            var M = {};
+            M.value = obj[path]; // binded!
+            M.save = save;
+            M.validate = validate;
+
+            var oldValue = m.value;
+
+            function save() {
+                console.log('>>Saving: ', M.value);
+
+                if (!validate()) {
+                    m.value = oldValue; // XXX- fix!
+                    return false;
+                }
+
+                obj[path] = oldValue = M.value;
+                m.patchProject();
+                return true
+            }
+
+            function validate() {
+                var invalid = (!M.value && M.value !== 0);
+                return !invalid;
+            }
+
+            return M;
+        }
+
+
+        return T;
     }
 }

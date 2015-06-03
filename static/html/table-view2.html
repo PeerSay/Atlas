@@ -1,0 +1,67 @@
+<ng-form name="form">
+    <table class="table"
+            ng-table="view.tableParams"
+            >
+        <!--Header-->
+        <thead>
+        <tr>
+            <th ng-repeat="col in view.columns">
+                <div>{{:: col.header.value }}</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody ng-repeat="group in $groups">
+        <!--Group row-->
+        <tr class="ng-table-group" ng-show="group.value">
+            <td colspan="{{ view.headers.length }}">
+                <a href ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()" tabindex="-1">
+                    <span class="fa fa-fw" ng-class="{ 'fa-caret-right': group.$hideRows, 'fa-caret-down': !group.$hideRows }"></span>
+                    {{:: group.value }}
+                </a>
+            </td>
+        </tr>
+        <!--Rows & cells-->
+        <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
+                >
+            <td ng-repeat="cell in row.cells"
+                    ng-click="focusInputEl(cell)">
+                {{cell.model | json}}
+                <!--Label cell-->
+                <div ng-if=":: cell.type === 'label' ">{{:: cell.value }}</div>
+                <!--Text cell-->
+                <div ng-if=":: cell.type === 'text' ">
+                    <input type="text"
+                            ng-model="cell.model.value"
+                            ps-table-input="cell.model">
+                </div>
+                <!--Number cell-->
+                <div ng-if=":: cell.type === 'number' ">
+                    <input type="number"
+                            min="0" max="{{:: cell.max }}"
+                            ng-model="cell.model.value"
+                            ps-table-input="cell.model"
+                            ps-input-number>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+        <!--Empty table row -->
+        <tr ng-show="view.hasAddLink">
+            <td class="attention">
+                <span class="clickable"
+                        ng-click="view.addEmptyRow()">Click to add</span>
+            </td>
+        </tr>
+        <!--Footer-->
+        <tfoot>
+        <tr>
+            <th ng-repeat="col in view.columns">
+                <!--Label cell-->
+                <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.value }}</div>
+                <!--Func cell-->
+                <div ng-if=":: col.footer.type === 'func' ">{{ col.footer.value() }}</div>
+            </th>
+        </tr>
+        </tfoot>
+    </table>
+</ng-form>

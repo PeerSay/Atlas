@@ -24,6 +24,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         }
     };
     P.readProject = readProject;
+    P.readProjectTable = readProjectTable;
     P.patchProject = patchProject;
 
     P.readPublicCategories = readPublicCategories;
@@ -297,6 +298,32 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
             category: category,
             popularity: popularity
         };
+        return res;
+    }
+
+    // Table
+    //
+
+    function readProjectTable(id) {
+        return $timeout(function () {
+            return readProjectTableDataDbg();
+        });
+    }
+
+    function readProjectTableDataDbg() {
+        var res = [];
+        var reqs = P.current.project.requirements;
+        var prods = P.current.project.products;
+
+        _.forEach(reqs, function (req) {
+            var reqCopy = angular.extend({name: '', weight: 0, products: []}, req);
+            _.forEach(prods, function (prod) {
+                var copyCell = angular.extend({name: '', input: '', grade: 0}, prod);
+                reqCopy.products.push(copyCell);
+            });
+            res.push(reqCopy);
+        });
+
         return res;
     }
 

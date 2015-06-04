@@ -24,7 +24,7 @@
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
                 ng-class="{muted: !row.req.weight}">
             <td class="cell {{:: cell.type }}" ng-repeat="cell in row.cells"
-                    ng-class="{'max' : cell.model.max()}"
+                    ng-class="{'winner' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
                 <!--Label cell-->
                 <div ng-if=":: cell.type === 'label' ">{{:: cell.label }}</div>
@@ -58,14 +58,16 @@
         <!--Footer-->
         <tfoot>
         <tr>
-            <th ng-repeat="col in view.columns"
-                    ng-class="{'max' : col.footer.model.max()}">
+            <th class="abs-container" ng-repeat="col in view.columns"
+                    ng-class="{'winner' : col.footer.model.max()}">
                 <!--Label cell-->
                 <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.label }}</div>
                 <!--Func cell-->
                 <div ng-if=":: col.footer.type === 'func' ">
                     {{ col.footer.model.value() }}
                 </div>
+                <!--Winner cup-->
+                <span class="fa fa-trophy winner-icon" ng-if="col.footer.model.max()"></span>
             </th>
         </tr>
         </tfoot>

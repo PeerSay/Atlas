@@ -44,7 +44,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             rows: []
         };
         var columnIdx = {};
-
         var view = {};
         // ngTable params
         var settings = {

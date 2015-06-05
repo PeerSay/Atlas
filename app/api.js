@@ -20,7 +20,7 @@ function RestApi(app) {
     function setupRoutes() {
         // Logging & auth
         app.use('/api/*', logApi);
-        app.use(/\/user|\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
+        app.use(/\/api\/user|\/api\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
 
         // Adding user (email) to waiting list
         app.post('/api/waiting-users', jsonParser, addToWaitingUsers);
@@ -197,7 +197,7 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators -criteria', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);
@@ -377,7 +377,7 @@ function RestApi(app) {
 
     function ensureAuthorized(req, res, next) {
         if (!req.user) {
-            return errRes.notAuthorized(res);
+            return errRes.notAuthorized(res, 'for API call');
         }
         next();
     }

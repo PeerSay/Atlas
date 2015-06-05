@@ -31,103 +31,6 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.readPublicRequirements = readPublicRequirements;
     P.readPublicProducts = readPublicProducts;
 
-    var empty = {
-        title: '',
-        reasons: '',
-        goals: '',
-        summary: '',
-        recommendations: '',
-        notes: '',
-        // Time
-        time: {
-            startDate: '',
-            duration: 0,
-            durationLabel: 'days'
-        },
-        // Resources
-        resources: {
-            description: '',
-            budget: '',
-            budgetCurrency: 'USD'
-        },
-        selectedCategory: null,
-        /*categories: [],
-        requirements: [],
-        products: []*/
-    };
-
-    /// XXX - fake data
-    var fakeProject = {
-        title: 'ABC project',
-        reasons: 'I want a new car.',
-        //goals: 'Must have wheels.',
-        time: {
-            duration: 10,
-            durationLabel: 'days'
-        },
-        resources: {
-            description: '2 half-men',
-            budget: '100M',
-            budgetCurrency: 'USD'
-        },
-        selectedCategory: {id: 6, name: 'VPN', domain: 'Networking'},
-        categories: [],
-        requirements: [],
-        products: [] // XXX - inside requirements?
-    };
-
-    var fakeCategories = [
-        {id: 1, name: 'Category of VM1', domain: 'Virtualization'},
-        {id: 2, name: 'Category of VM2', domain: 'Virtualization'},
-        {id: 3, name: 'Some etc vm', domain: 'Virtualization'},
-        {id: 4, name: 'Hypervizors', domain: 'Virtualization'},
-        {id: 5, name: 'IPv6', domain: 'Networking'},
-        {id: 6, name: 'VPN', domain: 'Networking'},
-        {id: 7, name: 'Some netw', domain: 'Networking'},
-        {id: 8, name: 'xxx', domain: 'Networking'},
-        {id: 9, name: 'Firewalls', domain: 'Security'},
-        {id: 10, name: 'Fw1', domain: 'Security'},
-        {id: 11, name: 'Email security', domain: 'Security'},
-        {id: 12, name: 'SSD', domain: 'Storage'},
-        {id: 13, name: 'RAID', domain: 'Storage'},
-        {id: 14, name: 'Some storage', domain: 'Storage'}
-    ];
-    var fakeRequirements = [
-        {id: 1, name: 'Req1', description: 'Some longer descriptio for Req1', topic: 'Support', popularity: 88},
-        {id: 2, name: 'Some requiremement', description: 'Some longer descriptio forsdfsdf as', topic: 'Support', popularity: 75},
-        {id: 3, name: 'All week long', description: 'Some longer descriptio for sdfs', topic: 'Support', popularity: 90},
-        {id: 4, name: 'Legendary', description: 'Some longer descriptio for FDFF', topic: 'Support', popularity: 82},
-        {id: 5, name: 'Free', description: 'Some longer descriptio for sd', topic: 'Price', popularity: 80},
-        {id: 6, name: 'Almost free', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 77},
-        {id: 7, name: 'Vistually free', description: 'Some short', topic: 'Price', popularity: 71},
-        {id: 8, name: 'xxx', description: 'Some longer descriptio for sdf', topic: 'Price', popularity: 74},
-        {id: 9, name: 'Firewalls', description: 'Some longer descriptio for ', topic: 'Security', popularity: 92},
-        {id: 10, name: 'Fw1', description: 'Some longer descriptio for sdf', topic: 'Security', popularity: 99},
-        {id: 11, name: 'Email securoty', description: 'Some longer descriptio for sdfsdf', topic: 'Security', popularity: 94},
-        {id: 12, name: 'Bigger', description: 'Some longer descriptio for sefwsd', topic: 'Some', popularity: 75},
-        {id: 13, name: 'Better', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 80},
-        {id: 14, name: 'Higher', description: 'Some longer descriptio for 123', topic: 'Some', popularity: 81}
-    ];
-    var fakeTopics = [
-        {id: 1, name: 'Support', popularity: 20, description: ''},
-        {id: 2, name: 'Price', popularity: 50, description: 'Topic description'},
-        {id: 3, name: 'Security', popularity: 10, description: ''},
-        {id: 4, name: 'Some', popularity: 0, description: ''}
-    ];
-    var fakeProducts = [
-        {id: 1, name: 'Raid2', description: 'Some descr for 123', category: 'SSD', popularity: 70},
-        {id: 2, name: 'ipfilter', description: 'Some descr for 12123', category: 'Firewalls', popularity: 80},
-        {id: 3, name: 'ZoneAlarm', description: 'Some descr for 123 Some descr for 123', category: 'Email security', popularity: 90},
-        {id: 4, name: 'Drive1', description: 'Some descr for 123', category: 'SSD', popularity: 92},
-        {id: 5, name: 'VMWare', description: '', category: 'Hypervizors', popularity: 88},
-        {id: 6, name: 'Bayezian', description: 'Some descr for 123s', category: 'Email security', popularity: 94},
-        {id: 7, name: 'Some3', description: '', category: 'SSD', popularity: 76},
-        {id: 8, name: 'FW1', description: 'Some descr for sdfsdf', category: 'Firewalls', popularity: 74},
-        {id: 9, name: 'iptables', description: '', category: 'Firewalls', popularity: 87},
-        {id: 10, name: 'ZoneAlarm', description: 'Some descr for 1sdfsdf3', category: 'Firewalls', popularity: 95},
-        {id: 11, name: 'Xen', description: '', category: 'Hypervizors', popularity: 95},
-        {id: 12, name: 'SpamFilter', description: '', category: 'Email security', popularity: 79}
-    ];
 
     // Project list
     //
@@ -163,23 +66,44 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     // Project details
     //
+
+    // Format:
+    /*var a = {
+        "_id": "",
+        "title": "",
+        "categories": [],
+        "products": [],
+        "requirements": [],
+        "notes": {
+            "reasons": "",
+            "goals": "",
+            "resources": "",
+            "summary": "",
+            "recommendations": ""
+        },
+        "budget": {
+            "amount": 0,
+            "amountMultiplier": "K",
+            "amountMultipliers": "K,M", // r/o
+            "currencyLabel": "USD",
+            "currencyLabels": "USD,EUR,GBP,ILS,RUB,BTC" // r/o
+        },
+        "time": {
+            "startDate": "2015-06-05T21:32:30.058Z", // ISO date
+            "duration": 0,
+            "durationLabel": "days",
+            "durationLabels": "days,weeks,months" // r/o
+        }
+    };*/
     function readProject(id) {
-        return readProjectDataDbg(id)
+        return readProjectData(id)
             .then(function (data) {
-                angular.extend(P.current.project, empty, data);
-                return P.current.project;
+                return (P.current.project = data.result);
             });
     }
 
     function readProjectData(id) {
         return Backend.read(['projects', id]);
-    }
-
-    function readProjectDataDbg(id) {
-        return $q(function (resolve) {
-            var data = Storage.get('project' + id) || fakeProject;
-            resolve(data);
-        });
     }
 
     function patchProject(id, data) {
@@ -195,7 +119,8 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         //XXX
         Storage.set('project' + id, P.current.project);
 
-        return $timeout(function () {});
+        return $timeout(function () {
+        });
         /*
          return Backend.patch(['projects', id], data);*/
     }
@@ -209,53 +134,20 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     // Categories
     //
     function readPublicCategories() {
-        return $timeout(function () {
-            return {categories: fakeCategories};
-        });
+        return Backend.read(['public', 'categories']);
     }
 
     //Requirements
     //
     function readPublicRequirements(params) {
-        return readPublicRequirementsDataDbg(params).then(function (res) {
-            return res;
+        return readPublicRequirementsData(params).then(function (data) {
+            return data.result;
         })
     }
 
-    function readPublicRequirementsDataDbg(params) {
-        var delay = 1000;
-        var generate = (params.page > 0);
-
-        return $timeout(function () {}, delay).then(function () {
-            return {
-                topics: fakeTopics,
-                requirements: generate ? genFakeReqs(params) : fakeRequirements
-            };
-        });
-    }
-
-    function genFakeReqs(params) {
-        var limit = params.limit || 10;
-
-        var res = [];
-        for (var i = 0, len = limit; i < len; i++) {
-            res.push(genFakeReq());
-        }
-        return res;
-    }
-
-    function genFakeReq() {
-        var name = Math.random().toString(36).slice(9);
-        var topic = fakeTopics[randInt(fakeTopics.length - 1)].name;
-        var popularity = randInt(99);
-        var res = {
-            id: randInt(1000000000000),
-            name: name,
-            description: 'Some descr for ' + name,
-            topic: topic,
-            popularity: popularity
-        };
-        return res;
+    function readPublicRequirementsData() {
+        // TODO - params: limit/from
+        return Backend.read(['public', 'requirements']);
     }
 
     //Products
@@ -269,7 +161,8 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     function readPublicProductsDataDbg(params) {
         var delay = 1000;
 
-        return $timeout(function () {}, delay).then(function () {
+        return $timeout(function () {
+        }, delay).then(function () {
             return genFakeProducts(params);
         });
     }

@@ -17,7 +17,7 @@
                         <label for="es-reason" class="control-label">Please describe the reasons for this project evaluation:</label>
                         <textarea id="es-reason" class="form-control vert"
                                 placeholder="I want to add an extra 10TB storage to the companies backup server"
-                                ng-model="cm.project.reasons"
+                                ng-model="cm.project.notes.reasons"
                                 ng-blur="cm.patchProject()"
                                 ps-focus-on="cm.focusField === 'reasons'"
                                 ></textarea>
@@ -25,13 +25,13 @@
                     <!--Category-->
                     <div class="form-group">
                         <label class="control-label">Select category:</label>
-                        <ui-select ng-model="cm.category.selected" theme="bootstrap"
+                        <!--<ui-select ng-model="cm.category.selected" theme="bootstrap"
                                 tagging="cm.addCategory"
                                 tagging-tokens="ENTER"
                                 tagging-label="(adding new)"
                                 on-select="cm.selectCategory($model)"
                                 ps-focus-on="cm.focusField === 'category'">
-                            <!--Label don't work-->
+                            &lt;!&ndash;Label don't work&ndash;&gt;
                             <ui-select-match placeholder="Select or search a category or domain...">
                                 {{ $select.selected.name }}
                                 <span class="fa fa-check"></span>
@@ -44,14 +44,14 @@
                                     <span class="fa fa-trash"></span> <span class="link">Delete</span>
                                 </span>
                             </ui-select-choices>
-                        </ui-select>
+                        </ui-select>-->
                     </div>
                     <!--Goals-->
                     <div class="form-group">
                         <label for="es-goal" class="control-label">What are the project goals?</label>
                         <textarea id="es-goal" class="form-control vert"
                                 placeholder="The new backup system should extend the current 6TB transparently..."
-                                ng-model="cm.project.goals"
+                                ng-model="cm.project.notes.goals"
                                 ng-blur="cm.patchProject()"
                                 ></textarea>
                     </div>
@@ -66,13 +66,13 @@
                                     <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle"
                                                 data-toggle="dropdown" aria-expanded="false">
-                                            <span class="fa fa-fw fa-{{ cm.project.resources.budgetCurrency | lowercase }}"></span>
-                                            {{ cm.project.resources.budgetCurrency }}
+                                            <span class="fa fa-fw fa-{{ cm.project.budget.currencyLabel | lowercase }}"></span>
+                                            {{ cm.project.budget.currencyLabel }}
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu">
-                                            <li ng-repeat="currency in cm.currencies"
-                                                    ng-class="{active: (currency === cm.project.resources.budgetCurrency)}">
+                                            <li ng-repeat="currency in cm.currencyLabels"
+                                                    ng-class="{active: (currency === cm.project.budget.currencyLabel)}">
                                                 <a href ng-click="cm.selectCurrency(currency)">
                                                     <span class="fa fa-{{:: currency | lowercase}}"></span>
                                                     {{:: currency }}
@@ -80,11 +80,24 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <input id="es-budget" type="text" class="form-control" placeholder="10K"
-                                            ng-model="cm.project.resources.budget"
+                                    <input id="es-budget" type="number" class="form-control" placeholder="10K"
+                                            ng-model="cm.project.budget.amount"
                                             ng-blur="cm.patchProject()"
                                             ps-focus-on="cm.focusField === 'budget'"
                                             />
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown" aria-expanded="false">
+                                            {{ cm.project.budget.amountMultiplier }}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                            <li ng-repeat="mul in cm.amountMultipliers"
+                                                    ng-class="{active: (mul === cm.project.budget.amountMultiplier)}">
+                                                <a href ng-click="cm.selectMultiplier(mul)">{{:: mul }}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -94,7 +107,7 @@
                             <div class="col-sm-10">
                                 <input id="es-resource" type="text" class="form-control"
                                         placeholder="2 employees part time for 2 months"
-                                        ng-model="cm.project.resources.description"
+                                        ng-model="cm.project.notes.resources"
                                         ng-blur="cm.patchProject()"
                                         ps-focus-on="cm.focusField === 'resources'"
                                         />
@@ -132,7 +145,7 @@
                                                 ps-focus-on="cm.focusField === 'duration'"
                                                 />
                                         <!--Label Select-->
-                                        <div class="input-group-btn">
+                                        <div class="input-group-btn dropup">
                                             <button type="button" class="btn btn-default dropdown-toggle"
                                                     data-toggle="dropdown" aria-expanded="false">
                                                 {{ cm.project.time.durationLabel }}

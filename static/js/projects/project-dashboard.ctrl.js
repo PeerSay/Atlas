@@ -35,9 +35,9 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
 
     function initFields(project) {
         angular.extend(m.essentials.data, {
-            goals: project.goals,
-            category: (project.selectedCategory || {}).name,
-            budget: project.resources.budget,
+            goals: project.notes.goals,
+            category: project.selectedCategory || null,
+            budget: project.budget.amount,
             duration: project.time.duration,
             durationLabel: project.time.durationLabel
         });

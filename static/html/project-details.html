@@ -49,29 +49,29 @@
                     </h4>
                     <ul>
                         <!--Budget-->
-                        <li ng-if="cm.project.resources.budget">
+                        <li ng-if="cm.project.budget.amount">
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: 'budget'})">
-                                {{ cm.project.resources.budget }}
+                                {{ cm.project.budget.amount }}
                             </a>
                         </li>
                         <!--Resources-->
-                        <li ng-if="cm.project.resources.description">
+                        <li ng-if="cm.project.notes.resources">
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: 'resources'})">
-                                {{ cm.project.resources.description }}
+                                {{ cm.project.notes.resources }}
                             </a>
                         </li>
                         <!--Time frame-->
                         <li ng-if="cm.project.time.duration || cm.project.time.startDate">
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})">
-                        <span ng-if="cm.project.time.duration" >
-                            {{ cm.project.time.duration }} {{ cm.project.time.durationLabel }}
-                        </span>
-                        <span ng-if="cm.project.time.startDate">
-                            @ {{ cm.project.time.startDate }}
-                        </span>
+                                <span ng-if="cm.project.time.duration" >
+                                    {{ cm.project.time.duration }} {{ cm.project.time.durationLabel }}
+                                </span>
+                                <span ng-if="cm.project.time.startDate">
+                                    @ {{ cm.project.time.startDate }}
+                                </span>
                             </a>
                         </li>
                     </ul>

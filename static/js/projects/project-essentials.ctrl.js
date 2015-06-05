@@ -22,10 +22,12 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     m.addCategory = addCategory;
     m.deleteCategory = deleteCategory;
     // Currency
-    m.currencies = ['USD', 'EUR', 'GBP', 'ILS', 'RUB', 'BTC'];
+    m.currencyLabels = []; // list from DB
+    m.amountMultipliers =  []; // list from DB
     m.selectCurrency = selectCurrency;
+    m.selectMultiplier = selectMultiplier;
     // Time
-    m.durationLabels = ['days', 'weeks', 'months'];
+    m.durationLabels = []; // list from DB
     m.selectDurationLabel = selectDurationLabel;
 
     activate();
@@ -35,9 +37,12 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
             m.project = res;
             m.patchObserver = jsonpatch.observe(m.project);
 
-            m.category.selected = res.selectedCategory || {};
-            m.categories = res.categories; // shared
+            m.currencyLabels = res.budget.currencyLabels.split(',');
+            m.amountMultipliers = res.budget.amountMultipliers.split(',');
+            m.durationLabels = res.time.durationLabels.split(',');
 
+            m.category.selected = res.selectedCategory || '';
+            m.categories = res.categories; // shared
             Projects.readPublicCategories().then(function (res) {
                 m.categories = [].concat(m.categories, res.categories);
             });
@@ -70,7 +75,7 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
         var item = {
             id: nextId(m.categories),
             name: val,
-            domain: 'Default',
+            domain: '',
             local: true
         };
         m.categories.unshift(item); // all
@@ -103,7 +108,12 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     // Currency / Labels
     //
     function selectCurrency(currency) {
-        m.project.resources.budgetCurrency = currency;
+        m.project.budget.currencyLabel = currency;
+        patchProject();
+    }
+
+    function selectMultiplier(mul) {
+        m.project.budget.amountMultiplier = mul;
         patchProject();
     }
 

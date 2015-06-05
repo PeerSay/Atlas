@@ -16,7 +16,8 @@ var defaultProject = {
     title: 'Welcome Project'
 };
 var durationLabelEnum = ['days', 'weeks', 'months'];
-var amountModifierEnum = ['K', 'M'];
+var amountMultiplierEnum = ['K', 'M'];
+var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS', 'RUB', 'BTC']; // ISO 4217 codes (BTC is unofficial)
 
 
 // Schema
@@ -51,10 +52,11 @@ var projectSchema = new Schema({
     // Migrate:
     // - was: budget:String
     budget: {
-        currency: { type: String, enum: ['USD', 'EUR', 'GBP', 'ILS', 'RUB', 'BTC'], default: 'USD'}, // TODO: verify: ISO codes
         amount: {type: Number, min: 0 },
-        amountModifier: { type: String, enum: amountModifierEnum, default: 'K' },
-        amountModifiers: { type: String, default: amountModifierEnum.join(',')}
+        amountMultiplier: { type: String, enum: amountMultiplierEnum, default: 'K' },
+        amountMultipliers: { type: String, default: amountMultiplierEnum.join(',')},
+        currencyLabel: { type: String, enum: currencyEnum, default: 'USD'},
+        currencyLabels: { type: String, default: currencyEnum.join(',') }
     },
 
     // Migrate:

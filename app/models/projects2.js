@@ -3,9 +3,6 @@ var mongoose = require('mongoose');
 var ShortId = require('mongoose-shortid-nodeps');
 var Schema = mongoose.Schema;
 
-var defaultProject = {
-    title: 'Welcome Project'
-};
 
 /**
  * From: https://github.com/coreh/uid2
@@ -13,19 +10,17 @@ var defaultProject = {
  */
 var UIDCHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-// Schema
+// Presets
 //
-
-var projectStubSchema = new Schema({
-    title: { type: String, required: true },
-    _stub: { type: Boolean, default: true },
-    _ref: { type: ShortId, ref: 'Project' }
-});
-
-// Enums
+var defaultProject = {
+    title: 'Welcome Project'
+};
 var durationLabelEnum = ['days', 'weeks', 'months'];
 var amountModifierEnum = ['K', 'M'];
 
+
+// Schema
+//
 var projectSchema = new Schema({
     _id: {
         type: ShortId,
@@ -34,6 +29,7 @@ var projectSchema = new Schema({
         retries: 5
     },
     title: { type: String, required: true },
+    creationDate: { type: Date, default: Date.now },
     collaborators: [
         { type: Schema.ObjectId, ref: 'User' }
     ],
@@ -49,9 +45,7 @@ var projectSchema = new Schema({
         startDate: { type: Date, default: Date.now },
         duration: { type: Number, min: 0 },
         durationLabel: { type: String, enum: durationLabelEnum, default: 'days' },
-        durationLabels: [{
-            type: String, default: durationLabelEnum.join(',')
-        }]
+        durationLabels: { type: String, default: durationLabelEnum.join(',') }
     },
 
     // Migrate:
@@ -67,8 +61,9 @@ var projectSchema = new Schema({
     // - was summary/recommendations/notes (flat, String)
     // - was description:String
     notes: {
-        reasons: { type: String },
+        reasons: { type: String, default: '' }, // Ensures parent is always created
         goals: { type: String },
+        resources: { type: String },
         summary: { type: String },
         recommendations: { type: String }
     },
@@ -93,6 +88,14 @@ var projectSchema = new Schema({
         popularity: { type: Number, min: 0, max: 100, default: 0 },
         selected: { type: Boolean },
         local: { type: Boolean }
+    }],
+
+    // Categories:
+    //
+    selectedCategory: { type: String }, //XXX - string ok?
+    categories: [{
+        name: { type: String, required: true },
+        domain: { type: String }
     }],
 
     // Migrate: was
@@ -191,6 +194,5 @@ var Project = mongoose.model('Project', projectSchema);
 
 
 module.exports = {
-    ProjectModel: Project,
-    projectStubSchema: projectStubSchema
+    ProjectModel: Project
 };

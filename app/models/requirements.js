@@ -15,11 +15,11 @@ var topicSchema = new Schema({
     popularity: {type: Number, min: 0, max: 100, default: 0}
 });
 
-var ReqModel = mongoose.model('Product', requirementSchema);
+var ReqModel = mongoose.model('Requirement', requirementSchema);
 var TopicModel = mongoose.model('Topic', topicSchema);
 
 
 module.exports = {
-    ProductModel: ReqModel,
+    RequirementModel: ReqModel,
     TopicModel: TopicModel
 };

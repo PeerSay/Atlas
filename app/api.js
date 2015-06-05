@@ -7,7 +7,7 @@ var swig = require('swig');
 // App dependencies
 var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
-var Project = require('../app/models/projects').ProjectModel;
+var Project = require('../app/models/projects2').ProjectModel;
 var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
 var mailer = require('../app/email/mailer');
 

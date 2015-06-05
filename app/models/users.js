@@ -1,12 +1,12 @@
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ShortId = require('mongoose-shortid-nodeps');
 
 var util = require('../../app/util');
 var config = require('../../app/config');
-var projects = require('../../app/models/projects');
+var projects = require('../../app/models/projects2');
 var Project = projects.ProjectModel;
-var projectStubSchema = projects.projectStubSchema;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000; // TODO - test
@@ -26,6 +26,12 @@ Settings
 
 // Schemas
 //
+
+var projectStubSchema = new Schema({
+    title: { type: String, required: true },
+    _stub: { type: Boolean, default: true },
+    _ref: { type: ShortId, ref: 'Project' }
+});
 
 var userSchema = new Schema({
     id: { type: Number, unique: true },

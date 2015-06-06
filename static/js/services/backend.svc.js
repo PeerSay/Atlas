@@ -29,12 +29,12 @@ function Backend($http, $q, Notification, _) {
     var middleware = [];
 
     function request(method) {
-        return function (path, data) {
-            var url = arrToUrl(path);
+        return function (path, data, query) {
+            var url = buildUrl(path);
             var promise, deferred;
 
             if (method === 'get') {
-                promise = readCached(url);
+                promise = readCached(url, query);
             } else {
                 deferred = $q.defer();
                 promise = deferred.promise;
@@ -52,33 +52,35 @@ function Backend($http, $q, Notification, _) {
         };
     }
 
-    function readCached(url) {
-        var cached = cache[url];
+    function readCached(url, query) {
+        var key = url + JSON.stringify(query || '');
+        var cached = cache[key];
         if (cached) {
             return cached.promise;
         }
 
-        var deferred = cache[url] = $q.defer();
-        doRequest(deferred, 'get', url);
+        var deferred = cache[key] = $q.defer();
+        doRequest(deferred, 'get', url, null, query);
 
         return deferred.promise;
     }
 
 
     function invalidateCache(url) {
-        var key = angular.isArray(url) ? arrToUrl(url) : url;
+        var key = angular.isArray(url) ? buildUrl(url) : url;
         delete cache[key];
     }
 
-    function doRequest(deferred, method, url, data) {
+    function doRequest(deferred, method, url, data, query) {
         return $http({
             url: url,
             method: method,
+            params: query,
             data: data,
             transformResponse: appendTransform($http.defaults.transformResponse, getTransform(method + url))
         })
-            .success(function (data) {
-                deferred.resolve(data);
+            .success(function (res) {
+                deferred.resolve(res);
             })
             .error(function () {
                 deferred.reject();
@@ -99,7 +101,7 @@ function Backend($http, $q, Notification, _) {
 
             if (mw && data.result) {
                 //console.log('Matched middleware [%s] for url [%s]', mw.re, key);
-                return { result: mw.cb(data.result) };
+                return {result: mw.cb(data.result)};
             }
             return data;
         };
@@ -120,7 +122,7 @@ function Backend($http, $q, Notification, _) {
         return B;
     }
 
-    function arrToUrl(arr) {
+    function buildUrl(arr) {
         return [].concat('/api', arr).join('/');
     }
 

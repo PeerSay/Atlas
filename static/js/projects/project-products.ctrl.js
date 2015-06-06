@@ -9,7 +9,14 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     // Data / Edit
     m.project = {};
     m.patchObserver = null;
-    // Categories - TODO - unify with Essentials
+    // Loading
+    var QUERY_LIMIT = 20;
+    var publicProductsLength = 0;
+    var noLoadMore = false;
+    m.loadingMore = true;
+    m.loadMoreProducts = loadMoreProducts;
+    m.showLoadMoreBtn = showLoadMoreBtn;
+    // Categories
     m.category = {}; // ui-select model
     m.categories = [];
     m.groupByCategory = groupByCategory;
@@ -23,9 +30,6 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.totalSelected = 0;
     m.addNotFoundProduct = addNotFoundProduct;
     m.selectProduct = selectProduct;
-    // Loading
-    m.loadingMore = true;
-    m.loadMoreProducts = loadMoreProducts;
     // Filters
     var filterExpr = {
         all: {removed: '!true'},
@@ -36,8 +40,8 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         name: 'all',
         expr: filterExpr.all
     };
-    m.filterLiClass= filterLiClass;
-    m.filterBtnClass= filterBtnClass;
+    m.filterLiClass = filterLiClass;
+    m.filterBtnClass = filterBtnClass;
     m.toggleFilter = toggleFilter;
     // Add/remove new
     var emptyNew = {
@@ -70,7 +74,6 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             if (categoryName) {
                 m.category.selected = {name: categoryName}; // TODO: extend after read
             }
-
             m.categories = [].concat(res.categories); // copy of custom
 
             Projects.readPublicCategories(m.projectId).then(function (res) {
@@ -81,10 +84,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             addProductsToList(res.products, true);
             m.totalSelected = getTotalSelected();
 
-            Projects.readPublicProducts({category: categoryName}).then(function (res) {
-                addProductsToList(res.products, false, {selected: false});
-                m.loadingMore = false;
-            });
+            loadPublicProducts({q: categoryName, from: 0, limit: QUERY_LIMIT});
         });
 
         $scope.$on('$destroy', function () {
@@ -93,6 +93,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     }
 
     var productIdx = {};
+
     function addProductsToList(list, reset, extend) {
         if (reset) {
             m.products = [];
@@ -120,14 +121,43 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         Projects.patchProject(m.projectId, patch);
     }
 
-    function loadMoreProducts() {
-        var params = {category: m.selectCategory};
-
+    function loadPublicProducts(params) {
         m.loadingMore = true;
-        Projects.readPublicProducts(params).then(function (res) {
-            addProductsToList(res.products, false, {selected: false});
-            m.loadingMore = false;
-        });
+        return Projects.readPublicProducts(params)
+            .then(function (res) {
+                if (res.products.length) {
+                    publicProductsLength = res.products.length;
+                    addProductsToList(res.products, false, {selected: false});
+                } else {
+                   noLoadMore = true;
+                }
+            })
+            .finally(function () {
+                m.loadingMore = false;
+            });
+    }
+
+    function loadMoreProducts(reset) {
+        var categoryName = m.category.selected.name;
+        var params = {
+            q: categoryName,
+            from: publicProductsLength,
+            limit: QUERY_LIMIT
+        };
+
+        if (reset) {
+            params.from = 0;
+            noLoadMore = false;
+            publicProductsLength = 0;
+        }
+
+        loadPublicProducts(params);
+    }
+
+    function showLoadMoreBtn() {
+        var hide = noLoadMore ||
+            (m.filter.name === 'selected'); // always empty for selected filter
+        return !hide;
     }
 
     // Category
@@ -143,7 +173,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
         // Build new list of products
         addProductsToList(m.project.products, true); //reset!
-        loadMoreProducts();
+        loadMoreProducts(true);
     }
 
     function addCategory(val) {
@@ -298,7 +328,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
     function uniqueId(arr) {
         return arr.reduce(function (prev, cur) {
-            return Math.max(prev, cur.id);
-        }, 0) + 1;
+                return Math.max(prev, cur.id);
+            }, 0) + 1;
     }
 }

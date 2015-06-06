@@ -131,9 +131,13 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     //Products
     //
     function readPublicProducts(params) {
-        return readPublicProductsDataDbg(params).then(function (res) {
+        return readPublicProductsData(params).then(function (res) {
             return {products: res};
         });
+    }
+
+    function readPublicProductsData(params) {
+        return Backend.read(['public', 'products'], null, params);
     }
 
     function readPublicProductsDataDbg(params) {

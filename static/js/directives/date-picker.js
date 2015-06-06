@@ -11,7 +11,8 @@ function psDatePicker($timeout) {
         restrict: 'A',
         link: function (scope, element, attrs, ngModelCtrl) {
             var options = {
-                format: 'DD/MM/YYYY',
+                //format: 'DD/MM/YYYY', // XXX - this format cannot be saved to server
+                //disabledHours: true, //TODO: uncomment after upgrade to 4.13.28
                 icons: {
                     date: 'fa fa-calendar',
                     next: 'fa fa-chevron-right',
@@ -38,7 +39,8 @@ function psDatePicker($timeout) {
 
 
             function setValue() {
-                var date = ngModelCtrl.$viewValue || null;
+                var viewValue = ngModelCtrl.$viewValue;
+                var date = viewValue ? new Date(viewValue) : null;
 
                 element
                     .data('DateTimePicker')

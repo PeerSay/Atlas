@@ -16,6 +16,9 @@ function psDatePicker($timeout) {
                     date: 'fa fa-calendar',
                     next: 'fa fa-chevron-right',
                     previous: 'fa fa-chevron-left'
+                },
+                widgetPositioning: {
+                    vertical: 'top'
                 }
             };
             element

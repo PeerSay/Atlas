@@ -23,13 +23,15 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
             title: ''
         }
     };
+    // Read
     P.readProject = readProject;
     P.readProjectTable = readProjectTable;
-    P.patchProject = patchProject;
-
     P.readPublicCategories = readPublicCategories;
     P.readPublicRequirements = readPublicRequirements;
     P.readPublicProducts = readPublicProducts;
+    // Patch
+    P.patcher = Patcher();
+    P.patchProject = patchProject;
 
 
     // Project list
@@ -39,10 +41,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     }
 
     function getProjectStubs() {
-        return User.readUser()
-            .then(function (user) {
-                return (P.projects = user.projects);
-            });
+        return User.readUser().then(function (user) {
+            return (P.projects = user.projects);
+        });
     }
 
     function createProject() {
@@ -58,17 +59,16 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     }
 
     function removeProject(id) {
-        return Backend.remove(['projects', id])
-            .then(function (data) {
-                P.projects.splice(getIdxById(data.result.id), 1);
-            });
+        return Backend.remove(['projects', id]).then(function (data) {
+            P.projects.splice(getIdxById(data.result.id), 1);
+        });
     }
 
     // Project details
     //
 
-    // Format:
-    /*var a = {
+    //@formatter:off
+    /* Format: {
         "_id": "",
         "title": "",
         "categories": [],
@@ -95,6 +95,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
             "durationLabels": "days,weeks,months" // r/o
         }
     };*/
+    //@formatter:on
     function readProject(id) {
         return readProjectData(id)
             .then(function (data) {
@@ -106,42 +107,19 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         return Backend.read(['projects', id]);
     }
 
-    function patchProject(id, data) {
-        var patch = data[0];
-        if (patch.path === '/title') {
-            // Project title is changed => invalidate Project stubs to get new titles
-            Backend.invalidateCache(['user']);
-        }
-        Backend.invalidateCache(['projects', id]);
-
-        console.log('Project patch: ', JSON.stringify(data));
-
-        //XXX
-        Storage.set('project' + id, P.current.project);
-
-        return $timeout(function () {
-        });
-        /*
-         return Backend.patch(['projects', id], data);*/
-    }
-
-    function getIdxById(id) {
-        var prj = _.findWhere(P.projects, {id: id});
-        var idx = P.projects.indexOf(prj);
-        return idx < 0 ? P.projects.length : idx;
-    }
-
     // Categories
     //
     function readPublicCategories() {
-        return Backend.read(['public', 'categories']);
+        return Backend.read(['public', 'categories']).then(function (data) {
+            return {categories: data.result};
+        });
     }
 
     //Requirements
     //
     function readPublicRequirements(params) {
         return readPublicRequirementsData(params).then(function (data) {
-            return data.result;
+            return {requirements: data.result};
         })
     }
 
@@ -222,6 +200,41 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     function randInt(max) {
         return Math.round(Math.random() * max);
+    }
+
+    // Patch
+    //
+    function patchProject(id, data) {
+        return P.patcher.release(id, data);
+    }
+
+    function Patcher() {
+        var P = {};
+        P.release = release;
+
+        function release(id, data) {
+            invalidateCache(id, data);
+            console.log('Project[%s] patch: ', id, JSON.stringify(data));
+
+            return Backend.patch(['projects', id], data);
+        }
+
+        function invalidateCache(id, data) {
+            var patch = data[0]; // XXX - only first!
+            if (patch.path === '/title') {
+                // Project title is changed => invalidate Project stubs to get new titles
+                Backend.invalidateCache(['user']);
+            }
+            Backend.invalidateCache(['projects', id]);
+        }
+
+        return P;
+    }
+
+    function getIdxById(id) {
+        var prj = _.findWhere(P.projects, {id: id});
+        var idx = P.projects.indexOf(prj);
+        return idx < 0 ? P.projects.length : idx;
     }
 
     return P;

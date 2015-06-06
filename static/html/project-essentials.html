@@ -25,26 +25,27 @@
                     <!--Category-->
                     <div class="form-group">
                         <label class="control-label">Select category:</label>
-                        <!--<ui-select ng-model="cm.category.selected" theme="bootstrap"
+                        <ui-select ng-model="cm.category.selected" theme="bootstrap"
                                 tagging="cm.addCategory"
                                 tagging-tokens="ENTER"
                                 tagging-label="(adding new)"
                                 on-select="cm.selectCategory($model)"
                                 ps-focus-on="cm.focusField === 'category'">
-                            &lt;!&ndash;Label don't work&ndash;&gt;
+                            <!--Label don't work-->
                             <ui-select-match placeholder="Select or search a category or domain...">
                                 {{ $select.selected.name }}
                                 <span class="fa fa-check"></span>
                             </ui-select-match>
-                            <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
-                                    group-by="'domain'">
+                            <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.name"
+                                    group-by="cm.groupByCategory">
                                 <span ng-bind-html="category.name | highlight: $select.search"></span>
+                                <span ng-if="category.name == cm.category.selected.name" class="fa fa-check"></span>
                                 <span ng-if="category.local" class="delete-category"
                                         ng-click="cm.deleteCategory(category)">
                                     <span class="fa fa-trash"></span> <span class="link">Delete</span>
                                 </span>
                             </ui-select-choices>
-                        </ui-select>-->
+                        </ui-select>
                     </div>
                     <!--Goals-->
                     <div class="form-group">

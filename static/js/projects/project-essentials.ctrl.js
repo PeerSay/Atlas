@@ -8,8 +8,6 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.project = {};
-
     m.focusField = null;
     // Edits
     m.project = null;
@@ -18,6 +16,7 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     // Categories
     m.category = {};
     m.categories = [];
+    m.groupByCategory = groupByCategory;
     m.selectCategory = selectCategory;
     m.addCategory = addCategory;
     m.deleteCategory = deleteCategory;
@@ -41,10 +40,14 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
             m.amountMultipliers = res.budget.amountMultipliers.split(',');
             m.durationLabels = res.time.durationLabels.split(',');
 
-            m.category.selected = res.selectedCategory || '';
-            m.categories = res.categories; // shared
+            var categoryName = res.selectedCategory;
+            if (categoryName) {
+                m.category.selected = {name: categoryName};
+            }
+
+            m.categories = [].concat(res.categories); // copy of local
             Projects.readPublicCategories().then(function (res) {
-                m.categories = [].concat(m.categories, res.categories);
+                m.categories = [].concat(m.categories, res.categories); // merge local+global
             });
 
             return m.project;
@@ -66,19 +69,27 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
 
     // Category
     //
+
+    function groupByCategory(item) {
+        return item.domain || '';
+    }
+
     function selectCategory(category) {
-        m.project.selectedCategory = category;
+        m.project.selectedCategory = category.name;
         patchProject();
     }
 
     function addCategory(val) {
+        var exist = _.findWhere(m.categories, {name: val});
+        if (exist) { return; } // XXX - API must handle too
+
         var item = {
-            id: nextId(m.categories),
             name: val,
             domain: '',
             local: true
         };
         m.categories.unshift(item); // all
+
         m.project.categories.unshift(item); // local
         patchProject();
 
@@ -91,18 +102,10 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
 
         if (category.name === m.category.selected.name) {
             m.category = {};
-            m.project.selectedCategory = null;
+            m.project.selectedCategory = '';
         }
 
         patchProject();
-    }
-
-    function nextId(arr) {
-        var res = 0;
-        _.forEach(arr, function (it) {
-            res = Math.max(it.id, res) + 1;
-        });
-        return res;
     }
 
     // Currency / Labels

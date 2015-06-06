@@ -197,7 +197,7 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators -categories._id', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);

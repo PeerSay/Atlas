@@ -90,7 +90,7 @@
                         </a>
                     </h4>
                     <ul class="animate-ease-right">
-                        <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' track by product.id">
+                        <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' track by product._id">
                             <span class="side-text ellipsis">{{ product.name }}</span>
                         </li>
                     </ul>

@@ -18,17 +18,17 @@ var defaultProject = {
 var durationLabelEnum = ['days', 'weeks', 'months'];
 var amountMultiplierEnum = ['K', 'M'];
 var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS', 'RUB', 'BTC']; // ISO 4217 codes (BTC is unofficial)
-
+var psShortId = {
+    type: ShortId,
+    len: 8,
+    alphabet: UIDCHARS,
+    retries: 10
+};
 
 // Schema
 //
 var projectSchema = new Schema({
-    _id: {
-        type: ShortId,
-        len: 8,
-        alphabet: UIDCHARS,
-        retries: 5
-    },
+    _id: psShortId,
     title: { type: String, required: true },
     creationDate: { type: Date, default: Date.now },
     collaborators: [

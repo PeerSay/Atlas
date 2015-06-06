@@ -209,7 +209,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     // Patch
     //
     function patchProject(id, data) {
-        return P.patcher.release(id, data);
+        return P.patcher.release(id, data).then(function (res) {
+            return res.result;
+        });
     }
 
     function Patcher() {
@@ -217,9 +219,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         P.release = release;
 
         function release(id, data) {
-            invalidateCache(id, data);
             console.log('Project[%s] patch: ', id, JSON.stringify(data));
 
+            invalidateCache(id, data);
             return Backend.patch(['projects', id], data);
         }
 

@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter', 'Util'];
-function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilter, _) {
+ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter', 'Util', 'jsonpatch'];
+function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilter, _, jsonpatch) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -92,6 +92,13 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         });
     }
 
+    function patchProject() {
+        var patch = jsonpatch.generate(m.patchObserver);
+        if (!patch.length) { return; } //XXX - return promise!
+
+        return Projects.patchProject(m.projectId, patch);
+    }
+
     var productIdx = {};
 
     function addProductsToList(list, reset, extend) {
@@ -101,24 +108,17 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         }
 
         _.forEach(list, function (it) {
-            var publicNotSelected = !reset && !productIdx[it.id];
+            var publicNotSelected = !reset && !productIdx[it._id];
             var local = !!reset;
             var skipIt = !(local || publicNotSelected);
 
             if (skipIt) { return; }
 
-            productIdx[it.id] = true;
+            productIdx[it._id] = true;
 
             var copy = angular.extend({}, it, extend);
             m.products.push(copy);
         })
-    }
-
-    function patchProject() {
-        var patch = jsonpatch.generate(m.patchObserver);
-        if (!patch.length) { return; }
-
-        Projects.patchProject(m.projectId, patch);
     }
 
     function loadPublicProducts(params) {
@@ -206,14 +206,6 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         patchProject();
     }
 
-    function nextId(arr) {
-        var res = 0;
-        _.forEach(arr, function (it) {
-            res = Math.max(it.id, res) + 1;
-        });
-        return res;
-    }
-
     //Selection
     //
     function toggleProduct(product, invert) {
@@ -224,7 +216,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     function toggleProductVal(product, val) {
         product.selected = val;
 
-        addRemoveLocal(product);
+        addRemoveToProject(product);
         patchProject();
 
         m.totalSelected = getTotalSelected();
@@ -246,7 +238,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
     function selectProduct(product) {
         // Item without id is newly added, it should not be propagated to table/project
-        if (!product.id) { return; }
+        if (!product._id) { return; }
 
         toggleProductVal(product, true);
 
@@ -283,14 +275,16 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     }
 
     function saveAddNew() {
+        var categoryName = m.category.selected.name;
         var product = angular.extend({}, emptyNew, m.addNew.model);
-        product.id = uniqueId(m.products);
-        product.category = m.selectCategory;
+        product.category = categoryName;
 
-        addProductsToList([product]);
-
-        addRemoveLocal(product);
-        patchProject();
+        addRemoveToProject(product);
+        patchProject().then(function (res) {
+            // XXX - patch may return non-promise
+            product._id = res._id; //get id from server response
+            addProductsToList([product]);
+        });
 
         cancelAddNew();
     }
@@ -298,21 +292,23 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     function removeCustomProduct(product) {
         product.selected = false;
         product.removed = true;
-        addRemoveLocal(product, true);
+        addRemoveToProject(product, true);
         patchProject();
     }
 
-    function addRemoveLocal(prod, forceRemove) {
+    function addRemoveToProject(prod, forceRemove) {
         var localProds = m.project.products;
-        var localProd = _.findWhere(localProds, {id: prod.id});
+        var localProd = _.findWhere(localProds, {_id: prod._id});
         var localIdx = localProds.indexOf(localProd);
         var inProject = (localIdx >= 0);
 
         if (prod.selected) {
             if (inProject && prod.custom) {
                 localProd.selected = true;
-            } else {
+            } else if (!prod.custom){
                 localProds.push(angular.copy(prod)); // copy!
+            } else {
+                localProds.push(prod); // shared, cause _id will be updated after req
             }
         }
 
@@ -324,11 +320,5 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
                 localProd.selected = false;
             }
         }
-    }
-
-    function uniqueId(arr) {
-        return arr.reduce(function (prev, cur) {
-                return Math.max(prev, cur.id);
-            }, 0) + 1;
     }
 }

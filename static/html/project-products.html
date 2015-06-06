@@ -45,7 +45,7 @@
                                 {{ $select.selected.name }}
                                 <span class="fa fa-check"></span>
                             </ui-select-match>
-                            <ui-select-choices repeat="product in cm.products | filter: $select.search track by product.id">
+                            <ui-select-choices repeat="product in cm.products | filter: $select.search track by product._id">
                                 <span ng-bind-html="product.name | highlight: $select.search"></span>
                                 <span ng-if="product.selected" class="fa fa-check"></span>
                             </ui-select-choices>
@@ -124,7 +124,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="product in filteredProducts = (cm.products | filter:cm.filter.expr | orderBy:'-popularity') track by product.id"
+                        <tr ng-repeat="product in filteredProducts = (cm.products | filter:cm.filter.expr | orderBy:'-popularity') track by product._id"
                                 ng-class="{selected: product.selected}"
                                 ng-click="cm.toggleProduct(product, true)"
                                 >

@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var util = require('util');
 var jsonParser = require('body-parser').json();
-var jsonpatch = require('json-patch');
+var jsonPatch = require('json-patch');
+var jsonPointer = require('json-pointer');
 var swig = require('swig');
 
 // App dependencies
@@ -232,17 +233,12 @@ function RestApi(app) {
                 }
 
                 // Patch
-                applyPatch(prj, data, function (err) {
+                applyPatch(prj, data, function (err, patchRes) {
                     if (err) { return modelError(res, err); }
 
-                    prj.save(function (err) {
-                        if (err) { return modelError(res, err); }
+                    console.log('[API] Patched project[%s] result:', project_id, patchRes);
 
-                        var result = true; // no need to send data back
-                        console.log('[API] Patched project[%s] result:', project_id, result);
-
-                        return res.json({result: result});
-                    });
+                    return res.json({result: patchRes});
                 });
             });
         });
@@ -322,17 +318,35 @@ function RestApi(app) {
      *  ...
      * ]
      * */
-    function applyPatch(obj, patch, cb) {
+    function applyPatch(model, patch, cb) {
         //console.log('[API] Applying patch: ', patch);
+
+        var firstPatch = patch[0]; // only first!
+        var op = firstPatch.op;
+        var result = {};
+        result[op] = true;
+
+        // Patch
         try {
-            jsonpatch.apply(obj, patch);
+            jsonPatch.apply(model, patch);
         }
         catch (e) {
             console.log('[API] Patch exception: ', e);
             return cb(e);
         }
 
-        return cb(null, obj);
+        // Can get added item _id only after save
+        model.save(function (err, saved) {
+            if (err) { return modelError(res, err); }
+
+            if (op === 'add') {
+                var obj = jsonPointer.get(saved, firstPatch.path);
+                result.add = !!obj;
+                result._id = obj && obj._id; // new _id
+            }
+
+            cb(null, result)
+        });
     }
 
     // Transforms

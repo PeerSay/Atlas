@@ -23,13 +23,14 @@
                                 {{ $select.selected.name }}
                                 <span class="fa fa-check"></span>
                             </ui-select-match>
-                            <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.id"
-                                    group-by="'domain'">
+                            <ui-select-choices repeat="category in cm.categories | filter: $select.search track by category.name"
+                                    group-by="cm.groupByCategory">
                                 <span ng-bind-html="category.name | highlight: $select.search"></span>
-                                        <span ng-if="category.custom" class="delete-category"
-                                                ng-click="cm.deleteCategory(category)">
-                                            <span class="fa fa-trash"></span> <span class="link">Delete</span>
-                                        </span>
+                                <span ng-if="category.name == cm.category.selected.name" class="fa fa-check"></span>
+                                <span ng-if="category.custom" class="delete-category"
+                                        ng-click="cm.deleteCategory(category)">
+                                    <span class="fa fa-trash"></span> <span class="link">Delete</span>
+                                </span>
                             </ui-select-choices>
                         </ui-select>
                     </div>

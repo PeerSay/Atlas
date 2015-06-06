@@ -46,9 +46,10 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
                 m.category.selected = {name: categoryName};
             }
 
-            m.categories = [].concat(res.categories); // copy of local
+            m.categories = [].concat(res.categories); // copy of custom
+
             Projects.readPublicCategories().then(function (res) {
-                m.categories = [].concat(m.categories, res.categories); // merge local+global
+                m.categories = [].concat(m.categories, res.categories); // merge custom+global
             });
 
             return m.project;
@@ -94,11 +95,11 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
         var item = {
             name: val,
             domain: '',
-            local: true
+            custom: true
         };
         m.categories.unshift(item); // all
 
-        m.project.categories.unshift(item); // local
+        m.project.categories.unshift(item); // custom
         patchProject();
 
         return item;

@@ -12,6 +12,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     // Categories - TODO - unify with Essentials
     m.category = {}; // ui-select model
     m.categories = [];
+    m.groupByCategory = groupByCategory;
     m.selectCategory = selectCategory;
     m.addCategory = addCategory;
     m.deleteCategory = deleteCategory;
@@ -64,19 +65,25 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
             m.project = res;
             m.patchObserver = jsonpatch.observe(m.project);
 
+            // Categories
+            var categoryName = res.selectedCategory;
+            if (categoryName) {
+                m.category.selected = {name: categoryName}; // TODO: extend after read
+            }
+
+            m.categories = [].concat(res.categories); // copy of custom
+
+            Projects.readPublicCategories(m.projectId).then(function (res) {
+                m.categories = [].concat(m.categories, res.categories);
+            });
+
+            // Products
             addProductsToList(res.products, true);
             m.totalSelected = getTotalSelected();
 
-            var category = m.category.selected = res.selectedCategory || {};
-            var categoryName = !category.custom ? category.name : null;
             Projects.readPublicProducts({category: categoryName}).then(function (res) {
                 addProductsToList(res.products, false, {selected: false});
                 m.loadingMore = false;
-            });
-
-            m.categories = res.categories;
-            Projects.readPublicCategories(m.projectId).then(function (res) {
-                m.categories = [].concat(m.categories, res.categories);
             });
         });
 
@@ -114,12 +121,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     }
 
     function loadMoreProducts() {
-        var maxPopularity = m.products.reduce(function (prev, cur) {
-            return Math.min(prev, cur.popularity);
-        }, 100);
-        var category = m.category.selected;
-        var categoryName = !category.custom ? category.name : null;
-        var params = {category: categoryName, maxPopularity: maxPopularity};
+        var params = {category: m.selectCategory};
 
         m.loadingMore = true;
         Projects.readPublicProducts(params).then(function (res) {
@@ -130,23 +132,32 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
 
     // Category
     //
+
+    function groupByCategory(item) {
+        return item.domain || '';
+    }
+
     function selectCategory(category) {
-        m.project.selectedCategory = category;
+        m.project.selectedCategory = category.name;
         patchProject();
 
+        // Build new list of products
         addProductsToList(m.project.products, true); //reset!
         loadMoreProducts();
     }
 
     function addCategory(val) {
+        var exist = _.findWhere(m.categories, {name: val});
+        if (exist) { return; } // XXX - API must handle too
+
         var item = {
-            id: nextId(m.categories),
             name: val,
-            domain: 'Default',
+            domain: '',
             custom: true
         };
         m.categories.unshift(item); // all
-        m.project.categories.unshift(item); // local
+
+        m.project.categories.unshift(item); // custom
         patchProject();
 
         return item;
@@ -244,7 +255,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     function saveAddNew() {
         var product = angular.extend({}, emptyNew, m.addNew.model);
         product.id = uniqueId(m.products);
-        product.category = (m.category.selected || {}).name;
+        product.category = m.selectCategory;
 
         addProductsToList([product]);
 

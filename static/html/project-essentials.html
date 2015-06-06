@@ -40,7 +40,7 @@
                                     group-by="cm.groupByCategory">
                                 <span ng-bind-html="category.name | highlight: $select.search"></span>
                                 <span ng-if="category.name == cm.category.selected.name" class="fa fa-check"></span>
-                                <span ng-if="category.local" class="delete-category"
+                                <span ng-if="category.custom" class="delete-category"
                                         ng-click="cm.deleteCategory(category)">
                                     <span class="fa fa-trash"></span> <span class="link">Delete</span>
                                 </span>

@@ -78,7 +78,7 @@ var projectSchema = new Schema({
         topic: { type: String },
         popularity: { type: Number, min: 0, max: 100, default: 0 },
         selected: { type: Boolean }, // default?
-        local: { type: Boolean, default: true }
+        custom: { type: Boolean, default: true }
     }],
 
     // Migrate:
@@ -89,7 +89,7 @@ var projectSchema = new Schema({
         category: { type: String },
         popularity: { type: Number, min: 0, max: 100, default: 0 },
         selected: { type: Boolean },
-        local: { type: Boolean, default: true }
+        custom: { type: Boolean, default: true }
     }],
 
     // Categories:
@@ -98,7 +98,7 @@ var projectSchema = new Schema({
     categories: [{
         name: { type: String, required: true }, // TODO - verify uniqueness
         domain: { type: String },
-        local: { type: Boolean, default: true }
+        custom: { type: Boolean, default: true }
     }],
 
     // Migrate: was

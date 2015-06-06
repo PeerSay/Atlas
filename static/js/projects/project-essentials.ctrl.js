@@ -13,6 +13,7 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     m.project = null;
     m.patchObserver = null;
     m.patchProject = patchProject;
+    m.saveNumber = saveNumber;
     // Categories
     m.category = {};
     m.categories = [];
@@ -65,6 +66,13 @@ function ProjectEssentialsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
         if (!patch.length) { return; }
 
         Projects.patchProject(m.projectId, patch);
+    }
+
+    function saveNumber(obj, key, invalid) {
+        if (invalid) {
+            obj[key] = 0;
+        }
+        patchProject();
     }
 
     // Category

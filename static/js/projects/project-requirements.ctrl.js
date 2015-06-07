@@ -10,10 +10,17 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.project = null; // ref to shared
     m.patchObserver = null;
     m.groups = GroupBy('topic');
-    m.getTotalSelected = getTotalSelected;
+    //Loading
+    var QUERY_LIMIT = 10;
+    var publicItemsLength = 0;
+    var noLoadMore = false;
+    m.loadingMore = true;
+    m.loadMore = loadMore;
+    m.showLoadMoreBtn = showLoadMoreBtn;
     // Table selection
     m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
+    m.getTotalSelected = getTotalSelected;
     // Search selection
     m.requirement = {}; // ui-select model
     m.requirements = []; // ui-select list
@@ -54,10 +61,6 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.onSelectTopic = onSelectTopic;
     m.addNotFoundTopic = addNotFoundTopic;
     m.removeCustomReq = removeCustomReq;
-    //Loading
-    m.loadingMore = true;
-    m.nextPage = 0;
-    m.loadMore = loadMore;
 
 
     activate();
@@ -70,13 +73,11 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
             m.groups.addItems(res.requirements, true); // reset
         });
 
-        Projects.readPublicRequirements({page: m.nextPage}).then(function (res) {
-            m.loadingMore = false;
-            m.nextPage++;
-
+        // Public topics & reqs
+        Projects.readPublicTopics().then(function (res) {
             m.groups.addGroups(res.topics, true);
-            m.groups.addItems(res.requirements, false, {selected: false});
-            toggleAllGroupsByReqs();
+
+            loadPublicItems({from: 0, limit: QUERY_LIMIT});
         });
 
         $scope.$on('$destroy', function () {
@@ -86,21 +87,40 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function patchProject() {
         var patch = jsonpatch.generate(m.patchObserver);
-        if (!patch.length) { return; }
+        if (!patch.length) { return; } // XXX -can return non-promise
 
-        Projects.patchProject(m.projectId, patch);
+        return Projects.patchProject(m.projectId, patch);
+    }
+
+    function loadPublicItems(params) {
+        m.loadingMore = true;
+        return Projects.readPublicRequirements(params)
+            .then(function (res) {
+                if (res.requirements.length) {
+                    publicItemsLength = res.requirements.length;
+                    m.groups.addItems(res.requirements, false, {selected: false});
+                } else {
+                    noLoadMore = true;
+                }
+            })
+            .finally(function () {
+                m.loadingMore = false;
+            });
     }
 
     function loadMore() {
-        m.loadingMore = true;
-        Projects.readPublicRequirements({page: m.nextPage}).then(function (res) {
-            m.loadingMore = false;
-            m.nextPage++;
+        var params = {
+            from: publicItemsLength,
+            limit: QUERY_LIMIT
+        };
 
-            m.groups.addItems(res.requirements, false, {selected: false});
-            toggleAllGroupsByReqs();
-        });
+        loadPublicItems(params)
+    }
 
+    function showLoadMoreBtn() {
+        var hide = noLoadMore ||
+            (m.filter.name === 'selected'); // always empty for selected filter
+        return !hide;
     }
 
     // Filters

@@ -102,7 +102,7 @@ var projectSchema = new Schema({
     }],
 
     // Migrate: was
-    // - grade was score score
+    // - grade was named score
     // - weight/input was inside criteria arr
     table: [{
         name: { type: String, required: true },

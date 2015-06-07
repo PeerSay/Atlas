@@ -27,8 +27,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.readProject = readProject;
     P.readProjectTable = readProjectTable;
     P.readPublicCategories = readPublicCategories;
-    P.readPublicRequirements = readPublicRequirements;
     P.readPublicProducts = readPublicProducts;
+    P.readPublicRequirements = readPublicRequirements;
+    P.readPublicTopics = readPublicTopics;
     // Patch
     P.patcher = Patcher();
     P.patchProject = patchProject;
@@ -97,17 +98,26 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     };*/
     //@formatter:on
     function readProject(id) {
-        return readProjectData(id)
-            .then(function (data) {
-                return (P.current.project = data.result);
-            });
+        return Backend.read(['projects', id]).then(function (data) {
+            return (P.current.project = data.result);
+        });
     }
 
-    function readProjectData(id) {
-        return Backend.read(['projects', id]);
+    //Requirements / Topics
+    //
+    function readPublicTopics() {
+        return Backend.read(['public', 'topics']).then(function (data) {
+            return {topics: data.result};
+        });
     }
 
-    // Categories
+    function readPublicRequirements(params) {
+        return Backend.read(['public', 'requirements'], null, params).then(function (data) {
+            return {requirements: data.result};
+        })
+    }
+
+    // Products / Categories
     //
     function readPublicCategories() {
         return Backend.read(['public', 'categories']).then(function (data) {
@@ -115,70 +125,14 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         });
     }
 
-    //Requirements
-    //
-    function readPublicRequirements(params) {
-        return readPublicRequirementsData(params).then(function (data) {
-            return {requirements: data.result};
-        })
-    }
-
-    function readPublicRequirementsData() {
-        // TODO - params: limit/from
-        return Backend.read(['public', 'requirements']);
-    }
-
-    //Products
-    //
     function readPublicProducts(params) {
-        return readPublicProductsData(params).then(function (res) {
-            return {products: res};
+        return Backend.read(['public', 'products'], null, params).then(function (data) {
+            return {products: data.result};
         });
-    }
-
-    function readPublicProductsData(params) {
-        return Backend.read(['public', 'products'], null, params);
-    }
-
-    function readPublicProductsDataDbg(params) {
-        var delay = 1000;
-
-        return $timeout(function () {
-        }, delay).then(function () {
-            return genFakeProducts(params);
-        });
-    }
-
-    function genFakeProducts(params) {
-        var category = params.category;
-        var limit = params.limit || 10;
-        var maxPopularity = params.maxPopularity || 100;
-
-        if (!category) { return []; }
-
-        var res = [];
-        for (var i = 0, len = limit; i < len; i++) {
-            res.push(genFakeProduct(maxPopularity, category));
-        }
-        return res;
-    }
-
-    function genFakeProduct(maxPopularity, category) {
-        var name = Math.random().toString(36).slice(9);
-        var popularity = Math.max(0, maxPopularity - randInt(20));
-        var res = {
-            id: randInt(1000000000000),
-            name: name,
-            description: 'Some descr for ' + name,
-            category: category,
-            popularity: popularity
-        };
-        return res;
     }
 
     // Table
     //
-
     function readProjectTable(id) {
         return $timeout(function () {
             return readProjectTableDataDbg();

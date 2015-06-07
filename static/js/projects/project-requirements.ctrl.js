@@ -221,8 +221,6 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         if (!req.id) { return; }
 
         toggleReqVal(req, true);
-
-        // TODO: focus (use ps-focus ?)
     }
 
     // Add/Remove new
@@ -241,10 +239,12 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         req.id = nextId(m.requirements);
         cancelAddNew();
 
-        m.groups.addItems([req], true);
-
         addRemoveLocal(req); // always selected!
-        patchProject();
+        patchProject().then(function (res) {
+            // XXX - patch may return non-promise
+            req._id = res._id; //get id from server response
+            m.groups.addItems([req], true);
+        });
     }
 
     function onSelectTopic(group) {
@@ -261,6 +261,8 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         req.selected = false;
         req.removed = true; // trick: hide with filter
 
+        // Todo: remove from goups
+
         addRemoveLocal(req, true/*force*/);
         patchProject();
     }
@@ -272,11 +274,12 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         var inProject = (localIdx >= 0);
 
         if (req.selected) {
-            if (!inProject) {
-                localReqs.push(angular.copy(req)); // copy!
-
-            } else if (localReq.custom) {
+            if (inProject && localReq.custom) {
                 localReq.selected = true;
+            } else if (!req.custom) {
+                localReqs.push(angular.copy(req)); // copy!
+            } else {
+                localReqs.push(req); // copy!
             }
         }
 

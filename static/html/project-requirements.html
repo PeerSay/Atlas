@@ -23,7 +23,7 @@
                                 <span class="fa fa-check"></span>
                             </ui-select-match>
                             <ui-select-choices
-                                    repeat="req in cm.requirements | filter: $select.search track by req._id">
+                                    repeat="req in cm.requirements | filter:{removed: '!true'} | filter: $select.search track by req._id">
                                 <span ng-bind-html="req.name | highlight: $select.search"></span>
                                 <span ng-if="req.selected" class="fa fa-check"></span>
                             </ui-select-choices>
@@ -62,6 +62,7 @@
 
                 <!--Add form-->
                 <form class="form-horizontal page-spacer" ng-show="cm.addNew.show">
+                    <!--Topic-->
                     <div class="form-group">
                         <label class="col-sm-2 control-label">Topic:</label>
                         <div class="col-sm-10">

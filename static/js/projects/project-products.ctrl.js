@@ -138,7 +138,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     }
 
     function loadMoreProducts(reset) {
-        var categoryName = m.category.selected.name;
+        var categoryName = (m.category.selected || {}).name || '';
         var params = {
             q: categoryName,
             from: publicProductsLength,
@@ -197,7 +197,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         _.removeItem(m.categories, category);
         _.removeItem(m.project.categories, category);
 
-        var categoryName = (m.category.selected || {}).name;
+        var categoryName = (m.category.selected || {}).name || '';
         if (category.name === categoryName) {
             m.category = {};
             m.project.selectedCategory = null;
@@ -275,7 +275,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     }
 
     function saveAddNew() {
-        var categoryName = m.category.selected.name;
+        var categoryName = (m.category.selected || {}).name || '';
         var product = angular.extend({}, emptyNew, m.addNew.model);
         product.category = categoryName;
 

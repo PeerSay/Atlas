@@ -1,19 +1,13 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as cm">
     <!--Title-->
     <div class="row">
-        <div class="col-xs-12 col-sm-2">
-            <a ui-sref="project.list" class="logo">
-                <img height="30" src="/images/logo-horiz-126x30.png" alt="Logo">
-            </a>
-        </div>
-        <div class="col-xs-12 col-sm-10 col-lg-8">
+        <div class="col-xs-12">
             <h3 class="page-title toggle-edit text-center">
                 <a class="toggle-value"
                         ui-sref=".essentials({edit: 'reasons'})"
                         data-placement="right"
                         ps-tooltip
                         ps-tooltip-title="cm.project.reasons">
-                    <span class="fa fa-cubes"></span>
                     {{ cm.project.title }}
                     <span class="fa fa-edit hover-edit"></span>
                 </a>

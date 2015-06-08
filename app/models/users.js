@@ -5,7 +5,7 @@ var ShortId = require('mongoose-shortid-nodeps');
 
 var util = require('../../app/util');
 var config = require('../../app/config');
-var projects = require('../../app/models/projects2');
+var projects = require('../../app/models/projects');
 var Project = projects.ProjectModel;
 
 // Need few iterations for fast tests, thus it is configurable

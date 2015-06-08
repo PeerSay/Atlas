@@ -25,7 +25,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
             m.project = {table: res.table};
             m.patchObserver = jsonpatch.observe(m.project);
-            
+
             m.loadingMore = false;
             return res.table;
         });

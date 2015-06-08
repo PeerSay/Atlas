@@ -4,7 +4,7 @@ var util = require('util');
 // App dependencies
 var Category = require('../app/models/categories').CategoryModel;
 var Product = require('../app/models/products').ProductModel;
-var Topic = require('../app/models/requirements').TopicModel;
+var Topic = require('../app/models/topics').TopicModel;
 var Requirement = require('../app/models/requirements').RequirementModel;
 
 var errRes = require('../app/api-errors');

@@ -2,22 +2,21 @@ var mongoose = require('mongoose');
 var findOrCreate = require('mongoose-findorcreate');
 var Schema = mongoose.Schema;
 
-// Categories of Products
-var categorySchema = new Schema({
+var topicSchema = new Schema({
     name: { type: String, required: true },
-    domain: { type: String, default: '' },
+    description: { type: String, default: '' },
     popularity: {type: Number, min: 0, max: 100, default: 0}
 });
-categorySchema.plugin(findOrCreate);
+topicSchema.plugin(findOrCreate);
 
-var Category = mongoose.model('Category', categorySchema);
+var Topic = mongoose.model('Topic', topicSchema);
 
 
 // Load JSON data
 var data = require('./data/all');
-data.load(data.categories, Category, ['name', 'domain']);
+data.load(data.topics, Topic, ['name']);
 
 
 module.exports = {
-    CategoryModel: Category
+    TopicModel: Topic
 };

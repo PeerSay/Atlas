@@ -198,12 +198,12 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
 projectSchema.pre('save', function ensureTableConsistency(next) {
     var doc = this;
 
-    console.log('>> Pre save: reqs', JSON.stringify(doc.requirements));
-    console.log('>> Pre save: prodys', JSON.stringify(doc.products));
-    // Exit of not add/remove product/req
+    //console.log('>> Pre save: reqs', JSON.stringify(doc.requirements));
+    //console.log('>> Pre save: prodys', JSON.stringify(doc.products));
 
-    // Table makes sense with at least 1 req and 1 product (API level may impose other requirments)
-    if (!doc.products.length || !doc.requirements.length) {
+    // TODO: Return if not add/remove product/req
+
+    if (isEmptyTable(doc)) {
         doc.table = [];
         return next();
     }
@@ -213,10 +213,18 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
     var diff = genDiffByIndex(doc.table, index);
     var res = patchTable(doc.table, diff);
 
-    console.log('[DB]: Synced table model[%s]: ', doc.id, JSON.stringify(res));
+    console.log('[DB]: Synced table model[%s] diff: ', doc.id, JSON.stringify(res));
 
     next();
 });
+
+function isEmptyTable(doc) {
+    // Table makes sense with at least 1 req and 1 product (API level may impose other requirements)
+    var selectedReqs = _.findWhere(doc.requirements, {selected: true});
+    var selectedProds = _.findWhere(doc.products, {selected: true});
+
+    return !selectedReqs || !selectedProds;
+}
 
 function buildTableIndex(doc) {
     var index = {reqs: {}, prods: {}};
@@ -287,7 +295,7 @@ function patchTable(table, diff) {
     //reqs
     _.forEach(diff.reqs.remove, function (removed) {
         table.splice(table.indexOf(removed), 1);
-        console.log('>>[DB]: table removed req', JSON.stringify(removed));
+        console.log(' [DB]: Sync table: removed req: ', JSON.stringify(removed));
     });
 
     _.forEach(diff.reqs.add, function (added) {
@@ -304,27 +312,26 @@ function patchTable(table, diff) {
 
         table.push(copy);
 
-        console.log('>>[DB]: table added req', JSON.stringify(added));
+        console.log(' [DB]: Sync table: added req: ', JSON.stringify(added));
     });
 
     //prods
     _.forEach(diff.prods.remove, function (removedId) {
         var req0 = table[0];
-        var prodIdx = req0.products.indexOf(req0.products.find(function (p) {
-            return p.prodId === removedId;
-        }));
+        var prod = _.findWhere(req0.products, {prodId: removedId});
+        var prodIdx = req0.products.indexOf(prod);
         _.forEach(table, function (req) {
-            req.products.splice(prodIdx, 0);
+            req.products.splice(prodIdx, 1);
         });
 
-        console.log('>>[DB]: table removed prod', JSON.stringify(removedId));
+        console.log(' [DB]: Sync table: removed prod: ', JSON.stringify(removedId));
     });
 
     _.forEach(diff.prods.add, function (added) {
         _.forEach(table, function (req) {
             req.products.push(added);
         });
-        console.log('>>[DB]: table added prod', JSON.stringify(added));
+        console.log(' [DB]: Sync table: added prod:', JSON.stringify(added));
     });
 
     return diff;

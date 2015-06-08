@@ -53,7 +53,7 @@ function Backend($http, $q, Notification, _) {
     }
 
     function readCached(url, query) {
-        var key = url + JSON.stringify(query || '');
+        var key = url + (query ? JSON.stringify(query) : '');
         var cached = cache[key];
         if (cached) {
             return cached.promise;

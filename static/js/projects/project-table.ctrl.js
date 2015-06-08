@@ -14,16 +14,18 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     m.activate = activate;
     m.tableView = Table(m).getView();
 
-    //activate();
+    $scope.$on('$destroy', function () {
+        jsonpatch.unobserve(m.project, m.patchObserver);
+    });
 
     function activate() {
         return Projects.readProjectTable(m.projectId).then(function (res) {
-            console.log('>>', res);
+            console.log('>>', res.table);
 
-            m.project = {requirements: res};
+            m.project = {table: res.table};
             m.patchObserver = jsonpatch.observe(m.project);
 
-            return res;
+            return res.table;
         });
     }
 
@@ -100,7 +102,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
                 _.forEach(req.products, function (prod) {
                     // Input
-                    var colInputKey = 'prod-input-' + prod.id;
+                    var colInputKey = 'prod-input-' + prod.prodId;
                     addHeader(colInputKey, {label: prod.name});
                     addCell(colInputKey, rowIdx, req, {
                         model: CellModel(prod, 'input'),
@@ -109,7 +111,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     addFooter(colInputKey, {label: '', type: 'label'});
 
                     // Grade
-                    var colGradeKey = 'prod-grade-' + prod.id;
+                    var colGradeKey = 'prod-grade-' + prod.prodId;
                     addHeader(colGradeKey, {label: 'Grade'});
                     addCell(colGradeKey, rowIdx, req, {
                         model: CellModel(prod, 'grade', {

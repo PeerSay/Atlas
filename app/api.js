@@ -36,9 +36,9 @@ function RestApi(app) {
         app.delete('/api/projects/:id', removeProject);
         app.patch('/api/projects/:id', jsonParser, patchProject);
 
-        // project's criteria
-        app.get('/api/projects/:id/criteria', readProjectCriteria);
-        app.patch('/api/projects/:id/criteria', jsonParser, patchProjectCriteria);
+        // project's table
+        app.get('/api/projects/:id/table', readProjectTable);
+        app.patch('/api/projects/:id/table', jsonParser, patchProjectTable);
         return U;
     }
 
@@ -192,7 +192,7 @@ function RestApi(app) {
 
         console.log('[API] Reading project[%s] for user=[%s]', project_id, email);
 
-        User.findOne({email: email}, 'projects', function (err, user) {
+        User.findOne({email: email}, function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return errRes.notFound(res, email);
@@ -220,7 +220,7 @@ function RestApi(app) {
 
         console.log('[API] Patching project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
-        User.findOne({email: email}, 'projects', function (err, user) {
+        User.findOne({email: email}, function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return errRes.notFound(res, email);
@@ -244,42 +244,43 @@ function RestApi(app) {
         });
     }
 
-    // Criteria
+    // Decision Table
 
-    function readProjectCriteria(req, res, next) {
+    function readProjectTable(req, res, next) {
         var project_id = req.params.id;
         var user = req.user;
         var email = user.email;
+        var minTable = [1, 2]; // TODO - return empty table until 1x2
 
-        console.log('[API] Reading criteria of project[%s] for user=[%s]', project_id, email);
+        console.log('[API] Reading table of project[%s] for user=[%s]', project_id, email);
 
-        User.findOne({email: email}, 'projects.criteria', function (err, user) {
+        User.findOne({email: email}, function (err, user) {
             if (err) { return next(err); }
             if (!user) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, 'criteria', function (err, prj) {
+            Project.findById(project_id, 'table', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);
                 }
 
-                var result = prj.toJSON({transform: xformProjectCriteria});
-                console.log('[API] Reading criteria of project[%s] result: %s', project_id, JSON.stringify(result));
+                var result = prj.toJSON({transform: xformProjectTable});
+                console.log('[API] Reading table of project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
             });
         });
     }
 
-    function patchProjectCriteria(req, res, next) {
+    function patchProjectTable(req, res, next) {
         var project_id = req.params.id;
         var data = req.body;
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Patching criteria of project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
+        console.log('[API] Patching table of project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
 
         User.findOne({email: email}, 'projects.criteria', function (err, user) {
             if (err) { return next(err); }
@@ -301,7 +302,7 @@ function RestApi(app) {
                         if (err) { return modelError(res, err); }
 
                         var result = true; // no need to send data back
-                        console.log('[API] Patched criteria of project[%s] result:', project_id, result);
+                        console.log('[API] Patched table of project[%s] result:', project_id, result);
 
                         return res.json({result: result});
                     });
@@ -337,7 +338,7 @@ function RestApi(app) {
 
         // Can get added item _id only after save
         model.save(function (err, saved) {
-            if (err) { return modelError(res, err); }
+            if (err) { return cb(err); }
 
             if (op === 'add') {
                 var obj = jsonPointer.get(saved, firstPatch.path);
@@ -378,7 +379,7 @@ function RestApi(app) {
         return ret;
     }
 
-    function xformProjectCriteria(doc, ret) {
+    function xformProjectTable(doc, ret) {
         delete ret._id;
         return ret;
     }

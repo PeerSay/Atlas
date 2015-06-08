@@ -3,7 +3,7 @@
             ng-table="view.tableParams"
             >
         <!--Header-->
-        <thead>
+        <thead ng-if="view.rows.length">
         <tr>
             <th ng-repeat="col in view.columns">
                 <div>{{:: col.header.label }}</div>
@@ -48,16 +48,9 @@
             </td>
         </tr>
         </tbody>
-        <!--Empty table row -->
-        <tr ng-show="view.hasAddLink">
-            <td class="attention">
-                <span class="clickable"
-                        ng-click="view.addEmptyRow()">Click to add</span>
-            </td>
-        </tr>
         <!--Footer-->
         <tfoot>
-        <tr>
+        <tr ng-if="view.rows.length">
             <th class="abs-container" ng-repeat="col in view.columns"
                     ng-class="{'winner' : col.footer.model.max()}">
                 <!--Label cell-->
@@ -69,6 +62,19 @@
                 <!--Winner cup-->
                 <span class="fa fa-trophy winner-icon" ng-if="col.footer.model.max()"></span>
             </th>
+        </tr>
+        <!--Empty table row -->
+        <tr class="empty-table-content"
+                ng-if="!view.rows.length">
+            <td colspan="6" class="text-center">
+                <span class="fa fa-info-circle"></span>
+                <h4>Bummer, there's nothing to compare yet.</h4>
+                <p>
+                    Please consider adding some
+                    <a ui-sref="^.requirements">criteria</a> and
+                    <a ui-sref="^.products">products</a>.
+                </p>
+            </td>
         </tr>
         </tfoot>
     </table>

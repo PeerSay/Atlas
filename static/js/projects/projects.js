@@ -21,7 +21,8 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.current = {
         project: {
             title: ''
-        }
+        },
+        table: []
     };
     // Read
     P.readProject = readProject;
@@ -134,30 +135,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     // Table
     //
     function readProjectTable(id) {
-        return $timeout(function () {
-            return readProjectTableDataDbg();
+        return Backend.read(['projects', id, 'table']).then(function (data) {
+            return (P.current.table = data.result);
         });
-    }
-
-    function readProjectTableDataDbg() {
-        var res = [];
-        var reqs = P.current.project.requirements;
-        var prods = P.current.project.products;
-
-        _.forEach(reqs, function (req) {
-            var reqCopy = angular.extend({name: '', weight: 1, products: []}, req);
-            _.forEach(prods, function (prod) {
-                var copyCell = angular.extend({name: '', input: '', grade: 0}, prod);
-                reqCopy.products.push(copyCell);
-            });
-            res.push(reqCopy);
-        });
-
-        return res;
-    }
-
-    function randInt(max) {
-        return Math.round(Math.random() * max);
     }
 
     // Patch
@@ -181,10 +161,16 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
         function invalidateCache(id, data) {
             var patch = data[0]; // XXX - only first!
+
             if (patch.path === '/title') {
                 // Project title is changed => invalidate Project stubs to get new titles
                 Backend.invalidateCache(['user']);
             }
+
+            if (/\/products|\/requirements/.test(patch.path)) {
+                Backend.invalidateCache(['projects', id, 'table']);
+            }
+
             Backend.invalidateCache(['projects', id]);
         }
 

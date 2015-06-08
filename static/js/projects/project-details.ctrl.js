@@ -26,6 +26,7 @@ function ProjectDetailsCtrl($rootScope, $stateParams, Projects) {
 
     function readProject() {
         Projects.readProject(m.projectId).then(function (res) {
+            m.project = res;
             m.requirements = res.requirements;
             m.products = res.products;
             return res;

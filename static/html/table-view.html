@@ -1,184 +1,80 @@
-<ng-form name="form{{:: view.name }}">
+<ng-form name="form">
     <table class="table"
             ng-table="view.tableParams"
-            ng-class="{ 'ng-table-resizable-columns': false }"
-            ng-attr-data-resizable-columns-id="{{:: false && 'psTable' }}"
             >
         <!--Header-->
-        <thead>
+        <thead ng-if="view.rows.length">
         <tr>
-            <th ng-repeat="col in view.columns"
-                    ng-class="view.runtimeColClass(col)"
-                    ng-show=":: col.visible"
-                    ng-click="!col.edited && view.sortBy(col)"
-                    >
-                <div ng-if=":: !col.editable">{{ col.model.value }}</div>
-                <!--Editable header cell-->
-                <div ng-if=":: col.editable"
-                        ng-init="validateFn = view.validateColumnCell(col)"
-                        ><!--Bind col to prevent infinite $digest-->
-                    <a href tabindex="-1"
-                            ng-show="!col.edited"
-                            ng-click="col.edited = true; $event.stopPropagation()"
-                            >{{ col.model.field }}</a>
-                    <input type="text" tabindex="-1" class="form-control cell-input"
-                            name="{{:: col.id }}"
-                            ng-show="col.edited"
-                            ng-model="col.model.value"
-                            ng-blur="onColBlur(col)"
-                            ng-keydown="onColKeydown(col, $event)"
-                            ps-focus-on="col.edited === true"
-                            ps-select="true"
-                            ng-attr-placeholder="{{:: col.placeholder }}"
-
-                            ps-input-validate="validateFn"
-                            ps-allow-empty="col.last"
-                            ng-required="!col.last"
-                            />
-                    <span class="col-warn hint hint-bottom" ng-messages="getInput(col).$error" ng-class="{show: getInput(col).$dirty}">
-                        <span ng-message="inputValidate">Must be unique!</span>
-                        <span ng-message="required">Not empty please!</span>
-                    </span>
-                </div>
+            <th ng-repeat="col in view.columns">
+                <div>{{:: col.header.label }}</div>
             </th>
         </tr>
         </thead>
-        <!--Groups & cells-->
         <tbody ng-repeat="group in $groups">
+        <!--Group row-->
         <tr class="ng-table-group" ng-show="group.value">
             <td colspan="{{ view.columns.length }}">
                 <a href ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()" tabindex="-1">
-                    <span class="fa" ng-class="{ 'fa-chevron-right': group.$hideRows, 'fa-chevron-down': !group.$hideRows }"></span>
+                    <span class="fa fa-fw" ng-class="{ 'fa-caret-right': group.$hideRows, 'fa-caret-down': !group.$hideRows }"></span>
                     {{:: group.value }}
                 </a>
             </td>
         </tr>
+        <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-                ng-class="{ grayed: !row[0].model.criteria.weight, hovered: view.isHover(row[0].model) }"
-                ng-mouseenter="view.enableHover && view.toggleHover(row[0].model, true)"
-                ng-mouseleave="view.enableHover && view.toggleHover(row[0].model, false)"
-                >
-            <td ng-repeat="cell in row"
-                    ng-show="cell.visible"
-                    class="cell {{:: cell.type }}"
-                    ng-class="{ edited: cell.edited, editable: cell.editable }"
-                    context-menu="view.menu.setContext({cell: cell})"
-                    context-menu-disabled="!view.menu || cell.noMenu"
-                    data-target="{{:: view.menu.id }}"
+                ng-class="{muted: !row.req.weight}">
+            <td class="cell {{:: cell.type }}" ng-repeat="cell in row.cells"
+                    ng-class="{'winner' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
-                <!--Not-editable cell-->
-                <div ng-if=":: !cell.editable">
-                    <div ng-if=":: cell.type === 'ordinary' || cell.type === 'static'">
-                        <span ng-if="cell.model.value" ng-bind-html="cell.model.value | multiline"></span>
-                        <span ng-if="!cell.model.value && cell.emptyValue" class="attention">
-                            <span class="fa fa-exclamation-circle"></span>
-                            {{:: cell.emptyValue }}
-                        </span>
-                    </div>
-                    <div ng-if=":: cell.type === 'number-static'"
-                            ng-class="{'max' : cell.computed.max()}">
-                        {{ cell.model.value }}
-                    </div>
+                <!--Label cell-->
+                <div ng-if=":: cell.type === 'label' ">{{:: cell.label }}</div>
+                <!--Text cell-->
+                <div ng-if=":: cell.type === 'text' ">
+                    <input type="text" class="cell-input"
+                            ng-model="cell.model.value"
+                            ps-table-input="cell.model">
                 </div>
-                <!--Editable cell-->
-                <div ng-if=":: cell.editable"
-                        ng-click="$event.stopPropagation()"> <!--Prevent click on input to trigger focus-->
-                    <div ng-if=":: cell.type === 'multiline'">
-                            <textarea class="form-control cell-input noresize"
-                                    name="{{:: cell.id }}"
-                                    msd-elastic
-                                    ng-model="cell.model.value"
-                                    ng-focus="onCellFocus(cell)"
-                                    ng-blur="onCellBlur(cell)"
-                                    ng-keydown="onCellKeydown(cell, $event)"
-                                    ps-focus-on="cell.justAdded"
-                                    ></textarea>
-                    </div>
-                    <div ng-if=":: cell.type === 'number'" class="abs-container">
-                        <input type="number" class="form-control cell-input"
-                                name="{{:: cell.id }}"
-                                min="0" max="{{:: cell.maxNumber }}"
-                                ng-model="cell.model.value"
-                                ng-class="{'max' : cell.computed.max()}"
-                                ng-focus="onCellFocus(cell)"
-                                ng-blur="onCellBlur(cell)"
-                                ng-keydown="onCellKeydown(cell, $event)"
-                                ps-tooltip
-                                ps-tooltip-title="(cell.computed.percent && cell.computed.percent() + '%') || cell.models['~input'].value"
-                                ps-input-number
-                                />
-                    </div>
-                    <div ng-if=":: cell.type === 'popup'">
-                        <ps-table-popover
-                                ps-container="td"
-                                ps-viewport=".modal-content"
-                                ps-id="{{:: group.value + '_crit_' + $index }}"
-                                ps-popover-on="view.popoverOn"
-                                ps-allow-hide="!view.topic.addNew.show"
-                                >
-                            <span class="popover-icon fa fa-cog"></span>
-
-                            <form class="popover-form">
-                                <div class="form-group">
-                                    <label class="checkbox-ext no-select text-nowrap block">
-                                        <input type="checkbox"
-                                                ng-model="cell.models.priority.value"
-                                                ng-true-value="'required'"
-                                                ng-false-value="'optional'"
-                                                ng-click="view.saveCell(cell.models.priority);">
-                                        Required criteria
-                                    </label>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Select topic:</label>
-                                    <div class="list-group">
-                                        <a href class="list-group-item"
-                                                ng-repeat="topic in view.topic.options.all"
-                                                ng-init="active = (topic === cell.models.topic.value)"
-                                                ng-class="{'active': active}"
-                                                ng-click="cell.models.topic.value = topic; view.saveCell(cell.models.topic);">
-                                            <span class="fa fa-check" ng-show="active"></span>
-                                            {{ topic || 'None' }}
-                                        </a>
-                                        <a href class="list-group-item"
-                                                ng-click="view.topic.addNew.show = true">
-                                            <div class="create-new" ng-show="!view.topic.addNew.show">Create new...</div>
-                                            <input type="text" class="form-control" placeholder="Topic name"
-                                                    ng-model="view.topic.addNew.value"
-                                                    ng-show="view.topic.addNew.show"
-                                                    ps-focus-on="view.topic.addNew.show"
-                                                    ng-keydown="view.topic.keyPressed(cell.models.topic, $event)"
-                                                    ng-blur="view.topic.doneEdit()">
-                                        </a>
-                                    </div>
-                                    <span class="hint" ng-show="view.topic.addNew.show">Press enter</span>
-                                </div>
-                            </form>
-                        </ps-table-popover>
-                    </div>
+                <!--Number cell-->
+                <div ng-if=":: cell.type === 'number' ">
+                    <input type="number" class="cell-input"
+                            min="0" max="{{:: cell.max }}"
+                            ng-model="cell.model.value"
+                            ps-table-input="cell.model"
+                            ps-input-number
+                            ps-tooltip
+                            ps-tooltip-title="cell.model.tooltip()"
+                            >
                 </div>
             </td>
         </tr>
         </tbody>
-        <!--Empty table row -->
-        <tr ng-show="view.hasAddLink">
-            <td class="attention">
-                <span class="clickable"
-                        ng-click="view.addEmptyRow()">Click to add</span>
-            </td>
-        </tr>
         <!--Footer-->
         <tfoot>
-        <tr>
-            <th ng-repeat="col in view.columns"
-                    ng-show="col.footer">
-                <div ng-if="col.footer.value">{{:: col.footer.value }}</div>
-                <div ng-if="col.footer.computed"
-                        ng-class="{'max' : col.footer.computed.max()}"
-                        >{{ col.footer.computed.total() }}
+        <tr ng-if="view.rows.length">
+            <th class="abs-container" ng-repeat="col in view.columns"
+                    ng-class="{'winner' : col.footer.model.max()}">
+                <!--Label cell-->
+                <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.label }}</div>
+                <!--Func cell-->
+                <div ng-if=":: col.footer.type === 'func' ">
+                    {{ col.footer.model.value() }}
                 </div>
+                <!--Winner cup-->
+                <span class="fa fa-trophy winner-icon" ng-if="col.footer.model.max()"></span>
             </th>
+        </tr>
+        <!--Empty table row -->
+        <tr class="empty-table-content"
+                ng-if="!view.ctrl.loadingMore && !view.rows.length">
+            <td colspan="6" class="text-center">
+                <span class="fa fa-info-circle"></span>
+                <h4>Bummer, there's nothing to compare yet.</h4>
+                <p>
+                    Please consider adding some
+                    <a ui-sref="^.requirements">criteria</a> and
+                    <a ui-sref="^.products">products</a>.
+                </p>
+            </td>
         </tr>
         </tfoot>
     </table>

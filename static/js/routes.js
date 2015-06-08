@@ -110,6 +110,12 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             url: '/decisions',
             templateUrl: '/html/project-decisions.html'
         })
+        // Project > Details > Notes
+        //
+        .state('project.details.notes', {
+            url: '/notes',
+            templateUrl: '/html/project-notes.html'
+        })
         // Project > Details > Essentials
         //
         .state('project.details.essentials', {

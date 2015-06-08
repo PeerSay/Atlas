@@ -41,7 +41,10 @@
                 </li>
                 <!--Project Details: Link to list-->
                 <li ng-show="$state.includes('project.details')">
-                    <a ui-sref="project.list">Projects</a>
+                    <a ui-sref="project.list">
+                        <span class="fa fa-caret-left"></span>
+                        Projects
+                    </a>
                 </li>
                 <!--User-->
                 <li class="dropdown user">

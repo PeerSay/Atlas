@@ -24,17 +24,17 @@ function ProjectSummaryCtrl($stateParams, Projects, _) {
 
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
-            initFields(res);
+            initFields(res.notes);
             return (m.project = res);
         });
     }
 
-    function initFields(project) {
-        var fields = ['summary', 'recommendations', 'notes'];
+    function initFields(notes) {
+        var fields = ['summary', 'recommendations'];
         _.forEach(fields, function (fld) {
             var field = m.fields[fld];
             field.name = fld;
-            field.value = field.lastValue = project[fld] || '';
+            field.value = field.lastValue = notes[fld] || '';
         });
     }
 
@@ -42,7 +42,7 @@ function ProjectSummaryCtrl($stateParams, Projects, _) {
         // Manually build patch
         var patch = {
             op: 'replace',
-            path: '/' + model.name,
+            path: '/notes/' + model.name,
             value: model.value
         };
         return Projects.patchProject(m.projectId, [patch]);

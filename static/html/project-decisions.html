@@ -17,35 +17,6 @@
                         </div>
                     </div>
                 </div>
-                <!--Summary / Notes-->
-                <div class="row" ng-controller="ProjectSummaryCtrl as summary">
-                    <!--Summary / Recommendations-->
-                    <div class="col-xs-12 col-sm-6 tile-container">
-                        <div class="panel panel-default tile">
-                            <div class="panel-body">
-                                <ps-edit-inline
-                                        data-label="Summary"
-                                        data-model="summary.fields.summary"
-                                        data-on-save="summary.updateField(summary.fields.summary)"></ps-edit-inline>
-                                <ps-edit-inline
-                                        data-label="Recommendations"
-                                        data-model="summary.fields.recommendations"
-                                        data-on-save="summary.updateField(summary.fields.recommendations)"></ps-edit-inline>
-                            </div>
-                        </div>
-                    </div>
-                    <!--Notes-->
-                    <div class="col-xs-12 col-sm-6 tile-container">
-                        <div class="panel panel-default tile">
-                            <div class="panel-body">
-                                <ps-edit-inline
-                                        data-label="Notes"
-                                        data-model="summary.fields.notes"
-                                        data-on-save="summary.updateField(summary.fields.notes)"></ps-edit-inline>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
         <!--End: Panel-->

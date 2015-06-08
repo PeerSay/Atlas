@@ -13,6 +13,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     // Table view
     m.activate = activate;
     m.tableView = Table(m).getView();
+    m.loadingMore = true;
 
     $scope.$on('$destroy', function () {
         jsonpatch.unobserve(m.project, m.patchObserver);
@@ -20,11 +21,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
     function activate() {
         return Projects.readProjectTable(m.projectId).then(function (res) {
-            console.log('>>', res.table);
+            //console.log('>>', res.table);
 
             m.project = {table: res.table};
             m.patchObserver = jsonpatch.observe(m.project);
-
+            
+            m.loadingMore = false;
             return res.table;
         });
     }
@@ -45,6 +47,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             columns: [],
             rows: []
         };
+
         var columnIdx = {};
         var view = {};
         // ngTable params
@@ -60,6 +63,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
         // ngTable stuff
         function getView() {
+            view.ctrl = ctrl;
             view.tableParams = new ngTableParams(parameters, settings);
             return view;
         }

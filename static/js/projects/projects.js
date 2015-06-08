@@ -68,7 +68,6 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     // Project details
     //
-
     //@formatter:off
     /* Format: {
         "_id": "",
@@ -98,9 +97,33 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         }
     };*/
     //@formatter:on
+
     function readProject(id) {
         return Backend.read(['projects', id]).then(function (data) {
             return (P.current.project = data.result);
+        });
+    }
+
+    // Table
+    //
+    //@formatter:off
+    /* Format: [{
+        "reqId": "",
+        "name": "",
+        "weight": 1,
+        "popularity": 0,
+        "products": [{
+            "prodId": "",
+            "name": "",
+            "input": "",
+            "grade": 0,
+            "popularity": 0
+        }]
+    }]*/
+    //@formatter:on
+    function readProjectTable(id) {
+        return Backend.read(['projects', id, 'table']).then(function (data) {
+            return (P.current.table = data.result);
         });
     }
 
@@ -129,14 +152,6 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     function readPublicProducts(params) {
         return Backend.read(['public', 'products'], null, params).then(function (data) {
             return {products: data.result};
-        });
-    }
-
-    // Table
-    //
-    function readProjectTable(id) {
-        return Backend.read(['projects', id, 'table']).then(function (data) {
-            return (P.current.table = data.result);
         });
     }
 

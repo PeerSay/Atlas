@@ -25,6 +25,7 @@ function PublicRestApi(app) {
         app.get('/api/public/categories', readCategories);
         app.get('/api/public/products', readProducts);
 
+
         return U;
     }
 
@@ -35,8 +36,15 @@ function PublicRestApi(app) {
 
         console.log('[API] Reading public topics[%s]', email);
 
-        // TODO
-        return res.json({result: []});
+        Topic.find()
+            .sort('-popularity')
+            .select('-__v')
+            .exec(function (err, data) {
+                if (err) { return next(err); }
+                console.log('[API] Reading public result: count: %s', data.length);
+
+                res.json({result: data});
+            });
     }
 
     function readRequirements(req, res, next) {
@@ -44,8 +52,17 @@ function PublicRestApi(app) {
 
         console.log('[API] Reading public requirements[%s]', email);
 
-        // TODO
-        return res.json({result: []});
+        // TODO: limit
+
+        Requirement.find()
+            .sort('-popularity')
+            .select('-__v')
+            .exec(function (err, data) {
+                if (err) { return next(err); }
+                console.log('[API] Reading public requirements result: count: %s', data.length);
+
+                res.json({result: data});
+            });
     }
 
     // Products
@@ -56,8 +73,15 @@ function PublicRestApi(app) {
 
         console.log('[API] Reading public categories[%s]', email);
 
-        // TODO
-        return res.json({result: []});
+        Category.find()
+            .sort('-popularity')
+            .select('-__v')
+            .exec(function (err, data) {
+                if (err) { return next(err); }
+                console.log('[API] Reading public categories result: count: %s', data.length);
+
+                res.json({result: data});
+            });
     }
 
     function readProducts(req, res, next) {
@@ -65,17 +89,15 @@ function PublicRestApi(app) {
 
         console.log('[API] Reading public products[%s]', email);
 
-        // TODO
-        return res.json({result: []});
-    }
+        Product.find()
+            .sort('-popularity')
+            .select('-__v')
+            .exec(function (err, data) {
+                if (err) { return next(err); }
+                console.log('[API] Reading public products result: count: %s', data.length);
 
-    // Transforms
-    //
-    function xformStubPrj(doc, ret) {
-        ret.id = ret._ref;
-        delete ret._ref;
-        delete ret._id;
-        return ret;
+                res.json({result: data});
+            });
     }
 
     U.setupRoutes = setupRoutes;

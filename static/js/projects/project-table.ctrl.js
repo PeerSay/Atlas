@@ -188,7 +188,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             var oldValue = m.value;
 
             function saveValue() {
-                console.log('>>Saving: ', M.value);
+                //console.log('>>Saving: ', M.value);
 
                 if (!validate()) {
                     M.value = oldValue;

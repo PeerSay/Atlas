@@ -99,6 +99,8 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
                 if (res.requirements.length) {
                     publicItemsLength = res.requirements.length;
                     m.groups.addItems(res.requirements, false, {selected: false});
+
+                    toggleAllGroupsByReqs();
                 } else {
                     noLoadMore = true;
                 }
@@ -218,7 +220,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function selectRequirement(req) {
         // Item without id is newly added, it should not be propagated to table/project
-        if (!req.id) { return; }
+        if (!req._id) { return; }
 
         toggleReqVal(req, true);
     }
@@ -236,7 +238,6 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     function saveAddNew() {
         var req = angular.extend({}, emptyNew, m.addNew.model);
         req.topic = (m.addNew.topic.selected || {}).name || ''; // Empty topic is hidden in UI
-        req.id = nextId(m.requirements);
         cancelAddNew();
 
         addRemoveLocal(req); // always selected!
@@ -269,7 +270,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
     function addRemoveLocal(req, forceRemove) {
         var localReqs = m.project.requirements;
-        var localReq = _.findWhere(localReqs, {id: req.id});
+        var localReq = _.findWhere(localReqs, {_id: req._id});
         var localIdx = localReqs.indexOf(localReq);
         var inProject = (localIdx >= 0);
 
@@ -348,12 +349,12 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
 
         function addItems(list, local, extend) {
             _.forEach(list, function (it) {
-                var publicNotSelected = !local && !itemIdx[it.id];
+                var publicNotSelected = !local && !itemIdx[it._id];
                 var skipIt = !(local || publicNotSelected);
 
                 if (skipIt) { return; }
 
-                itemIdx[it.id] = true;
+                itemIdx[it._id] = true;
 
                 // Add group
                 var key = it[prop];
@@ -373,13 +374,5 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         }
 
         return G;
-    }
-
-    function nextId(arr) {
-        var res = 0;
-        _.forEach(arr, function (it) {
-            res = Math.max(it.id, res) + 1;
-        });
-        return res;
     }
 }

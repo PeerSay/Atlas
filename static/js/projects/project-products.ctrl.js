@@ -10,8 +10,8 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.project = {};
     m.patchObserver = null;
     // Loading
-    var QUERY_LIMIT = 20;
-    var publicProductsLength = 0;
+    var QUERY_LIMIT = 2;
+    var loadFrom = 0;
     var noLoadMore = false;
     m.loadingMore = true;
     m.loadMoreProducts = loadMoreProducts;
@@ -125,10 +125,13 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         m.loadingMore = true;
         return Projects.readPublicProducts(params)
             .then(function (res) {
-                if (res.products.length) {
-                    publicProductsLength = res.products.length;
+                var len = res.products.length;
+                var lastBatch = (len < QUERY_LIMIT);
+                if (len) {
+                    loadFrom += len;
                     addProductsToList(res.products, false, {selected: false});
-                } else {
+                }
+                if (lastBatch) {
                    noLoadMore = true;
                 }
             })
@@ -141,14 +144,14 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
         var categoryName = (m.category.selected || {}).name || '';
         var params = {
             q: categoryName,
-            from: publicProductsLength,
+            from: loadFrom,
             limit: QUERY_LIMIT
         };
 
         if (reset) {
             params.from = 0;
             noLoadMore = false;
-            publicProductsLength = 0;
+            loadFrom = 0;
         }
 
         loadPublicProducts(params);

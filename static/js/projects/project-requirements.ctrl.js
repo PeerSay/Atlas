@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
-function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterFilter, jsonpatch, _) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
+function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -12,7 +12,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     m.groups = GroupBy('topic');
     //Loading
     var QUERY_LIMIT = 10;
-    var publicItemsLength = 0;
+    var loadFrom = 0;
     var noLoadMore = false;
     m.loadingMore = true;
     m.loadMore = loadMore;
@@ -77,7 +77,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         Projects.readPublicTopics().then(function (res) {
             m.groups.addGroups(res.topics, true);
 
-            loadPublicItems({from: 0, limit: QUERY_LIMIT});
+            loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
         });
 
         $scope.$on('$destroy', function () {
@@ -96,12 +96,15 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
         m.loadingMore = true;
         return Projects.readPublicRequirements(params)
             .then(function (res) {
-                if (res.requirements.length) {
-                    publicItemsLength = res.requirements.length;
+                var len = res.requirements.length;
+                var lastBatch = (len < QUERY_LIMIT);
+                if (len) {
+                    loadFrom += res.requirements.length;
                     m.groups.addItems(res.requirements, false, {selected: false});
 
                     toggleAllGroupsByReqs();
-                } else {
+                }
+                if (lastBatch) {
                     noLoadMore = true;
                 }
             })
@@ -111,12 +114,7 @@ function ProjectRequirementsCtrl($scope, $state, $stateParams, Projects, filterF
     }
 
     function loadMore() {
-        var params = {
-            from: publicItemsLength,
-            limit: QUERY_LIMIT
-        };
-
-        loadPublicItems(params)
+        loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
     }
 
     function showLoadMoreBtn() {

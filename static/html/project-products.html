@@ -153,7 +153,11 @@
                                 ng-if="!cm.loadingMore && !filteredProducts.length">
                             <td colspan="6" class="text-center">
                                 <span class="fa fa-info-circle"></span>
-                                <h4>Couldn't find anything.</h4>
+                                <h4>Couldn't find anything<!--
+                                    --><span ng-if="cm.category.selected.name"> of category
+                                    <strong>{{cm.category.selected.name}}</strong></span>
+                                    <span ng-if="!cm.category.selected.name">without category</span>.
+                                </h4>
                                 <p>
                                     Please choose another filter or
                                     <a href ng-click="cm.toggleFilter('all')">show all</a>.

@@ -12,9 +12,8 @@
                 <!--MainTable-->
                 <div class="row">
                     <div class="col-xs-12 page-spacer" ng-controller="ProjectTableCtrl as table">
-                        <div class="tile-section border">
-                            <div ng-include="'/html/table-view.html'" ng-init="view = table.tableView"></div>
-                        </div>
+                        <div class="table-border" ng-include="'/html/table-view.html'"
+                                ng-init="view = table.tableView"></div>
                     </div>
                 </div>
             </div>

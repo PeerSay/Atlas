@@ -104,7 +104,8 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                         tooltipFn: weightPercentComputeFn
                     }),
                     type: 'number',
-                    max: 100
+                    max: 100,
+                    muteOnZero: true
                 });
 
                 _.forEach(req.products, function (prod) {

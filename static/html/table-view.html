@@ -21,8 +21,7 @@
             </td>
         </tr>
         <!--Rows & cells-->
-        <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
-                ng-class="{muted: !row.req.weight}">
+        <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
             <td class="cell {{:: cell.type }} {{:: cell.class }}" ng-repeat="cell in row.cells"
                     ng-class="{'winner' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
@@ -32,7 +31,7 @@
                 <div ng-if=":: cell.type === 'text' ">
                     <textarea class="cell-input noresize"
                             ng-model="cell.model.value"
-                            ps-table-input="cell.model"
+                            ps-table-input="cell"
                             msd-elastic></textarea>
                 </div>
                 <!--Number cell-->
@@ -40,7 +39,7 @@
                     <input type="number" class="cell-input"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
-                            ps-table-input="cell.model"
+                            ps-table-input="cell"
                             ps-input-number
                             ps-tooltip
                             ps-tooltip-title="cell.model.tooltip()"

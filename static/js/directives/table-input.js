@@ -11,7 +11,9 @@ function psTableInput() {
 
             var $el = $(element);
             var $td = $el.parents('td');
-            var model = scope.$eval(attrs.psTableInput);
+            var $tr = $td.parent();
+            var cell = scope.$eval(attrs.psTableInput);
+            var model = cell.model;
 
             // This fixes table cell's save logic for type=number inputs in Firefox.
             // Firefox (unlike Chrome) does not focus input when spinner buttons are clicked, thus it breaks
@@ -38,6 +40,15 @@ function psTableInput() {
                     model.save();
                 });
             });
+
+            // Mute zero-weight rows
+            if (cell.muteOnZero) {
+                scope.$watch(function () {
+                    return model.value;
+                }, function (newVal/*, oldVal*/) {
+                    $tr.toggleClass('muted', !newVal);
+                })
+            }
 
         }
     };

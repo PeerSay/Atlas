@@ -10,10 +10,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     m.patchObserver = null;
     m.patchProject = patchProject;
 
-    // Table view
-    m.activate = activate;
-    m.tableView = Table(m).getView();
+    // Table model/view
+    var table = Table(m);
+    m.tableView = table.getView();
+    m.getCsv = table.getCsv.bind(table);
     m.loadingMore = true;
+    m.activate = activate;
 
     $scope.$on('$destroy', function () {
         jsonpatch.unobserve(m.project, m.patchObserver);
@@ -47,6 +49,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             columns: [],
             rows: []
         };
+        T.getCsv = Exporter(T.model).getCsv;
 
         var columnIdx = {};
         var view = {};
@@ -112,7 +115,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                         model: CellModel(prod, 'input'),
                         type: 'text'
                     });
-                    addFooter(colInputKey, {label: '', type: 'label'});
+                    addFooter(colInputKey, {label: '', type: 'static'});
 
                     // Grade
                     var colGradeKey = 'prod-grade-' + prod.prodId;
@@ -187,6 +190,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             M.tooltip = (addon || {}).tooltip;
             M.max = (addon || {}).max;
             M.save = saveValue;
+            M.toString = toString;
 
             var oldValue = m.value;
 
@@ -206,6 +210,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             function validate() {
                 var invalid = (!M.value && M.value !== 0);
                 return !invalid;
+            }
+
+            function toString() {
+                var val = angular.isDefined(M.value) ? M.value : '';
+                var addon =  M.tooltip ? ['/', M.tooltip()].join('') : '';
+                return val + addon;
             }
 
             return M;
@@ -282,5 +292,61 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         }
 
         return T;
+    }
+
+    // Export
+    function Exporter(model) {
+        var E = {};
+        E.getCsv = getCsv;
+        
+        function getCsv() {
+            // Header
+            var res = getRowStr(model.columns, function (col) {
+                return col.header.label;
+            });
+            //console.log('>>> CSV Titles: ', res);
+
+            // Rows
+            _.forEach(model.rows, function (row) {
+                res += getRowStr(row.cells, function (cell) {
+                    return (cell.type === 'static') ? cell.label : cell.model.toString();
+                });
+            });
+            //console.log('>>> CSV Rows: ', res);
+
+            // Footer
+            res += getRowStr(model.columns, function (col) {
+                var cell = col.footer;
+                return (cell.type === 'static') ? cell.label : cell.model.value();
+            });
+            //console.log('>>> CSV: ', res);
+            return res;
+        }
+
+        function getRowStr(arr, valFn) {
+            var res = '';
+            _.forEach(arr, function (it, j) {
+                var val = valFn(it);
+                var txt = stringify(val);
+                if (j > 0) {
+                    res += ',';
+                }
+                res += txt;
+            });
+            return (res += '\n');
+        }
+
+        function stringify(val) {
+            var str = (val === null) ? '' : val.toString();
+            var res = str
+                .replace(/^\s*/, '').replace(/\s*$/, '') // trim spaces
+                .replace(/"/g,'""'); // replace quotes with double quotes;
+            if (res.search(/("|,|\n)/g) >= 0) {
+                res = '"' + res + '"'; // quote if contains special chars
+            }
+            return res;
+        }
+        
+        return E;
     }
 }

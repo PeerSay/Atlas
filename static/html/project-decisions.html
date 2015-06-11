@@ -1,8 +1,19 @@
-<div class="row">
+<div class="row" ng-controller="ProjectTableCtrl as table">
     <div class="col-xs-12 col-lg-9">
         <!--Panel-->
-        <div class="panel panel-default tile" ng-controller="ProjectRequirementsCtrl as cm">
+        <div class="panel panel-default tile">
             <div class="panel-heading">
+                <!--Export CSV-->
+                <a class="btn btn-default export header-btn pull-right"
+                        ng-mousedown="csv.generate()"
+                        ng-href="{{ csv.link() }}"
+                        download="export.csv"
+                        ps-export-csv="csv"
+                        data-get-csv="table.getCsv()">
+                    <span class="fa fa-file-excel-o"></span>
+                    Export
+                </a>
+                <!--Title-->
                 <h3 class="text-center">
                     <span class="fa fa-graduation-cap"></span>
                     Decision Table
@@ -11,7 +22,7 @@
             <div class="panel-body">
                 <!--MainTable-->
                 <div class="row">
-                    <div class="col-xs-12 page-spacer" ng-controller="ProjectTableCtrl as table">
+                    <div class="col-xs-12 page-spacer">
                         <div class="table-border" ng-include="'/html/table-view.html'"
                                 ng-init="view = table.tableView"></div>
                     </div>

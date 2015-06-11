@@ -101,7 +101,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                 });
                 addCell('weight', rowIdx, req, {
                     model: CellModel(req, 'weight', {
-                        tooltip: weightPercentComputeFn(req)
+                        tooltipFn: weightPercentComputeFn
                     }),
                     type: 'number',
                     max: 100
@@ -187,10 +187,13 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         function CellModel(obj, path, addon) {
             var M = {};
             M.value = obj[path]; // binded!
-            M.tooltip = (addon || {}).tooltip;
             M.max = (addon || {}).max;
             M.save = saveValue;
             M.toString = toString;
+
+            if (addon && addon.tooltipFn) {
+                M.tooltip = addon.tooltipFn(M);
+            }
 
             var oldValue = m.value;
 
@@ -247,9 +250,9 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             }
         }
 
-        function weightPercentComputeFn(req) {
+        function weightPercentComputeFn(cellModel) {
             return function () {
-                var value = req.weight;
+                var value = cellModel.value;
                 var weights = columnIdx['weight'].cells;
 
                 var totalWeight = weights.reduce(function (prev, current) {
@@ -295,6 +298,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     }
 
     // Export
+    //
     function Exporter(model) {
         var E = {};
         E.getCsv = getCsv;

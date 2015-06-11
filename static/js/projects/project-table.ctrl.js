@@ -116,19 +116,22 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
                     // Grade
                     var colGradeKey = 'prod-grade-' + prod.prodId;
-                    addHeader(colGradeKey, {label: 'Grade'});
+                    addHeader(colGradeKey, {label: 'Grade', 'class': 'grade'});
                     addCell(colGradeKey, rowIdx, req, {
                         model: CellModel(prod, 'grade', {
                             max: gradeMaxInRowFn(req, prod)
                         }),
-                        type: 'number', max: 10
+                        type: 'number', max: 10,
+                        'class': 'grade'
                     });
                     addFooter(colGradeKey, {
                         model: {
                             value: productGradeComputeFn(colGradeKey),
                             max: totalGradeMaxFn(colGradeKey)
                         },
-                        type: 'func'});
+                        type: 'func',
+                        'class': 'grade'
+                    });
                 });
             });
         }

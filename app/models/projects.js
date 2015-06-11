@@ -107,6 +107,7 @@ var projectSchema = new Schema({
     table: [{
         reqId: {type: String, required: true},
         name: {type: String, required: true},
+        topic: {type: String},
         weight: {type: Number, min: 0, max: 100, default: 1},
         popularity: {type: Number, min: 0, max: 100, default: 0},
         products: [{
@@ -264,6 +265,7 @@ function genDiffByIndex(table, index) {
         diff.reqs.add.push({
             reqId: req._id,
             name: req.name,
+            topic: req.topic,
             popularity: req.popularity,
             products: []
         });

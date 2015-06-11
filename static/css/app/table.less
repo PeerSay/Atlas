@@ -14,10 +14,23 @@
 .ng-table {
   margin-bottom: 0;
 
+  /*Header/footer*/
+  thead th {
+    &.grade {
+      padding: 3px;
+      div {
+        padding: 4px;
+        border: 1px solid @border-vert-color;
+        border-radius: 3px;
+        background: #fdfdfd;
+      }
+    }
+  }
   tfoot th {
     text-align: left;
   }
 
+  /*Row*/
   tr {
     &.muted {
       opacity: .2;
@@ -38,7 +51,10 @@
 
     /*Vertical borders*/
     th + th, td + td {
-      border-left: 1px solid @border-vert-color;
+      border-left: 2px solid @border-vert-color;
+      &.grade {
+        border-left: 1px dotted @border-vert-color;
+      }
     }
 
     /*Header/footer cells*/
@@ -67,6 +83,7 @@
         padding: 2px 5px;
       }
       &.number {
+        width: 1%;
         .cell-input {
           padding: 1px 1px 1px 5px;
         }

@@ -5,7 +5,7 @@
         <!--Header-->
         <thead ng-if="view.rows.length">
         <tr>
-            <th ng-repeat="col in view.columns">
+            <th ng-repeat="col in view.columns" ng-class=":: col.header.class">
                 <div>{{:: col.header.label }}</div>
             </th>
         </tr>
@@ -23,7 +23,7 @@
         <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data"
                 ng-class="{muted: !row.req.weight}">
-            <td class="cell {{:: cell.type }}" ng-repeat="cell in row.cells"
+            <td class="cell {{:: cell.type }} {{:: cell.class }}" ng-repeat="cell in row.cells"
                     ng-class="{'winner' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
                 <!--Label cell-->
@@ -51,7 +51,7 @@
         <!--Footer-->
         <tfoot>
         <tr ng-if="view.rows.length">
-            <th class="abs-container" ng-repeat="col in view.columns"
+            <th class="abs-container {{:: col.footer.class }}" ng-repeat="col in view.columns"
                     ng-class="{'winner' : col.footer.model.max()}">
                 <!--Label cell-->
                 <div ng-if=":: col.footer.type === 'static' ">{{:: col.footer.label }}</div>

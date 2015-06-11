@@ -30,9 +30,10 @@
                 <div ng-if=":: cell.type === 'static' ">{{:: cell.label }}</div>
                 <!--Text cell-->
                 <div ng-if=":: cell.type === 'text' ">
-                    <input type="text" class="cell-input"
+                    <textarea class="cell-input noresize"
                             ng-model="cell.model.value"
-                            ps-table-input="cell.model">
+                            ps-table-input="cell.model"
+                            msd-elastic></textarea>
                 </div>
                 <!--Number cell-->
                 <div ng-if=":: cell.type === 'number' ">

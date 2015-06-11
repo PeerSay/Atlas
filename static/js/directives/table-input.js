@@ -10,7 +10,7 @@ function psTableInput() {
             if (!ngModel) { return; }
 
             var $el = $(element);
-            var $td = $el.parents('td')
+            var $td = $el.parents('td');
             var model = scope.$eval(attrs.psTableInput);
 
             // This fixes table cell's save logic for type=number inputs in Firefox.
@@ -21,7 +21,12 @@ function psTableInput() {
                 $(this).focus();
             });
 
-            // Edit class
+            // Make active on clicking cell outside input (of cell is larger)
+            $td.click(function () {
+                $el.focus();
+            });
+
+            // Toggle 'edit' class on focus/blur
             $el.on('focus', function () {
                 $td.addClass('edited');
             });

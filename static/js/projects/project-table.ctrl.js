@@ -86,15 +86,15 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
         function buildModel(reqs) {
             addHeader('name', {label: 'Requirement'});
-            addFooter('name', {label: 'Total:', type: 'label'});
+            addFooter('name', {label: 'Total:', type: 'static'});
 
             addHeader('weight', {label: 'Weight'});
-            addFooter('weight', {label: '100%', type: 'label'});
+            addFooter('weight', {label: '100%', type: 'static'});
 
             _.forEach(reqs, function (req, rowIdx) {
                 addCell('name', rowIdx, req, {
                     label: req.name,
-                    type: 'label'
+                    type: 'static'
                 });
                 addCell('weight', rowIdx, req, {
                     model: CellModel(req, 'weight', {

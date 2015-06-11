@@ -27,7 +27,7 @@
                     ng-class="{'winner' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
                 <!--Label cell-->
-                <div ng-if=":: cell.type === 'label' ">{{:: cell.label }}</div>
+                <div ng-if=":: cell.type === 'static' ">{{:: cell.label }}</div>
                 <!--Text cell-->
                 <div ng-if=":: cell.type === 'text' ">
                     <input type="text" class="cell-input"
@@ -54,7 +54,7 @@
             <th class="abs-container" ng-repeat="col in view.columns"
                     ng-class="{'winner' : col.footer.model.max()}">
                 <!--Label cell-->
-                <div ng-if=":: col.footer.type === 'label' ">{{:: col.footer.label }}</div>
+                <div ng-if=":: col.footer.type === 'static' ">{{:: col.footer.label }}</div>
                 <!--Func cell-->
                 <div ng-if=":: col.footer.type === 'func' ">
                     {{ col.footer.model.value() }}

@@ -1,8 +1,9 @@
 /* Data table */
 
 @header-bg: #f5f5f5;
-@winner-color: #f5fffa;
-@winner-cup-color: #00805A;
+@winner-bg: #f5fffa;
+@edit-bg: #f9fbdb;
+@winner-cup-color: #00805a;
 @border-vert-color: #ddd;
 
 .table-border {
@@ -41,7 +42,6 @@
     &.ng-table-group td {
       height: auto;
       padding: 3px 8px;
-      background: @header-bg;
       a {
         display: block;
         text-decoration: none;
@@ -81,6 +81,7 @@
 
       &.static {
         padding: 2px 5px;
+        line-height: 20px;
       }
       &.number {
         width: 1%;
@@ -94,7 +95,13 @@
         }
       }
       &.winner {
-        background: @winner-color;
+        background: @winner-bg;
+      }
+      &.edited {
+        background: @edit-bg !important;
+      }
+      &.static {
+        background: @header-bg;
       }
     }
   }

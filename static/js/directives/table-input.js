@@ -10,6 +10,7 @@ function psTableInput() {
             if (!ngModel) { return; }
 
             var $el = $(element);
+            var $td = $el.parents('td')
             var model = scope.$eval(attrs.psTableInput);
 
             // This fixes table cell's save logic for type=number inputs in Firefox.
@@ -20,8 +21,14 @@ function psTableInput() {
                 $(this).focus();
             });
 
+            // Edit class
+            $el.on('focus', function () {
+                $td.addClass('edited');
+            });
 
+            // Save model
             $el.on('blur', function () {
+                $td.removeClass('edited');
                 scope.$apply(function () {
                     model.save();
                 });

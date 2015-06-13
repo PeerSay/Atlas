@@ -43,7 +43,7 @@ var projectSchema = new Schema({
     //  startDate: { type: String }, plain string!
     //  duration: { type: String }, plain string!
     time: {
-        startDate: {type: Date, default: Date.now},
+        startDate: {type: Date},
         duration: {type: Number, min: 0},
         durationLabel: {type: String, enum: durationLabelEnum, default: 'days'},
         durationLabels: {type: String, default: durationLabelEnum.join(',')}

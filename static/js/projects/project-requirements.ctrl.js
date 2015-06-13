@@ -71,13 +71,13 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
             m.patchObserver = jsonpatch.observe(m.project);
 
             m.groups.addItems(res.requirements, true); // reset
-        });
 
-        // Public topics & reqs
-        Projects.readPublicTopics().then(function (res) {
-            m.groups.addGroups(res.topics, true);
+            // Public topics & reqs
+            Projects.readPublicTopics().then(function (res) {
+                m.groups.addGroups(res.topics, true);
 
-            loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
+                loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
+            });
         });
 
         $scope.$on('$destroy', function () {
@@ -87,9 +87,22 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
 
     function patchProject() {
         var patch = jsonpatch.generate(m.patchObserver);
+        patch = fixPatch(patch);
         if (!patch.length) { return; } // XXX -can return non-promise
 
         return Projects.patchProject(m.projectId, patch);
+    }
+
+    function fixPatch(arr) {
+        // XXX - workaround for wrong patches generated on unselecting group
+        // Not clear why this happens, but it depends on the order items were added.
+        // TODO - debug further.
+        return _.map(arr, function (it) {
+            if (it.op === 'replace' && !it.val) {
+                return null;
+            }
+            return it;
+        });
     }
 
     function loadPublicItems(params) {
@@ -180,6 +193,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
 
     function toggleGroupByVal(group, val) {
         var on = group.selected = val;
+
         _.forEach(group.reqs, function (req) {
             req.selected = on;
             addRemoveLocal(req);
@@ -275,8 +289,10 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         //add
         if (req.selected) {
             if (inProject && localReq.custom) {
+                //console.log('>>Add: select local idx=%s', localIdx);
                 localReq.selected = true;
             } else if (!inProject) {
+                //console.log('>>Add: push local copy?=%s', !req.custom);
                 localReqs.push(req.custom ? req : angular.copy(req)); // copy if not custom
             }
         }
@@ -284,8 +300,10 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         //remove
         if (!req.selected && inProject) {
             if (!req.custom || forceRemove) {
+                //console.log('>>>>Remove: splice local idx=%s', localIdx);
                 localReqs.splice(localIdx, 1); // remove if not user-added
             } else {
+                //console.log('>>>>Remove: unselect local idx=%s', localIdx);
                 localReq.selected = false;
             }
         }

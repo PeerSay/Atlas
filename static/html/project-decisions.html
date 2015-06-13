@@ -9,7 +9,8 @@
                         ng-href="{{ csv.link() }}"
                         download="export.csv"
                         ps-export-csv="csv"
-                        data-get-csv="table.getCsv()">
+                        data-get-csv="table.getCsv()"
+                        ng-disabled="!view.rows.length">
                     <span class="fa fa-file-excel-o"></span>
                     Export
                 </a>

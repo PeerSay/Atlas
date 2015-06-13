@@ -260,7 +260,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         req.selected = false;
         req.removed = true; // trick: hide with filter
 
-        // Todo: remove from goups
+        // Todo: remove from groups
 
         addRemoveLocal(req, true/*force*/);
         patchProject();
@@ -272,16 +272,16 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         var localIdx = localReqs.indexOf(localReq);
         var inProject = (localIdx >= 0);
 
+        //add
         if (req.selected) {
             if (inProject && localReq.custom) {
                 localReq.selected = true;
-            } else if (!req.custom) {
-                localReqs.push(angular.copy(req)); // copy!
-            } else {
-                localReqs.push(req); // copy!
+            } else if (!inProject) {
+                localReqs.push(req.custom ? req : angular.copy(req)); // copy if not custom
             }
         }
 
+        //remove
         if (!req.selected && inProject) {
             if (!req.custom || forceRemove) {
                 localReqs.splice(localIdx, 1); // remove if not user-added

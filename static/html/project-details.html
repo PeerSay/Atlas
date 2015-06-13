@@ -6,8 +6,7 @@
                 <a class="toggle-value"
                         ui-sref=".essentials({edit: 'reasons'})"
                         data-placement="right"
-                        ps-tooltip
-                        ps-tooltip-title="cm.project.reasons">
+                        ps-tooltip="cm.project.reasons">
                     {{ cm.project.title }}
                     <span class="fa fa-edit hover-edit"></span>
                 </a>
@@ -40,28 +39,25 @@
                         <!--Budget-->
                         <li ng-if="cm.project.budget.amount">
                             <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: 'budget'})">
-                                {{ cm.project.budget.amount }}
-                                {{ cm.project.budget.amountMultiplier }}
+                                    ui-sref=".essentials({edit: 'budget'})"
+                                    ps-tooltip="cm.sidebar.amountText()">
+                                {{ cm.sidebar.amountText() }}
                             </a>
                         </li>
                         <!--Resources-->
                         <li ng-if="cm.project.notes.resources">
                             <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: 'resources'})">
+                                    ui-sref=".essentials({edit: 'resources'})"
+                                    ps-tooltip="cm.project.notes.resources">
                                 {{ cm.project.notes.resources }}
                             </a>
                         </li>
                         <!--Time frame-->
                         <li ng-if="cm.project.time.duration || cm.project.time.startDate">
                             <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})">
-                                <span ng-if="cm.project.time.duration" >
-                                    {{ cm.project.time.duration }} {{ cm.project.time.durationLabel }}
-                                </span>
-                                <span ng-if="cm.project.time.startDate">
-                                    @ {{ cm.project.time.startDate }}
-                                </span>
+                                    ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})"
+                                    ps-tooltip="cm.sidebar.dateDurationText()">
+                                {{ cm.sidebar.dateDurationText() }}
                             </a>
                         </li>
                     </ul>
@@ -82,7 +78,8 @@
                         </a>
                     </h4>
                     <ul class="animate-ease-right">
-                        <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' | limitTo:5 track by product._id">
+                        <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' | limitTo:5 track by product._id"
+                                ps-tooltip=":: product.name">
                             <span class="side-text ellipsis">{{:: product.name }}</span>
                             <span class="pull-right" ng-if=":: !product.custom">{{:: product.popularity }}%</span>
                         </li>
@@ -101,8 +98,9 @@
                         </a>
                     </h4>
                     <ul class="animate-ease-right">
-                        <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id">
-                            <span class="side-text ellipsis">{{ req.name }}</span>
+                        <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id"
+                                ps-tooltip=":: req.name">
+                            <span class="side-text ellipsis">{{:: req.name }}</span>
                             <span class="pull-right" ng-if=":: !req.custom">{{:: req.popularity }}%</span>
                         </li>
                     </ul>

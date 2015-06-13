@@ -12,6 +12,11 @@ function ProjectDetailsCtrl($rootScope, $stateParams, Projects) {
     m.project = null;
     m.requirements = [];
     m.products = [];
+    //UI helpers
+    m.sidebar = {
+        amountText: amountText,
+        dateDurationText: dateDurationText
+    };
 
     activate();
 
@@ -31,5 +36,24 @@ function ProjectDetailsCtrl($rootScope, $stateParams, Projects) {
             m.products = res.products;
             return res;
         });
+    }
+
+    // UI helpers
+    function amountText() {
+        if (!m.project.budget.amount) {
+            return '';
+        }
+        return [m.project.budget.amount, m.project.budget.amountMultiplier].join(' ');
+    }
+
+    function dateDurationText() {
+        var text = '';
+        if (m.project.time.duration) {
+            text += [m.project.time.duration, m.project.time.durationLabel, ' '].join(' ');
+        }
+        if (m.project.time.startDate) {
+            text += ['@', m.project.time.startDate].join(' ');
+        }
+        return text;
     }
 }

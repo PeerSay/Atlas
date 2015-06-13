@@ -71,13 +71,13 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
             m.patchObserver = jsonpatch.observe(m.project);
 
             m.groups.addItems(res.requirements, true); // reset
-        });
 
-        // Public topics & reqs
-        Projects.readPublicTopics().then(function (res) {
-            m.groups.addGroups(res.topics, true);
+            // Public topics & reqs
+            Projects.readPublicTopics().then(function (res) {
+                m.groups.addGroups(res.topics, true);
 
-            loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
+                loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
+            });
         });
 
         $scope.$on('$destroy', function () {

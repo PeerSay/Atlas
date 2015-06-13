@@ -131,12 +131,19 @@
                         <h4 class="toggle-edit text-center">
                             <a ui-sref="^.decisions">Decision Table</a>
                         </h4>
-                        <p>
+                        <p ng-if="!board.decisions.initialized">
                             Please select <a ui-sref="^.products">Products</a>
                             and <a ui-sref="^.requirements">Criteria</a> in order to make a decision,
                             using <a ui-sref="^.decisions">the table</a>.
                         </p>
-                        <!--TODO: initialized-->
+                        <div ng-if="board.decisions.initialized">
+                            <p>The winner products are:</p>
+                            <p ng-repeat="winner in board.decisions.data">
+                                <span class="fa fa-trophy"></span>
+                                <strong>{{:: winner.name }}</strong>
+                                ({{:: winner.totalGrade }})
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

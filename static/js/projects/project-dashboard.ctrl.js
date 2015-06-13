@@ -22,6 +22,10 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
         data: [],
         initialized: false
     };
+    m.decisions = {
+        data: [],
+        initialized: false
+    };
 
 
     activate();
@@ -29,7 +33,15 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             initFields(res);
+
             return (m.project = res);
+        }).then(function () {
+            var tableOk = m.decisions.initialized = (m.products.initialized && m.requirements.initialized);
+            if (!tableOk) { return; }
+
+            Projects.readProjectTable(m.projectId).then(function (res) {
+                m.decisions.data = findWinners(res.table);
+            });
         });
     }
 
@@ -44,10 +56,12 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
         m.essentials.initialized = hasAnyValue(m.essentials.data, ['goals', 'category', 'budget', 'duration']);
 
         m.products.data = project.products;
-        m.products.initialized = (project.products.length > 0);
+        var selectedProducts = _.filter(project.products, function (it) { return !!it.selected; });
+        m.products.initialized = (selectedProducts.length > 0);
 
         m.requirements.data = project.requirements;
-        m.requirements.initialized = (project.requirements.length > 0);
+        var selectedReqs = _.filter(project.requirements, function (it) { return !!it.selected; });
+        m.requirements.initialized = (selectedReqs.length > 0);
     }
 
     function hasAnyValue(obj, keys) {
@@ -58,5 +72,40 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
             }
         });
         return res;
+    }
+
+    function findWinners(table) {
+        var totalWeight = 0;
+        var products = [];
+
+        _.forEach(table, function (req) {
+            totalWeight += req.weight;
+
+            _.forEach(req.products, function (prod, idx) {
+                var p = products[idx] = products[idx] || {
+                        name: prod.name,
+                        grade: 0
+                    };
+                p.grade += prod.grade * req.weight;
+            });
+        });
+        //console.log('>> totalWeight', totalWeight);
+
+        var maxGrade = products.reduce(function (prev, current) {
+            var totalGrade = current.totalGrade = weightedGrade(current.grade, totalWeight);
+            return Math.max(totalGrade, prev);
+        }, 0);
+        //console.log('>>max', maxGrade);
+
+        var res = _.filter(products, function (prod) {
+            return (prod.totalGrade === maxGrade);
+        });
+        return res;
+    }
+
+    function weightedGrade(grade, weight) {
+        var ave = weight ? grade / weight : 0;
+        var gradeAve = !ave ? 0 : Math.round(ave * 10) / 10;
+        return gradeAve;
     }
 }

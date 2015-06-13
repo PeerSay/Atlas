@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$rootScope', '$stateParams', 'Projects'];
-function ProjectDetailsCtrl($rootScope, $stateParams, Projects) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -24,9 +24,12 @@ function ProjectDetailsCtrl($rootScope, $stateParams, Projects) {
         readProject();
 
         // Re-read on navigation to get fresh (not cached) object
-        $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
+        var off = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
+            if(toState.name === 'project.list') { return; } // back to list
             readProject();
         });
+
+        $scope.$on('$destroy', off);
     }
 
     function readProject() {

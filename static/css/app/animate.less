@@ -1,0 +1,24 @@
+
+// Ease form: http://www.nganimate.org/angularjs/ng-repeat/move
+ul.animate-ease-right > li {
+  &.ng-enter,
+  &.ng-leave {
+    position: relative;
+    display: block;
+    .transition(400ms cubic-bezier(0.250, 0.100, 0.250, 1.000) all);
+  }
+
+  &.ng-enter.ng-enter-active,
+  &.ng-leave {
+    opacity: 1;
+    right: 0;
+    height: 30px;
+  }
+
+  &.ng-leave.ng-leave-active,
+  &.ng-enter {
+    opacity: 0;
+    right: -30px;
+    height: 0;
+  }
+}

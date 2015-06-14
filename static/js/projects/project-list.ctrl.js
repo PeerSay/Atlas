@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectListCtrl', ProjectListCtrl);
 
-ProjectListCtrl.$inject = ['$state', '$timeout', 'Projects', 'Wizard', 'Util'];
-function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
+ProjectListCtrl.$inject = ['$state', '$timeout', 'Projects'];
+function ProjectListCtrl($state, $timeout, Projects) {
     var m = this;
 
     m.projects = [];
@@ -22,32 +22,20 @@ function ProjectListCtrl($state, $timeout, Projects, Wizard, _) {
     function createProject() {
         Projects.createProject()
             .then(function (prj) {
-                editProject(prj.id, true/*isNew*/);
+                editProject(prj.id);
             });
     }
 
-    function editProject(id, isNew) {
-        $state.go('project.details', {projectId: id})
-            .then(function () {
-                var curStepNum = Wizard.current.stepNum; // resolved by now
-
-                // $timeout prevents a case when location replace wipes previous state and
-                // incorrect navigation on back button, sometimes even out of the app
-                $timeout(function () {
-                    $state.go('.steps', {step: curStepNum}, {location: 'replace'})
-                        .then(function () {
-                            if (!isNew) { return; }
-
-                            $timeout(function () {
-                                $state.go('.essentials');
-                            })
-                        });
-                }, 0)
-            });
+    function editProject(id) {
+        return $state.go('project.details.dashboard', {projectId: id});
     }
 
     function removeProject(prj) {
         prj.muted = true;
-        Projects.removeProject(prj.id);
+        Projects.removeProject(prj.id)
+            .finally(function () {
+                // in case of error - do not left in spinning state
+                prj.muted = false;
+            });
     }
 }

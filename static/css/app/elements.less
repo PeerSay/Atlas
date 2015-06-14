@@ -1,0 +1,68 @@
+/*
+* Standard elements
+*/
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 70px;
+  background: #ececec;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+textarea {
+  resize: both; /* none|horizontal|vertical|both */
+  &.vert {
+    resize: vertical;
+  }
+  &.noresize {
+    resize: none;
+  }
+}
+
+.modal-dialog {
+  /*It's better to cover full page on mobile*/
+  margin-top: 10px;
+}
+
+/*See Angular ngCloak*/
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+/*
+* Buttons
+*/
+.btn {
+  &.full-width {
+    width: 100%;
+    text-align: center;
+  }
+
+  &.hint {
+    position: relative;
+    span[data-toggle=tooltip] {
+      display: inline-block;
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 0; right: 0;
+    }
+  }
+}
+
+.checkbox-ext {
+  background-color: #fff;
+  padding: 2px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  &:hover, &.checked:hover {
+    background-color: #ddd;
+  }
+  &.checked {
+    background-color: #eee;
+  }
+}

@@ -10,8 +10,9 @@ angular.module('PeerSay', [
     'ngRoute', // TODO - remove?
     'ngMessages',
     'ngSanitize',
+    'ngAnimate',
     'ngTable',
-    'ngTableResizableColumns',
     'monospaced.elastic',
-    'ng-context-menu'
+    'ng-context-menu',
+    'ui.select'
 ]);

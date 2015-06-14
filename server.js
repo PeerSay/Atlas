@@ -43,6 +43,7 @@ app.use(passport.session());
 require('./app/api-validate')(app).setupRoutes();
 require('./app/auth')(app).setupRoutes();
 require('./app/api')(app).setupRoutes();
+require('./app/api-public')(app).setupRoutes();
 
 
 // Run

@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>PeerSay - MVP - app</title>
     <base href="/">
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css">
     <!-- build:css css/app.css -->
     <link rel="stylesheet" href="/bower_components/bootstrap3-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
-    <link rel="stylesheet" href="/bower_components/ng-table/ng-table.min.css">
+    <link rel="stylesheet" href="/bower_components/ng-table/dist/ng-table.min.css">
+    <link rel="stylesheet" href="/bower_components/angular-ui-select/dist/select.min.css">
     <link rel="stylesheet" href="/css/app.css">
     <link rel="stylesheet" href="/bower_components/bootstrap-social/bootstrap-social.css">
     <!-- endbuild -->
@@ -29,11 +29,13 @@
 <!--Notifications-->
 <div class="container-fluid" ng-controller="NotificationCtrl as m">
     <div class="row">
-        <div class="alert alert-danger text-center notification" role="alert" ng-show="m.error.show" ng-cloak>
-            <button type="button" class="close" ng-click="m.hide()">
-                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-            </button>
-            <strong>{{ m.error.title }}:</strong> {{ m.error.msg }}
+        <div class="col-xs-12">
+            <div class="alert alert-danger text-center notification" role="alert" ng-show="m.error.show" ng-cloak>
+                <button type="button" class="close" ng-click="m.hide()">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+                <strong>{{ m.error.title }}:</strong> {{ m.error.msg }}
+            </div>
         </div>
     </div>
 </div>
@@ -41,9 +43,7 @@
 <!--Main content-->
 <div ui-view></div>
 
-<!--<div ng-view=""></div>-->
 
-<!--<script src="bower_components/socket.io-client/socket.io.min.js"></script>-->
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="/bower_components/angular/angular.js"></script>
@@ -51,14 +51,15 @@
 <script src="/bower_components/angular-route/angular-route.js"></script>
 <script src="/bower_components/angular-messages/angular-messages.js"></script>
 <script src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
+<script src="/bower_components/angular-animate/angular-animate.js"></script>
 <script src="/bower_components/moment/min/moment.min.js"></script>
 <script src="/bower_components/bootstrap3-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/bower_components/ng-table/ng-table.js"></script>
-<script src="/bower_components/ng-table-resizable-columns/ng-table-resizable-columns.src.js"></script>
+<script src="/bower_components/ng-table/dist/ng-table.js"></script>
 <script src="/bower_components/angular-elastic/elastic.js"></script>
 <script src="/bower_components/ng-context-menu/dist/ng-context-menu.js"></script>
-<script src="/bower_components/fast-json-patch/dist/json-patch-duplex.min.js"></script>
+<script src="/bower_components/fast-json-patch/src/json-patch-duplex.js"></script>
 <script src="/bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+<script src="/bower_components/angular-ui-select/dist/select.js"></script>
 
 <script src="/js/app.js"></script>
 <script src="/js/routes.js"></script>
@@ -67,18 +68,17 @@
 <script src="/js/users/user.js"></script>
 <script src="/js/users/auth.ctrl.js"></script>
 <script src="/js/projects/projects.js"></script>
-<script src="/js/projects/wizard.js"></script>
 <script src="/js/projects/table.js"></script>
 <script src="/js/projects/table-model.js"></script>
 <script src="/js/projects/project-list.ctrl.js"></script>
 <script src="/js/projects/project-details.ctrl.js"></script>
-<script src="/js/projects/project-essentials-edit.ctrl.js"></script>
+<script src="/js/projects/project-table.ctrl.js"></script>
+<script src="/js/projects/project-essentials.ctrl.js"></script>
 <script src="/js/projects/project-requirements.ctrl.js"></script>
-<script src="/js/projects/project-requirements-edit.ctrl.js"></script>
 <script src="/js/projects/project-products.ctrl.js"></script>
-<script src="/js/projects/project-products-edit.ctrl.js"></script>
-<script src="/js/projects/project-shortlist.ctrl.js"></script>
-<script src="/js/projects/project-shortlist-edit.ctrl.js"></script>
+<script src="/js/projects/project-summary.ctrl.js"></script>
+<script src="/js/projects/project-dashboard.ctrl.js"></script>
+
 <script src="/js/projects/capitalize.filter.js"></script>
 <script src="/js/projects/multiline.filter.js"></script>
 <script src="/js/services/backend.svc.js"></script>
@@ -88,13 +88,14 @@
 <script src="/js/directives/tooltip.js"></script>
 <script src="/js/directives/dialog.js"></script>
 <script src="/js/directives/focus.js"></script>
-<script src="/js/directives/progress.js"></script>
 <script src="/js/directives/edit-inline.js"></script>
 <script src="/js/directives/table-view.js"></script>
 <script src="/js/directives/table-popover.js"></script>
 <script src="/js/directives/table-export-csv.js"></script>
 <script src="/js/directives/form-submit.js"></script>
 <script src="/js/directives/input-number.js"></script>
+<script src="/js/directives/date-picker.js"></script>
+<script src="/js/directives/table-input.js"></script>
 <!-- endbuild -->
 </body>
 </html>

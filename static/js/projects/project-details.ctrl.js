@@ -3,67 +3,60 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$stateParams', 'Wizard', 'Projects', 'Util'];
-function ProjectDetailsCtrl($stateParams, Wizard, Projects, _) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    // Wizard
-    m.steps = Wizard.steps;
-    m.isReached = Wizard.isReached.bind(Wizard);
-    m.openDialog = Wizard.openDialog.bind(Wizard);
-    m.stepClass = stepClass;
     //Model
     m.project = null;
-    m.openEditDialog = openEditDialog;
-    // Footer fields
-    m.fields = {
-        summary: {},
-        notes: {},
-        recommendations: {}
+    m.requirements = [];
+    m.products = [];
+    //UI helpers
+    m.sidebar = {
+        amountText: amountText,
+        dateDurationText: dateDurationText
     };
-    m.initFields = initFields;
-    m.updateField = updateField;
 
     activate();
 
     function activate() {
-        Projects.readProject(m.projectId)
-            .then(function (res) {
-                initFields(res);
-                return (m.project = res);
-            });
+        readProject();
 
+        // Re-read on navigation to get fresh (not cached) object
+        var off = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
+            if(toState.name === 'project.list') { return; } // back to list
+            readProject();
+        });
+
+        $scope.$on('$destroy', off);
     }
 
-    function stepClass(step) {
-        return {
-            active: step.reached,
-            disabled: !step.enabled,
-            current: step.current
-        };
-    }
-
-    function openEditDialog(field) {
-        m.openDialog(m.steps[0], field);
-    }
-
-    function initFields(project) {
-        var fields = ['summary', 'recommendations', 'notes'];
-        _.forEach(fields, function (fld) {
-            var field = m.fields[fld];
-            field.name = fld;
-            field.value = field.lastValue = project[fld] || '';
+    function readProject() {
+        Projects.readProject(m.projectId).then(function (res) {
+            m.project = res;
+            m.requirements = res.requirements;
+            m.products = res.products;
+            return res;
         });
     }
 
-    function updateField(model) {
-        // Manually build patch
-        var patch = {
-            op: 'replace',
-            path: '/' + model.name,
-            value: model.value
-        };
-        return Projects.patchProject(m.projectId, [patch]);
+    // UI helpers
+    function amountText() {
+        if (!m.project.budget.amount) {
+            return '';
+        }
+        return [m.project.budget.amount, m.project.budget.amountMultiplier].join(' ');
+    }
+
+    function dateDurationText() {
+        var text = '';
+        if (m.project.time.duration) {
+            text += [m.project.time.duration, m.project.time.durationLabel, ' '].join(' ');
+        }
+        if (m.project.time.startDate) {
+            text += ['@', m.project.time.startDate].join(' ');
+        }
+        return text;
     }
 }

@@ -89,8 +89,9 @@
   font-size: 12px;
 }
 /*
-* Projects
+* Projects list
 */
+
 .tile {
   display: block;
   position: relative;
@@ -136,6 +137,18 @@
     }
   }
 }
+
+.panel {
+  // Add new dialog
+  &.dialog {
+    position: relative;
+    top: -120px;
+    .btn.close {
+      margin-top: -20px;
+    }
+  }
+}
+
 
 /*
 * Project Details
@@ -301,14 +314,17 @@
     cursor: pointer;
   }
 
-  .btn.load-more {
+  .btn {
     padding: 1px 10px;
-    &:not(.loading) {
-      &:after {
-        content: 'Load More...'; // XXX - localization
-      }
-      .fa {
-        display: none;
+
+    &.load-more {
+      &:not(.loading) {
+        &:after {
+          content: 'Load More...'; // XXX - localization
+        }
+        .fa {
+          display: none;
+        }
       }
     }
   }

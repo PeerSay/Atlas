@@ -141,7 +141,7 @@
                             <td></td>
                         </tr>
                         <!--Criteria list-->
-                        <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' track by req._id"
+                        <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' | limitTo:group.paging.limit track by req._id"
                                 ng-class="{selected: req.selected}"
                                 ng-click="cm.toggleReq(req, true)">
                             <td></td>
@@ -152,14 +152,29 @@
                                         ng-click="$event.stopPropagation()"
                                         ps-focus-on="req.selected">
                             </td>
-                            <td>{{:: req.name}}</td>
-                            <td>{{:: req.description}}</td>
+                            <td>{{:: req.name }}</td>
+                            <td>{{:: req.description }}</td>
                             <td class="last">
                                 <span ng-if="!req.custom">{{:: req.popularity }}%</span>
                             </td>
                             <td>
                                 <span class="fa fa-trash remove-icon" ng-if="req.custom"
                                         ng-click="cm.removeCustomReq(req); $event.stopPropagation()"></span>
+                            </td>
+                        </tr>
+                        <!--Paging: more/less-->
+                        <tr ng-if="!group.paging.hidden()">
+                            <td colspan="6" class="text-center">
+                                <button type="button" class="btn btn-xs btn-default"
+                                        ng-click="group.paging.showLess()"
+                                        ng-disabled="group.paging.disableShowLess">
+                                    Show Less
+                                </button>
+                                <button type="button" class="btn btn-xs btn-default"
+                                        ng-click="group.paging.showMore()"
+                                        ng-disabled="group.paging.disableShowMore">
+                                    Show More
+                                </button>
                             </td>
                         </tr>
                         </tbody>
@@ -177,11 +192,10 @@
                             </td>
                         </tr>
                         <!--Load more-->
-                        <tr ng-if="cm.showLoadMoreBtn()">
+                        <tr ng-if="cm.loadingMore">
                             <td colspan="6" class="text-center">
-                                <button type="button" class="btn btn-xs btn-default load-more"
-                                        ng-class="{loading: cm.loadingMore}"
-                                        ng-click="cm.loadMore()">
+                                <button type="button" class="btn btn-xs btn-default load-more loading"
+                                        disabled>
                                     <span class="fa fa-refresh fa-spin"></span>
                                 </button>
                             </td>

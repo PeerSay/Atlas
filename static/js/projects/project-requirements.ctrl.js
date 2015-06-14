@@ -11,12 +11,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
     m.patchObserver = null;
     m.groups = GroupBy('topic');
     //Loading
-    var QUERY_LIMIT = 10;
-    var loadFrom = 0;
-    var noLoadMore = false;
     m.loadingMore = true;
-    m.loadMore = loadMore;
-    m.showLoadMoreBtn = showLoadMoreBtn;
     // Table selection
     m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
@@ -76,7 +71,16 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
             Projects.readPublicTopics().then(function (res) {
                 m.groups.addGroups(res.topics, true);
 
-                loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
+                // Loading all items!
+                return Projects.readPublicRequirements(/*no params*/)
+                    .then(function (res) {
+                        m.groups.addItems(res.requirements, false, {selected: false});
+
+                        toggleAllGroupsByReqs();
+                    })
+                    .finally(function () {
+                        m.loadingMore = false;
+                    });
             });
         });
 
@@ -103,37 +107,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
             }
             return it;
         });
-    }
-
-    function loadPublicItems(params) {
-        m.loadingMore = true;
-        return Projects.readPublicRequirements(params)
-            .then(function (res) {
-                var len = res.requirements.length;
-                var lastBatch = (len < QUERY_LIMIT);
-                if (len) {
-                    loadFrom += res.requirements.length;
-                    m.groups.addItems(res.requirements, false, {selected: false});
-
-                    toggleAllGroupsByReqs();
-                }
-                if (lastBatch) {
-                    noLoadMore = true;
-                }
-            })
-            .finally(function () {
-                m.loadingMore = false;
-            });
-    }
-
-    function loadMore() {
-        loadPublicItems({from: loadFrom, limit: QUERY_LIMIT});
-    }
-
-    function showLoadMoreBtn() {
-        var hide = noLoadMore ||
-            (m.filter.name === 'selected'); // always empty for selected filter
-        return !hide;
     }
 
     // Filters
@@ -337,6 +310,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
                     group = shared ? angular.copy(it) : it;
                     group.reqs = group.reqs || [];
                     groupIdx[it.name] = group;
+                    group.paging = Paging(group);
+
                     G.list.push(group);
                 } else {
                     //console.log('>>Adding group exiting:', group.name);
@@ -390,5 +365,42 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         }
 
         return G;
+    }
+
+    // Paging
+    //
+    function Paging(group) {
+        var P = {};
+        var MIN = 3;
+        var STEP = 3;
+        P.limit = MIN;
+        P.showMore = showFn(STEP);
+        P.showLess = showFn(-STEP);
+        P.disableShowLess = true;
+        P.disableShowMore = false;
+        P.hidden = hidden;
+
+        function showFn(diff) {
+            return function () {
+                var max = group.reqs.length;
+
+                P.limit +=  diff;
+                P.disableShowLess = P.disableShowMore = false;
+
+                if (P.limit <= MIN) {
+                    P.disableShowLess = true;
+                    P.limit = MIN;
+                } else if (P.limit >= max) {
+                    P.disableShowMore = true;
+                    P.limit = max;
+                }
+            }
+        }
+
+        function hidden() {
+            return m.loadingMore || group.custom || group.reqs.length <= MIN;
+        }
+
+        return P;
     }
 }

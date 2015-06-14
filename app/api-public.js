@@ -11,6 +11,7 @@ var errRes = require('../app/api-errors');
 var errorcodes = require('../app/errors');
 
 var DEFAULT_LIMIT = 10;
+var BIG_LIMIT = 1000000;
 
 
 function PublicRestApi(app) {
@@ -43,7 +44,7 @@ function PublicRestApi(app) {
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }
-                console.log('[API] Reading public result: count: %s', data.length);
+                console.log('[API] Reading public result: items: %d', data.length);
 
                 res.json({result: data});
             });
@@ -52,7 +53,7 @@ function PublicRestApi(app) {
     function readRequirements(req, res, next) {
         var email = (req.user || {}).email;
         var from = Number(req.query.from) || 0;
-        var limit = Number(req.query.limit) || DEFAULT_LIMIT;
+        var limit = Number(req.query.limit) || BIG_LIMIT;
 
         console.log('[API] Reading public requirements[%s]: from=%d, limit=%d', email, from, limit);
 
@@ -63,7 +64,7 @@ function PublicRestApi(app) {
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }
-                console.log('[API] Reading public requirements result: count: %s', data.length);
+                console.log('[API] Reading public requirements result: items: %d', data.length);
 
                 res.json({result: data});
             });
@@ -82,7 +83,7 @@ function PublicRestApi(app) {
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }
-                console.log('[API] Reading public categories result: count: %s', data.length);
+                console.log('[API] Reading public categories result: items: %d', data.length);
 
                 res.json({result: data});
             });
@@ -104,7 +105,7 @@ function PublicRestApi(app) {
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }
-                console.log('[API] Reading public products result: count: %s', data.length);
+                console.log('[API] Reading public products result: items: %d', data.length);
 
                 res.json({result: data});
             });

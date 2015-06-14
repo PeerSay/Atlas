@@ -10,7 +10,7 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.project = {};
     m.patchObserver = null;
     // Loading
-    var QUERY_LIMIT = 2;
+    var QUERY_LIMIT = 10;
     var loadFrom = 0;
     var noLoadMore = false;
     m.loadingMore = true;

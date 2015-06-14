@@ -163,7 +163,7 @@
                             </td>
                         </tr>
                         <!--Paging: more/less-->
-                        <tr ng-if="!group.paging.hidden()">
+                        <tr ng-if="!group.paging.disabled()">
                             <td colspan="6" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default"
                                         ng-click="group.paging.showLess()"
@@ -174,6 +174,7 @@
                                         ng-click="group.paging.showMore()"
                                         ng-disabled="group.paging.disableShowMore">
                                     Show More
+                                    <span ng-if="group.paging.hiddenItems()">({{ group.paging.hiddenItems() }})</span>
                                 </button>
                             </td>
                         </tr>

@@ -208,6 +208,10 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         if (!req._id) { return; }
 
         toggleReqVal(req, true);
+
+        // Reveal if hidden by paging
+        var group = m.groups.get(req.topic);
+        group.paging.revealItem(req);
     }
 
     // Add/Remove new
@@ -374,17 +378,19 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         var MIN = 3;
         var STEP = 3;
         P.limit = MIN;
+        P.disabled = disabled;
         P.showMore = showFn(STEP);
         P.showLess = showFn(-STEP);
         P.disableShowLess = true;
         P.disableShowMore = false;
-        P.hidden = hidden;
+        P.hiddenItems = hiddenItems;
+        P.revealItem = revealItem;
 
         function showFn(diff) {
             return function () {
                 var max = group.reqs.length;
 
-                P.limit +=  diff;
+                P.limit += diff;
                 P.disableShowLess = P.disableShowMore = false;
 
                 if (P.limit <= MIN) {
@@ -397,8 +403,21 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
             }
         }
 
-        function hidden() {
+        function disabled() {
             return m.loadingMore || group.custom || group.reqs.length <= MIN;
+        }
+
+        function hiddenItems() {
+            return group.reqs.length - P.limit;
+        }
+
+        function revealItem(req) {
+            var reqIdx = group.reqs.indexOf(req);
+            var diff = reqIdx - P.limit + 1;
+
+            if (diff > 0) {
+                showFn(diff)();
+            }
         }
 
         return P;

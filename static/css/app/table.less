@@ -1,160 +1,119 @@
 /* Data table */
-.table {
+
+@header-bg: #f5f5f5;
+@winner-bg: #f5fffa;
+@edit-bg: #f9fbdb;
+@winner-cup-color: #00805a;
+@border-vert-color: #ddd;
+
+.table-border {
+  border: 1px solid @border-vert-color;
+  border-top: 0;
+  border-radius: 4px;
+}
+
+.ng-table {
   margin-bottom: 0;
 
-  tr {
-    /*background: #cd5c5c;*/
-
-    &.grayed {
-      // TODO - fix btn/popover opacity
-      opacity: .2;
-    }
-    &.hovered td {
-      background: fadeout(#428BCA, 95%);
+  /*Header/footer*/
+  thead th {
+    &.grade {
+      padding: 3px;
       div {
-        //background: none !important;
-        outline: none !important;
+        padding: 4px;
+        border: 1px solid @border-vert-color;
+        border-radius: 3px;
+        background: #fdfdfd;
       }
+    }
+    &:first-of-type {
+      width:20%; // first
+    }
+  }
+  tfoot th {
+    text-align: left;
+  }
+
+  /*Row*/
+  tr {
+    &.muted {
+      opacity: .3;
+      background-color: rgba(0, 0, 0, 0.07);
     }
 
     /*Group row*/
     &.ng-table-group td {
       height: auto;
       padding: 3px 8px;
-      background: #f5f5f5;
       a {
         display: block;
-      }
-      .glyphicon {
-        font-size: 12px;
+        text-decoration: none;
+        outline: none;
       }
     }
 
     /*Vertical borders*/
     th + th, td + td {
-      border-left: 1px solid #ddd;
-    }
-
-    /*All cells*/
-    th, td {
-      div {
-        &.max {
-          background: #f5fffa;
-          outline: 8px solid #f5fffa; /*hack!*/
-        }
-      }
-
-      &.cell, &.editable {
-        padding: 1px;
-
-        .cell-input {
-          width: 100%;
-          height: 34px;
-          background: transparent;
-          border: none;
-          .box-shadow(none);
-          &:active, &:focus {
-            outline: 0;
-          }
-          &.max {
-            background: #f5fffa;
-            &:active, &:focus {
-              background: transparent;
-            }
-          }
-        }
-        &.edited {
-          background-color: #f9f7d0;
-          .box-shadow(~"inset 0 0 1px rgba(0,0,0,.075), 1px 1px 5px rgba(102, 175, 233, .6)");
-          input.ng-dirty.ng-invalid {
-            background-color: #ffe5e5;
-          }
-        }
-        &.text {
-          input {
-            padding: 7px;
-          }
-        }
-        &.number {
-          input {
-            padding: 2px 2px 2px 8px;
-          }
-        }
-      }
-      &.last {
-        .width-full(36px);
-      }
-      &.add-column {
-        .width-full(50px);
-        text-align: center;
-        padding: 7px 5px;
-
-        a {
-          color: #999;
-          font-weight: normal;
-          font-style: italic;
-        }
+      border-left: 2px solid @border-vert-color;
+      &.grade {
+        border-left: 1px dotted @border-vert-color;
       }
     }
 
     /*Header/footer cells*/
     th {
-      position: relative;
-      text-align: left;
-      background: #f5f5f5;
-
-      &.sortable {
-        min-width: 80px;
-        padding: 7px 0 7px 7px;
-        div {
-          &:before, &:after {
-            right: 5px;
-          }
-        }
-      }
-
-      &.editable {
-        min-width: 80px;
-      }
+      background: @header-bg;
     }
 
-    /*Body Cells*/
-    td {
-      /*Fix empty cells collapse*/
-      height: 36px;
+    /*All cells*/
+    th, td {
+      &.cell {
+        padding: 1px;
+        line-height: 20px;
 
-      &.cell.editable {
-        cursor: text;
-      }
-      &.static {
-        padding: 8px;
-        background: #f5f5f5;
-      }
-      &.ordinary, &.number-static {
-        padding: 8px;
-      }
-      &.attention, .attention {
-        font-style: italic;
-        color: #999;
-        .clickable {
-          cursor: pointer;
-          &:hover {
-            text-decoration: underline;
+        .cell-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          .box-shadow(none);
+          &, &:active, &:focus {
+            outline: 0;
           }
         }
+      }
+
+      &.static {
+        padding: 2px 5px;
+      }
+      &.number {
+        width: 1%;
+        .cell-input {
+          padding: 1px 1px 1px 5px;
+        }
+      }
+      &.text {
+        .cell-input {
+          padding: 1px 4px;
+        }
+      }
+      &.winner {
+        background: @winner-bg;
+      }
+      &.edited {
+        background: @edit-bg !important;
+      }
+      &.static {
+        background: @header-bg;
       }
     }
   }
 
-  &.dbg {
-    tr.bold {
-      td {
-        font-weight: bold;
-      }
-    }
-    td {
-      padding: 2px 8px;
-    }
+  .winner-icon {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    color: @winner-cup-color;
+    font-size: 13px;
   }
 }
 /*Hide pagination*/

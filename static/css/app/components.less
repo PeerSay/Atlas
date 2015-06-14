@@ -1,0 +1,424 @@
+/*
+* Logo
+*/
+.logo {
+  position: relative;
+  top: -10px; left: -5px;
+}
+/*
+* Auth forms
+*/
+.panel.auth {
+  box-shadow: 0 0 1px 3px #ccc;
+  overflow: hidden;
+
+  .panel-title {
+    font-size: 25px;
+  }
+
+  .hint {
+    position: absolute;
+    bottom: 50px;
+    right: -10px;
+    z-index: 3;
+    background: #FCF8E3;
+    padding: 2px 10px;
+    border-radius: 5px 5px 5px 0;
+    color: #CD5C5C;
+    border: 1px solid #EAB6B6;
+    opacity: 0;
+    transition: opacity .5s, bottom .3s;
+
+    &.ng-active.show {
+      opacity: 1;
+      bottom: 35px;
+    }
+
+    &:before, &:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      border-top: 10px solid #FCF8E3;
+      border-right: 10px solid transparent;
+    }
+    &:before {
+      left: -1px;
+      bottom: -9px;
+      border-top: 9px solid #EAB6B6;
+    }
+    span {
+      display: block;
+    }
+  }
+
+  .linkedin-section {
+    .title {
+      margin-bottom: 20px;
+    }
+    .title-or {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      margin-left: -25px;
+      width: 50px;
+      background-color: #FFF;
+      color: #CCC;
+      font-style: italic;
+    }
+  }
+}
+#activate-acc-dlg {
+  .email-sent {
+    font-size: 18px;
+    color: #428BCA;
+  }
+}
+/*
+* App Header
+*/
+.page-title {
+  margin: 0 0 20px;
+}
+.page-spacer {
+  margin-bottom: 20px;
+}
+.notification {
+  margin-top: -20px;
+  padding: 8px;
+  font-size: 12px;
+}
+/*
+* Projects list
+*/
+
+.tile {
+  display: block;
+  position: relative;
+  min-height: 100px;
+  background: #fff;
+  color: #666;
+  &:hover {
+    color: #000;
+    text-decoration: none;
+  }
+
+  &.create-new {
+    background: rgba(0, 0, 0, 0.2);
+    color: #ddd;
+    box-shadow: none;
+    &:hover {
+      color: #fff;
+    }
+    h4 {
+      line-height: 45px;
+    }
+  }
+
+  .info {
+    color: #bbb;
+    font-size: 75%;
+    line-height: 18px;
+  }
+
+  /* Tiles highlight */
+  transition: border-color .3s;
+  & > .panel-heading {
+    transition: all .3s;
+
+    // Panel header
+    h3 {
+      margin: 10px 0 5px;
+    }
+    .header-btn {
+      position: absolute;
+      top: 10px;
+      left: 15px;
+    }
+  }
+}
+
+.panel {
+  // Add new dialog
+  &.dialog {
+    position: relative;
+    top: -120px;
+    .btn.close {
+      margin-top: -20px;
+    }
+  }
+}
+
+
+/*
+* Project Details
+*/
+
+// Edit links
+.toggle-edit {
+  a.toggle-value {
+    color: inherit;
+    text-decoration: none;
+  }
+  a.toggle-label {
+    color: #ccc;
+    font-style: italic;
+    text-decoration: underline;
+  }
+  .hover-edit {
+    opacity: 0;
+    font-size: 14px;
+    transition: opacity .2s;
+  }
+  *:hover {
+    .hover-edit,
+    & + .hover-edit {
+      opacity: .2;
+    }
+  }
+  .label-text {
+    color: #666;
+    text-decoration: underline;
+  }
+}
+.edit-form {
+  textarea {
+    height: 36px;
+    max-height: 120px;
+  }
+}
+.inline-close {
+  float: none;
+  margin-left: 10px;
+  font-size: 30px;
+}
+/*
+  Tile Menus
+*/
+.tile-container {
+  position: relative;
+
+  .btn-menu-wrap {
+    position: absolute;
+    height: 38px;
+    width: 38px;
+    overflow: visible;
+    &.bottom {
+      bottom: 20px;
+      right: 15px;
+    }
+    &.top {
+      top: 0;
+      right: 0;
+    }
+
+    .btn-group.menu {
+      margin: 5px;
+      .btn {
+        padding: 3px 9px;
+        border-radius: 50%;
+      }
+      .dropdown-menu {
+        right: 0;
+        left: auto;
+      }
+    }
+  }
+
+  &.muted {
+    &:before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 20px;
+      left: 15px; right: 15px;
+      background: #ccc;
+      opacity: .2;
+      z-index: 1;
+    }
+    .fa-spinner {
+      position: absolute;
+      top: 35%; left: 50%;
+      font-size: 18px;
+      z-index: 1;
+    }
+  }
+}
+.debug {
+  display: none;
+}
+
+/*
+* Project Essentials
+*/
+.delete-category {
+  float: right;
+  color: #777;
+  font-size: 12px;
+  line-height: 20px;
+  .link:hover {
+    text-decoration: underline;
+  }
+}
+.active .delete-category {
+  color: #fff;
+}
+
+/*
+* Selection lists
+*/
+@selection-color: #17B7AD;
+@remove-color: indianred;
+
+.total-selected {
+  color: @selection-color;
+  font-weight: bold;
+}
+
+.selection-controls {
+  .button-bar {
+    .btn {
+      margin-right: 10px;
+    }
+  }
+}
+
+.table-selection-list {
+  &.border {
+    border: 1px solid @table-border-color;
+    border-radius: 4px;
+  }
+  table {
+    // Override bootstrap
+    margin-bottom: 0;
+  }
+
+  tr {
+    &.selected {
+      color: @selection-color;
+    }
+  }
+
+  td, th {
+    &.min {
+      width: 1%;
+    }
+    &.main {
+      width: 35%;
+    }
+    &.last {
+      width: 5%;
+      text-align: right;
+    }
+  }
+  td {
+    cursor: pointer;
+  }
+
+  .btn {
+    padding: 1px 10px;
+
+    &.load-more {
+      &:not(.loading) {
+        &:after {
+          content: 'Load More...'; // XXX - localization
+        }
+        .fa {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .remove-icon {
+    color: @remove-color;
+    opacity: .4;
+    transition: opacity .3s ease;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.empty-table-content {
+  .fa {
+    font-size: 25px;
+  }
+  h4 {
+    font-size:  17px;
+    margin: 5px 0 5px;
+  }
+}
+
+/*
+* Side-bar
+*/
+.side-bar {
+  .menu-item {
+    position: relative;
+    a {
+      display: block;
+      padding: 5px 0;
+      text-decoration: none;
+    }
+    &.active {
+      margin-left: -15px;
+      padding-left:  11px;
+      border-left: 4px solid @brand-primary;
+      background-color: #DCDCDC;
+      box-shadow: 0 1px 0 0 #F0F0F0, 0 -1px 0 0 #BFBFBF;
+      font-weight: bold;
+    }
+    &:hover:not(.active) {
+      margin-left: -15px;
+      padding-left:  15px;
+      background-color: #e5e5e5;
+    }
+    .label {
+      position: absolute;
+      right: -6px; top: -6px;
+      padding: 0.2em 0.4em;
+    }
+  }
+}
+
+/*
+* Override Bootstrap
+*/
+.form-horizontal {
+  .control-label {
+    &.left {
+      text-align: left;
+    }
+  }
+
+  &.compact-form{
+    .form-control-static {
+      min-height: 30px;
+    }
+
+    @media (min-width: @grid-float-breakpoint) {
+      .control-label,
+      .form-control-static {
+        padding-top: 0;
+      }
+    }
+  }
+}
+.ui-select-bootstrap > .ui-select-choices {
+  max-height: 350px;
+}
+.carousel-indicators {
+  bottom: 60px;
+}
+.input-group-addon.last {
+  border-radius: 0 4px 4px 0 !important;
+}
+.side-text {
+  width: 77%; // Found experimentally, doesn't cause break on any screen (+ required for .ellipsis)
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.navbar-brand {
+  padding: 10px 10px;
+}

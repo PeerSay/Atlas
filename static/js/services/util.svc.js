@@ -6,11 +6,13 @@ angular.module('PeerSay')
 Util.$inject = ['jQuery', '$state'];
 function Util($, $state) {
     var U = {};
-    // List
+    // Functional
     U.forEach = angular.forEach.bind(angular);
     U.map = $.map.bind($);
     U.find = find;
     U.findWhere = findWhere;
+    U.filter = filter;
+    U.removeItem = removeItem;
     // Time
     U.now = getNow();
     U.timeIt = timeIt;
@@ -93,6 +95,31 @@ function Util($, $state) {
             return true;
         });
     }
+
+    /**
+     * As Underscore's _.filter
+     * */
+    function filter(obj, predicate, context) {
+        var results = [];
+        U.forEach(obj, function(value, index, list) {
+            if (predicate.call(context, value, index, list)) {
+                results.push(value);
+            }
+        });
+        return results;
+    }
+
+    /**
+     * Removes item from array
+     * */
+    function removeItem(arr, item) {
+        var idx = arr.indexOf(item);
+        if (idx >= 0) {
+            arr.splice(idx, 1);
+        }
+        return item;
+    }
+
 
     /**
      * Debug utility: logging wrapper for ui-router $state.go()

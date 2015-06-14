@@ -22,7 +22,7 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 
     $urlRouterProvider
-        .otherwise('/auth/login'); //XXX?
+        .otherwise('/auth/login');
 
     $stateProvider
         // Auth
@@ -90,69 +90,48 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         //
         .state('project.list', {
             url: '/projects',
-            templateUrl: '/html/project-list.html',
-            controller: 'ProjectListCtrl as m'
+            templateUrl: '/html/project-list.html'
         })
         // Project > Details
         //
         .state('project.details', {
             url: '/projects/:projectId',
-            templateUrl: '/html/project-details.html',
-            controller: 'ProjectDetailsCtrl as cm',
-            resolve: {
-                wizardCurrent: ['$stateParams', 'Wizard', function($stateParams, Wizard){
-                    return Wizard.load($stateParams.projectId);
-                }]
-            }
+            templateUrl: '/html/project-details.html'
         })
-        // Project > Details > Steps
+        // Project > Details > Dashboard
         //
-        .state('project.details.steps', {
-            url: '/step-{step}',
-            views: {
-                '': {
-                    template: '<ui-view/>'
-                },
-                'step2': {
-                    templateUrl: '/html/project-tile.html',
-                    controller: 'ProjectRequirementsCtrl as cm'
-                },
-                'step3': {
-                    templateUrl: '/html/project-tile.html',
-                    controller: 'ProjectProductsCtrl as cm'
-                },
-                'step4': {
-                    templateUrl: '/html/project-tile.html',
-                    controller: 'ProjectShortlistCtrl as cm'
-                }
-            }
+        .state('project.details.dashboard', {
+            url: '/dashboard',
+            templateUrl: '/html/project-dashboard.html'
         })
-        // Project > Details > Steps > Essentials
+        // Project > Details > Decisions
         //
-        .state('project.details.steps.essentials', {
+        .state('project.details.decisions', {
+            url: '/decisions',
+            templateUrl: '/html/project-decisions.html'
+        })
+        // Project > Details > Notes
+        //
+        .state('project.details.notes', {
+            url: '/notes',
+            templateUrl: '/html/project-notes.html'
+        })
+        // Project > Details > Essentials
+        //
+        .state('project.details.essentials', {
             url: '/essentials?edit={field}',
-            templateUrl: '/html/project-essentials-edit.html',
-            controller: 'ProjectEssentialsEditCtrl as cm'
+            templateUrl: '/html/project-essentials.html'
         })
-        // Project > Details > Steps > Requirements
+        // Project > Details > Requirements
         //
-        .state('project.details.steps.requirements', {
+        .state('project.details.requirements', {
             url: '/requirements',
-            templateUrl: '/html/project-requirements-edit.html',
-            controller: 'ProjectRequirementsEditCtrl as cm'
+            templateUrl: '/html/project-requirements.html'
         })
-        // Project > Details > Steps > Products
+        // Project > Details > Products
         //
-        .state('project.details.steps.products', {
+        .state('project.details.products', {
             url: '/products',
-            templateUrl: '/html/project-products-edit.html',
-            controller: 'ProjectProductsEditCtrl as cm'
-        })
-        // Project > Details > Steps > Decisions
-        //
-        .state('project.details.steps.shortlist', {
-            url: '/shortlist',
-            templateUrl: '/html/project-shortlist-edit.html',
-            controller: 'ProjectShortlistEditCtrl as cm'
+            templateUrl: '/html/project-products.html'
         });
 }

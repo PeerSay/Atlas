@@ -1,6 +1,6 @@
 <div class="container-fluid" ng-controller="AuthCtrl as m">
     <div class="row">
-        <div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+        <div class="col-sm-6 col-sm-offset-3 col-lg-4 col-lg-offset-4">
             <div class="panel panel-default auth">
                 <div class="panel-heading">
                     <h2 class="panel-title">Login</h2>
@@ -20,7 +20,7 @@
                             <div class="input-group input-group-lg" ng-class="{
                                     'has-success': m.form.email.$valid,
                                     'has-warning': m.form.email.$touched && m.form.email.$invalid}">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+                                <span class="input-group-addon"><span class="fa fa-fw fa-envelope"></span></span>
                                 <div class="hint" ng-messages="m.form.email.$error" ng-class="{show: m.form.email.$touched}">
                                     <div ng-message="required">Required</div>
                                     <div ng-message="email">Invalid email!</div>
@@ -38,7 +38,7 @@
                             <div class="input-group input-group-lg" ng-class="{
                                     'has-success': m.form.password.$valid,
                                     'has-warning': m.form.password.$touched && m.form.password.$invalid}">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+                                <span class="input-group-addon"><span class="fa fa-fw fa-key"></span></span>
                                 <div class="hint" ng-messages="m.form.password.$error" ng-class="{show: m.form.password.$touched}">
                                     <div ng-message="required">Required</div>
                                     <div ng-message="minlength">6 chars or more</div>
@@ -66,7 +66,7 @@
                             <a href="/auth/restore">Forgot password?</a>
                         </div>
 
-                        <button class="btn btn-lg btn-primary pull-right"
+                        <button type="submit" class="btn btn-lg btn-primary pull-right"
                                 ng-disabled="m.form.$invalid">
                             Login
                         </button>

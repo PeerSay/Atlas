@@ -9,7 +9,7 @@ angular
                         delay: { "show": 400, "hide": 50 }
                     });
 
-                scope.$watch(attrs.psTooltipTitle, function(value) {
+                scope.$watch(attrs.psTooltip, function(value) {
                     updateTitle(value);
                 });
 

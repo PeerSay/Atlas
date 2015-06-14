@@ -11,12 +11,14 @@ psExportCsv.$inject = ['$parse', 'Util', 'TableModel'];
 function psExportCsv($parse, _, TableModel) {
     return {
         restrict: 'A',
-        scope: false,
+        scope: {
+            getCsv: '&'
+        },
         link: function(scope, element, attrs) {
             var data = '';
             var csv = {
                 generate: function() {
-                    data = TableModel.viewModel.getCSV();
+                    data = scope.getCsv();
                 },
                 link: function() {
                     // Work only in Chrome?

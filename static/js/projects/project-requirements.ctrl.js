@@ -404,7 +404,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         }
 
         function disabled() {
-            return m.loadingMore || group.custom || group.reqs.length <= MIN;
+            return m.loadingMore || m.filter.name !== 'all'|| group.custom || group.reqs.length <= MIN;
         }
 
         function hiddenItems() {

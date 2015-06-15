@@ -16,9 +16,8 @@
                             <a ui-sref="^.essentials({})">Essentials</a>
                         </h4>
                         <p ng-if="!board.essentials.initialized">
-                            There are some missing essential information for this project.
                             Essential information  is required for PeerSay to suggest effective alternatives.
-                            Follow <a ui-sref="^.essentials({})">this link</a> to add Project essentials.
+                            Go to <a ui-sref="^.essentials({})">Project essentials</a> to add some of this information.
                         </p>
                         <form class="form-horizontal compact-form"
                                 ng-if="board.essentials.initialized"
@@ -93,7 +92,7 @@
                         <p ng-if="!board.products.initialized">
                             There are no products selected yet. PeerSay presents popular products
                             per category, and allows you to view grades and opinions based on different criteria.
-                            Follow <a ui-sref="^.products">this link</a> to add Products.
+                            Go to the <a ui-sref="^.products">Products page</a> to add Products.
                         </p>
                         <div ng-if="board.products.initialized">
                             <p>There are <span> {{:: board.products.data.length }}</span> products selected:</p>

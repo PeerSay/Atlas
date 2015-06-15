@@ -16,7 +16,7 @@
                     <div class="form-group">
                         <label for="es-reason" class="control-label">Please describe the reasons for this project evaluation:</label>
                         <textarea id="es-reason" class="form-control vert"
-                                placeholder="I want to add an extra 10TB storage to the companies backup server"
+                                placeholder="Example: There's a strong need to add an extra 10TB storage to the company's backup server."
                                 ng-model="cm.project.notes.reasons"
                                 ng-blur="cm.patchProject()"
                                 ps-focus-on="cm.focusField === 'reasons'"
@@ -51,7 +51,7 @@
                     <div class="form-group">
                         <label for="es-goal" class="control-label">What are the project goals?</label>
                         <textarea id="es-goal" class="form-control vert"
-                                placeholder="The new backup system should extend the current 6TB transparently..."
+                                placeholder="Example: The new backup system should extend the current 6TB transparently."
                                 ng-model="cm.project.notes.goals"
                                 ng-blur="cm.patchProject()"
                                 ps-focus-on="cm.focusField === 'goals'"
@@ -82,7 +82,7 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <input id="es-budget" name="esBudget" type="number" class="form-control" placeholder="10K"
+                                    <input id="es-budget" name="esBudget" type="number" class="form-control"
                                             ng-model="cm.project.budget.amount"
                                             ng-blur="cm.saveNumber(cm.project.budget, 'amount',  cm.form.esBudget.$invalid)"
                                             ps-focus-on="cm.focusField === 'budget'"
@@ -108,7 +108,7 @@
                             <label for="es-resource" class="col-sm-2 control-label left">Resources:</label>
                             <div class="col-sm-10">
                                 <input id="es-resource" type="text" class="form-control"
-                                        placeholder="2 employees part time for 2 months"
+                                        placeholder="Example: 2 employees part time for 2 months"
                                         ng-model="cm.project.notes.resources"
                                         ng-blur="cm.patchProject()"
                                         ps-focus-on="cm.focusField === 'resources'"
@@ -121,7 +121,7 @@
                         <!--Col #1: Start Date-->
                         <div class="col-sm-6 form-horizontal">
                             <div class="form-group">
-                                <label for="es-start-date" class="col-sm-4 control-label text-nowrap left">Begin date:</label>
+                                <label for="es-start-date" class="col-sm-4 control-label text-nowrap left">Due date:</label>
                                 <div class="col-sm-8">
                                     <div class="input-group date">
                                         <input id="es-start-date" type="text" class="form-control"
@@ -141,7 +141,7 @@
                                 <label for="es-duration" class="col-sm-4 control-label">Duration:</label>
                                 <div class="col-sm-8">
                                     <div class="input-group" ng-class="{'has-error': cm.form.esDuration.$invalid}">
-                                        <input id="es-duration" name="esDuration" type="number" class="form-control" placeholder="6"
+                                        <input id="es-duration" name="esDuration" type="number" class="form-control"
                                                 ng-model="cm.project.time.duration"
                                                 ng-blur="cm.saveNumber(cm.project.time, 'duration', cm.form.esDuration.$invalid)"
                                                 ps-focus-on="cm.focusField === 'duration'"

@@ -15,9 +15,9 @@ var UIDCHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 var defaultProject = {
     title: 'Welcome Project'
 };
-var durationLabelEnum = ['days', 'weeks', 'months'];
-var amountMultiplierEnum = ['K', 'M'];
-var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS', 'RUB', 'BTC']; // ISO 4217 codes (BTC is unofficial)
+var durationLabelEnum = ['Days', 'Weeks', 'Months'];
+var amountMultiplierEnum = ['----', 'Thousands'];
+var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes (BTC is unofficial)
 var psShortId = {
     type: ShortId,
     len: 8,
@@ -45,7 +45,7 @@ var projectSchema = new Schema({
     time: {
         startDate: {type: Date},
         duration: {type: Number, min: 0},
-        durationLabel: {type: String, enum: durationLabelEnum, default: 'days'},
+        durationLabel: {type: String, enum: durationLabelEnum, default: 'Weeks'},
         durationLabels: {type: String, default: durationLabelEnum.join(',')}
     },
 
@@ -53,7 +53,7 @@ var projectSchema = new Schema({
     // - was: budget:String
     budget: {
         amount: {type: Number, min: 0},
-        amountMultiplier: {type: String, enum: amountMultiplierEnum, default: 'K'},
+        amountMultiplier: {type: String, enum: amountMultiplierEnum, default: '----'},
         amountMultipliers: {type: String, default: amountMultiplierEnum.join(',')},
         currencyLabel: {type: String, enum: currencyEnum, default: 'USD'},
         currencyLabels: {type: String, default: currencyEnum.join(',')}

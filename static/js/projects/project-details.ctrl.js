@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects', 'budgetFilter'];
-function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, budgetFilter) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', '$filter', 'Projects', 'budgetFilter'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects, budgetFilter) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -57,7 +57,8 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, budgetFi
             text += [m.project.time.duration, m.project.time.durationLabel, ' '].join(' ');
         }
         if (m.project.time.startDate) {
-            text += ['@', m.project.time.startDate].join(' ');
+            var date = $filter('date')(m.project.time.startDate, 'MM/dd/yyyy');
+            text += ['@', date].join(' ');
         }
         return text;
     }

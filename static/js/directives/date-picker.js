@@ -2,7 +2,7 @@ angular
     .module('PeerSay')
     .directive('psDatePicker', psDatePicker);
 
-// Requires: bootstrap3-datetimepicker (jQuery plugin)
+// Requires: eonasdan-bootstrap-datetimepicker (jQuery plugin)
 
 psDatePicker.$inject = ['$timeout'];
 function psDatePicker($timeout) {
@@ -11,8 +11,7 @@ function psDatePicker($timeout) {
         restrict: 'A',
         link: function (scope, element, attrs, ngModelCtrl) {
             var options = {
-                //format: 'DD/MM/YYYY', // XXX - this format cannot be saved to server
-                //disabledHours: true, //TODO: uncomment after upgrade to 4.13.28
+                format: 'L', // This format prevents hours selection/display (only date)
                 icons: {
                     date: 'fa fa-calendar',
                     next: 'fa fa-chevron-right',

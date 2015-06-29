@@ -33,7 +33,7 @@
         "ng-table": "~0.5.4",
         "ng-context-menu": "~1.0.1",
         "bootstrap": "~3.3.4",
-        "bootstrap3-datetimepicker": "~4.7.14",
+        "eonasdan-bootstrap-datetimepicker": "~4.14.30",
         "bootstrap-social": "~4.9.0",
         "font-awesome": "~4.3.0",
         "fast-json-patch": "~0.5.0"

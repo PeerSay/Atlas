@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects'];
-function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', '$filter', 'Projects', 'budgetFilter'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects, budgetFilter) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -15,6 +15,7 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects) {
     //UI helpers
     m.sidebar = {
         amountText: amountText,
+        amountHtml: amountHtml,
         dateDurationText: dateDurationText
     };
 
@@ -42,11 +43,12 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects) {
     }
 
     // UI helpers
+    function amountHtml() {
+        return budgetFilter(m.project.budget);
+    }
+
     function amountText() {
-        if (!m.project.budget.amount) {
-            return '';
-        }
-        return [m.project.budget.amount, m.project.budget.amountMultiplier].join(' ');
+        return budgetFilter(m.project.budget, true);
     }
 
     function dateDurationText() {
@@ -55,7 +57,8 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects) {
             text += [m.project.time.duration, m.project.time.durationLabel, ' '].join(' ');
         }
         if (m.project.time.startDate) {
-            text += ['@', m.project.time.startDate].join(' ');
+            var date = $filter('date')(m.project.time.startDate, 'MM/dd/yyyy');
+            text += ['@', date].join(' ');
         }
         return text;
     }

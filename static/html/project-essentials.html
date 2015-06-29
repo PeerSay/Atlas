@@ -82,7 +82,8 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <input id="es-budget" name="esBudget" type="number" class="form-control"
+                                    <input type="number" id="es-budget" name="esBudget" class="form-control"
+                                            min="0"
                                             ng-model="cm.project.budget.amount"
                                             ng-blur="cm.saveNumber(cm.project.budget, 'amount',  cm.form.esBudget.$invalid)"
                                             ps-focus-on="cm.focusField === 'budget'"
@@ -125,7 +126,7 @@
                                 <div class="col-sm-8">
                                     <div class="input-group date">
                                         <input id="es-start-date" type="text" class="form-control"
-                                                placeholder="mm/yy"
+                                                placeholder="MM/dd/yyyy"
                                                 ng-model="cm.project.time.startDate"
                                                 ps-date-picker
                                                 ng-blur="cm.patchProject()"
@@ -141,7 +142,8 @@
                                 <label for="es-duration" class="col-sm-4 control-label">Duration:</label>
                                 <div class="col-sm-8">
                                     <div class="input-group" ng-class="{'has-error': cm.form.esDuration.$invalid}">
-                                        <input id="es-duration" name="esDuration" type="number" class="form-control"
+                                        <input type="number" id="es-duration" name="esDuration" class="form-control"
+                                                min="0"
                                                 ng-model="cm.project.time.duration"
                                                 ng-blur="cm.saveNumber(cm.project.time, 'duration', cm.form.esDuration.$invalid)"
                                                 ps-focus-on="cm.focusField === 'duration'"

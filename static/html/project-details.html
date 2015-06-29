@@ -41,7 +41,7 @@
                             <a class="side-text ellipsis"
                                     ui-sref=".essentials({edit: 'budget'})"
                                     ps-tooltip="cm.sidebar.amountText()">
-                                {{ cm.sidebar.amountText() }}
+                                <span ng-bind-html="cm.sidebar.amountHtml()"></span>
                             </a>
                         </li>
                         <!--Resources-->

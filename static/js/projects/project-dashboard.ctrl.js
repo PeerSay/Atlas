@@ -49,7 +49,7 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
         angular.extend(m.essentials.data, {
             goals: project.notes.goals,
             category: project.selectedCategory || null,
-            budget: project.budget.amount,
+            budget: project.budget,
             duration: project.time.duration,
             durationLabel: project.time.durationLabel
         });

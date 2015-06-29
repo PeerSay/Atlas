@@ -58,13 +58,13 @@
                                 <label class="col-sm-3 control-label left">Budget:</label>
                                 <div class="col-sm-3 toggle-edit">
                                     <a class="form-control-static toggle-value"
-                                            ng-if="data.budget"
+                                            ng-if="data.budget.amount"
                                             ui-sref="^.essentials({edit: 'budget'})">
-                                        {{:: data.budget }}
+                                        <span ng-bind-html=":: data.budget | budget"></span>
                                         <span class="fa fa-edit hover-edit"></span>
                                     </a>
                                     <a class="text-info"
-                                            ng-if="!data.budget"
+                                            ng-if="!data.budget.amount"
                                             ui-sref="^.essentials({edit: 'budget'})">Add</a>
                                 </div>
                                 <!--Duration-->

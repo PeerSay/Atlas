@@ -7,8 +7,8 @@ angular
     .directive('psExportCsv', psExportCsv);
 
 
-psExportCsv.$inject = ['$parse', 'Util', 'TableModel'];
-function psExportCsv($parse, _, TableModel) {
+psExportCsv.$inject = ['$parse'];
+function psExportCsv($parse) {
     return {
         restrict: 'A',
         scope: {

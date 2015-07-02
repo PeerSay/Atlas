@@ -1,0 +1,37 @@
+/*
+Project Details
+*/
+// Title
+.title-row {
+  .make-row();
+  .title-col {
+    .make-xs-column(12);
+  }
+}
+
+.content-row {
+  .make-row();
+  //Side-bar
+  .sidebar-col {
+    .make-xs-column(12);
+    .make-sm-column(2); // 1/6 of screen on non-mobile
+
+    .sidebar-section-col {
+      .make-xs-column(6); // 1/2 of screen on mobile
+      .make-sm-column(12);
+    }
+  }
+  //Content
+  .content-container-col {
+    .make-xs-column(12);
+    .make-sm-column(10); // 5/6 of screen on non-mobile (all but sidebar)
+
+    .content-col {
+      .make-xs-column(12);
+      &:not(.full) {
+        .make-lg-column(9.6); // makes content centered on lg
+      }
+      transition: width .3s ease;
+    }
+  }
+}

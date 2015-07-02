@@ -350,7 +350,7 @@
 }
 
 /*
-* Side-bar
+* Side-bar menu
 */
 .side-bar {
   .menu-item {
@@ -378,6 +378,51 @@
       right: 5px; top: 5px;
       padding: 0.2em 0.4em;
     }
+  }
+}
+
+/*Full-screen toggle*/
+.fullscreen-toggle {
+  display: none;
+  position: absolute;
+  top: 0; right: -10px;
+  background: #ccc;
+  height: ~"calc(100% - 20px)";
+  width: 40px;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  opacity: .4;
+  &:hover {
+    opacity: .8;
+  }
+
+  .fa {
+    display: inline-block;
+    text-align: center;
+    font-size: 24px;
+    width: 24px;
+    .center-square(24px);
+    color: #fff;
+  }
+}
+
+.content-col.full {
+  .fullscreen-toggle {
+    right: 0;
+    width: 30px;
+    .fa {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// Hidden if not lg
+@media (min-width: @screen-lg-min) {
+  &.has-fullscreen-toggle {
+    margin-right: @grid-gutter-width / 2;
+  }
+  .fullscreen-toggle {
+    display: block;
   }
 }
 
@@ -414,7 +459,8 @@
   border-radius: 0 4px 4px 0 !important;
 }
 .side-text {
-  width: 77%; // Found experimentally, doesn't cause break on any screen (+ required for .ellipsis)
+  width: 70%; // Found experimentally, doesn't cause break on any screen (+ required for .ellipsis)
+  width:  ~"calc(100% - 34px)"; // Better suites: in px is a max size of percent col + padding
   display: inline-block;
   vertical-align: middle;
 }

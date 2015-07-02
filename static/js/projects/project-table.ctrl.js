@@ -16,6 +16,13 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     m.getCsv = table.getCsv.bind(table);
     m.loadingMore = true;
     m.activate = activate;
+    //Fullscreen
+    m.fullscreen = {
+        on: false,
+        toggle: function () {
+            this.on = !this.on;
+        }
+    };
 
     $scope.$on('$destroy', function () {
         jsonpatch.unobserve(m.project, m.patchObserver);
@@ -111,7 +118,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                 _.forEach(req.products, function (prod) {
                     // Input
                     var colInputKey = 'prod-input-' + prod.prodId;
-                    addHeader(colInputKey, {label: prod.name});
+                    addHeader(colInputKey, {label: prod.name, 'class': 'text-input'});
                     addCell(colInputKey, rowIdx, req, {
                         model: CellModel(prod, 'input'),
                         type: 'text'

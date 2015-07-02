@@ -5,6 +5,7 @@
 @edit-bg: #f9fbdb;
 @winner-cup-color: #00805a;
 @border-vert-color: #ddd;
+@min-text-column-width: 200px;
 
 .table-border {
   border: 1px solid @border-vert-color;
@@ -27,7 +28,11 @@
       }
     }
     &:first-of-type {
-      width:20%; // first
+      width:20%; // first col
+      min-width: @min-text-column-width;
+    }
+    &.text-input {
+      min-width: @min-text-column-width;
     }
   }
   tfoot th {

@@ -292,6 +292,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             var oldTopic = curReq.topic;
             angular.extend(curReq, E.model);
             m.groups.relocate(curReq, oldTopic, curReq.topic);
+
+            toggleGroupByReqs(m.groups.get(curReq.topic));
         }
 
         function pick(obj) {
@@ -437,10 +439,11 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 oldGroup.reqs.splice(oldIdx, 1);
             }
 
-            var newGroup = name ? getGroup(name) : null;
-            if (newGroup) {
-                newGroup.reqs.push(req);
+            var group = getGroup(name);
+            if (!group) {
+                group = addGroupByName(name);
             }
+            group.reqs.push(req);
         }
 
         return G;

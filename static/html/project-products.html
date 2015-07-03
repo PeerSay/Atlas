@@ -121,7 +121,7 @@
                             <th class="min"></th>
                             <th class="main">Name</th>
                             <th>Description</th>
-                            <th class="last">Popularity</th>
+                            <th class="min center">Popularity</th>
                             <th class="min"><span class="fa fa-trash"></span></th>
                         </tr>
                         </thead>
@@ -139,7 +139,7 @@
                             </td>
                             <td class="main">{{:: product.name }}</td>
                             <td>{{:: product.description }}</td>
-                            <td class="last">
+                            <td class="center">
                                 <span ng-if="!product.custom">{{:: product.popularity }}%</span>
                             </td>
                             <td>

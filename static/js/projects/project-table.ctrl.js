@@ -16,7 +16,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     m.getCsv = table.getCsv.bind(table);
     m.loadingMore = true;
     m.activate = activate;
-    //Fullscreen
+    //Full screen
     m.fullscreen = {
         on: false,
         toggle: function () {
@@ -98,12 +98,19 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             addHeader('name', {label: 'Requirement'});
             addFooter('name', {label: 'Total:', type: 'static'});
 
+            addHeader('mandatory', {label: 'Mandatory'});
+            addFooter('mandatory', {label: '', type: 'static'});
+
             addHeader('weight', {label: 'Weight'});
             addFooter('weight', {label: '100%', type: 'static'});
 
             _.forEach(reqs, function (req, rowIdx) {
                 addCell('name', rowIdx, req, {
                     label: req.name,
+                    type: 'static'
+                });
+                addCell('mandatory', rowIdx, req, {
+                    label: req.mandatory,
                     type: 'static'
                 });
                 addCell('weight', rowIdx, req, {

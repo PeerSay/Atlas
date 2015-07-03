@@ -320,14 +320,13 @@ function RestApi(app) {
      * ]
      * */
     function applyPatch(model, patch, cb) {
-        //console.log('[API] Applying patch: ', patch);
-
         var firstPatch = patch[0]; // only first!
         var op = firstPatch.op;
         var result = {};
         result[op] = true;
 
-        // Patch
+        // Using json-path lib here instead of fast-json-patch,
+        // because the latter clutters Mongoose object after apply
         try {
             jsonPatch.apply(model, patch);
         }

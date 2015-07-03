@@ -209,7 +209,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             description: '',
             popularity: 100,
             selected: true,
-            custom: true
+            custom: true,
+            mandatory: false
         };
 
         E.model = pick(emptyNew);
@@ -300,7 +301,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             return {
                 name: obj.name,
                 description: obj.description,
-                topic: obj.topic
+                topic: obj.topic,
+                mandatory: !!obj.mandatory
             };
         }
 

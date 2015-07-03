@@ -6,7 +6,7 @@ function load(dataArr, Model, picks) {
 
         Model.findOrCreate(search, doc, {upsert: true}, function (err, doc, created) {
             var op = created ? 'created' : 'updated';
-            console.log('[DB] Populate [%s] from JSON: %s: %s', Model.modelName, op, JSON.stringify(doc));
+            //console.log('[DB] Populate [%s] from JSON: %s: %s', Model.modelName, op, JSON.stringify(doc));
         });
     });
 }

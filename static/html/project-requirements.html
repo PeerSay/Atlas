@@ -99,6 +99,14 @@
                     </div>
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
+                            <label class="checkbox-ext no-select" ng-class="{checked: cm.edit.model.mandatory}">
+                                <input type="checkbox" ng-model="cm.edit.model.mandatory">
+                                Mandatory
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
                             <button type="button" class="btn btn-primary"
                                     ng-click="cm.edit.save()"
                                     ng-disabled="cm.addForm.$invalid">Save
@@ -119,7 +127,8 @@
                             <th class="min"></th>
                             <th colspan="2" class="main">Name</th>
                             <th>Description</th>
-                            <th class="last">Popularity</th>
+                            <th class="min center">Mandatory</th>
+                            <th class="min center">Popularity</th>
                             <th class="min"><span class="fa fa-fw fa-edit"></span></th>
                             <th class="min"><span class="fa fa-fw fa-trash"></span></th>
                         </tr>
@@ -138,7 +147,8 @@
                             </td>
                             <td colspan="2" class="bold"><strong>{{:: group.name }}</strong></td>
                             <td>{{:: group.description }}</td>
-                            <td class="last"><span ng-if="!group.custom">{{:: group.popularity }}%</span></td>
+                            <td></td>
+                            <td class="center"><span ng-if="!group.custom">{{:: group.popularity }}%</span></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -156,7 +166,10 @@
                             </td>
                             <td>{{ req.name }}</td>
                             <td>{{ req.description }}</td>
-                            <td class="last">
+                            <td class="center">
+                                <span class="fa fa-check" ng-if="req.mandatory && req.selected"></span>
+                            </td>
+                            <td class="center">
                                 <span ng-if="!req.custom">{{:: req.popularity }}%</span>
                             </td>
                             <td>
@@ -170,7 +183,7 @@
                         </tr>
                         <!--Paging: more/less-->
                         <tr ng-if="!group.paging.disabled()">
-                            <td colspan="7" class="text-center">
+                            <td colspan="8" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default"
                                         ng-click="group.paging.showLess()"
                                         ng-disabled="group.paging.disableShowLess">
@@ -189,7 +202,7 @@
                         <!--Empty list-->
                         <tr class="empty-table-content"
                                 ng-if="!cm.loadingMore && cm.isEmptyTable()">
-                            <td colspan="7" class="text-center">
+                            <td colspan="8" class="text-center">
                                 <span class="fa fa-info-circle"></span>
                                 <h4>Couldn't find anything.</h4>
                                 <p>
@@ -200,7 +213,7 @@
                         </tr>
                         <!--Load more-->
                         <tr ng-if="cm.loadingMore">
-                            <td colspan="7" class="text-center">
+                            <td colspan="8" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default load-more loading"
                                         disabled>
                                     <span class="fa fa-refresh fa-spin"></span>

@@ -99,8 +99,8 @@
                     </h4>
                     <ul class="animate-ease-right">
                         <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id"
-                                ps-tooltip=":: req.name">
-                            <span class="side-text ellipsis">{{:: req.name }}</span>
+                                ps-tooltip="req.name">
+                            <span class="side-text ellipsis">{{ req.name }}</span>
                             <span class="pull-right" ng-if=":: !req.custom">{{:: req.popularity }}%</span>
                         </li>
                     </ul>

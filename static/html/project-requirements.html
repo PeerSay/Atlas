@@ -54,23 +54,23 @@
                         </div>
                         <!--Add new-->
                         <button type="button" class="btn btn-default"
-                                ng-click="cm.toggleAddNew()">
-                            <span class="fa fa-{{ cm.addNew.show && 'minus' || 'plus' }}-circle"></span> New
+                                ng-click="cm.edit.toggleByBtn()">
+                            <span class="fa fa-{{ cm.edit.visible && 'minus' || 'plus' }}-circle"></span> New
                         </button>
                     </div>
                 </form>
 
                 <!--Add form-->
-                <form name="cm.addForm" class="form-horizontal page-spacer" ng-show="cm.addNew.show">
+                <form name="cm.addForm" class="form-horizontal page-spacer" ng-show="cm.edit.visible">
                     <!--Topic-->
                     <div class="form-group">
                         <label class="col-sm-2 control-label text-left-important">Topic:</label>
                         <div class="col-sm-10">
-                            <ui-select ng-model="cm.addNew.topic.selected" theme="bootstrap"
-                                    tagging="cm.addNotFoundTopic"
+                            <ui-select ng-model="cm.edit.topic.selected" theme="bootstrap"
+                                    tagging="cm.edit.topic.onAddNew"
                                     tagging-tokens="ENTER"
                                     tagging-label="(adding new)"
-                                    on-select="cm.onSelectTopic($model)">
+                                    on-select="cm.edit.topic.onSelect($model)">
                                 <ui-select-match placeholder="Select a topic or add a new one...">
                                     {{ $select.selected.name }}
                                 </ui-select-match>
@@ -85,8 +85,8 @@
                         <label for="req-name" class="col-sm-2 control-label text-left-important">Name:</label>
                         <div class="col-sm-10">
                             <input type="text" id="req-name" class="form-control" placeholder="Name"
-                                    ng-model="cm.addNew.model.name"
-                                    ps-focus-on="cm.addNew.show"
+                                    ng-model="cm.edit.model.name"
+                                    ps-focus-on="cm.edit.visible"
                                     required>
                         </div>
                     </div>
@@ -94,17 +94,17 @@
                         <label for="req-descr" class="col-sm-2 control-label text-left-important">Description:</label>
                         <div class="col-sm-10">
                             <input type="text" id="req-descr" class="form-control" placeholder="Description"
-                                    ng-model="cm.addNew.model.description">
+                                    ng-model="cm.edit.model.description">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="button" class="btn btn-primary"
-                                    ng-click="cm.saveAddNew()"
-                                    ng-disabled="cm.addForm.$invalid">Add
+                                    ng-click="cm.edit.save()"
+                                    ng-disabled="cm.addForm.$invalid">Save
                             </button>
                             <button type="button" class="btn close inline-close"
-                                    ng-click="cm.cancelAddNew()">
+                                    ng-click="cm.edit.cancel()">
                                 <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                             </button>
                         </div>
@@ -120,7 +120,8 @@
                             <th colspan="2" class="main">Name</th>
                             <th>Description</th>
                             <th class="last">Popularity</th>
-                            <th class="min"><span class="fa fa-trash"></span></th>
+                            <th class="min"><span class="fa fa-fw fa-edit"></span></th>
+                            <th class="min"><span class="fa fa-fw fa-trash"></span></th>
                         </tr>
                         </thead>
                         <!--Groups list-->
@@ -139,6 +140,7 @@
                             <td>{{:: group.description }}</td>
                             <td class="last"><span ng-if="!group.custom">{{:: group.popularity }}%</span></td>
                             <td></td>
+                            <td></td>
                         </tr>
                         <!--Criteria list-->
                         <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' | limitTo:group.paging.limit track by req._id"
@@ -152,19 +154,23 @@
                                         ng-click="$event.stopPropagation()"
                                         ps-focus-on="req.selected">
                             </td>
-                            <td>{{:: req.name }}</td>
-                            <td>{{:: req.description }}</td>
+                            <td>{{ req.name }}</td>
+                            <td>{{ req.description }}</td>
                             <td class="last">
                                 <span ng-if="!req.custom">{{:: req.popularity }}%</span>
                             </td>
                             <td>
-                                <span class="fa fa-trash remove-icon" ng-if="req.custom"
-                                        ng-click="cm.removeCustomReq(req); $event.stopPropagation()"></span>
+                                <span class="fa fa-fw fa-edit table-icon" ng-if="req.selected || req.custom"
+                                        ng-click="cm.edit.init(req); $event.stopPropagation()"></span>
+                            </td>
+                            <td>
+                                <span class="fa fa-fw fa-trash table-icon" ng-if="req.selected || req.custom"
+                                        ng-click="cm.removeLocalReq(req); $event.stopPropagation()"></span>
                             </td>
                         </tr>
                         <!--Paging: more/less-->
                         <tr ng-if="!group.paging.disabled()">
-                            <td colspan="6" class="text-center">
+                            <td colspan="7" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default"
                                         ng-click="group.paging.showLess()"
                                         ng-disabled="group.paging.disableShowLess">
@@ -183,7 +189,7 @@
                         <!--Empty list-->
                         <tr class="empty-table-content"
                                 ng-if="!cm.loadingMore && cm.isEmptyTable()">
-                            <td colspan="6" class="text-center">
+                            <td colspan="7" class="text-center">
                                 <span class="fa fa-info-circle"></span>
                                 <h4>Couldn't find anything.</h4>
                                 <p>
@@ -194,7 +200,7 @@
                         </tr>
                         <!--Load more-->
                         <tr ng-if="cm.loadingMore">
-                            <td colspan="6" class="text-center">
+                            <td colspan="7" class="text-center">
                                 <button type="button" class="btn btn-xs btn-default load-more loading"
                                         disabled>
                                     <span class="fa fa-refresh fa-spin"></span>

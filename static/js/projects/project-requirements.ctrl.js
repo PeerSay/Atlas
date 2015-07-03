@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
-function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, jsonpatch, _) {
+ProjectRequirementsCtrl.$inject = ['$scope', '$stateParams', '$timeout', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
+function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filterFilter, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -36,26 +36,10 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
     m.toggleFilter = toggleFilter;
     m.showFilteredGroup = showFilteredGroup;
     m.isEmptyTable = isEmptyTable;
-    // Add/remove new
-    var emptyNew = {
-        name: '',
-        topic: '',
-        description: '',
-        popularity: 100,
-        selected: true,
-        custom: true
-    };
-    m.addNew = {
-        show: false,
-        model: angular.copy(emptyNew),
-        topic: {} // ui-select model
-    };
-    m.toggleAddNew = toggleAddNew;
-    m.cancelAddNew = cancelAddNew;
-    m.saveAddNew = saveAddNew;
-    m.onSelectTopic = onSelectTopic;
-    m.addNotFoundTopic = addNotFoundTopic;
-    m.removeCustomReq = removeCustomReq;
+    // Edit/add new
+    m.edit = Edit();
+    // Remove
+    m.removeLocalReq = removeLocalReq; //TODO - unselect if not-custom
 
 
     activate();
@@ -90,9 +74,11 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
     }
 
     function patchProject() {
+        var nullPromise = $timeout(function () {
+        });
         var patch = jsonpatch.generate(m.patchObserver);
         patch = fixPatch(patch);
-        if (!patch.length) { return; } // XXX -can return non-promise
+        if (!patch.length) { return nullPromise; }
 
         return Projects.patchProject(m.projectId, patch);
     }
@@ -102,7 +88,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         // Not clear why this happens, but it depends on the order items were added.
         // TODO - debug further.
         return _.map(arr, function (it) {
-            if (it.op === 'replace' && !it.val) {
+            if (it.op === 'replace' && !angular.isDefined(it.value)) {
                 return null;
             }
             return it;
@@ -215,39 +201,111 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
     }
 
     // Add/Remove new
-    function toggleAddNew() {
-        m.addNew.show = !m.addNew.show;
-    }
+    function Edit() {
+        var E = {};
+        var emptyNew = {
+            name: '',
+            topic: '',
+            description: '',
+            popularity: 100,
+            selected: true,
+            custom: true
+        };
 
-    function cancelAddNew() {
-        m.addNew.show = false;
-        angular.extend(m.addNew.model, emptyNew);
-    }
+        E.model = pick(emptyNew);
+        E.topic = { // ui-select model
+            selected: {},
+            value: function () {
+                return (this.selected || {}).name || ''
+            },
+            onSelect: function (m) {
+                if (m) {
+                    E.model.topic = m.name;
+                }
+            },
+            onAddNew: function (value) {
+                return m.groups.create(value);
+            }
+        };
+        E.visible = false;
+        E.toggleByBtn = toggleByBtn;
+        E.init = init;
+        E.cancel = cancel;
+        E.save = save;
 
-    function saveAddNew() {
-        var req = angular.extend({}, emptyNew, m.addNew.model);
-        req.topic = (m.addNew.topic.selected || {}).name || ''; // Empty topic is hidden in UI
-        cancelAddNew();
+        var curReq = null;
 
-        addRemoveLocal(req); // always selected!
-        patchProject().then(function (res) {
-            // XXX - patch may return non-promise
-            req._id = res._id; //get id from server response
-            m.groups.addItems([req], true);
-        });
-    }
-
-    function onSelectTopic(group) {
-        if (group) {
-            m.addNew.model.topic = group.name;
+        function toggleByBtn() {
+            if (E.visible) {
+                cancel();
+            } else {
+                toggle();
+            }
         }
+
+        function toggle(show) {
+            E.visible = (arguments.length > 0) ? show : !E.visible;
+        }
+
+        function init(req) {
+            curReq = req;
+            angular.extend(E.model, pick(req));
+            E.topic.selected = {name: req.topic};
+
+            toggle(true);
+        }
+
+        function cancel() {
+            toggle(false);
+            angular.extend(E.model, pick(emptyNew));
+            E.topic.selected = {};
+            curReq = null;
+        }
+
+        function save() {
+            updateProject(!curReq);
+            updateList();
+            cancel();
+        }
+
+        function updateProject(isNew) {
+            var req = null;
+            if (isNew) {
+                req = angular.extend({}, emptyNew, E.model);
+                addRemoveLocal(req); // always selected!
+            } else {
+                req = _.findWhere(m.project.requirements, {_id: curReq._id});
+                angular.extend(req, E.model);
+            }
+
+            patchProject().then(function (res) {
+                if (isNew && res) {
+                    req._id = res._id; //get id from server response
+                    m.groups.addItems([req], true);
+                }
+            });
+        }
+
+        function updateList() {
+            if (!curReq) { return; }
+
+            var oldTopic = curReq.topic;
+            angular.extend(curReq, E.model);
+            m.groups.relocate(curReq, oldTopic, curReq.topic);
+        }
+
+        function pick(obj) {
+            return {
+                name: obj.name,
+                description: obj.description,
+                topic: obj.topic
+            };
+        }
+
+        return E;
     }
 
-    function addNotFoundTopic(value) {
-        return m.groups.create(value);
-    }
-
-    function removeCustomReq(req) {
+    function removeLocalReq(req) {
         req.selected = false;
         req.removed = true; // trick: hide with filter
 
@@ -295,6 +353,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         G.create = createNew;
         G.addGroups = addGroups;
         G.addItems = addItems;
+        G.relocate = relocate;
 
         var groupIdx = {};
         var itemIdx = {};
@@ -368,6 +427,22 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
             });
         }
 
+
+        function relocate(req, oldName, name) {
+            if (oldName === name) { return; }
+
+            var oldGroup = getGroup(oldName);
+            var oldIdx = oldGroup.reqs.indexOf(req);
+            if (oldIdx >= 0) {
+                oldGroup.reqs.splice(oldIdx, 1);
+            }
+
+            var newGroup = name ? getGroup(name) : null;
+            if (newGroup) {
+                newGroup.reqs.push(req);
+            }
+        }
+
         return G;
     }
 
@@ -404,7 +479,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, j
         }
 
         function disabled() {
-            return m.loadingMore || m.filter.name !== 'all'|| group.custom || group.reqs.length <= MIN;
+            return m.loadingMore || m.filter.name !== 'all' || group.custom || group.reqs.length <= MIN;
         }
 
         function hiddenItems() {

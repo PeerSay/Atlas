@@ -15,7 +15,7 @@ var Requirement = mongoose.model('Requirement', requirementSchema);
 
 // Load JSON data
 var data = require('./data/all');
-data.load(data.requirements, Requirement, ['name', 'topic']);
+data.load(data.requirements, Requirement);
 
 module.exports = {
     RequirementModel: Requirement

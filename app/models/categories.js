@@ -15,7 +15,7 @@ var Category = mongoose.model('Category', categorySchema);
 
 // Load JSON data
 var data = require('./data/all');
-data.load(data.categories, Category, ['name', 'domain']);
+data.load(data.categories, Category);
 
 
 module.exports = {

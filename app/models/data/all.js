@@ -1,12 +1,14 @@
 var _ = require('lodash');
 
-function load(dataArr, Model, picks) {
-    _.forEach(dataArr, function (doc) {
-        var search = _.pick(doc, picks);
+function load(dataArr, Model) {
+    _.forEach(dataArr, function (item) {
 
-        Model.findOrCreate(search, doc, {upsert: true}, function (err, doc, created) {
-            var op = created ? 'created' : 'updated';
-            //console.log('[DB] Populate [%s] from JSON: %s: %s', Model.modelName, op, JSON.stringify(doc));
+        Model.findOrCreate({_id: item._id}, _.omit(item, '_id'), {upsert: true}, function (err, doc, created) {
+            var op = created ? 'created' : '';
+            // TODO - show updated
+            if (op){
+                console.log('[DB] Populate [%s] from JSON: %s: %s, cnt=%d', Model.modelName, op, JSON.stringify(doc));
+            }
         });
     });
 }

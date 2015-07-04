@@ -12,6 +12,14 @@ function psTableInput() {
             var $el = $(element);
             var $td = $el.parents('td');
             var $tr = $td.parent();
+            var productCells = function () {
+                var $cells = $('#decision-table th, #decision-table td');
+                // using jquery.column.js plugin
+                var $inputCol = $cells.nthCol($td.index());
+                var $gradeCol = $cells.nthCol($td.index() + 1);
+                return $inputCol.add($gradeCol)
+            };
+
             var cell = scope.$eval(attrs.psTableInput);
             var model = cell.model;
 
@@ -42,14 +50,22 @@ function psTableInput() {
             });
 
             // Mute zero-weight rows
-            if (cell.muteOnZero) {
-                scope.$watch(function () {
-                    return model.value;
-                }, function (newVal/*, oldVal*/) {
-                    $tr.toggleClass('muted', !newVal);
+            if (cell.model.muteRow) {
+                scope.$watch(cell.model.muteRow, function (newVal/*, oldVal*/) {
+                    $tr.toggleClass('muted', newVal);
                 })
             }
 
+            //Mute columns if mandatory requirement is not met
+            if (cell.model.muteProd) {
+                scope.$watch(cell.model.muteProd, function (newVal/*, oldVal*/) {
+                    $td.toggleClass('culprit', newVal);
+
+                    var $prodCells = productCells();
+                    var anyMuted = ($prodCells.filter('.culprit').length > 0);
+                    $prodCells.toggleClass('muted', anyMuted);
+                })
+            }
         }
     };
 }

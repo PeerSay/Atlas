@@ -1,5 +1,5 @@
-<ng-form name="form">
-    <table class="table"
+<div ng-form="form" class="table-responsive">
+    <table class="table" id="decision-table"
             ng-table="view.tableParams"
             >
         <!--Header-->
@@ -22,7 +22,8 @@
         </tr>
         <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <td class="cell {{:: cell.type }} {{:: cell.class }}" ng-repeat="cell in row.cells"
+            <td class="cell" ng-repeat="cell in row.cells"
+                    ng-class="[cell.type, cell.class]"
                     ng-class="{'winner' : cell.model.max()}"
                     ng-click="focusInputEl(cell)">
                 <!--Label cell-->
@@ -43,6 +44,10 @@
                             ps-input-number
                             ps-tooltip="cell.model.tooltip()"
                             >
+                </div>
+                <!--Mandatory icon cell-->
+                <div ng-if=":: cell.type === 'icon' ">
+                    <span class="fa {{:: cell.label }}"></span>
                 </div>
             </td>
         </tr>
@@ -77,4 +82,4 @@
         </tr>
         </tfoot>
     </table>
-</ng-form>
+</div>

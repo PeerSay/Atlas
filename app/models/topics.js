@@ -14,7 +14,7 @@ var Topic = mongoose.model('Topic', topicSchema);
 
 // Load JSON data
 var data = require('./data/all');
-data.load(data.topics, Topic, ['name']);
+data.load(data.topics, Topic);
 
 
 module.exports = {

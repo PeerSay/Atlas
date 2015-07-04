@@ -1,7 +1,7 @@
 <div class="row" ng-controller="ProjectTableCtrl as table">
-    <div class="col-xs-12 col-lg-9">
+    <div class="content-col" ng-class="{'full': table.fullscreen.on}">
         <!--Panel-->
-        <div class="panel panel-default tile">
+        <div class="panel panel-default tile has-fullscreen-toggle">
             <div class="panel-heading">
                 <!--Export CSV-->
                 <a class="btn btn-default export header-btn"
@@ -31,6 +31,12 @@
             </div>
         </div>
         <!--End: Panel-->
+
+        <!--Full screen toggle-->
+        <div class="fullscreen-toggle"
+                ng-click="table.fullscreen.toggle()">
+            <span class="fa fa-chevron-right"></span>
+        </div>
     </div>
 </div>
 

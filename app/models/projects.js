@@ -2,6 +2,7 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var ShortId = require('mongoose-shortid-nodeps');
 var Schema = mongoose.Schema;
+var jsonPatch = require('fast-json-patch');
 
 
 /**
@@ -78,7 +79,8 @@ var projectSchema = new Schema({
         topic: {type: String},
         popularity: {type: Number, min: 0, max: 100, default: 0},
         selected: {type: Boolean}, // default?
-        custom: {type: Boolean, default: false}
+        custom: {type: Boolean, default: false},
+        mandatory: {type: Boolean, default: false}
     }],
 
     // Migrate:
@@ -110,11 +112,12 @@ var projectSchema = new Schema({
         topic: {type: String},
         weight: {type: Number, min: 0, max: 100, default: 1},
         popularity: {type: Number, min: 0, max: 100, default: 0},
+        mandatory: {type: Boolean, default: false},
         products: [{
             prodId: {type: String, required: true},
             name: {type: String, required: true},
             input: {type: String, default: ''},
-            grade: {type: Number, min: 0, max: 10, default: 0},
+            grade: {type: Number, min: 0, max: 10, default: 10},
             popularity: {type: Number, min: 0, max: 100, default: 0}
         }]
     }]
@@ -199,22 +202,26 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
 projectSchema.pre('save', function ensureTableConsistency(next) {
     var doc = this;
 
-    //console.log('>> Pre save: reqs', JSON.stringify(doc.requirements));
-    //console.log('>> Pre save: prodys', JSON.stringify(doc.products));
-
-    // TODO: Return if not add/remove product/req
-
-    if (isEmptyTable(doc)) {
-        doc.table = [];
+    // Skip table sync if modified is not product or req
+    if (!doc.isModified('products') && !doc.isModified('requirements')) {
         return next();
     }
 
-    // buildIndex
-    var index = buildTableIndex(doc);
-    var diff = genDiffByIndex(doc.table, index);
-    var res = patchTable(doc.table, diff);
+    if (isEmptyTable(doc)) {
+        doc.table = [];
+        console.log('[DB]: Sync table for[%s] skipped - empty', doc.id);
+        return next();
+    }
 
-    console.log('[DB]: Synced table model[%s] diff: ', doc.id, JSON.stringify(res));
+    var oldTable = buildOldTable(doc.table);
+    var newTable = buildNewTable(doc.requirements, doc.products);
+    var patches = buildPatch(oldTable, newTable);
+    console.log('[DB]: Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
+
+    if (patches.length) {
+        patchTable(doc, patches);
+        console.log('[DB]: Sync table for[%s] patch applied', doc.id);
+    }
 
     next();
 });
@@ -227,117 +234,70 @@ function isEmptyTable(doc) {
     return !selectedReqs || !selectedProds;
 }
 
-function buildTableIndex(doc) {
-    var index = {reqs: {}, prods: {}};
-
-    _.forEach(doc.requirements, function (req) {
-        if (req.selected) {
-            index.reqs[req._id] = req;
-        }
-    });
-    _.forEach(doc.products, function (prod) {
-        if (prod.selected) {
-            index.prods[prod._id] = prod;
-        }
-    });
-
-    return index;
-}
-
-
-function genDiffByIndex(table, index) {
-    var diff = {
-        reqs: {add: [], remove: []},
-        prods: {add: [], remove: []}
-    };
-
-    // reqs - remove
+function buildOldTable(table) {
+    // doc.table is Mongoose object with many additional props,
+    // we need to get pure data to generate correct patch form it
+    var res = [];
     _.forEach(table, function (row) {
-        if (index.reqs[row.reqId]) {
-            delete index.reqs[row.reqId]; // to keep only added items in index
-        } else {
-            // not in index => remove
-            diff.reqs.remove.push(row);
-        }
-    });
-    // reqs - add
-    _.forEach(index.reqs, function (req) {
-        diff.reqs.add.push({
-            reqId: req._id,
-            name: req.name,
-            topic: req.topic,
-            popularity: req.popularity,
-            products: []
+        var dataRow = _.pick(row, 'reqId', 'name', 'topic', 'weight', 'popularity', 'mandatory');
+        dataRow.products = [];
+
+        _.forEach(row.products, function (prod) {
+            var col = _.pick(prod, 'prodId', 'name', 'input', 'grade','popularity');
+            dataRow.products.push(col);
         });
+
+        res.push(dataRow);
     });
 
-    // prods - remove
-    var prods0 = table[0] ? table[0].products : [];
-    _.forEach(prods0, function (col) {
-        if (index.prods[col.prodId]) {
-            delete index.prods[col.prodId];
-        } else {
-            // not in index => remove
-            diff.prods.remove.push(col.prodId); // id!
-        }
-    });
-    // prods - add
-    _.forEach(index.prods, function (prod) {
-        diff.prods.add.push({
-            prodId: prod._id,
-            name: prod.name,
-            popularity: prod.popularity
-        });
-    });
-
-    return diff;
+    return res;
 }
 
-function patchTable(table, diff) {
-    //reqs
-    _.forEach(diff.reqs.remove, function (removed) {
-        table.splice(table.indexOf(removed), 1);
-        console.log(' [DB]: Sync table: removed req: ', JSON.stringify(removed));
-    });
+function buildNewTable(requirements, products) {
+    var res = [];
 
-    _.forEach(diff.reqs.add, function (added) {
-        var copy = _.extend({}, added);
-        // Add existing prods (copy)
-        var prods0 = (table[0] || {}).products; // exist by now
-        _.forEach(prods0, function (prod) {
-            copy.products.push({
-                prodId: prod.prodId,
-                name: prod.name,
-                popularity: prod.popularity
+    _.forEach(requirements, function (req) {
+        if (req.selected) {
+            var row = _.pick(req, 'name', 'topic', 'popularity', 'mandatory');
+            row.reqId = req._id;
+            row.products = [];
+
+            _.forEach(products, function (prod) {
+                if (prod.selected) {
+                    var col = _.pick(prod, 'name', 'popularity');
+                    col.prodId = prod._id;
+                    row.products.push(col);
+                }
             });
-        });
 
-        table.push(copy);
-
-        console.log(' [DB]: Sync table: added req: ', JSON.stringify(added));
+            res.push(row);
+        }
     });
 
-    //prods
-    _.forEach(diff.prods.remove, function (removedId) {
-        var req0 = table[0];
-        var prod = _.findWhere(req0.products, {prodId: removedId});
-        var prodIdx = req0.products.indexOf(prod);
-        _.forEach(table, function (req) {
-            req.products.splice(prodIdx, 1);
-        });
-
-        console.log(' [DB]: Sync table: removed prod: ', JSON.stringify(removedId));
-    });
-
-    _.forEach(diff.prods.add, function (added) {
-        _.forEach(table, function (req) {
-            req.products.push(added);
-        });
-        console.log(' [DB]: Sync table: added prod:', JSON.stringify(added));
-    });
-
-    return diff;
+    return res;
 }
+
+function buildPatch(oldTable, newTable) {
+    var patches = jsonPatch.compare({table: oldTable}, {table: newTable});
+
+    // Remove invalid ones: as far as newTable has no weight|input|grade,
+    // they appear in patches as remove op.
+    patches = _.filter(patches, function (p) {
+        return !/(\/weight|\/input|\/grade)$/.test(p.path);
+    });
+
+    return patches;
+}
+
+function patchTable(doc, patches) {
+    try {
+        jsonPatch.apply(doc, patches, true /*validate*/);
+    }
+    catch (e) {
+        console.log('[DB]: Sync table: patch exception: ', e);
+    }
+}
+
 
 // Model
 //

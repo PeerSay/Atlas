@@ -1,7 +1,7 @@
-<div class="row">
-    <div class="col-xs-12 col-lg-9">
+<div class="row" ng-controller="ProjectProductsCtrl as cm">
+    <div class="content-col">
         <!--Panel-->
-        <div class="panel panel-default tile" ng-controller="ProjectProductsCtrl as cm">
+        <div class="panel panel-default tile">
             <div class="panel-heading">
                 <h3 class="text-center">
                     <span class="fa fa-bar-chart"></span>
@@ -121,7 +121,7 @@
                             <th class="min"></th>
                             <th class="main">Name</th>
                             <th>Description</th>
-                            <th class="last">Popularity</th>
+                            <th class="min center">Popularity</th>
                             <th class="min"><span class="fa fa-trash"></span></th>
                         </tr>
                         </thead>
@@ -139,11 +139,11 @@
                             </td>
                             <td class="main">{{:: product.name }}</td>
                             <td>{{:: product.description }}</td>
-                            <td class="last">
+                            <td class="center">
                                 <span ng-if="!product.custom">{{:: product.popularity }}%</span>
                             </td>
                             <td>
-                                <span class="fa fa-trash remove-icon"
+                                <span class="fa fa-trash table-icon"
                                         ng-if="product.custom"
                                         ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
                             </td>

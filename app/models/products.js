@@ -16,7 +16,7 @@ var Product = mongoose.model('Product', productSchema);
 
 // Load JSON data
 var data = require('./data/all');
-data.load(data.products, Product, ['name', 'category']);
+data.load(data.products, Product);
 
 
 module.exports = {

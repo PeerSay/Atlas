@@ -16,6 +16,13 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     m.getCsv = table.getCsv.bind(table);
     m.loadingMore = true;
     m.activate = activate;
+    //Full screen
+    m.fullscreen = {
+        on: false,
+        toggle: function () {
+            this.on = !this.on;
+        }
+    };
 
     $scope.$on('$destroy', function () {
         jsonpatch.unobserve(m.project, m.patchObserver);
@@ -91,7 +98,10 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             addHeader('name', {label: 'Requirement'});
             addFooter('name', {label: 'Total:', type: 'static'});
 
-            addHeader('weight', {label: 'Weight'});
+            addHeader('mandatory', {label: 'Mandatory', 'class': 'min'});
+            addFooter('mandatory', {label: '', type: 'static'});
+
+            addHeader('weight', {label: 'Weight', 'class': 'min'});
             addFooter('weight', {label: '100%', type: 'static'});
 
             _.forEach(reqs, function (req, rowIdx) {
@@ -99,19 +109,23 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     label: req.name,
                     type: 'static'
                 });
+                addCell('mandatory', rowIdx, req, {
+                    label: req.mandatory ? 'fa-check' : '',
+                    type: 'icon'
+                });
                 addCell('weight', rowIdx, req, {
                     model: CellModel(req, 'weight', {
-                        tooltipFn: weightPercentComputeFn
+                        tooltipFn: weightPercentComputeFn,
+                        muteRowFn: muteOnZeroFn
                     }),
                     type: 'number',
-                    max: 100,
-                    muteOnZero: true
+                    max: 100
                 });
 
                 _.forEach(req.products, function (prod) {
                     // Input
                     var colInputKey = 'prod-input-' + prod.prodId;
-                    addHeader(colInputKey, {label: prod.name});
+                    addHeader(colInputKey, {label: prod.name, 'class': 'text-input'});
                     addCell(colInputKey, rowIdx, req, {
                         model: CellModel(prod, 'input'),
                         type: 'text'
@@ -123,7 +137,8 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     addHeader(colGradeKey, {label: 'Grade', 'class': 'grade'});
                     addCell(colGradeKey, rowIdx, req, {
                         model: CellModel(prod, 'grade', {
-                            max: gradeMaxInRowFn(req, prod)
+                            max: gradeMaxInRowFn(req, prod),
+                            muteProdFn: req.mandatory ? muteOnZeroFn : null
                         }),
                         type: 'number', max: 10,
                         'class': 'grade'
@@ -194,6 +209,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
             if (addon && addon.tooltipFn) {
                 M.tooltip = addon.tooltipFn(M);
+            }
+            if (addon && addon.muteRowFn) {
+                M.muteRow = addon.muteRowFn(M);
+            }
+            if (addon && addon.muteProdFn) {
+                M.muteProd = addon.muteProdFn(M);
             }
 
             var oldValue = m.value;
@@ -293,6 +314,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
                 return (value === max);
             }
+        }
+
+        function muteOnZeroFn(model) {
+            return function () {
+                return (model.value === 0);
+            };
         }
 
         return T;

@@ -1,7 +1,7 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as cm">
     <!--Title-->
-    <div class="row">
-        <div class="col-xs-12">
+    <div class="title-row">
+        <div class="title-col">
             <h3 class="page-title toggle-edit text-center">
                 <a class="toggle-value"
                         ui-sref=".essentials({edit: 'reasons'})"
@@ -14,12 +14,12 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="content-row">
         <!--Left side-bar-->
-        <div class="col-xs-12 col-sm-2">
+        <div class="sidebar-col">
             <div class="row page-spacer side-bar">
                 <!--Overview-->
-                <div class="col-xs-6 col-sm-12">
+                <div class="sidebar-section-col">
                     <h4 class="toggle-edit">Overview</h4>
                     <ul class="sub-menu">
                         <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
@@ -31,7 +31,7 @@
                 </div>
 
                 <!--Essentials-->
-                <div class="col-xs-6 col-sm-12">
+                <div class="sidebar-section-col">
                     <h4 class="menu-item" ui-sref-active="active">
                         <a class="toggle-value" ui-sref=".essentials({})">Essentials</a>
                     </h4>
@@ -68,7 +68,7 @@
                 <div class="clearfix visible-xs-block"></div>
 
                 <!--Products-->
-                <div class="col-xs-6 col-sm-12">
+                <div class="sidebar-section-col">
                     <h4 class="menu-item" ui-sref-active="active">
                         <a class="toggle-value" ui-sref=".products">
                             Products
@@ -88,7 +88,7 @@
                 </div>
 
                 <!--Criteria-->
-                <div class="col-xs-6 col-sm-12">
+                <div class="sidebar-section-col">
                     <h4 class="menu-item" ui-sref-active="active">
                         <a class="toggle-value" ui-sref=".requirements">
                             Criteria
@@ -99,8 +99,8 @@
                     </h4>
                     <ul class="animate-ease-right">
                         <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id"
-                                ps-tooltip=":: req.name">
-                            <span class="side-text ellipsis">{{:: req.name }}</span>
+                                ps-tooltip="req.name">
+                            <span class="side-text ellipsis">{{ req.name }}</span>
                             <span class="pull-right" ng-if=":: !req.custom">{{:: req.popularity }}%</span>
                         </li>
                     </ul>
@@ -109,6 +109,6 @@
         </div>
 
         <!--Center Col: content-->
-        <div class="col-xs-12 col-sm-10" ui-view></div>
+        <div class="content-container-col" ui-view></div>
     </div>
 </div>

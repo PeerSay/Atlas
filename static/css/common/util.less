@@ -34,6 +34,13 @@
   border-@{to}-width: 0;
 }
 
+// If need top-left corner triangle, pass opposites: bottom/right
+.triangle-corner(@opp1, @opp2, @size, @color) {
+  border: @size solid @color;
+  border-@{opp1}-color: transparent;
+  border-@{opp2}-color: transparent;
+}
+
 .width-full(@sz) {
   width: @sz;
   min-width: @sz;

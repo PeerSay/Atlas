@@ -138,7 +138,8 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     addCell(colGradeKey, rowIdx, req, {
                         model: CellModel(prod, 'grade', {
                             max: gradeMaxInRowFn(req, prod),
-                            muteProdFn: req.mandatory ? muteOnZeroFn : null
+                            muteProdFn: req.mandatory ? muteOnZeroFn : null,
+                            tooltipFn: req.mandatory ? mandatoryTooltipFn : null
                         }),
                         type: 'number', max: 10,
                         'class': 'grade'
@@ -319,6 +320,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         function muteOnZeroFn(model) {
             return function () {
                 return (model.value === 0);
+            };
+        }
+
+        function mandatoryTooltipFn(model) {
+            return function () {
+                return (model.value === 0) ? 'Unsupported mandatory requirement' : '';
             };
         }
 

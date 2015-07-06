@@ -78,10 +78,9 @@
                         </a>
                     </h4>
                     <ul class="animate-ease-right">
-                        <li ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' | limitTo:5 track by product._id"
-                                ps-tooltip=":: product.name">
-                            <span class="side-text ellipsis">{{:: product.name }}</span>
-                            <span class="pull-right" ng-if=":: !product.custom">{{:: product.popularity }}%</span>
+                        <li class="list-item"
+                                ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' | limitTo:5 track by product._id">
+                            {{:: product.name }}
                         </li>
                     </ul>
                     <hr class="hidden-xs">
@@ -98,10 +97,9 @@
                         </a>
                     </h4>
                     <ul class="animate-ease-right">
-                        <li ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id"
-                                ps-tooltip="req.name">
-                            <span class="side-text ellipsis">{{ req.name }}</span>
-                            <span class="pull-right" ng-if=":: !req.custom">{{:: req.popularity }}%</span>
+                        <li class="list-item"
+                                ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id">
+                            {{ req.name }}
                         </li>
                     </ul>
                 </div>

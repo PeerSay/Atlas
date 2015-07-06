@@ -1,7 +1,7 @@
 <div class="row" ng-controller="ProjectProductsCtrl as cm">
-    <div class="content-col">
+    <div class="content-col" ng-class="{'full': cm.fullscreen.on}">
         <!--Panel-->
-        <div class="panel panel-default tile">
+        <div class="panel panel-default tile has-fullscreen-toggle" >
             <div class="panel-heading">
                 <h3 class="text-center">
                     <span class="fa fa-bar-chart"></span>
@@ -182,5 +182,11 @@
             </div>
         </div>
         <!--End: Panel-->
+
+        <!--Full screen toggle-->
+        <div class="fullscreen-toggle"
+                ng-click="cm.fullscreen.toggle()">
+            <span class="fa fa-chevron-right"></span>
+        </div>
     </div>
 </div>

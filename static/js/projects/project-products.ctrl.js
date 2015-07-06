@@ -60,6 +60,13 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
     m.removeCustomProduct = removeCustomProduct;
+    //Full screen
+    m.fullscreen = {
+        on: false,
+        toggle: function () {
+            this.on = !this.on;
+        }
+    };
 
 
     activate();

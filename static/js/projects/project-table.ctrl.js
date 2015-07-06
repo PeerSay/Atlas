@@ -9,13 +9,12 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     m.project = null;
     m.patchObserver = null;
     m.patchProject = patchProject;
-
+    m.loading = true;
+    m.activate = activate;
     // Table model/view
     var table = Table(m);
     m.tableView = table.getView();
     m.getCsv = table.getCsv.bind(table);
-    m.loadingMore = true;
-    m.activate = activate;
     //Full screen
     m.fullscreen = {
         on: false,
@@ -35,7 +34,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             m.project = {table: res.table};
             m.patchObserver = jsonpatch.observe(m.project);
 
-            m.loadingMore = false;
+            m.loading = false;
             return res.table;
         });
     }

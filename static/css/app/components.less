@@ -149,7 +149,6 @@
   }
 }
 
-
 /*
 * Project Details
 */
@@ -273,7 +272,6 @@
   color: @selection-color;
   font-weight: bold;
 }
-
 .selection-controls {
   .button-bar {
     .btn {
@@ -281,7 +279,6 @@
     }
   }
 }
-
 .table-selection-list {
   &.border {
     border: 1px solid @table-border-color;
@@ -313,17 +310,13 @@
     cursor: pointer;
   }
 
-  .btn {
-    padding: 1px 10px;
-
-    &.load-more {
-      &:not(.loading) {
-        &:after {
-          content: 'Load More...'; // XXX - localization
-        }
-        .fa {
-          display: none;
-        }
+  .btn.load-more {
+    &:not(.loading) {
+      &:after {
+        content: 'Load More...'; // XXX - localization
+      }
+      .fa {
+        display: none;
       }
     }
   }
@@ -337,17 +330,15 @@
     }
   }
 }
-
 .empty-table-content {
   .fa {
     font-size: 25px;
   }
   h4 {
-    font-size:  17px;
+    font-size: 17px;
     margin: 5px 0 5px;
   }
 }
-
 /*
 * Side-bar menu
 */
@@ -361,7 +352,7 @@
     }
     &.active {
       margin-left: -15px;
-      padding-left:  11px;
+      padding-left: 11px;
       border-left: 4px solid @brand-primary;
       background-color: #DCDCDC;
       box-shadow: 0 1px 0 0 #F0F0F0, 0 -1px 0 0 #BFBFBF;
@@ -369,7 +360,7 @@
     }
     &:hover:not(.active) {
       margin-left: -15px;
-      padding-left:  15px;
+      padding-left: 15px;
       background-color: #e5e5e5;
     }
     .label {
@@ -383,7 +374,6 @@
     margin-bottom: 10px;
   }
 }
-
 /*Full-screen toggle*/
 .fullscreen-toggle {
   display: none;
@@ -408,7 +398,6 @@
     color: #fff;
   }
 }
-
 .content-col.full {
   .fullscreen-toggle {
     right: 0;
@@ -418,7 +407,6 @@
     }
   }
 }
-
 // Hidden if not lg
 @media (min-width: @screen-lg-min) {
   &.has-fullscreen-toggle {
@@ -428,7 +416,6 @@
     display: block;
   }
 }
-
 /*
 * Override Bootstrap
 */
@@ -439,7 +426,7 @@
     }
   }
 
-  &.compact-form{
+  &.compact-form {
     .form-control-static {
       min-height: 30px;
     }
@@ -463,11 +450,10 @@
 }
 .side-text {
   width: 70%; // Found experimentally, doesn't cause break on any screen (+ required for .ellipsis)
-  width:  ~"calc(100% - 34px)"; // Better suites: in px is a max size of percent col + padding
+  width: ~"calc(100% - 34px)"; // Better suites: in px is a max size of percent col + padding
   display: inline-block;
   vertical-align: middle;
 }
-
 .navbar-brand {
   padding: 10px 10px;
 }

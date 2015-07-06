@@ -21,6 +21,13 @@
                 </h3>
             </div>
             <div class="panel-body">
+                <!--Load indicator-->
+                <div class="row text-center" ng-if="table.loading">
+                    <button type="button" class="btn btn-xxs btn-default load-more loading" disabled>
+                        <span class="fa fa-refresh fa-spin"></span>
+                    </button>
+                </div>
+
                 <!--MainTable-->
                 <div class="row">
                     <div class="col-xs-12 page-spacer">

@@ -55,7 +55,8 @@
             <div class="panel panel-default dialog" ng-show="list.create.showDlg">
                 <div class="panel-heading">
                     <h3 class="panel-title">Create Project</h3>
-                    <button type="button" class="btn close" ng-click="list.toggleCreateDlg(false)">
+                    <button type="button" class="btn close" ng-click="list.toggleCreateDlg(false)"
+                            ng-disabled="list.creating">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
                 </div>
@@ -67,11 +68,14 @@
                                     placeholder='Like "Storage Project" for example...'
                                     required
                                     ng-model="list.create.title"
-                                    ps-focus-on="list.create.showDlg">
+                                    ps-focus-on="list.create.showDlg"
+                                    ng-disabled="list.creating">
                         </div>
                         <button type="submit" class="btn btn-success"
-                                ng-disabled="list.form.$invalid"
-                                >Create
+                                ng-disabled="list.form.$invalid || list.creating"
+                                >
+                            <span ng-if="!list.creating">Create</span>
+                            <span ng-if="list.creating"><span class="fa fa-spinner fa-spin"></span> Creating</span>
                         </button>
                     </form>
                 </div>

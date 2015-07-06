@@ -43,7 +43,7 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
             Projects.readProjectTable(m.projectId).then(function (res) {
                 m.decisions.data = findWinners(res.table);
             });
-
+        }).finally(function () {
             m.loading = false;
         });
     }

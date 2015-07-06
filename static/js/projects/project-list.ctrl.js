@@ -9,6 +9,7 @@ function ProjectListCtrl($state, $timeout, Projects) {
 
     m.projects = [];
     m.create = Projects.create;
+    m.creating = false;
     m.toggleCreateDlg = Projects.toggleCreateDlg.bind(Projects);
     m.removeProject = removeProject;
     m.createProject = createProject;
@@ -20,9 +21,13 @@ function ProjectListCtrl($state, $timeout, Projects) {
         });
 
     function createProject() {
+        m.creating = true;
         Projects.createProject()
             .then(function (prj) {
                 editProject(prj.id);
+            })
+            .finally(function () {
+                m.creating = false;
             });
     }
 

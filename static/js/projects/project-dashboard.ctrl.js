@@ -10,6 +10,7 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
     m.projectId = $stateParams.projectId;
     //Model
     m.project = null;
+    m.loading = true;
     m.essentials = {
         data: {},
         initialized: false
@@ -42,6 +43,8 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
             Projects.readProjectTable(m.projectId).then(function (res) {
                 m.decisions.data = findWinners(res.table);
             });
+
+            m.loading = false;
         });
     }
 

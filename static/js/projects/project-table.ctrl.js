@@ -2,7 +2,7 @@ angular.module('PeerSay')
     .controller('ProjectTableCtrl', ProjectTableCtrl);
 
 ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'jsonpatch', 'Util'];
-function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpatch,  _) {
+function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -55,6 +55,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             columns: [],
             rows: []
         };
+        T.groups = Groups();
         T.getCsv = Exporter(T.model).getCsv;
 
         var columnIdx = {};
@@ -78,16 +79,110 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         }
 
         function groupBy(row) {
-            return row.req.topic; // TODO - total group weight
+            var key = T.groups.add(row);
+            return key;
+        }
+
+        // Groups
+        //
+        function Groups() {
+            var G = {};
+            G.add = add;
+            G.get = get;
+            var cache = {};
+
+            function get(key) {
+                return cache[key];
+            }
+
+            function add(row) {
+                var key = row.req.topic || '(no name)';
+                var group = cache[key] = cache[key] || Group();
+                group.addRow(row);
+
+                return key;
+            }
+
+            function Group() {
+                var G = {};
+                G.addRow = addRow;
+                G.weight = calcWeight;
+                G.cols = [];
+
+                var rows = [];
+                var groupColIdx = {};
+
+                function addRow(row) {
+                    rows.push(row);
+                    addCols(row);
+                }
+
+                function addCols(row) {
+                    var gradeCells = _.map(row.cells, function (cell) {
+                        return cell.class === 'grade' ? cell : null;
+                    });
+
+                    _.forEach(gradeCells, function (cell, idx) {
+                        var colKey = 'group-grade-' + idx;
+                        addCol(colKey, {req: row.req, grade: cell.model});
+                    });
+                }
+
+                function addCol(key, data) {
+                    var col = getColumn(key);
+                    col.cells.push(data);
+                }
+
+                function getColumn(key) {
+                    var col = groupColIdx[key];
+                    if (!col) {
+                        col = groupColIdx[key] = {
+                            cells: [],
+                            grade: function () {
+                                var weights = columnIdx['weight'].cells;
+                                var totalWeight = weights.reduce(function (prev, cur) {
+                                    return prev + cur.model.value;
+                                }, 0);
+
+                                var totalGrade =  this.cells.reduce(function (prev, cur) {
+                                    var weight = cur.req.weight;
+                                    var grade = cur.grade.value;
+                                    return prev + grade * weight;
+                                }, 0);
+
+                                var ave = totalWeight ? totalGrade / totalWeight : 0; // weighted average
+                                if (ave) {
+                                    ave = Math.round(ave * 10) / 10; // .1
+                                }
+                                return ave;
+                            }
+                        };
+                        G.cols.push(col);
+                    }
+                    return col;
+                }
+
+                // Reducers
+                function calcWeight() {
+                    return rows.reduce(function (prev, cur) {
+                        return prev + cur.req.weight;
+                    }, 0);
+                }
+
+                return G;
+            }
+
+            return G;
         }
 
         // Model
-
+        //
         function getData($defer) {
             ctrl.activate().then(function (reqs) {
                 buildModel(reqs);
                 view.columns = T.model.columns;
                 view.rows = T.model.rows;
+                view.groups = T.groups;
 
                 $defer.resolve(T.model.rows);
             });
@@ -155,30 +250,27 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             });
         }
 
-        function addHeader(key, data) {
+        function getColumn(key) {
             var col = columnIdx[key];
             if (!col) {
                 col = columnIdx[key] = {};
                 T.model.columns.push(col);
             }
+            return col;
+        }
+
+        function addHeader(key, data) {
+            var col = getColumn(key);
             col.header = data;
         }
 
         function addFooter(key, data) {
-            var col = columnIdx[key];
-            if (!col) {
-                col = columnIdx[key] = {};
-                T.model.columns.push(col);
-            }
+            var col = getColumn(key);
             col.footer = data;
         }
 
         function addColumnCell(key, cell) {
-            var col = columnIdx[key];
-            if (!col) {
-                col = columnIdx[key] = {};
-                T.model.columns.push(col);
-            }
+            var col = getColumn(key);
             col.cells = col.cells || [];
             col.cells.push(cell);
         }
@@ -239,7 +331,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
             function toString() {
                 var val = angular.isDefined(M.value) ? M.value : '';
-                var addon =  M.tooltip ? ['/', M.tooltip()].join('') : '';
+                var addon = M.tooltip ? ['/', M.tooltip()].join('') : '';
                 return val + addon;
             }
 
@@ -336,7 +428,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     function Exporter(model) {
         var E = {};
         E.getCsv = getCsv;
-        
+
         function getCsv() {
             // Header
             var res = getRowStr(model.columns, function (col) {
@@ -378,13 +470,13 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             var str = (val === null) ? '' : val.toString();
             var res = str
                 .replace(/^\s*/, '').replace(/\s*$/, '') // trim spaces
-                .replace(/"/g,'""'); // replace quotes with double quotes;
+                .replace(/"/g, '""'); // replace quotes with double quotes;
             if (res.search(/("|,|\n)/g) >= 0) {
                 res = '"' + res + '"'; // quote if contains special chars
             }
             return res;
         }
-        
+
         return E;
     }
 }

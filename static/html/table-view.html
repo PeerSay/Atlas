@@ -10,15 +10,24 @@
             </th>
         </tr>
         </thead>
-        <tbody ng-repeat="group in $groups">
+        <tbody ng-repeat="group in $groups"
+                ng-init="groupObj = view.groups.get(group.value)">
         <!--Group row-->
-        <tr class="ng-table-group" ng-show="group.value">
-            <td colspan="{{ view.columns.length }}" class="static">
-                <a href ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()" tabindex="-1">
+        <tr class="ng-table-group"
+                ng-show="group.value"
+                ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()">
+            <td colspan="{{ group.$hideRows && 2 || view.columns.length }}" class="static">
+                <a href tabindex="-1">
                     <span class="fa fa-fw" ng-class="{ 'fa-caret-right': group.$hideRows, 'fa-caret-down': !group.$hideRows }"></span>
                     {{:: group.value }}
                 </a>
             </td>
+            <!--Group weight-->
+            <td class="static" ng-if="group.$hideRows">{{ groupObj.weight() }}</td>
+            <!--Group grades-->
+            <td colspan="2" class="static text-right"
+                    ng-if="group.$hideRows"
+                    ng-repeat="groupCol in groupObj.cols">{{ groupCol.grade() }}</td>
         </tr>
         <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">

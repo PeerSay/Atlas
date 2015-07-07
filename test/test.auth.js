@@ -23,7 +23,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 var agent = request.agent(app);
 
-var companyEmail = 'PeerSay Team <team@peersay.com>';
+var companyEmail = 'PeerSay Team <team@peer-say.com>';
 
 // Mock config
 process.deploy = {web: {}, db: {hash_iters: 100}, auth: {linkedin : {api_key: 'x', secret_key: 'x'}}, email: {enable: false, auth: {}}};

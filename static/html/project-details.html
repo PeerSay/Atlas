@@ -107,6 +107,19 @@
         </div>
 
         <!--Center Col: content-->
-        <div class="content-container-col" ui-view></div>
+        <div class="content-container-col">
+            <div class="row">
+                <div class="content-col" ng-class="{'full': cm.fullscreen.on}">
+                    <!--Content panel-->
+                    <div ui-view></div>
+
+                    <!--Full screen toggle-->
+                    <div class="fullscreen-toggle"
+                            ng-click="cm.fullscreen.toggle()">
+                        <span class="fa fa-chevron-right"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

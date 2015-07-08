@@ -9,17 +9,17 @@ function Storage() {
     S.set = set;
     S.remove = remove;
 
-    function get (name) {
+    function get(name) {
         var val = localStorage[name];
         return val ? JSON.parse(val) : null;
     }
 
-    function set (name, val) {
+    function set(name, val) {
         localStorage[name] = JSON.stringify(val);
         return val; // return plain!
     }
 
-    function remove (name) {
+    function remove(name) {
         return localStorage.removeItem(name);
     }
 

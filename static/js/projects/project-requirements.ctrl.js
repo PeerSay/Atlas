@@ -40,13 +40,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     m.edit = Edit();
     // Remove
     m.removeLocalReq = removeLocalReq; //TODO - unselect if not-custom
-    //Full screen
-    m.fullscreen = {
-        on: false,
-        toggle: function () {
-            this.on = !this.on;
-        }
-    };
 
 
     activate();

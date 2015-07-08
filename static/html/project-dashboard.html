@@ -1,161 +1,156 @@
-<div class="row" ng-controller="ProjectDashboardCtrl as board">
-    <div class="content-col">
-        <!--Panel-->
-        <div class="panel panel-default tile">
-            <div class="panel-heading">
-                <h3 class="text-center">
-                    <span class="fa fa-dashboard"></span>
-                    Dashboard
-                </h3>
+<!--Panel-->
+<div class="panel panel-default tile has-fullscreen-toggle" ng-controller="ProjectDashboardCtrl as board">
+    <div class="panel-heading">
+        <h3 class="text-center">
+            <span class="fa fa-dashboard"></span>
+            Dashboard
+        </h3>
+    </div>
+    <div class="panel-body">
+        <!--Load indicator-->
+        <div class="row text-center" ng-if="board.loading">
+            <button type="button" class="btn btn-xxs btn-default load-more loading" disabled>
+                <span class="fa fa-refresh fa-spin"></span>
+            </button>
+        </div>
+
+        <!--Content - 1st row-->
+        <div class="row" ng-if="!board.loading">
+            <!--Essentials-->
+            <div class="col-xs-12 col-sm-6 page-spacer">
+                <h4 class="toggle-edit text-center">
+                    <a ui-sref="^.essentials({})">Essentials</a>
+                </h4>
+                <p ng-if="!board.essentials.initialized">
+                    Essential information  is required for PeerSay to suggest effective alternatives.
+                    Go to <a ui-sref="^.essentials({})">Project essentials</a> to add some of this information.
+                </p>
+                <form class="form-horizontal compact-form"
+                        ng-if="board.essentials.initialized"
+                        ng-init="data = board.essentials.data">
+                    <!--Goals-->
+                    <div class="row">
+                        <label class="col-sm-3 control-label left">Project goals:</label>
+                        <div class="col-sm-9 toggle-edit">
+                            <a class="form-control-static toggle-value"
+                                    ng-if="data.goals"
+                                    ui-sref="^.essentials({edit: 'goals'})">
+                                {{:: data.goals }}
+                                <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                            <a class="text-info"
+                                    ng-if="!data.goals"
+                                    ui-sref="^.essentials({edit: 'goals'})">Add</a>
+                        </div>
+                    </div>
+                    <!--Category-->
+                    <div class="row">
+                        <label class="col-sm-3 control-label left">Category:</label>
+                        <div class="col-sm-9 toggle-edit">
+                            <a class="form-control-static toggle-value"
+                                    ng-if="data.category"
+                                    ui-sref="^.essentials({edit: 'category'})">
+                                {{:: data.category }}
+                                <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                            <a class="text-info"
+                                    ng-if="!data.category"
+                                    ui-sref="^.essentials({edit: 'category'})">Add</a>
+                        </div>
+                    </div>
+                    <!--2 cols-->
+                    <div class="row">
+                        <!--Budget-->
+                        <label class="col-sm-3 control-label left">Budget:</label>
+                        <div class="col-sm-3 toggle-edit">
+                            <a class="form-control-static toggle-value"
+                                    ng-if="data.budget.amount"
+                                    ui-sref="^.essentials({edit: 'budget'})">
+                                <span ng-bind-html=":: data.budget | budget"></span>
+                                <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                            <a class="text-info"
+                                    ng-if="!data.budget.amount"
+                                    ui-sref="^.essentials({edit: 'budget'})">Add</a>
+                        </div>
+                        <!--Duration-->
+                        <label class="col-sm-3 control-label left">Duration:</label>
+                        <div class="col-sm-3 toggle-edit">
+                            <a class="form-control-static toggle-value"
+                                    ng-if="data.duration"
+                                    ui-sref="^.essentials({edit: 'duration'})">
+                                {{:: data.duration }}
+                                {{:: data.durationLabel }}
+                                <span class="fa fa-edit hover-edit"></span>
+                            </a>
+                            <a class="text-info"
+                                    ng-if="!data.duration"
+                                    ui-sref="^.essentials({edit: 'duration'})">Add</a>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="panel-body">
-                <!--Load indicator-->
-                <div class="row text-center" ng-if="board.loading">
-                    <button type="button" class="btn btn-xxs btn-default load-more loading" disabled>
-                        <span class="fa fa-refresh fa-spin"></span>
-                    </button>
+            <!--Products-->
+            <div class="col-xs-12 col-sm-6 page-spacer">
+                <h4 class="toggle-edit text-center">
+                    <a ui-sref="^.products">Products</a>
+                </h4>
+                <p ng-if="!board.products.initialized">
+                    There are no products selected yet. PeerSay presents popular products
+                    per category, and allows you to view grades and opinions based on different criteria.
+                    Go to the <a ui-sref="^.products">Products page</a> to add Products.
+                </p>
+                <div ng-if="board.products.initialized">
+                    <p>There are <span> {{:: board.products.data.length }}</span> products selected:</p>
+                    <ul >
+                        <li ng-repeat="product in board.products.data | orderBy:'-popularity'">
+                            {{:: product.name }}
+                        </li>
+                    </ul>
                 </div>
+            </div>
+        </div>
 
-                <!--Content - 1st row-->
-                <div class="row" ng-if="!board.loading">
-                    <!--Essentials-->
-                    <div class="col-xs-12 col-sm-6 page-spacer">
-                        <h4 class="toggle-edit text-center">
-                            <a ui-sref="^.essentials({})">Essentials</a>
-                        </h4>
-                        <p ng-if="!board.essentials.initialized">
-                            Essential information  is required for PeerSay to suggest effective alternatives.
-                            Go to <a ui-sref="^.essentials({})">Project essentials</a> to add some of this information.
-                        </p>
-                        <form class="form-horizontal compact-form"
-                                ng-if="board.essentials.initialized"
-                                ng-init="data = board.essentials.data">
-                            <!--Goals-->
-                            <div class="row">
-                                <label class="col-sm-3 control-label left">Project goals:</label>
-                                <div class="col-sm-9 toggle-edit">
-                                    <a class="form-control-static toggle-value"
-                                            ng-if="data.goals"
-                                            ui-sref="^.essentials({edit: 'goals'})">
-                                        {{:: data.goals }}
-                                        <span class="fa fa-edit hover-edit"></span>
-                                    </a>
-                                    <a class="text-info"
-                                            ng-if="!data.goals"
-                                            ui-sref="^.essentials({edit: 'goals'})">Add</a>
-                                </div>
-                            </div>
-                            <!--Category-->
-                            <div class="row">
-                                <label class="col-sm-3 control-label left">Category:</label>
-                                <div class="col-sm-9 toggle-edit">
-                                    <a class="form-control-static toggle-value"
-                                            ng-if="data.category"
-                                            ui-sref="^.essentials({edit: 'category'})">
-                                        {{:: data.category }}
-                                        <span class="fa fa-edit hover-edit"></span>
-                                    </a>
-                                    <a class="text-info"
-                                            ng-if="!data.category"
-                                            ui-sref="^.essentials({edit: 'category'})">Add</a>
-                                </div>
-                            </div>
-                            <!--2 cols-->
-                            <div class="row">
-                                <!--Budget-->
-                                <label class="col-sm-3 control-label left">Budget:</label>
-                                <div class="col-sm-3 toggle-edit">
-                                    <a class="form-control-static toggle-value"
-                                            ng-if="data.budget.amount"
-                                            ui-sref="^.essentials({edit: 'budget'})">
-                                        <span ng-bind-html=":: data.budget | budget"></span>
-                                        <span class="fa fa-edit hover-edit"></span>
-                                    </a>
-                                    <a class="text-info"
-                                            ng-if="!data.budget.amount"
-                                            ui-sref="^.essentials({edit: 'budget'})">Add</a>
-                                </div>
-                                <!--Duration-->
-                                <label class="col-sm-3 control-label left">Duration:</label>
-                                <div class="col-sm-3 toggle-edit">
-                                    <a class="form-control-static toggle-value"
-                                            ng-if="data.duration"
-                                            ui-sref="^.essentials({edit: 'duration'})">
-                                        {{:: data.duration }}
-                                        {{:: data.durationLabel }}
-                                        <span class="fa fa-edit hover-edit"></span>
-                                    </a>
-                                    <a class="text-info"
-                                            ng-if="!data.duration"
-                                            ui-sref="^.essentials({edit: 'duration'})">Add</a>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <!--Products-->
-                    <div class="col-xs-12 col-sm-6 page-spacer">
-                        <h4 class="toggle-edit text-center">
-                            <a ui-sref="^.products">Products</a>
-                        </h4>
-                        <p ng-if="!board.products.initialized">
-                            There are no products selected yet. PeerSay presents popular products
-                            per category, and allows you to view grades and opinions based on different criteria.
-                            Go to the <a ui-sref="^.products">Products page</a> to add Products.
-                        </p>
-                        <div ng-if="board.products.initialized">
-                            <p>There are <span> {{:: board.products.data.length }}</span> products selected:</p>
-                            <ul >
-                                <li ng-repeat="product in board.products.data | orderBy:'-popularity'">
-                                    {{:: product.name }}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+        <!--Content - 2nd row-->
+        <div class="row" ng-if="!board.loading">
+            <!--Criteria-->
+            <div class="col-xs-12 col-sm-6 page-spacer">
+                <h4 class="toggle-edit text-center">
+                    <a ui-sref="^.requirements">Criteria</a>
+                </h4>
+                <p ng-if="!board.requirements.initialized">
+                    There are not criteria selected yet. PeerSay presents popular criteria,
+                    and let you select or add criteria that are important for your project's success.
+                    Follow <a ui-sref="^.requirements">this link</a> to add Criteria.
+                </p>
+                <div ng-if="board.requirements.initialized">
+                    <p>There are <span> {{:: board.requirements.data.length }}</span> criteria selected:</p>
+                    <ul >
+                        <li ng-repeat="req in board.requirements.data | orderBy:'-popularity'">
+                            {{:: req.name }}
+                        </li>
+                    </ul>
                 </div>
-
-                <!--Content - 2nd row-->
-                <div class="row" ng-if="!board.loading">
-                    <!--Criteria-->
-                    <div class="col-xs-12 col-sm-6 page-spacer">
-                        <h4 class="toggle-edit text-center">
-                            <a ui-sref="^.requirements">Criteria</a>
-                        </h4>
-                        <p ng-if="!board.requirements.initialized">
-                            There are not criteria selected yet. PeerSay presents popular criteria,
-                            and let you select or add criteria that are important for your project's success.
-                            Follow <a ui-sref="^.requirements">this link</a> to add Criteria.
-                        </p>
-                        <div ng-if="board.requirements.initialized">
-                            <p>There are <span> {{:: board.requirements.data.length }}</span> criteria selected:</p>
-                            <ul >
-                                <li ng-repeat="req in board.requirements.data | orderBy:'-popularity'">
-                                    {{:: req.name }}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!--Decision-->
-                    <div class="col-xs-12 col-sm-6 page-spacer">
-                        <h4 class="toggle-edit text-center">
-                            <a ui-sref="^.decisions">Decision Table</a>
-                        </h4>
-                        <p ng-if="!board.decisions.initialized">
-                            Please select <a ui-sref="^.products">Products</a>
-                            and <a ui-sref="^.requirements">Criteria</a> in order to make a decision,
-                            using <a ui-sref="^.decisions">the table</a>.
-                        </p>
-                        <div ng-if="board.decisions.initialized">
-                            <p>The winner products are:</p>
-                            <p ng-repeat="winner in board.decisions.data">
-                                <span class="fa fa-trophy"></span>
-                                <strong>{{:: winner.name }}</strong>
-                                ({{:: winner.totalGrade }})
-                            </p>
-                        </div>
-                    </div>
+            </div>
+            <!--Decision-->
+            <div class="col-xs-12 col-sm-6 page-spacer">
+                <h4 class="toggle-edit text-center">
+                    <a ui-sref="^.decisions">Decision Table</a>
+                </h4>
+                <p ng-if="!board.decisions.initialized">
+                    Please select <a ui-sref="^.products">Products</a>
+                    and <a ui-sref="^.requirements">Criteria</a> in order to make a decision,
+                    using <a ui-sref="^.decisions">the table</a>.
+                </p>
+                <div ng-if="board.decisions.initialized">
+                    <p>The winner products are:</p>
+                    <p ng-repeat="winner in board.decisions.data">
+                        <span class="fa fa-trophy"></span>
+                        <strong>{{:: winner.name }}</strong>
+                        ({{:: winner.totalGrade }})
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-

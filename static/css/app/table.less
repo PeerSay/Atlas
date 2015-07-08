@@ -24,6 +24,7 @@
   /*Header/footer*/
   thead th {
     &.grade {
+      width: 1%;
       padding: 3px;
       div {
         padding: 4px;
@@ -55,10 +56,21 @@
 
     /*Group row*/
     &.ng-table-group td {
-      /*height: auto;*/ // Need?
+      padding: 8px;
+      background: @header-bg;
+      cursor: pointer;
+
+      &.strong {
+        font-weight: bold;
+      }
+      &.align-fix {
+        // Hack!
+        padding-right: 30px;
+      }
       a {
         display: block;
-        padding: 3px 0;
+        padding: 0;
+        line-height: 16px;
         text-decoration: none;
         outline: none;
       }

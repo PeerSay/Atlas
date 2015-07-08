@@ -101,7 +101,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             function Group() {
                 var G = {};
                 G.addRow = addRow;
-                G.weight = calcWeight;
+                G.weight = calcWeightPercents;
                 G.cols = [];
 
                 var rows = [];
@@ -134,10 +134,8 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                         col = groupColIdx[key] = {
                             cells: [],
                             grade: function () {
-                                var weights = columnIdx['weight'].cells;
-                                var totalWeight = weights.reduce(function (prev, cur) {
-                                    return prev + cur.model.value;
-                                }, 0);
+                                var totalWeight = calcTotalWeight();
+                                if (!totalWeight) { return 0; }
 
                                 var totalGrade =  this.cells.reduce(function (prev, cur) {
                                     var weight = cur.req.weight;
@@ -145,10 +143,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                                     return prev + grade * weight;
                                 }, 0);
 
-                                var ave = totalWeight ? totalGrade / totalWeight : 0; // weighted average
-                                if (ave) {
-                                    ave = Math.round(ave * 10) / 10; // .1
-                                }
+                                var ave = Math.round(totalGrade / totalWeight * 10) / 10; // .1
                                 return ave;
                             }
                         };
@@ -157,10 +152,21 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     return col;
                 }
 
-                // Reducers
-                function calcWeight() {
-                    return rows.reduce(function (prev, cur) {
+                function calcWeightPercents() {
+                    var totalWeight = calcTotalWeight();
+                    if (!totalWeight) { return 0; }
+
+                    var groupWeight = rows.reduce(function (prev, cur) {
                         return prev + cur.req.weight;
+                    }, 0);
+                    var weightPercents = Math.round(groupWeight / totalWeight * 100);
+                    return weightPercents;
+                }
+
+                function calcTotalWeight() {
+                    var weights = columnIdx['weight'].cells;
+                    return weights.reduce(function (prev, cur) {
+                        return prev + cur.model.value;
                     }, 0);
                 }
 

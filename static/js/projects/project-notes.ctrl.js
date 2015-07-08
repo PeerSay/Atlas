@@ -1,10 +1,10 @@
 /*global angular:true*/
 
 angular.module('PeerSay')
-    .controller('ProjectSummaryCtrl', ProjectSummaryCtrl);
+    .controller('ProjectNotesCtrl', ProjectNotesCtrl);
 
-ProjectSummaryCtrl.$inject = ['$stateParams', 'Projects', 'Util'];
-function ProjectSummaryCtrl($stateParams, Projects, _) {
+ProjectNotesCtrl.$inject = ['$stateParams', 'Projects', 'Util'];
+function ProjectNotesCtrl($stateParams, Projects, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;

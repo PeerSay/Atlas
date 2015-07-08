@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$state', '$stateParams', 'Projects', 'filterFilter', 'Util', 'jsonpatch'];
-function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilter, _, jsonpatch) {
+ProjectProductsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'filterFilter', 'Util', 'jsonpatch'];
+function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, jsonpatch) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -60,13 +60,6 @@ function ProjectProductsCtrl($scope, $state, $stateParams, Projects, filterFilte
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
     m.removeCustomProduct = removeCustomProduct;
-    //Full screen
-    m.fullscreen = {
-        on: false,
-        toggle: function () {
-            this.on = !this.on;
-        }
-    };
 
 
     activate();

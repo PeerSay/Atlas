@@ -15,19 +15,14 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     var table = Table(m);
     m.tableView = table.getView();
     m.getCsv = table.getCsv.bind(table);
-    //Full screen
-    m.fullscreen = {
-        on: false,
-        toggle: function () {
-            this.on = !this.on;
-        }
-    };
 
-    $scope.$on('$destroy', function () {
-        jsonpatch.unobserve(m.project, m.patchObserver);
-    });
 
+    // Called by Table
     function activate() {
+        $scope.$on('$destroy', function () {
+            jsonpatch.unobserve(m.project, m.patchObserver);
+        });
+
         return Projects.readProjectTable(m.projectId).then(function (res) {
             //console.log('>>', res.table);
 

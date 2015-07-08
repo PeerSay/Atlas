@@ -15,15 +15,16 @@ var requirements = [
     {_id: '55974b363dc107cb75453824', name: 'Relevant customers', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 75},
     {_id: '55974b373dc107cb75453825', name: 'Support Service Level Agreement (SLA)', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 80},
 
-    {_id: '55974b373dc107cb75453826', name: 'Vendor', description: '', topic: 'Risk management', popularity: 45},
+    {_id: '55974b373dc107cb75453826', name: 'Vendor', description: 'How risky is this vendor?', topic: 'Risk management', popularity: 45},
     {_id: '55974b383dc107cb75453827', name: 'Development, Deployment and Complexity', description: '', topic: 'Risk management', popularity: 45},
-    {_id: '55974b393dc107cb75453828', name: 'Future roadmap and upgrades', description: '', topic: 'Risk management', popularity: 70},
+    {_id: '559cf83dd21e2f6d44eb6408', name: 'Future roadmap and upgrades', description: 'Risk involved with future versions', topic: 'Risk management', popularity: 70},
+    {_id: '559cf848d21e2f6d44eb6409', name: 'Vendor Locking', description: 'Does choosing this solution lock us on this vendor?', topic: 'Risk management', popularity: 45}, 
+    {_id: '559cfa63d21e2f6d44eb6413', name: 'Migration Complexity', description: 'How complex will it be to migrate from the current solution to this new one?', topic: 'Risk management', popularity: 45}, 
 
     {_id: '55974b393dc107cb75453829', name: 'Security', description: 'Level of security of data storage, passwords, etc. Usage of SingleSignOn, Two factor authentication, etc.', topic: 'System Interfaces and user management', popularity: 45},
     {_id: '55974b3a3dc107cb7545382a', name: 'Hardenning according to procedure', description: '', topic: 'System Interfaces and user management', popularity: 45},
     {_id: '55974b3a3dc107cb7545382b', name: 'Different user profiles', description: '', topic: 'System Interfaces and user management', popularity: 70},
     {_id: '55974b3b3dc107cb7545382c', name: 'Logging of management system user access', description: '', topic: 'System Interfaces and user management', popularity: 70},
-
 
     {_id: '55974bf43dc107cb7545382d', name: 'Zero Day', description: 'Finding unknown attacks', topic: 'Threat Prevention Functionality', popularity: 50},
     {_id: '55974bf53dc107cb7545382e', name: 'Finding Advanced Persistent Threats', description: 'Before the attack happens', topic: 'Threat Prevention Functionality', popularity: 70},
@@ -40,8 +41,21 @@ var requirements = [
     {_id: '55974bfa3dc107cb75453838', name: 'Integration with 24x7 SOC', description: 'Integration with 24x7 SOC', topic: 'Threat Prevention Functionality', popularity: 90},
     {_id: '55974bfb3dc107cb75453839', name: 'On Demand file clearance', description: '', topic: 'Threat Prevention Functionality', popularity: 90},
     {_id: '55974bfb3dc107cb7545383a', name: 'Integration with 3rd party anti virus providers', description: 'Like Virus Total and NIST', topic: 'Threat Prevention Functionality', popularity: 45},
-    {_id: '55974bfc3dc107cb7545383b', name: 'SLA', description: 'Vendor should commit to respond on real time attacks according to the priority level of the attack', topic: 'Threat Prevention Functionality', popularity: 70}
+    {_id: '55974bfc3dc107cb7545383b', name: 'SLA', description: 'Vendor should commit to respond on real time attacks according to the priority level of the attack', topic: 'Threat Prevention Functionality', popularity: 70},
+
+    {_id: '559cf8cbd21e2f6d44eb640a', name: 'Answers to business requirement', description: 'How this solution meets the business requirements defined for it by the company', topic: 'Impact on the Company', popularity: 85},
+    {_id: '559cf8d8d21e2f6d44eb640b', name: 'Time to market', description: 'How quickly the solution will be up and running', topic: 'Impact on the Company', popularity: 95}, 
+    {_id: '559cf8dfd21e2f6d44eb640c', name: 'Delivers while adopting', description: 'Flexibility of the solution to change and remain fully operational', topic: 'Impact on the Company', popularity: 90},
+    {_id: '559cf8e8d21e2f6d44eb640d', name: 'Delivers competitive advantage', description: 'Whether this technology is a differentiation over the competition', topic: 'Impact on the Company', popularity: 90},
+     {_id: '559cf8f2d21e2f6d44eb640e', name: 'Solves immediate need and as well as coming technology challenges', description: 'How this solution fits the problem now and expected to fit in the future', topic: 'Impact on the Company', popularity: 45},
+
+    {_id: '559cf8fcd21e2f6d44eb640f', name: 'Price', description: 'How much this solution cost. Monthly / Annually / or one time payment.', topic: 'Cost', popularity: 99}, 
+    {_id: '559cf907d21e2f6d44eb6410', name: 'Cost of Ownership', description: 'Adding other parameters to the calculation, like internal resources.', topic: 'Cost', popularity: 95}, 
+    {_id: '559cf90fd21e2f6d44eb6411', name: 'Return on Investment', description: 'Measuring if the solution will return its cost, how and when.', topic: 'Cost', popularity: 90}, 
+    {_id: '559cf918d21e2f6d44eb6412', name: 'Cost structure', description: 'One time or recurrent. Product vs. service. Vendor vs. Integrator, etc.', topic: 'Cost', popularity: 90} 
+
 ];
+
 
 module.exports = {
     requirements: requirements

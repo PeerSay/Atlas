@@ -13,7 +13,7 @@ function getTemplateStr(str) {
 
 module.exports = {
     'account-activation': {
-        subj: '[ACTION REQUIRED] Complete Your PeerSay Account Registration',
+        subj: '[Action Required] Complete Your PeerSay Account Registration',
         tpl: getTemplateFile('account-activation')
     },
     'welcome': {
@@ -21,7 +21,7 @@ module.exports = {
         tpl: getTemplateFile('welcome')
     },
     'restore-pwd': {
-        subj: '[ACTION REQUIRED] Restore Your PeerSay Password',
+        subj: '[Action Required] Restore Your PeerSay Password',
         tpl: getTemplateFile('restore-pwd')
     },
     'say-hello': {

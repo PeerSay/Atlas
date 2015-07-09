@@ -197,7 +197,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
             addFooter('mandatory', {label: '', type: 'static'});
 
             addHeader('weight', {label: 'Weight', 'class': 'min'});
-            addFooter('weight', {label: '100%', type: 'static'});
+            addFooter('weight', {label: '100%', type: 'static', 'class': 'center'});
 
             _.forEach(reqs, function (req, rowIdx) {
                 addCell('name', rowIdx, req, {
@@ -206,7 +206,8 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                 });
                 addCell('mandatory', rowIdx, req, {
                     label: req.mandatory ? 'fa-check' : '',
-                    type: 'icon'
+                    type: 'icon',
+                    'class': 'center'
                 });
                 addCell('weight', rowIdx, req, {
                     model: CellModel(req, 'weight', {

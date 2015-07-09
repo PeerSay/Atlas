@@ -23,7 +23,7 @@
                 </a>
             </td>
             <!--Group weight-->
-            <td class="strong" ng-if="group.$hideRows">{{ groupObj.weight() }}%</td>
+            <td class="strong center" ng-if="group.$hideRows">{{ groupObj.weight() }}%</td>
             <!--Group grades-->
             <td colspan="2" class="strong text-right align-fix"
                     ng-if="group.$hideRows"
@@ -46,7 +46,7 @@
                 </div>
                 <!--Number cell-->
                 <div ng-if=":: cell.type === 'number' ">
-                    <input type="number" class="cell-input"
+                    <input type="number" class="cell-input center"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
                             ps-table-input="cell"

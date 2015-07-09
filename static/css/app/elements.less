@@ -70,3 +70,23 @@ textarea {
     background-color: #eee;
   }
 }
+
+/*
+Inputs
+*/
+
+input[type=number] {
+  &.center {
+    text-align: center;
+    // Without this, center-aligned number input is not exactly at center,
+    // because it is pushed left by spin button
+    &::-webkit-textfield-decoration-container {
+      position: relative;
+    }
+    &::-webkit-inner-spin-button {
+      position: absolute;
+      top: 0; right: 0;
+      height: 20px;
+    }
+  }
+}

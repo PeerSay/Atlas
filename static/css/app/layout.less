@@ -20,6 +20,20 @@ Project Details
       .make-xs-column(6); // 1/2 of screen on mobile
       .make-sm-column(12);
     }
+
+
+    .side-bar {
+      // Vertical scroll bar if no space
+      height: ~"calc(100% - 60px)";
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      // Sticky with affix plugin
+      &.affix {
+        top: 60px;
+        width: 100% * (1/6);
+      }
+    }
   }
   //Content
   .content-container-col {

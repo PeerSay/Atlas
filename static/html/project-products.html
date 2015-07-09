@@ -138,12 +138,16 @@
                     <td class="main">{{:: product.name }}</td>
                     <td>{{:: product.description }}</td>
                     <td class="center">
-                        <span ng-if="!product.custom">{{:: product.popularity }}%</span>
+                        <div ng-if="!product.custom"
+                                title="{{:: product.popularity }}%"
+                                ps-tooltip>
+                            <ps-progress value="product.popularity"></ps-progress>
+                        </div>
                     </td>
                     <td>
-                                <span class="fa fa-trash table-icon"
-                                        ng-if="product.custom"
-                                        ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
+                        <span class="fa fa-trash table-icon"
+                                ng-if="product.custom"
+                                ng-click="cm.removeCustomProduct(product); $event.stopPropagation()"></span>
                     </td>
                 </tr>
                 </tbody>

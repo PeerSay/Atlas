@@ -65,7 +65,7 @@
       }
       &.align-fix {
         // Hack!
-        padding-right: 30px;
+        padding-right: 18px;
       }
       a {
         display: block;
@@ -81,9 +81,6 @@
       border-left: 2px solid @border-vert-color;
       &.grade {
         border-left: 1px dotted @border-vert-color;
-      }
-      &.icon {
-        text-align: center;
       }
     }
 
@@ -115,7 +112,7 @@
       &.number {
         width: 1%;
         .cell-input {
-          padding: 1px 1px 1px 5px;
+          padding: 1px;
         }
       }
       &.text {
@@ -131,6 +128,9 @@
       }
       &.static {
         background: @header-bg;
+      }
+      &.center, &.grade {
+        text-align: center;
       }
 
       &.muted {

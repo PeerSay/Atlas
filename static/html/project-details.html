@@ -17,7 +17,7 @@
     <div class="content-row">
         <!--Left side-bar-->
         <div class="sidebar-col">
-            <div class="row page-spacer side-bar">
+            <div class="row page-spacer side-bar" id="js-sidebar-affix">
                 <!--Overview-->
                 <div class="sidebar-section-col">
                     <h4 class="toggle-edit">Overview</h4>
@@ -123,3 +123,15 @@
         </div>
     </div>
 </div>
+
+<!--Init JS plugins-->
+<script>
+    $(function () {
+        // Sidebar affix
+        $('#js-sidebar-affix').affix({
+            offset: {
+                top: 60
+            }
+        });
+    });
+</script>

@@ -103,8 +103,8 @@
                 <div ng-if="board.products.initialized">
                     <p>There are <span> {{:: board.products.data.length }}</span> products selected:</p>
                     <ul >
-                        <li ng-repeat="product in board.products.data | orderBy:'-popularity'">
-                            {{:: product.name }}
+                        <li ng-repeat="prod in board.products.data | orderBy:'-popularity' track by prod._id">
+                            {{:: prod.name }}
                         </li>
                     </ul>
                 </div>
@@ -126,8 +126,8 @@
                 <div ng-if="board.requirements.initialized">
                     <p>There are <span> {{:: board.requirements.data.length }}</span> criteria selected:</p>
                     <ul >
-                        <li ng-repeat="req in board.requirements.data | orderBy:'-popularity'">
-                            {{:: req.name }}
+                        <li ng-repeat="req in board.requirements.data | orderBy:'-popularity' track by req._id">
+                            {{ req.name }}
                         </li>
                     </ul>
                 </div>

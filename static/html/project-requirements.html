@@ -146,7 +146,13 @@
                     <td colspan="2" class="bold"><strong>{{:: group.name }}</strong></td>
                     <td>{{:: group.description }}</td>
                     <td></td>
-                    <td class="center"><span ng-if="!group.custom">{{:: group.popularity }}%</span></td>
+                    <td class="center">
+                        <div ng-if="!group.custom"
+                                title="{{:: group.popularity }}%"
+                                ps-tooltip>
+                            <ps-progress value="group.popularity"></ps-progress>
+                        </div>
+                    </td>
                     <td></td>
                     <td></td>
                 </tr>
@@ -168,7 +174,11 @@
                         <span class="fa fa-check" ng-if="req.mandatory && req.selected"></span>
                     </td>
                     <td class="center">
-                        <span ng-if="!req.custom">{{:: req.popularity }}%</span>
+                        <div ng-if="!req.custom"
+                                title="{{:: req.popularity }}%"
+                                ps-tooltip>
+                            <ps-progress value="req.popularity"></ps-progress>
+                        </div>
                     </td>
                     <td>
                         <span class="fa fa-fw fa-edit table-icon" ng-if="req.selected || req.custom"

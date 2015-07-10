@@ -1,7 +1,8 @@
 <!--Accordion-->
 <div class="panel-group selection-list" id="accordion" role="tablist">
     <!--Topic list-->
-    <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'">
+    <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
+            ng-show="cm.showFilteredGroup(group)">
         <!--Topic-->
         <div class="panel-heading topic-widget" role="tab"
                 id="heading-{{:: group.id }}"
@@ -10,7 +11,7 @@
                 data-target="#{{:: group.id }}">
             <h4 class="panel-title topic-name">
                 <span class="fa fa-caret-right caret-icon"></span>
-                {{:: group.name }}
+                {{:: group.name || '(no topic)' }}
             </h4>
             <div class="topic-details">
                 <span>{{:: group.description }}</span>
@@ -73,6 +74,8 @@
                                 ng-click="cm.removeLocalReq(req); $event.stopPropagation()"></span>
                     </td>
                 </tr>
+                </tbody>
+                <tfoot>
                 <!--Paging: more/less-->
                 <tr ng-if="!group.paging.disabled()">
                     <td colspan="8" class="text-center">
@@ -89,7 +92,7 @@
                         </button>
                     </td>
                 </tr>
-                </tbody>
+                </tfoot>
             </table>
         </div>
     </div>

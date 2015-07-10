@@ -7,10 +7,9 @@
         </h3>
     </div>
     <div class="panel-body">
-        <!--Top form-->
-        <form class="selection-controls">
-            <!--Select/Add Products-->
-            <div class="form-group">
+        <form class="row">
+            <!--Col2 - Select/Add Products-->
+            <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group">
                 <ui-select ng-model="cm.requirement.selected" theme="bootstrap"
                         tagging="cm.addNotFoundRequirement"
                         tagging-tokens="ENTER"
@@ -27,8 +26,8 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
-            <!--Buttons-->
-            <div class="form-group button-bar">
+            <!--Col1 - Buttons-->
+            <div class="col-xs-12 col-sm-6 col-sm-pull-6 form-group button-bar">
                 <!--Filter dropdown-->
                 <div class="btn-group">
                     <button type="button" class="btn btn-default dropdown-toggle"

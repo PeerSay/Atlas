@@ -13,7 +13,6 @@ Project Details
   .make-row();
   //Side-bar
   .sidebar-col {
-    .make-xs-column(12);
     .make-sm-column(2); // 1/6 of screen on non-mobile
 
     .sidebar-section-col {
@@ -37,7 +36,6 @@ Project Details
   }
   //Content
   .content-container-col {
-    .make-xs-column(12);
     .make-sm-column(10); // 5/6 of screen on non-mobile (all but sidebar)
 
     .content-col {
@@ -47,5 +45,17 @@ Project Details
       }
       transition: width .3s ease;
     }
+  }
+}
+/*
+Selector page's form
+*/
+.selector-edit-form {
+  .label-col{
+    .make-sm-column(2);
+  }
+  .control-col {
+    .make-sm-column(10);
+    .make-lg-column(8);
   }
 }

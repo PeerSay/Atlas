@@ -51,18 +51,20 @@
                 </div>
                 <!--Add new-->
                 <button type="button" class="btn btn-default"
-                        ng-click="cm.edit.toggleByBtn()">
-                    <span class="fa fa-{{ cm.edit.visible && 'minus' || 'plus' }}-circle"></span> New
+                        ng-click="cm.edit.toggleByBtn()"
+                        ng-class="{active: cm.edit.visible}"
+                        >
+                    <span class="fa fa-plus-circle"></span> New
                 </button>
             </div>
         </form>
 
         <!--Add form-->
-        <form name="cm.addForm" class="form-horizontal page-spacer" ng-show="cm.edit.visible">
+        <form name="cm.addForm" class="form-horizontal selector-edit-form add-new page-spacer" ng-show="cm.edit.visible">
             <!--Topic-->
-            <div class="form-group">
-                <label class="col-sm-2 control-label text-left-important">Topic:</label>
-                <div class="col-sm-10">
+            <div class="form-group form-group-sm">
+                <label class="label-col control-label text-left-important">Topic:</label>
+                <div class="control-col">
                     <ui-select ng-model="cm.edit.topic.selected" theme="bootstrap"
                             tagging="cm.edit.topic.onAddNew"
                             tagging-tokens="ENTER"
@@ -78,33 +80,35 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="req-name" class="col-sm-2 control-label text-left-important">Name:</label>
-                <div class="col-sm-10">
+            <div class="form-group form-group-sm">
+                <label for="req-name" class="label-col control-label text-left-important">Name:</label>
+                <div class="control-col">
                     <input type="text" id="req-name" class="form-control" placeholder="Name"
                             ng-model="cm.edit.model.name"
                             ps-focus-on="cm.edit.visible"
                             required>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="req-descr" class="col-sm-2 control-label text-left-important">Description:</label>
-                <div class="col-sm-10">
+            <div class="form-group form-group-sm">
+                <label for="req-descr" class="label-col control-label text-left-important">Description:</label>
+                <div class="control-col">
                     <input type="text" id="req-descr" class="form-control" placeholder="Description"
                             ng-model="cm.edit.model.description">
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
+            <div class="form-group form-group-sm">
+                <div class="label-col"></div>
+                <div class="control-col">
                     <label class="checkbox-ext no-select" ng-class="{checked: cm.edit.model.mandatory}">
                         <input type="checkbox" ng-model="cm.edit.model.mandatory">
                         Mandatory
                     </label>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="button" class="btn btn-primary"
+            <div class="form-group form-group-sm">
+                <div class="label-col"></div>
+                <div class="control-col">
+                    <button type="button" class="btn btn-sm btn-primary"
                             ng-click="cm.edit.save()"
                             ng-disabled="cm.addForm.$invalid">Save
                     </button>

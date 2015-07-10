@@ -266,11 +266,36 @@
 * Selection lists
 */
 @selection-color: #17B7AD;
-@remove-color: indianred;
+@icon-color: indianred;
+@form-bg: #FFFEEC;
+@form-chevron-color: #EBEAD9;
 
 .button-bar {
   .btn {
     margin-right: 10px;
+  }
+}
+
+/*Add/edit form*/
+.selector-edit-form {
+  position: relative;
+  background-color: @form-bg;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 4px 0 rgba(0, 0, 0, 0.2);
+
+  &.add-new::before {
+    content: "";
+    position: absolute;
+    top: -11px; left: 87px;
+    .triangle(bottom, top, 12px, @form-chevron-color);
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+    &:last-of-type {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -317,7 +342,7 @@
   }
 
   .table-icon {
-    color: @remove-color;
+    color: @icon-color;
     opacity: .4;
     transition: opacity .3s ease;
     &:hover {

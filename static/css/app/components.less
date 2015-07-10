@@ -304,6 +304,16 @@
     border: 1px solid @table-border-color;
     border-radius: 4px;
   }
+  .panel {
+    .caret-icon {
+      transition: .1s ease;
+    }
+    &.visible {
+      .caret-icon {
+        transform: rotate(90deg);
+      }
+    }
+  }
 
   .topic-widget {
     cursor: pointer;

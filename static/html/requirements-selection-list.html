@@ -9,7 +9,7 @@
                 data-parent="#accordion"
                 data-target="#{{:: group.id }}">
             <h4 class="panel-title topic-name">
-                <span class="fa fa-caret-right"></span>
+                <span class="fa fa-caret-right caret-icon"></span>
                 {{:: group.name }}
             </h4>
             <div class="topic-details">
@@ -94,3 +94,15 @@
         </div>
     </div>
 </div>
+<script>
+    $(function () {
+        var $accordion = $('#accordion').on('shown.bs.collapse hidden.bs.collapse', toggleCaret);
+        toggleCaret();
+
+        function toggleCaret() {
+            var $panels =$accordion.find('.panel');
+            $panels.toggleClass('visible', false);
+            $panels.has('.collapse.in').toggleClass('visible', true);
+        }
+    });
+</script>

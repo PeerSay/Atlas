@@ -7,9 +7,8 @@
         </h3>
     </div>
     <div class="panel-body">
-        <!--Top form-->
-        <form class="selection-controls">
-            <!--Select Category-->
+        <!--Select Category-->
+        <form>
             <div class="form-group">
                 <ui-select ng-model="cm.category.selected" theme="bootstrap"
                         tagging="cm.addCategory"
@@ -32,8 +31,11 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
-            <!--Select/Add Products-->
-            <div class="form-group">
+        </form>
+        <!--Top form-->
+        <form class="row">
+            <!--Col2 - Select/Add Products-->
+            <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group">
                 <ui-select ng-model="cm.product.selected" theme="bootstrap"
                         tagging="cm.addNotFoundProduct"
                         tagging-tokens="ENTER"
@@ -49,10 +51,10 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
-            <!--Buttons-->
-            <div class="form-group button-bar">
+            <!--Col1 - Buttons-->
+            <div class="col-xs-12 col-sm-6 col-sm-pull-6 form-group button-bar">
                 <!--Filter dropdown-->
-                <div class="btn-group">
+                <!--<div class="btn-group">
                     <button type="button" class="btn btn-default dropdown-toggle"
                             data-toggle="dropdown"
                             title="Filter"
@@ -71,35 +73,38 @@
                             <a href ng-click="cm.toggleFilter('not-selected')"><span class="fa fa-square-o"></span> Not selected</a>
                         </li>
                     </ul>
-                </div>
+                </div>-->
                 <!--Add new-->
                 <button type="button" class="btn btn-default"
-                        ng-click="cm.toggleAddNew()">
-                    <span class="fa fa-{{ cm.addNew.show && 'minus' || 'plus' }}-circle"></span> New
+                        ng-click="cm.toggleAddNew()"
+                        ng-class="{active: cm.addNew.show}"
+                        >
+                    <span class="fa fa-plus-circle"></span> New
                 </button>
             </div>
         </form>
 
         <!--Add form-->
-        <form name="cm.addForm" class="form-horizontal page-spacer" ng-show="cm.addNew.show">
-            <div class="form-group">
-                <label for="prod-name" class="col-sm-2 control-label text-left-important">Name:</label>
-                <div class="col-sm-10">
+        <form name="cm.addForm" class="form-horizontal selector-edit-form add-new page-spacer" ng-show="cm.addNew.show">
+            <div class="form-group form-group-sm">
+                <label for="prod-name" class="label-col control-label text-left-important">Name:</label>
+                <div class="control-col">
                     <input type="text" id="prod-name" class="form-control" placeholder="Name"
                             ng-model="cm.addNew.model.name"
                             ps-focus-on="cm.addNew.show"
                             required>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="prod-descr" class="col-sm-2 control-label text-left-important">Description:</label>
-                <div class="col-sm-10">
+            <div class="form-group form-group-sm">
+                <label for="prod-descr" class="label-col control-label text-left-important">Description:</label>
+                <div class="control-col">
                     <input type="text" id="prod-descr" class="form-control" placeholder="Description"
                             ng-model="cm.addNew.model.description">
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
+            <div class="form-group form-group-sm">
+                <div class="label-col"></div>
+                <div class="control-col">
                     <button type="button" class="btn btn-sm btn-primary"
                             ng-click="cm.saveAddNew()"
                             ng-disabled="cm.addForm.$invalid">Add</button>
@@ -112,7 +117,7 @@
         </form>
 
         <!--Selection List-->
-        <div class="table-responsive table-selection-list border">
+        <div class="table-responsive selection-list border">
             <table class="table table-hover table-striped no-select">
                 <thead>
                 <tr>

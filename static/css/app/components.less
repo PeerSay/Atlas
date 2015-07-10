@@ -266,24 +266,79 @@
 * Selection lists
 */
 @selection-color: #17B7AD;
-@remove-color: indianred;
+@icon-color: indianred;
+@form-bg: #FFFEEC;
+@form-chevron-color: #EBEAD9;
 
-.total-selected {
-  color: @selection-color;
-  font-weight: bold;
+.button-bar {
+  .btn {
+    margin-right: 10px;
+  }
 }
-.selection-controls {
-  .button-bar {
-    .btn {
-      margin-right: 10px;
+
+/*Add/edit form*/
+.selector-edit-form {
+  position: relative;
+  background-color: @form-bg;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 4px 0 rgba(0, 0, 0, 0.2);
+
+  &.add-new::before {
+    content: "";
+    position: absolute;
+    top: -11px; left: 25px;
+    .triangle(bottom, top, 12px, @form-chevron-color);
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+    &:last-of-type {
+      margin-bottom: 0;
     }
   }
 }
-.table-selection-list {
+
+.selection-list {
   &.border {
     border: 1px solid @table-border-color;
     border-radius: 4px;
   }
+  .panel {
+    .caret-icon {
+      transition: .1s ease;
+    }
+    &.visible {
+      .caret-icon {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .topic-widget {
+    cursor: pointer;
+    &:hover {
+      background-color: @gray-lighter;
+    }
+
+    .topic-name {
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: bold;
+    }
+    .topic-details {
+      font-size: 12px;
+      color: @gray-light;
+      span {
+        margin-right: 10px;
+      }
+    }
+    .topic-popularity {
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+
   table {
     // Override bootstrap
     margin-bottom: 0;
@@ -322,7 +377,7 @@
   }
 
   .table-icon {
-    color: @remove-color;
+    color: @icon-color;
     opacity: .4;
     transition: opacity .3s ease;
     &:hover {
@@ -464,5 +519,8 @@
 }
 .navbar-brand {
   padding: 10px 10px;
+}
+.panel-group .panel-heading {
+  border-bottom: inherit; // overwrite 0 (bootstrap bug?)
 }
 

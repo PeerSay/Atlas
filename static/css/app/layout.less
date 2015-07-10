@@ -13,7 +13,6 @@ Project Details
   .make-row();
   //Side-bar
   .sidebar-col {
-    .make-xs-column(12);
     .make-sm-column(2); // 1/6 of screen on non-mobile
 
     .sidebar-section-col {
@@ -24,20 +23,21 @@ Project Details
 
     .side-bar {
       // Vertical scroll bar if no space
-      height: ~"calc(100% - 60px)";
+      position: fixed;
+      width: 100% * (1/6);
+      height: ~"calc(100% - 117px)";
       overflow-y: auto;
       overflow-x: hidden;
 
       // Sticky with affix plugin
       &.affix {
         top: 60px;
-        width: 100% * (1/6);
+        height: ~"calc(100% - 60px)";
       }
     }
   }
   //Content
   .content-container-col {
-    .make-xs-column(12);
     .make-sm-column(10); // 5/6 of screen on non-mobile (all but sidebar)
 
     .content-col {
@@ -47,5 +47,17 @@ Project Details
       }
       transition: width .3s ease;
     }
+  }
+}
+/*
+Selector page's form
+*/
+.selector-edit-form {
+  .label-col{
+    .make-sm-column(2);
+  }
+  .control-col {
+    .make-sm-column(10);
+    .make-lg-column(8);
   }
 }

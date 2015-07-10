@@ -361,6 +361,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
 
         var groupIdx = {};
         var itemIdx = {};
+        var nextId = nextIdFn();
 
         function getGroup(topic) {
             return groupIdx[topic];
@@ -376,9 +377,11 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                     // across Ctrl instantiations
                     group = shared ? angular.copy(it) : it;
                     group.reqs = group.reqs || [];
-                    groupIdx[it.name] = group;
+                    group.id = nextId();
                     group.paging = Paging(group);
+                    group.sel = Selected(group);
 
+                    groupIdx[it.name] = group;
                     G.list.push(group);
                 } else {
                     //console.log('>>Adding group exiting:', group.name);
@@ -387,6 +390,13 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                     angular.extend(group, it, {custom: false});
                 }
             });
+        }
+
+        function nextIdFn() {
+            var id = 0;
+            return function () {
+                return 'group-' + (id++);
+            };
         }
 
         function createNew(name) {
@@ -446,6 +456,15 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 group = addGroupByName(name);
             }
             group.reqs.push(req);
+        }
+
+        //Selected
+        function Selected(group) {
+            var S = {};
+            S.number = function () {
+                return filterFilter(group.reqs, filterExpr.selected).length;
+            };
+            return S;
         }
 
         return G;

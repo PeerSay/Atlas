@@ -217,7 +217,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
     }
 
     function toggleProductVal(product, val) {
-        product.selected = val;
+        product.selected = product.focus = val; // set focus on selected
 
         addRemoveToProject(product);
         patchProject();

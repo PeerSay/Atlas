@@ -137,7 +137,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     }
 
     function toggleReqVal(req, val) {
-        req.selected = val;
+        req.selected = req.focus = val; //set focus on selected
 
         toggleGroupByReqs(m.groups.get(req.topic));
 
@@ -181,6 +181,15 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
 
     // Search Requirements
     //
+    function selectRequirement(req) {
+        // Item without id is newly added, it should not be propagated to table/project
+        if (!req._id) { return; }
+
+        toggleReqVal(req, true);
+
+        m.groups.revealItem(req);
+    }
+
     function addNotFoundRequirement(val) {
         m.addNew.show = true;
         m.addNew.model.name = val;
@@ -189,18 +198,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         return copy; // added to list!
     }
 
-    function selectRequirement(req) {
-        // Item without id is newly added, it should not be propagated to table/project
-        if (!req._id) { return; }
-
-        toggleReqVal(req, true);
-
-        // Reveal if hidden by paging
-        var group = m.groups.get(req.topic);
-        group.paging.revealItem(req);
-    }
-
-    // Add/Remove new
+    // Edit / add new
     function Edit() {
         var E = {};
         var emptyNew = {
@@ -358,6 +356,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         G.addGroups = addGroups;
         G.addItems = addItems;
         G.relocate = relocate;
+        G.revealItem = revealItem;
 
         var groupIdx = {};
         var itemIdx = {};
@@ -404,7 +403,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 reqs: [],
                 name: name,
                 popularity: 100,
-                selected: false,
                 custom: true
             };
         }
@@ -456,6 +454,14 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 group = addGroupByName(name);
             }
             group.reqs.push(req);
+        }
+
+        function revealItem(req) {
+            // Reveal if hidden by accordion/paging & focus it
+            var group = getGroup(req.topic);
+            group.paging.revealItem(req);
+
+            group.open = true; // triggers accordion open
         }
 
         //Selected

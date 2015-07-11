@@ -6,9 +6,8 @@
         <!--Topic-->
         <div class="panel-heading topic-widget" role="tab"
                 id="heading-{{:: group.id }}"
-                data-toggle="collapse"
-                data-parent="#accordion"
-                data-target="#{{:: group.id }}">
+                data-target="#{{:: group.id }}"
+                data-toggle="collapse">
             <h4 class="panel-title topic-name">
                 <span class="fa fa-caret-right caret-icon"></span>
                 {{:: group.name || '(no topic)' }}
@@ -27,7 +26,8 @@
         <div class="panel-collapse collapse table-responsive" role="tabpanel"
                 id="{{:: group.id }}"
                 aria-labelledby="heading-{{:: group.id }}"
-                ng-class="{in: !$index}">
+                ps-collapse="group"
+                ps-collapse-parent="#accordion">
             <table class="table table-hover no-select">
                 <thead>
                 <tr>
@@ -51,7 +51,7 @@
                                 ng-model="req.selected"
                                 ng-change="cm.toggleReq(req)"
                                 ng-click="$event.stopPropagation()"
-                                ps-focus-on="req.selected">
+                                ps-focus-on="req.focus">
                     </td>
                     <td>{{ req.name }}</td>
                     <td>{{ req.description }}</td>

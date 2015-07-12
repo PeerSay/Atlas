@@ -2,7 +2,8 @@
 <div class="panel-group selection-list" id="accordion" role="tablist">
     <!--Topic list-->
     <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
-            ng-if="cm.groups.isVisible(group)">
+            ng-if="cm.groups.isVisible(group)"
+            ng-class="{visible: group.open}">
         <!--Topic-->
         <div class="panel-heading topic-widget" role="tab"
                 id="heading-{{:: group.id }}"
@@ -79,15 +80,4 @@
         </div>
     </div>
 </div>
-<script>
-    $(function () {
-        var $accordion = $('#accordion').on('shown.bs.collapse hidden.bs.collapse', toggleCaret);
-        toggleCaret();
 
-        function toggleCaret() {
-            var $panels =$accordion.find('.panel');
-            $panels.toggleClass('visible', false);
-            $panels.has('.collapse.in').toggleClass('visible', true);
-        }
-    });
-</script>

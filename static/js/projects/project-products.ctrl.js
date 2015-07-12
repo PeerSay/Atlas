@@ -82,7 +82,6 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
 
             // Products
             addProductsToList(res.products, true);
-            m.totalSelected = getTotalSelected();
 
             loadPublicProducts({q: categoryName, from: 0, limit: QUERY_LIMIT});
         });
@@ -221,12 +220,6 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
 
         addRemoveToProject(product);
         patchProject();
-
-        m.totalSelected = getTotalSelected();
-    }
-
-    function getTotalSelected() {
-        return filterFilter(m.project.products, filterExpr.selected).length;
     }
 
     // Select / Add new

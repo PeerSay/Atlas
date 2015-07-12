@@ -2,7 +2,7 @@
 <div class="panel-group selection-list" id="accordion" role="tablist">
     <!--Topic list-->
     <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
-            ng-show="cm.showFilteredGroup(group)">
+            ng-if="cm.groups.isVisible(group)">
         <!--Topic-->
         <div class="panel-heading topic-widget" role="tab"
                 id="heading-{{:: group.id }}"
@@ -42,7 +42,7 @@
                 </thead>
                 <tbody>
                 <!--Criteria list-->
-                <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' | limitTo:group.paging.limit track by req._id"
+                <tr ng-repeat="req in group.reqs | filter:cm.filter.visible | orderBy:'-popularity' | limitTo:group.paging.limit track by req._id"
                         ng-class="{selected: req.selected}"
                         ng-click="cm.toggleReq(req, true)">
                     <td></td>

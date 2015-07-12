@@ -12,26 +12,14 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     m.loadingMore = true;
     m.groups = GroupBy('topic');
     // Table selection
-    m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
-    m.getTotalSelected = getTotalSelected;
     // Search selection
     m.search = Search();
-    // Filters
-    var filterExpr = {
-        all: {removed: '!true'},
-        selected: {selected: true, removed: '!true'},
-        'not-selected': {selected: false, removed: '!true'}
-    };
+    //Filter
     m.filter = {
-        name: 'all',
-        expr: filterExpr.all
+        visible: {removed: '!true'},
+        selected: {selected: true, removed: '!true'}
     };
-    m.filterLiClass = filterLiClass;
-    m.filterBtnClass = filterBtnClass;
-    m.toggleFilter = toggleFilter;
-    m.showFilteredGroup = showFilteredGroup;
-    m.isEmptyTable = isEmptyTable;
     // Edit/add new
     m.edit = Edit();
     // Remove
@@ -91,40 +79,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         });
     }
 
-    // Filters
-    //
-    function filterLiClass(name) {
-        return {active: m.filter.name === name};
-    }
-
-    function filterBtnClass() {
-        return {
-            'fa-minus-square-o': m.filter.name === 'all',
-            'fa-check-square-o': m.filter.name === 'selected',
-            'fa-square-o': m.filter.name === 'not-selected'
-        };
-    }
-
-    function toggleFilter(name) {
-        m.filter.name = name;
-        m.filter.expr = filterExpr[name];
-    }
-
-    function showFilteredGroup(group) {
-        var arr = filterFilter(group.reqs, m.filter.expr);
-        return (arr.length !== 0);
-    }
-
-    function isEmptyTable() {
-        var res = false;
-        var i = 0, group;
-        while (group = m.groups.list[i]) {
-            if (res = showFilteredGroup(group)) { break; }
-            i++;
-        }
-        return !res;
-    }
-
     // Selection
     //
     function toggleReq(req, invert) {
@@ -135,44 +89,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     function toggleReqVal(req, val) {
         req.selected = req.focus = val; //set focus on selected
 
-        toggleGroupByReqs(m.groups.get(req.topic));
-
         addRemoveLocal(req);
         patchProject();
-    }
-
-    function toggleGroup(group, invert) {
-        var val = invert ? !group.selected : group.selected;
-        toggleGroupByVal(group, val);
-    }
-
-    function toggleGroupByVal(group, val) {
-        var on = group.selected = val;
-
-        _.forEach(group.reqs, function (req) {
-            req.selected = on;
-            addRemoveLocal(req);
-        });
-
-        patchProject();
-    }
-
-    function toggleGroupByReqs(group) {
-        var reqs = group.reqs;
-        var len = reqs.length;
-        var selectedLen = filterFilter(reqs, filterExpr.selected).length;
-
-        group.selected = (selectedLen === len);
-    }
-
-    function toggleAllGroupsByReqs() {
-        _.forEach(m.groups.list, function (group) {
-            toggleGroupByReqs(group);
-        });
-    }
-
-    function getTotalSelected() {
-        return filterFilter(m.project.requirements, filterExpr.selected).length;
     }
 
     // Search
@@ -198,20 +116,12 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
         function addNew(value) {
-           var newReq = m.edit.initWithVal(value);
+            var newReq = m.edit.initWithVal(value);
             // need to return new item to hide search list
             return newReq;
         }
 
         return S;
-    }
-
-    function addNotFoundRequirement(val) {
-        m.addNew.show = true;
-        m.addNew.model.name = val;
-
-        var copy = angular.extend({}, emptyNew, m.addNew.model, {selected: false});
-        return copy; // added to list!
     }
 
     // Edit / add new
@@ -317,8 +227,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             var oldTopic = curReq.topic;
             angular.extend(curReq, E.model);
             m.groups.relocate(curReq, oldTopic, curReq.topic);
-
-            toggleGroupByReqs(m.groups.get(curReq.topic));
         }
 
         function pick(obj) {
@@ -383,6 +291,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         G.addItems = addItems;
         G.relocate = relocate;
         G.revealItem = revealItem;
+        G.isVisible = isVisible;
 
         var groupIdx = {};
         var itemIdx = {};
@@ -490,11 +399,16 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             group.open = true; // triggers accordion open
         }
 
+        function isVisible(group) {
+            var arr = filterFilter(group.reqs, m.filter.visible);
+            return (arr.length !== 0);
+        }
+
         //Selected
         function Selected(group) {
             var S = {};
             S.number = function () {
-                return filterFilter(group.reqs, filterExpr.selected).length;
+                return filterFilter(group.reqs, m.filter.selected).length;
             };
             return S;
         }
@@ -535,7 +449,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
         function disabled() {
-            return m.loadingMore || m.filter.name !== 'all' || group.custom || group.reqs.length <= MIN;
+            return m.loadingMore || group.custom || group.reqs.length <= MIN;
         }
 
         function hiddenItems() {

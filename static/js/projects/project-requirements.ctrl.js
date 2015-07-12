@@ -9,18 +9,14 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     // Data / Edit
     m.project = null; // ref to shared
     m.patchObserver = null;
-    m.groups = GroupBy('topic');
-    //Loading
     m.loadingMore = true;
+    m.groups = GroupBy('topic');
     // Table selection
     m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
     m.getTotalSelected = getTotalSelected;
     // Search selection
-    m.requirement = {}; // ui-select model
-    m.requirements = []; // ui-select list
-    m.addNotFoundRequirement = addNotFoundRequirement;
-    m.selectRequirement = selectRequirement;
+    m.search = Search();
     // Filters
     var filterExpr = {
         all: {removed: '!true'},
@@ -179,15 +175,35 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         return filterFilter(m.project.requirements, filterExpr.selected).length;
     }
 
-    // Search Requirements
+    // Search
     //
-    function selectRequirement(req) {
-        // Item without id is newly added, it should not be propagated to table/project
-        if (!req._id) { return; }
+    function Search() {
+        var S = {};
+        S.model = {};
+        S.list = [];
+        S.add = add;
+        S.onSelect = select;
+        S.onAddNew = addNew;
 
-        toggleReqVal(req, true);
+        function add(req) {
+            S.list.push(req);
+        }
 
-        m.groups.revealItem(req);
+        function select(req) {
+            // Item without id is newly added, it should not be propagated to table/project
+            if (!req._id) { return; }
+
+            toggleReqVal(req, true);
+            m.groups.revealItem(req);
+        }
+
+        function addNew(value) {
+           var newReq = m.edit.initWithVal(value);
+            // need to return new item to hide search list
+            return newReq;
+        }
+
+        return S;
     }
 
     function addNotFoundRequirement(val) {
@@ -199,6 +215,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     }
 
     // Edit / add new
+    //
     function Edit() {
         var E = {};
         var emptyNew = {
@@ -206,7 +223,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             topic: '',
             description: '',
             popularity: 100,
-            selected: true,
+            selected: false,
             custom: true,
             mandatory: false
         };
@@ -227,14 +244,15 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             }
         };
         E.visible = false;
-        E.toggleByBtn = toggleByBtn;
+        E.toggleNew = toggleNew;
         E.init = init;
+        E.initWithVal = initWithVal;
         E.cancel = cancel;
         E.save = save;
 
         var curReq = null;
 
-        function toggleByBtn() {
+        function toggleNew() {
             if (E.visible) {
                 cancel();
             } else {
@@ -254,6 +272,14 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             toggle(true);
         }
 
+        function initWithVal(value) {
+            var newReq = angular.extend({}, emptyNew, {name: value, selected: false});
+            angular.extend(E.model, pick(newReq));
+
+            toggle(true);
+            return newReq;
+        }
+
         function cancel() {
             toggle(false);
             angular.extend(E.model, pick(emptyNew));
@@ -270,8 +296,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         function updateProject(isNew) {
             var req = null;
             if (isNew) {
-                req = angular.extend({}, emptyNew, E.model);
-                addRemoveLocal(req); // always selected!
+                req = angular.extend({}, emptyNew, E.model, {selected: true});
+                addRemoveLocal(req);
             } else {
                 req = _.findWhere(m.project.requirements, {_id: curReq._id});
                 angular.extend(req, E.model);
@@ -432,7 +458,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 // Need a copy to separate project's items which are observable
                 var copy = angular.extend({}, it, extend);
 
-                m.requirements.push(copy); // search list
+                m.search.add(copy); // search list
                 group.reqs.push(copy); // select table
 
                 //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);

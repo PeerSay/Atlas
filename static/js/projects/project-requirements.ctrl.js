@@ -43,8 +43,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 return Projects.readPublicRequirements(/*no params*/)
                     .then(function (res) {
                         m.groups.addItems(res.requirements, false, {selected: false});
-
-                        toggleAllGroupsByReqs();
                     })
                     .finally(function () {
                         m.loadingMore = false;

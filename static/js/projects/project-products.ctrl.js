@@ -12,10 +12,9 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
     // Loading
     var QUERY_LIMIT = 10;
     var loadFrom = 0;
-    var noLoadMore = false;
+    m.noLoadMore = false;
     m.loadingMore = true;
     m.loadMoreProducts = loadMoreProducts;
-    m.showLoadMoreBtn = showLoadMoreBtn;
     // Categories
     m.category = {}; // ui-select model
     m.categories = [];
@@ -31,18 +30,10 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
     m.addNotFoundProduct = addNotFoundProduct;
     m.selectProduct = selectProduct;
     // Filters
-    var filterExpr = {
-        all: {removed: '!true'},
-        selected: {selected: true, removed: '!true'},
-        'not-selected': {selected: false, removed: '!true'}
-    };
     m.filter = {
-        name: 'all',
-        expr: filterExpr.all
+        visible: {removed: '!true'},
+        selected: {selected: true, removed: '!true'}
     };
-    m.filterLiClass = filterLiClass;
-    m.filterBtnClass = filterBtnClass;
-    m.toggleFilter = toggleFilter;
     // Add/remove new
     var emptyNew = {
         name: '',
@@ -82,7 +73,6 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
 
             // Products
             addProductsToList(res.products, true);
-            m.totalSelected = getTotalSelected();
 
             loadPublicProducts({q: categoryName, from: 0, limit: QUERY_LIMIT});
         });
@@ -132,7 +122,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
                     addProductsToList(res.products, false, {selected: false});
                 }
                 if (lastBatch) {
-                   noLoadMore = true;
+                    m.noLoadMore = true;
                 }
             })
             .finally(function () {
@@ -150,22 +140,15 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
 
         if (reset) {
             params.from = 0;
-            noLoadMore = false;
+            m.noLoadMore = false;
             loadFrom = 0;
         }
 
         loadPublicProducts(params);
     }
 
-    function showLoadMoreBtn() {
-        var hide = noLoadMore ||
-            (m.filter.name === 'selected'); // always empty for selected filter
-        return !hide;
-    }
-
     // Category
     //
-
     function groupByCategory(item) {
         return item.domain || '';
     }
@@ -217,16 +200,10 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
     }
 
     function toggleProductVal(product, val) {
-        product.selected = val;
+        product.selected = product.focus = val; // set focus on selected
 
         addRemoveToProject(product);
         patchProject();
-
-        m.totalSelected = getTotalSelected();
-    }
-
-    function getTotalSelected() {
-        return filterFilter(m.project.products, filterExpr.selected).length;
     }
 
     // Select / Add new
@@ -246,25 +223,6 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
         toggleProductVal(product, true);
 
         // TODO: focus (use ps-focus ?)
-    }
-
-    // Filters
-    //
-    function filterLiClass(name) {
-        return {active: m.filter.name === name};
-    }
-
-    function filterBtnClass() {
-        return {
-            'fa-minus-square-o': m.filter.name === 'all',
-            'fa-check-square-o': m.filter.name === 'selected',
-            'fa-square-o': m.filter.name === 'not-selected'
-        };
-    }
-
-    function toggleFilter(name) {
-        m.filter.name = name;
-        m.filter.expr = filterExpr[name];
     }
 
     // Add new

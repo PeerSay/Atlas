@@ -10,17 +10,17 @@
         <form class="row">
             <!--Col2 - Select/Add Products-->
             <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group">
-                <ui-select ng-model="cm.requirement.selected" theme="bootstrap"
-                        tagging="cm.addNotFoundRequirement"
+                <ui-select ng-model="cm.search.model.selected" theme="bootstrap"
+                        tagging="cm.search.onAddNew"
                         tagging-tokens="ENTER"
                         tagging-label="(adding new)"
-                        on-select="cm.selectRequirement($model)">
+                        on-select="cm.search.onSelect($model)">
                     <ui-select-match placeholder="Select a requirement or add a new one...">
                         {{ $select.selected.name }}
                         <span class="fa fa-check"></span>
                     </ui-select-match>
                     <ui-select-choices
-                            repeat="req in cm.requirements | filter:{removed: '!true'} | filter: $select.search track by req._id">
+                            repeat="req in cm.search.list | filter:cm.filter.visible | filter:$select.search track by req._id">
                         <span ng-bind-html="req.name | highlight: $select.search"></span>
                         <span ng-if="req.selected" class="fa fa-check"></span>
                     </ui-select-choices>
@@ -28,30 +28,9 @@
             </div>
             <!--Col1 - Buttons-->
             <div class="col-xs-12 col-sm-6 col-sm-pull-6 form-group button-bar">
-                <!--Filter dropdown-->
-                <!--<div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle"
-                            data-toggle="dropdown"
-                            title="Filter"
-                            ps-tooltip>
-                        <span class="fa" ng-class="cm.filterBtnClass()"></span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li ng-class="cm.filterLiClass('all')">
-                            <a href ng-click="cm.toggleFilter('all')"><span class="fa fa-minus-square-o"></span> All</a>
-                        </li>
-                        <li ng-class="cm.filterLiClass('selected')">
-                            <a href ng-click="cm.toggleFilter('selected')"><span class="fa fa-check-square-o"></span> Selected</a>
-                        </li>
-                        <li ng-class="cm.filterLiClass('not-selected')">
-                            <a href ng-click="cm.toggleFilter('not-selected')"><span class="fa fa-square-o"></span> Not selected</a>
-                        </li>
-                    </ul>
-                </div>-->
                 <!--Add new-->
                 <button type="button" class="btn btn-default"
-                        ng-click="cm.edit.toggleByBtn()"
+                        ng-click="cm.edit.toggleNew()"
                         ng-class="{active: cm.edit.visible}"
                         >
                     <span class="fa fa-plus-circle"></span> New
@@ -60,7 +39,8 @@
         </form>
 
         <!--Add form-->
-        <form name="cm.addForm" class="form-horizontal selector-edit-form add-new page-spacer" ng-show="cm.edit.visible">
+        <form name="cm.addForm" class="form-horizontal selector-edit-form add-new page-spacer"
+                ng-if="cm.edit.visible">
             <!--Topic-->
             <div class="form-group form-group-sm">
                 <label class="label-col control-label text-left-important">Topic:</label>
@@ -74,7 +54,7 @@
                             {{ $select.selected.name }}
                         </ui-select-match>
                         <ui-select-choices
-                                repeat="group in cm.groups.list | filter: $select.search">
+                                repeat="group in cm.groups.list | filter:$select.search">
                             <span ng-bind-html="group.name | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>

@@ -2,24 +2,24 @@
 <div class="panel-group selection-list" id="accordion" role="tablist">
     <!--Topic list-->
     <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
-            ng-show="cm.showFilteredGroup(group)">
+            ng-if="cm.groups.isVisible(group)"
+            ng-class="{visible: group.open}">
         <!--Topic-->
         <div class="panel-heading topic-widget" role="tab"
                 id="heading-{{:: group.id }}"
-                data-toggle="collapse"
-                data-parent="#accordion"
-                data-target="#{{:: group.id }}">
+                data-target="#{{:: group.id }}"
+                data-toggle="collapse">
             <h4 class="panel-title topic-name">
                 <span class="fa fa-caret-right caret-icon"></span>
                 {{:: group.name || '(no topic)' }}
             </h4>
             <div class="topic-details">
                 <span>{{:: group.description }}</span>
-                <span class="topic-popularity" ng-if="!group.custom"
+                <!--<span class="topic-popularity" ng-if="!group.custom"
                         title="Popularity: {{:: group.popularity }}%"
                         ps-tooltip>
                     <ps-progress value="group.popularity"></ps-progress>
-                </span>
+                </span>-->
                 <span>Selected: {{ group.sel.number() | number }}</span>
             </div>
         </div>
@@ -27,7 +27,8 @@
         <div class="panel-collapse collapse table-responsive" role="tabpanel"
                 id="{{:: group.id }}"
                 aria-labelledby="heading-{{:: group.id }}"
-                ng-class="{in: !$index}">
+                ps-collapse="group"
+                ps-collapse-parent="#accordion">
             <table class="table table-hover no-select">
                 <thead>
                 <tr>
@@ -42,7 +43,7 @@
                 </thead>
                 <tbody>
                 <!--Criteria list-->
-                <tr ng-repeat="req in group.reqs | filter:cm.filter.expr | orderBy:'-popularity' | limitTo:group.paging.limit track by req._id"
+                <tr ng-repeat="req in group.reqs | filter:cm.filter.visible | orderBy:'-popularity' track by req._id"
                         ng-class="{selected: req.selected}"
                         ng-click="cm.toggleReq(req, true)">
                     <td></td>
@@ -51,7 +52,7 @@
                                 ng-model="req.selected"
                                 ng-change="cm.toggleReq(req)"
                                 ng-click="$event.stopPropagation()"
-                                ps-focus-on="req.selected">
+                                ps-focus-on="req.focus">
                     </td>
                     <td>{{ req.name }}</td>
                     <td>{{ req.description }}</td>
@@ -75,37 +76,8 @@
                     </td>
                 </tr>
                 </tbody>
-                <tfoot>
-                <!--Paging: more/less-->
-                <tr ng-if="!group.paging.disabled()">
-                    <td colspan="8" class="text-center">
-                        <button type="button" class="btn btn-xs btn-default"
-                                ng-click="group.paging.showLess()"
-                                ng-disabled="group.paging.disableShowLess">
-                            Show Less
-                        </button>
-                        <button type="button" class="btn btn-xs btn-default"
-                                ng-click="group.paging.showMore()"
-                                ng-disabled="group.paging.disableShowMore">
-                            Show More
-                            <span ng-if="group.paging.hiddenItems()">({{ group.paging.hiddenItems() }})</span>
-                        </button>
-                    </td>
-                </tr>
-                </tfoot>
             </table>
         </div>
     </div>
 </div>
-<script>
-    $(function () {
-        var $accordion = $('#accordion').on('shown.bs.collapse hidden.bs.collapse', toggleCaret);
-        toggleCaret();
 
-        function toggleCaret() {
-            var $panels =$accordion.find('.panel');
-            $panels.toggleClass('visible', false);
-            $panels.has('.collapse.in').toggleClass('visible', true);
-        }
-    });
-</script>

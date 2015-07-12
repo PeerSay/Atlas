@@ -9,33 +9,17 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     // Data / Edit
     m.project = null; // ref to shared
     m.patchObserver = null;
-    m.groups = GroupBy('topic');
-    //Loading
     m.loadingMore = true;
+    m.groups = GroupBy('topic');
     // Table selection
-    m.toggleGroup = toggleGroup;
     m.toggleReq = toggleReq;
-    m.getTotalSelected = getTotalSelected;
     // Search selection
-    m.requirement = {}; // ui-select model
-    m.requirements = []; // ui-select list
-    m.addNotFoundRequirement = addNotFoundRequirement;
-    m.selectRequirement = selectRequirement;
-    // Filters
-    var filterExpr = {
-        all: {removed: '!true'},
-        selected: {selected: true, removed: '!true'},
-        'not-selected': {selected: false, removed: '!true'}
-    };
+    m.search = Search();
+    //Filter
     m.filter = {
-        name: 'all',
-        expr: filterExpr.all
+        visible: {removed: '!true'},
+        selected: {selected: true, removed: '!true'}
     };
-    m.filterLiClass = filterLiClass;
-    m.filterBtnClass = filterBtnClass;
-    m.toggleFilter = toggleFilter;
-    m.showFilteredGroup = showFilteredGroup;
-    m.isEmptyTable = isEmptyTable;
     // Edit/add new
     m.edit = Edit();
     // Remove
@@ -95,40 +79,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         });
     }
 
-    // Filters
-    //
-    function filterLiClass(name) {
-        return {active: m.filter.name === name};
-    }
-
-    function filterBtnClass() {
-        return {
-            'fa-minus-square-o': m.filter.name === 'all',
-            'fa-check-square-o': m.filter.name === 'selected',
-            'fa-square-o': m.filter.name === 'not-selected'
-        };
-    }
-
-    function toggleFilter(name) {
-        m.filter.name = name;
-        m.filter.expr = filterExpr[name];
-    }
-
-    function showFilteredGroup(group) {
-        var arr = filterFilter(group.reqs, m.filter.expr);
-        return (arr.length !== 0);
-    }
-
-    function isEmptyTable() {
-        var res = false;
-        var i = 0, group;
-        while (group = m.groups.list[i]) {
-            if (res = showFilteredGroup(group)) { break; }
-            i++;
-        }
-        return !res;
-    }
-
     // Selection
     //
     function toggleReq(req, invert) {
@@ -137,70 +87,45 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     }
 
     function toggleReqVal(req, val) {
-        req.selected = val;
-
-        toggleGroupByReqs(m.groups.get(req.topic));
+        req.selected = req.focus = val; //set focus on selected
 
         addRemoveLocal(req);
         patchProject();
     }
 
-    function toggleGroup(group, invert) {
-        var val = invert ? !group.selected : group.selected;
-        toggleGroupByVal(group, val);
-    }
-
-    function toggleGroupByVal(group, val) {
-        var on = group.selected = val;
-
-        _.forEach(group.reqs, function (req) {
-            req.selected = on;
-            addRemoveLocal(req);
-        });
-
-        patchProject();
-    }
-
-    function toggleGroupByReqs(group) {
-        var reqs = group.reqs;
-        var len = reqs.length;
-        var selectedLen = filterFilter(reqs, filterExpr.selected).length;
-
-        group.selected = (selectedLen === len);
-    }
-
-    function toggleAllGroupsByReqs() {
-        _.forEach(m.groups.list, function (group) {
-            toggleGroupByReqs(group);
-        });
-    }
-
-    function getTotalSelected() {
-        return filterFilter(m.project.requirements, filterExpr.selected).length;
-    }
-
-    // Search Requirements
+    // Search
     //
-    function addNotFoundRequirement(val) {
-        m.addNew.show = true;
-        m.addNew.model.name = val;
+    function Search() {
+        var S = {};
+        S.model = {};
+        S.list = [];
+        S.add = add;
+        S.onSelect = select;
+        S.onAddNew = addNew;
 
-        var copy = angular.extend({}, emptyNew, m.addNew.model, {selected: false});
-        return copy; // added to list!
+        function add(req) {
+            S.list.push(req);
+        }
+
+        function select(req) {
+            // Item without id is newly added, it should not be propagated to table/project
+            if (!req._id) { return; }
+
+            toggleReqVal(req, true);
+            m.groups.revealItem(req);
+        }
+
+        function addNew(value) {
+            var newReq = m.edit.initWithVal(value);
+            // need to return new item to hide search list
+            return newReq;
+        }
+
+        return S;
     }
 
-    function selectRequirement(req) {
-        // Item without id is newly added, it should not be propagated to table/project
-        if (!req._id) { return; }
-
-        toggleReqVal(req, true);
-
-        // Reveal if hidden by paging
-        var group = m.groups.get(req.topic);
-        group.paging.revealItem(req);
-    }
-
-    // Add/Remove new
+    // Edit / add new
+    //
     function Edit() {
         var E = {};
         var emptyNew = {
@@ -208,7 +133,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             topic: '',
             description: '',
             popularity: 100,
-            selected: true,
+            selected: false,
             custom: true,
             mandatory: false
         };
@@ -229,14 +154,15 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             }
         };
         E.visible = false;
-        E.toggleByBtn = toggleByBtn;
+        E.toggleNew = toggleNew;
         E.init = init;
+        E.initWithVal = initWithVal;
         E.cancel = cancel;
         E.save = save;
 
         var curReq = null;
 
-        function toggleByBtn() {
+        function toggleNew() {
             if (E.visible) {
                 cancel();
             } else {
@@ -256,6 +182,14 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             toggle(true);
         }
 
+        function initWithVal(value) {
+            var newReq = angular.extend({}, emptyNew, {name: value, selected: false});
+            angular.extend(E.model, pick(newReq));
+
+            toggle(true);
+            return newReq;
+        }
+
         function cancel() {
             toggle(false);
             angular.extend(E.model, pick(emptyNew));
@@ -272,8 +206,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         function updateProject(isNew) {
             var req = null;
             if (isNew) {
-                req = angular.extend({}, emptyNew, E.model);
-                addRemoveLocal(req); // always selected!
+                req = angular.extend({}, emptyNew, E.model, {selected: true});
+                addRemoveLocal(req);
             } else {
                 req = _.findWhere(m.project.requirements, {_id: curReq._id});
                 angular.extend(req, E.model);
@@ -293,8 +227,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             var oldTopic = curReq.topic;
             angular.extend(curReq, E.model);
             m.groups.relocate(curReq, oldTopic, curReq.topic);
-
-            toggleGroupByReqs(m.groups.get(curReq.topic));
         }
 
         function pick(obj) {
@@ -358,6 +290,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         G.addGroups = addGroups;
         G.addItems = addItems;
         G.relocate = relocate;
+        G.revealItem = revealItem;
+        G.isVisible = isVisible;
 
         var groupIdx = {};
         var itemIdx = {};
@@ -378,7 +312,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                     group = shared ? angular.copy(it) : it;
                     group.reqs = group.reqs || [];
                     group.id = nextId();
-                    group.paging = Paging(group);
                     group.sel = Selected(group);
 
                     groupIdx[it.name] = group;
@@ -404,7 +337,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 reqs: [],
                 name: name,
                 popularity: 100,
-                selected: false,
                 custom: true
             };
         }
@@ -434,7 +366,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 // Need a copy to separate project's items which are observable
                 var copy = angular.extend({}, it, extend);
 
-                m.requirements.push(copy); // search list
+                m.search.add(copy); // search list
                 group.reqs.push(copy); // select table
 
                 //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);
@@ -458,67 +390,26 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             group.reqs.push(req);
         }
 
+        function revealItem(req) {
+            // Reveal if hidden by accordion & focus it
+            var group = getGroup(req.topic);
+            group.open = true; // triggers accordion open
+        }
+
+        function isVisible(group) {
+            var arr = filterFilter(group.reqs, m.filter.visible);
+            return (arr.length !== 0);
+        }
+
         //Selected
         function Selected(group) {
             var S = {};
             S.number = function () {
-                return filterFilter(group.reqs, filterExpr.selected).length;
+                return filterFilter(group.reqs, m.filter.selected).length;
             };
             return S;
         }
 
         return G;
-    }
-
-    // Paging
-    //
-    function Paging(group) {
-        var P = {};
-        var MIN = 3;
-        var STEP = 3;
-        P.limit = MIN;
-        P.disabled = disabled;
-        P.showMore = showFn(STEP);
-        P.showLess = showFn(-STEP);
-        P.disableShowLess = true;
-        P.disableShowMore = false;
-        P.hiddenItems = hiddenItems;
-        P.revealItem = revealItem;
-
-        function showFn(diff) {
-            return function () {
-                var max = group.reqs.length;
-
-                P.limit += diff;
-                P.disableShowLess = P.disableShowMore = false;
-
-                if (P.limit <= MIN) {
-                    P.disableShowLess = true;
-                    P.limit = MIN;
-                } else if (P.limit >= max) {
-                    P.disableShowMore = true;
-                    P.limit = max;
-                }
-            }
-        }
-
-        function disabled() {
-            return m.loadingMore || m.filter.name !== 'all' || group.custom || group.reqs.length <= MIN;
-        }
-
-        function hiddenItems() {
-            return group.reqs.length - P.limit;
-        }
-
-        function revealItem(req) {
-            var reqIdx = group.reqs.indexOf(req);
-            var diff = reqIdx - P.limit + 1;
-
-            if (diff > 0) {
-                showFn(diff)();
-            }
-        }
-
-        return P;
     }
 }

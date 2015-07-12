@@ -312,7 +312,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                     group = shared ? angular.copy(it) : it;
                     group.reqs = group.reqs || [];
                     group.id = nextId();
-                    group.paging = Paging(group);
                     group.sel = Selected(group);
 
                     groupIdx[it.name] = group;
@@ -392,10 +391,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
         function revealItem(req) {
-            // Reveal if hidden by accordion/paging & focus it
+            // Reveal if hidden by accordion & focus it
             var group = getGroup(req.topic);
-            group.paging.revealItem(req);
-
             group.open = true; // triggers accordion open
         }
 
@@ -414,57 +411,5 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
         return G;
-    }
-
-    // Paging
-    //
-    function Paging(group) {
-        var P = {};
-        var MIN = 3;
-        var STEP = 3;
-        P.limit = MIN;
-        P.disabled = disabled;
-        P.showMore = showFn(STEP);
-        P.showLess = showFn(-STEP);
-        P.disableShowLess = true;
-        P.disableShowMore = false;
-        P.hiddenItems = hiddenItems;
-        P.revealItem = revealItem;
-
-        function showFn(diff) {
-            return function () {
-                var max = group.reqs.length;
-
-                P.limit += diff;
-                P.disableShowLess = P.disableShowMore = false;
-
-                if (P.limit <= MIN) {
-                    P.disableShowLess = true;
-                    P.limit = MIN;
-                } else if (P.limit >= max) {
-                    P.disableShowMore = true;
-                    P.limit = max;
-                }
-            }
-        }
-
-        function disabled() {
-            return m.loadingMore || group.custom || group.reqs.length <= MIN;
-        }
-
-        function hiddenItems() {
-            return group.reqs.length - P.limit;
-        }
-
-        function revealItem(req) {
-            var reqIdx = group.reqs.indexOf(req);
-            var diff = reqIdx - P.limit + 1;
-
-            if (diff > 0) {
-                showFn(diff)();
-            }
-        }
-
-        return P;
     }
 }

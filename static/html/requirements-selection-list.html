@@ -58,7 +58,7 @@
                     <td>{{ req.name }}</td>
                     <td>{{ req.description }}</td>
                     <td class="center">
-                        <span class="fa fa-check" ng-if="req.mandatory && req.selected"></span>
+                        <span class="fa fa-check" ng-if="req.mandatory"></span>
                     </td>
                     <td class="center">
                         <div ng-if="!req.custom"
@@ -81,4 +81,3 @@
         </div>
     </div>
 </div>
-

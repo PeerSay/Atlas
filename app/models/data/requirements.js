@@ -9,7 +9,7 @@ var requirements = [
     {_id: '55974b333dc107cb7545381f', name: 'Minimal false positives', description: '', topic: 'Technology', popularity: 45},
     {_id: '55974b343dc107cb75453820', name: 'Integration with management control and monitoring systems', description: '', topic: 'Technology', popularity: 70},
 
-    {_id: '55974b343dc107cb75453821', name: 'Vendor', description: 'Provide some details about the vendor', topic: 'Vendor, Reseller & Integrator', popularity: 90},
+    {_id: '55a387e3ec285d678e3d7261', name: 'Vendor', description: 'Provide some details about the vendor', topic: 'Vendor, Reseller & Integrator', popularity: 90},
     {_id: '55974b343dc107cb75453821', name: 'Level of expertise on the product', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 90},
     {_id: '55974b353dc107cb75453822', name: 'Experience deploying this product in similar organizations', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 80},
     {_id: '55974b353dc107cb75453823', name: 'Number of deployments in this country and world wide', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 70},

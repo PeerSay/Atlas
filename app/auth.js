@@ -18,7 +18,7 @@ var constant = {
     SESS_RESTORE: 1000 * 60 * 20 // 20min
 };
 var defAppEntryUrl = '/projects';
-var companyEmail = 'PeerSay Team <team@peer-say.com>';
+var companyEmail = 'PeerSay <team@peer-say.com>';
 
 
 function Auth(app) {

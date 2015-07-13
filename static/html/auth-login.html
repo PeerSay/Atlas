@@ -5,82 +5,92 @@
                 <div class="panel-heading">
                     <h2 class="panel-title">Login</h2>
                 </div>
-                <div class="panel-body">
-                    <div class="alert alert-warning text-center" role="alert" ng-if="m.error.show">
-                        <button type="button" class="close" aria-label="Close" ng-click="m.error.show = false">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <strong>Error!</strong> {{ m.error.msg }}
-                    </div>
-
-                    <form class="auth" name="m.form" action="/auth/login" method="POST"
-                            ps-form-submit="m.login()"
-                            ps-form-submit-control="m.formSubmitControl">
-                        <div class="form-group">
-                            <div class="input-group input-group-lg" ng-class="{
-                                    'has-success': m.form.email.$valid,
-                                    'has-warning': m.form.email.$touched && m.form.email.$invalid}">
-                                <span class="input-group-addon"><span class="fa fa-fw fa-envelope"></span></span>
-                                <div class="hint" ng-messages="m.form.email.$error" ng-class="{show: m.form.email.$touched}">
-                                    <div ng-message="required">Required</div>
-                                    <div ng-message="email">Invalid email!</div>
-                                </div>
-                                <input type="email" class="form-control" placeholder="Your email"
-                                        name="email"
-                                        ng-model="m.user.email"
-                                        ng-model-options="{updateOn: 'blur default'}"
-                                        ng-focus="m.form.email.$setUntouched()"
-                                        required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group input-group-lg" ng-class="{
-                                    'has-success': m.form.password.$valid,
-                                    'has-warning': m.form.password.$touched && m.form.password.$invalid}">
-                                <span class="input-group-addon"><span class="fa fa-fw fa-key"></span></span>
-                                <div class="hint" ng-messages="m.form.password.$error" ng-class="{show: m.form.password.$touched}">
-                                    <div ng-message="required">Required</div>
-                                    <div ng-message="minlength">6 chars or more</div>
-                                </div>
-                                <input type="password" id="password" class="form-control" placeholder="Password"
-                                        name="password"
-                                        ng-model="m.user.password"
-                                        ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
-                                        ng-focus="m.form.password.$setUntouched()"
-                                        minlength="6"
-                                        required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="checkbox-ext no-select" ng-class="{checked: m.user.longSession}">
-                                <input type="checkbox"
-                                        name="longSession"
-                                        ng-model="m.user.longSession">
-                                Keep me signed in
-                            </label>
-                        </div>
-
-                        <div class="pull-left">
-                            <a href="/auth/restore">Forgot password?</a>
-                        </div>
-
-                        <button type="submit" class="btn btn-lg btn-primary pull-right"
-                                ng-disabled="m.form.$invalid">
-                            Login
-                        </button>
-                    </form>
-                </div>
-
                 <ul class="list-group">
-                    <li class="list-group-item linkedin-section">
-                        <h4 class="title-or text-center">OR</h4>
-                        <h4 class="title text-center">Have LinkedIn account?</h4>
-                        <a href="/auth/linkedin" target="_self" class="btn btn-lg full-width btn-social btn-linkedin">
+                    <!--LinkedIn-->
+                    <li class="list-group-item">
+                        <h4 class="text-center">Have LinkedIn account?</h4>
+                        <a href="/auth/linkedin" target="_self" class="btn btn-lg full-width btn-social btn-linkedin page-spacer">
                             <span class="fa fa-linkedin"></span>
                             Login with LinkedIn
                         </a>
+                    </li>
+
+                    <!--Classic form-->
+                    <li class="list-group-item">
+                        <!--Divider-->
+                        <div class="page-spacer">
+                            <h4 class="divider-or">OR</h4>
+                        </div>
+                        <!--Warning alert-->
+                        <div class="alert alert-warning text-center" role="alert" ng-if="m.error.show">
+                            <button type="button" class="close" aria-label="Close" ng-click="m.error.show = false">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <strong>Error!</strong> {{ m.error.msg }}
+                        </div>
+                        <!--Form-->
+                        <form class="auth" name="m.form" action="/auth/login" method="POST"
+                                ps-form-submit="m.login()"
+                                ps-form-submit-control="m.formSubmitControl">
+                            <div class="form-group">
+                                <div class="input-group input-group-lg" ng-class="{
+                                    'has-success': m.form.email.$valid,
+                                    'has-warning': m.form.email.$touched && m.form.email.$invalid}">
+                                    <span class="input-group-addon"><span class="fa fa-fw fa-envelope"></span></span>
+                                    <div class="hint" ng-messages="m.form.email.$error" ng-class="{show: m.form.email.$touched}">
+                                        <div ng-message="required">Required</div>
+                                        <div ng-message="email">Invalid email!</div>
+                                    </div>
+                                    <input type="email" class="form-control" placeholder="Your email"
+                                            name="email"
+                                            ng-model="m.user.email"
+                                            ng-model-options="{updateOn: 'blur default'}"
+                                            ng-focus="m.form.email.$setUntouched()"
+                                            required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group input-group-lg" ng-class="{
+                                    'has-success': m.form.password.$valid,
+                                    'has-warning': m.form.password.$touched && m.form.password.$invalid}">
+                                    <span class="input-group-addon"><span class="fa fa-fw fa-key"></span></span>
+                                    <div class="hint" ng-messages="m.form.password.$error" ng-class="{show: m.form.password.$touched}">
+                                        <div ng-message="required">Required</div>
+                                        <div ng-message="minlength">6 chars or more</div>
+                                    </div>
+                                    <input type="password" id="password" class="form-control" placeholder="Password"
+                                            name="password"
+                                            ng-model="m.user.password"
+                                            ng-model-options="{updateOn: 'blur default', debounce: {'default': 500, 'blur': 0}}"
+                                            ng-focus="m.form.password.$setUntouched()"
+                                            minlength="6"
+                                            required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-ext no-select" ng-class="{checked: m.user.longSession}">
+                                    <input type="checkbox"
+                                            name="longSession"
+                                            ng-model="m.user.longSession">
+                                    Keep me signed in
+                                </label>
+                            </div>
+                            <!--Buttons-->
+                            <div class="form-horizontal">
+                                <div class="form-group last-group">
+                                    <div class="col-sm-8">
+                                        <a href="/auth/restore">Forgot password?</a>
+                                    </div>
+
+                                    <div class="col-sm-4">
+                                        <button type="submit" class="btn btn-lg btn-primary pull-right"
+                                                ng-disabled="m.form.$invalid">
+                                            Login
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </li>
                 </ul>
             </div>

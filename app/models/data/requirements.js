@@ -7,18 +7,19 @@ var requirements = [
     {_id: '55974b323dc107cb7545381d', name: 'Minimal impact on servers and end points', description: '', topic: 'Technology', popularity: 90},
     {_id: '55974b333dc107cb7545381e', name: 'Can work in parallel to other tools', description: '', topic: 'Technology', popularity: 90},
     {_id: '55974b333dc107cb7545381f', name: 'Minimal false positives', description: '', topic: 'Technology', popularity: 45},
-
     {_id: '55974b343dc107cb75453820', name: 'Integration with management control and monitoring systems', description: '', topic: 'Technology', popularity: 70},
+
+    {_id: '55a387e3ec285d678e3d7261', name: 'Vendor', description: 'Provide some details about the vendor', topic: 'Vendor, Reseller & Integrator', popularity: 90},
     {_id: '55974b343dc107cb75453821', name: 'Level of expertise on the product', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 90},
-    {_id: '55974b353dc107cb75453822', name: 'experience deploying this product in similar organizations', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 90},
-    {_id: '55974b353dc107cb75453823', name: 'Number of deployments in this country and world wide', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 80},
-    {_id: '55974b363dc107cb75453824', name: 'Relevant customers', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 75},
-    {_id: '55974b373dc107cb75453825', name: 'Support Service Level Agreement (SLA)', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 80},
+    {_id: '55974b353dc107cb75453822', name: 'Experience deploying this product in similar organizations', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 80},
+    {_id: '55974b353dc107cb75453823', name: 'Number of deployments in this country and world wide', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 70},
+    {_id: '55974b363dc107cb75453824', name: 'Relevant customers', description: '', topic: 'Vendor, Reseller & Integrator', popularity: 55},
+    {_id: '55974b373dc107cb75453825', name: 'Support Service Level Agreement (SLA)', description: 'What is the SLA that this vendor / reseller / integrator offers?', topic: 'Vendor, Reseller & Integrator', popularity: 60},
 
     {_id: '55974b373dc107cb75453826', name: 'Vendor', description: 'How risky is this vendor?', topic: 'Risk management', popularity: 45},
-    {_id: '55974b383dc107cb75453827', name: 'Development, Deployment and Complexity', description: '', topic: 'Risk management', popularity: 45},
-    {_id: '559cf83dd21e2f6d44eb6408', name: 'Future roadmap and upgrades', description: 'Risk involved with future versions', topic: 'Risk management', popularity: 70},
-    {_id: '559cf848d21e2f6d44eb6409', name: 'Vendor Locking', description: 'Does choosing this solution lock us on this vendor?', topic: 'Risk management', popularity: 45}, 
+    {_id: '55974b383dc107cb75453827', name: 'Development, Deployment and Complexity', description: '', topic: 'Risk management', popularity: 55},
+    {_id: '559cf83dd21e2f6d44eb6408', name: 'Future roadmap and upgrades', description: 'Risk involved with future versions', topic: 'Risk management', popularity: 90},
+    {_id: '559cf848d21e2f6d44eb6409', name: 'Vendor Locking', description: 'Does choosing this solution lock us on this vendor?', topic: 'Risk management', popularity: 75}, 
     {_id: '559cfa63d21e2f6d44eb6413', name: 'Migration Complexity', description: 'How complex will it be to migrate from the current solution to this new one?', topic: 'Risk management', popularity: 45}, 
 
     {_id: '55974b393dc107cb75453829', name: 'Security', description: 'Level of security of data storage, passwords, etc. Usage of SingleSignOn, Two factor authentication, etc.', topic: 'System Interfaces and user management', popularity: 45},

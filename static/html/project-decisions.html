@@ -33,5 +33,9 @@
                         ng-init="view = table.tableView"></div>
             </div>
         </div>
+
+        <!--Done link-->
+        <a class="btn btn-primary pull-right" ui-sref="^.dashboard"
+                ng-if="!table.loading">Done</a>
     </div>
 </div>

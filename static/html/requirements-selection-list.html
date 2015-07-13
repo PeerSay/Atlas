@@ -9,9 +9,11 @@
                 id="heading-{{:: group.id }}"
                 data-target="#{{:: group.id }}"
                 data-toggle="collapse">
-            <h4 class="panel-title topic-name">
+            <h4 class="panel-title topic-header">
                 <span class="fa fa-caret-right caret-icon"></span>
                 {{:: group.name || '(no topic)' }}
+                <span class="label label-primary"
+                        ng-if="group.sel.number()">{{ group.sel.number() }}</span>
             </h4>
             <div class="topic-details">
                 <span>{{:: group.description }}</span>
@@ -20,7 +22,6 @@
                         ps-tooltip>
                     <ps-progress value="group.popularity"></ps-progress>
                 </span>-->
-                <span>Selected: {{ group.sel.number() | number }}</span>
             </div>
         </div>
         <!--Collapsible content-->

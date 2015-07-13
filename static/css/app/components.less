@@ -52,21 +52,24 @@
     }
   }
 
-  .linkedin-section {
-    .title {
-      margin-bottom: 20px;
-    }
-    .title-or {
+  .list-group-item {
+    padding: 20px 15px; // override default
+    .divider-or {
       position: absolute;
-      top: -20px;
-      left: 50%;
+      top: -20px; left: 50%;
       margin-left: -25px;
       width: 50px;
-      background-color: #FFF;
-      color: #CCC;
+      text-align: center;
       font-style: italic;
+      color: @list-group-border;
+      background-color: #fff;
+    }
+    .last-group {
+      margin-bottom: 0;
     }
   }
+
+
 }
 #activate-acc-dlg {
   .email-sent {

@@ -284,14 +284,22 @@
   position: relative;
   background-color: @form-bg;
   padding: 15px;
-  border-radius: 5px;
-  box-shadow: inset 0 0 4px 0 rgba(0, 0, 0, 0.2);
 
-  &.add-new::before {
+  // Chevron
+  &::before {
     content: "";
     position: absolute;
-    top: -11px; left: 25px;
+    top: -12px; right: 40px;
     .triangle(bottom, top, 12px, @form-chevron-color);
+  }
+
+  &.add-new {
+    border-radius: 5px;
+    box-shadow: inset 0 0 4px 0 rgba(0, 0, 0, 0.2);
+    &::before {
+      top: -11px; left: 25px;
+      right: auto;
+    }
   }
 
   .form-group {
@@ -367,6 +375,9 @@
     }
     &.center {
       text-align: center;
+    }
+    &.no-space {
+      padding: 0;
     }
   }
   td {

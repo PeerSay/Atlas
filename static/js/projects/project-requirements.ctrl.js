@@ -21,7 +21,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         selected: {selected: true, removed: '!true'}
     };
     // Edit/add new
-    m.edit = Edit();
+    m.edit = Edit(); // singleton
     // Remove
     m.removeLocalReq = removeLocalReq; //TODO - unselect if not-custom
 
@@ -114,7 +114,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
         function addNew(value) {
-            var newReq = m.edit.initWithVal(value);
+            var newReq = m.edit.editNew({name: value});
             // need to return new item to hide search list
             return newReq;
         }
@@ -152,65 +152,92 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             }
         };
         E.visible = false;
-        E.toggleNew = toggleNew;
-        E.init = init;
-        E.initWithVal = initWithVal;
+        E.isNew = false;
+        E.editReq = editReq;
+        E.editNew = editNew;
+        E.newBtn = {
+            active: newBtnActiveState,
+            toggle: newBtnToggle
+        };
         E.cancel = cancel;
         E.save = save;
 
         var curReq = null;
 
-        function toggleNew() {
-            if (E.visible) {
-                cancel();
+        function newBtnToggle() {
+            if (newBtnActiveState()) {
+                cancel()
             } else {
-                toggle();
+                editNew(null);
             }
         }
 
-        function toggle(show) {
-            E.visible = (arguments.length > 0) ? show : !E.visible;
+        function newBtnActiveState() {
+            return E.isNew && E.visible;
         }
 
-        function init(req) {
+        function editReq(req) {
+            if (req === curReq) { return; }
+
+            if (curReq) { cancel(); }
             curReq = req;
+            curReq.edited = true;
+            E.isNew = false;
+
             angular.extend(E.model, pick(req));
             E.topic.selected = {name: req.topic};
 
             toggle(true);
         }
 
-        function initWithVal(value) {
-            var newReq = angular.extend({}, emptyNew, {name: value, selected: false});
+        function editNew(spec) {
+            if (curReq) { cancel(); }
+
+            var newReq = angular.extend({}, emptyNew, spec, {selected: false});
+            E.isNew = true;
+
             angular.extend(E.model, pick(newReq));
+            E.topic.selected = {name: (m.groups.getOpenGroup() || {}).name || ''};
 
             toggle(true);
             return newReq;
         }
 
+        function toggle(show) {
+            E.visible = (arguments.length > 0) ? show : !E.visible;
+        }
+
         function cancel() {
             toggle(false);
+
             angular.extend(E.model, pick(emptyNew));
             E.topic.selected = {};
-            curReq = null;
+            E.isNew = false;
+
+            if (curReq) {
+                curReq.edited = false;
+                curReq = null;
+            }
         }
 
         function save() {
-            updateProject(!curReq);
+            updateProject();
             updateList();
             cancel();
         }
 
-        function updateProject(isNew) {
+        function updateProject() {
             var req = null;
-            if (isNew) {
+            if (m.isNew) {
                 req = angular.extend({}, emptyNew, E.model, {selected: true});
                 addRemoveLocal(req);
             } else {
+                curReq.edited = false;
                 req = _.findWhere(m.project.requirements, {_id: curReq._id});
                 angular.extend(req, E.model);
             }
 
+            var isNew = m.isNew;
             patchProject().then(function (res) {
                 if (isNew && res) {
                     req._id = res._id; //get id from server response
@@ -284,6 +311,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         var G = {};
         G.list = [];
         G.get = getGroup;
+        G.getOpenGroup = getOpenGroup;
         G.create = createNew;
         G.addGroups = addGroups;
         G.addItems = addItems;
@@ -297,6 +325,10 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
 
         function getGroup(topic) {
             return groupIdx[topic];
+        }
+
+        function getOpenGroup() {
+            return _.findWhere(G.list, {open: true});
         }
 
         function addGroups(groups, shared) {

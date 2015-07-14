@@ -44,7 +44,7 @@
                 </thead>
                 <tbody>
                 <!--Criteria list-->
-                <tr ng-repeat="req in group.reqs | filter:cm.filter.visible | orderBy:'-popularity' track by req._id"
+                <tr ng-repeat-start="req in group.reqs | filter:cm.filter.visible | orderBy:'-popularity' track by req._id"
                         ng-class="{selected: req.selected}"
                         ng-click="cm.toggleReq(req, true)">
                     <td></td>
@@ -69,11 +69,17 @@
                     </td>
                     <td>
                         <span class="fa fa-fw fa-edit table-icon" ng-if="req.selected || req.custom"
-                                ng-click="cm.edit.init(req); $event.stopPropagation()"></span>
+                                ng-click="cm.edit.editReq(req); $event.stopPropagation()"></span>
                     </td>
                     <td>
                         <span class="fa fa-fw fa-trash table-icon" ng-if="req.selected || req.custom"
                                 ng-click="cm.removeLocalReq(req); $event.stopPropagation()"></span>
+                    </td>
+                </tr>
+                <!--Edit form-->
+                <tr ng-repeat-end ng-if="req.edited">
+                    <td colspan="8" class="no-space">
+                        <div ng-include="'/html/requirements-edit-form.html'"></div>
                     </td>
                 </tr>
                 </tbody>

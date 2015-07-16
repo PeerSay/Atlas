@@ -21,7 +21,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         selected: {selected: true, removed: '!true'}
     };
     // Edit/add new
-    m.edit = Edit(); // singleton
+    m.editFactory = EditFactory();
+    m.editNew = m.editFactory.create({'class': 'add-new'});
     // Remove
     m.removeLocalReq = removeLocalReq; //TODO - unselect if not-custom
 
@@ -114,7 +115,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
         function addNew(value) {
-            var newReq = m.edit.editNew({name: value});
+            var newReq = m.editNew.show({name: value});
             // need to return new item to hide search list
             return newReq;
         }
@@ -122,10 +123,12 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         return S;
     }
 
-    // Edit / add new
+    // Edit factory
     //
-    function Edit() {
-        var E = {};
+    function EditFactory() {
+        var F = {};
+        F.create = create;
+
         var emptyNew = {
             name: '',
             topic: '',
@@ -135,123 +138,17 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             custom: true,
             mandatory: false
         };
+        var curEdit = null;
 
-        E.model = pick(emptyNew);
-        E.topic = { // ui-select model
-            selected: {},
-            value: function () {
-                return (this.selected || {}).name || ''
-            },
-            onSelect: function (m) {
-                if (m) {
-                    E.model.topic = m.name;
-                }
-            },
-            onAddNew: function (value) {
-                return m.groups.create(value);
+        function create(spec) {
+            return EditOne(spec);
+        }
+
+        function hideCur(edit) {
+            if (curEdit) {
+                curEdit.cancel();
             }
-        };
-        E.visible = false;
-        E.isNew = false;
-        E.editReq = editReq;
-        E.editNew = editNew;
-        E.newBtn = {
-            active: newBtnActiveState,
-            toggle: newBtnToggle
-        };
-        E.cancel = cancel;
-        E.save = save;
-
-        var curReq = null;
-
-        function newBtnToggle() {
-            if (newBtnActiveState()) {
-                cancel()
-            } else {
-                editNew(null);
-            }
-        }
-
-        function newBtnActiveState() {
-            return E.isNew && E.visible;
-        }
-
-        function editReq(req) {
-            if (req === curReq) { return; }
-
-            if (curReq) { cancel(); }
-            curReq = req;
-            curReq.edited = true;
-            E.isNew = false;
-
-            angular.extend(E.model, pick(req));
-            E.topic.selected = {name: req.topic};
-
-            toggle(true);
-        }
-
-        function editNew(spec) {
-            if (curReq) { cancel(); }
-
-            var newReq = angular.extend({}, emptyNew, spec, {selected: false});
-            E.isNew = true;
-
-            angular.extend(E.model, pick(newReq));
-            E.topic.selected = {name: (m.groups.getOpenGroup() || {}).name || ''};
-
-            toggle(true);
-            return newReq;
-        }
-
-        function toggle(show) {
-            E.visible = (arguments.length > 0) ? show : !E.visible;
-        }
-
-        function cancel() {
-            toggle(false);
-
-            angular.extend(E.model, pick(emptyNew));
-            E.topic.selected = {};
-            E.isNew = false;
-
-            if (curReq) {
-                curReq.edited = false;
-                curReq = null;
-            }
-        }
-
-        function save() {
-            updateProject();
-            updateList();
-            cancel();
-        }
-
-        function updateProject() {
-            var req = null;
-            if (m.isNew) {
-                req = angular.extend({}, emptyNew, E.model, {selected: true});
-                addRemoveLocal(req);
-            } else {
-                curReq.edited = false;
-                req = _.findWhere(m.project.requirements, {_id: curReq._id});
-                angular.extend(req, E.model);
-            }
-
-            var isNew = m.isNew;
-            patchProject().then(function (res) {
-                if (isNew && res) {
-                    req._id = res._id; //get id from server response
-                    m.groups.addItems([req], true);
-                }
-            });
-        }
-
-        function updateList() {
-            if (!curReq) { return; }
-
-            var oldTopic = curReq.topic;
-            angular.extend(curReq, E.model);
-            m.groups.relocate(curReq, oldTopic, curReq.topic);
+            curEdit = edit;
         }
 
         function pick(obj) {
@@ -263,7 +160,121 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
             };
         }
 
-        return E;
+        // Edit class
+        function EditOne(spec) {
+            var E = {};
+            spec = spec || {};
+            E.class = spec.class || '';
+            E.visible = false;
+            E.toggle = toggleClick;
+            E.show = show;
+            E.save = save;
+            E.cancel = cancel;
+            //Model
+            E.model = pick(emptyNew);
+            E.topic = { // ui-select model
+                selected: {},
+                init: function (topic) {
+                    this.selected = {name: topic};
+                },
+                value: function () {
+                    return (this.selected || {}).name || ''
+                },
+                onSelect: function (m) {
+                    if (m) {
+                        E.model.topic = m.name;
+                    }
+                },
+                onAddNew: function (value) {
+                    return m.groups.create(value);
+                }
+            };
+            E.groups = function () {
+                return m.groups; // fix circular ref with func
+            };
+            var req = spec.req || null;
+
+            function getTopic() {
+                return spec.topic || (m.groups.getOpenGroup() || {}).name || '';
+            }
+
+            function toggleClick(data) {
+                if (E.visible) {
+                    cancel();
+                }
+                else {
+                    show(data);
+                }
+            }
+
+            function show(data) {
+                var req = init(data);
+                hideCur(E);
+                toggle(true);
+
+                return req; // required for search
+            }
+
+            function init(data) {
+                var topic = getTopic();
+                var curReq = req || angular.extend({}, emptyNew, data, {topic: topic, selected: false});
+
+                angular.extend(E.model, pick(curReq));
+                E.topic.init(topic);
+
+                return curReq;
+            }
+
+            function save() {
+                updateProject();
+                updateList();
+                cancel();
+            }
+
+            function updateProject() {
+                var isNew = !req;
+                var savedReq = null;
+                if (isNew) {
+                    savedReq = angular.extend({}, emptyNew, E.model, {selected: true});
+                    addRemoveLocal(savedReq);
+                } else {
+                    savedReq = _.findWhere(m.project.requirements, {_id: req._id});
+                    angular.extend(savedReq, E.model);
+                }
+
+                patchProject().then(function (res) {
+                    if (isNew && res) {
+                        savedReq._id = res._id; //get id from server response
+                        m.groups.addItems([savedReq], true);
+                    }
+                });
+            }
+
+            function updateList() {
+                if (!req) { return; }
+
+                var oldTopic = req.topic;
+                angular.extend(req, E.model);
+                m.groups.relocate(req, oldTopic, req.topic);
+            }
+
+            function cancel() {
+                angular.extend(E.model, pick(emptyNew));
+                E.topic.selected = {};
+
+                toggle(false);
+                curEdit = null;
+            }
+
+            function toggle(show) {
+                E.visible = (arguments.length > 0) ? show : !E.visible;
+            }
+
+            return E;
+        }
+
+
+        return F;
     }
 
     function removeLocalReq(req) {
@@ -343,6 +354,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                     group.reqs = group.reqs || [];
                     group.id = nextId();
                     group.sel = Selected(group);
+                    group.editNew = m.editFactory.create({topic: it.name});
 
                     groupIdx[it.name] = group;
                     G.list.push(group);
@@ -395,6 +407,9 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
 
                 // Need a copy to separate project's items which are observable
                 var copy = angular.extend({}, it, extend);
+
+                // Req's edit form
+                copy.edit = m.editFactory.create({topic: key, req: copy});
 
                 m.search.add(copy); // search list
                 group.reqs.push(copy); // select table

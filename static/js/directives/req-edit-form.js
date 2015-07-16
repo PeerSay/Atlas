@@ -5,7 +5,7 @@ angular
 function psReqEditForm() {
     return {
         restrict: 'E',
-        templateUrl: 'html/requirements-edit-form.html',
+        templateUrl: 'html/req-edit-form.html',
         scope: {
             ctl: '=psCtl',
             disableName: '=psDisableName',

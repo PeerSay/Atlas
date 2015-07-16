@@ -1,20 +1,21 @@
-<form name="cm.editForm" class="form-horizontal selector-edit-form"
-        ng-class="{'add-new': cm.edit.isNew}"
-        ng-if="cm.edit.visible">
+<form name="ctl.editForm" class="form-horizontal selector-edit-form"
+        ng-class="ctl.class"
+        ng-if="ctl.visible">
     <!--Topic-->
     <div class="form-group form-group-sm">
         <label class="label-col control-label text-left-important">Topic:</label>
         <div class="control-col">
-            <ui-select ng-model="cm.edit.topic.selected" theme="bootstrap"
-                    tagging="cm.edit.topic.onAddNew"
+            <ui-select ng-model="ctl.topic.selected" theme="bootstrap"
+                    tagging="ctl.topic.onAddNew"
                     tagging-tokens="ENTER"
                     tagging-label="(adding new)"
-                    on-select="cm.edit.topic.onSelect($model)">
+                    on-select="ctl.topic.onSelect($model)"
+                    ng-disabled="disableTopic">
                 <ui-select-match placeholder="Select a topic or add a new one...">
                     {{ $select.selected.name }}
                 </ui-select-match>
                 <ui-select-choices
-                        repeat="group in cm.groups.list | filter:$select.search">
+                        repeat="group in ctl.groups().list | filter:$select.search">
                     <span ng-bind-html="group.name | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>
@@ -25,8 +26,9 @@
         <label for="req-name" class="label-col control-label text-left-important">Name:</label>
         <div class="control-col">
             <input type="text" id="req-name" class="form-control" placeholder="Name"
-                    ng-model="cm.edit.model.name"
-                    ps-focus-on="cm.edit.visible"
+                    ng-model="ctl.model.name"
+                    ps-focus-on="ctl.visible && !disableName"
+                    ng-disabled="disableName"
                     required>
         </div>
     </div>
@@ -35,15 +37,16 @@
         <label for="req-descr" class="label-col control-label text-left-important">Description:</label>
         <div class="control-col">
             <input type="text" id="req-descr" class="form-control" placeholder="Description"
-                    ng-model="cm.edit.model.description">
+                    ng-model="ctl.model.description"
+                    ps-focus-on="ctl.visible && disableName">
         </div>
     </div>
     <!--Mandatory-->
     <div class="form-group form-group-sm">
         <div class="label-col"></div>
         <div class="control-col">
-            <label class="checkbox-ext no-select" ng-class="{checked: cm.edit.model.mandatory}">
-                <input type="checkbox" ng-model="cm.edit.model.mandatory">
+            <label class="checkbox-ext no-select" ng-class="{checked: ctl.model.mandatory}">
+                <input type="checkbox" ng-model="ctl.model.mandatory">
                 Mandatory
             </label>
         </div>
@@ -53,11 +56,11 @@
         <div class="label-col"></div>
         <div class="control-col">
             <button type="button" class="btn btn-sm btn-primary"
-                    ng-click="cm.edit.save()"
-                    ng-disabled="cm.editForm.$invalid">Save
+                    ng-click="ctl.save()"
+                    ng-disabled="ctl.editForm.$invalid">Save
             </button>
             <button type="button" class="btn close inline-close"
-                    ng-click="cm.edit.cancel()">
+                    ng-click="ctl.cancel()">
                 <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
             </button>
         </div>

@@ -30,19 +30,18 @@
             <!--Col1 - Buttons-->
             <div class="col-xs-12 col-sm-6 col-sm-pull-6 form-group button-bar">
                 <!--Add new-->
-                <button type="button" class="btn btn-default"
-                        ng-click="cm.edit.newBtn.toggle()"
-                        ng-class="{active: cm.edit.newBtn.active()}"
-                        >
+                <button type="button" class="btn btn-default" id="top-add-new">
                     <span class="fa fa-plus-circle"></span> New
                 </button>
             </div>
         </form>
 
         <!--Add form-->
-        <div class="page-spacer"
-                ng-if="cm.edit.isNew"
-                ng-include="'/html/requirements-edit-form.html'"></div>
+        <div class="page-spacer">
+            <ps-req-edit-form
+                    ps-ctl="cm.editNew"
+                    ps-btn-selector="#top-add-new"></ps-req-edit-form>
+        </div>
 
         <!--Selection list-->
         <div ng-include="'/html/requirements-selection-list.html'"></div>

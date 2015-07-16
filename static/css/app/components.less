@@ -289,7 +289,7 @@
   &::before {
     content: "";
     position: absolute;
-    top: -12px; right: 40px;
+    top: -12px; right: 40px; // default is edit icon pos
     .triangle(bottom, top, 12px, @form-chevron-color);
   }
 
@@ -322,6 +322,13 @@
     &.visible {
       .caret-icon {
         transform: rotate(90deg);
+      }
+    }
+
+    .panel-body-edit {
+      padding: 0;
+      &.form-open {
+        border-bottom: 1px solid @table-border-color;
       }
     }
   }

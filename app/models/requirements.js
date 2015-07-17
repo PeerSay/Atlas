@@ -7,7 +7,8 @@ var requirementSchema = new Schema({
     name: { type: String, required: true },
     description: { type: String, default: '' },
     topic: { type: String, default: '' }, // foreign key to Topics
-    popularity: {type: Number, min: 0, max: 100, default: 0}
+    popularity: {type: Number, min: 0, max: 100, default: 0},
+    category: { type: String, default: '' }
 });
 requirementSchema.plugin(findOrCreate);
 

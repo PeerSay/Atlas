@@ -36,12 +36,14 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
 
             m.groups.addItems(res.requirements, true); // reset
 
+            var categoryName = res.selectedCategory;
+
             // Public topics & reqs
             Projects.readPublicTopics().then(function (res) {
                 m.groups.addGroups(res.topics, true);
 
                 // Loading all items!
-                return Projects.readPublicRequirements(/*no params*/)
+                return Projects.readPublicRequirements({q: categoryName})
                     .then(function (res) {
                         m.groups.addItems(res.requirements, false, {selected: false});
                     })

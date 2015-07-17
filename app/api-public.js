@@ -7,12 +7,6 @@ var Product = require('../app/models/products').ProductModel;
 var Topic = require('../app/models/topics').TopicModel;
 var Requirement = require('../app/models/requirements').RequirementModel;
 
-var errRes = require('../app/api-errors');
-var errorcodes = require('../app/errors');
-
-var DEFAULT_LIMIT = 10;
-var BIG_LIMIT = 1000000;
-
 
 function PublicRestApi(app) {
     var U = {};
@@ -52,15 +46,16 @@ function PublicRestApi(app) {
 
     function readRequirements(req, res, next) {
         var email = (req.user || {}).email;
-        var from = Number(req.query.from) || 0;
-        var limit = Number(req.query.limit) || BIG_LIMIT;
+        var category = req.query.q || '';
+        var orSelector = [{category: ''}, {category: {$exists: false }}];
+        if (category) {
+            orSelector.push({category: category});
+        }
 
-        console.log('[API] Reading public requirements[%s]: from=%d, limit=%d', email, from, limit);
+        console.log('[API] Reading public requirements[%s]: category=[%s]', email, category);
 
-        Requirement.find()
+        Requirement.find().or(orSelector)
             .sort('-popularity')
-            .skip(from)
-            .limit(limit)
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }
@@ -91,17 +86,12 @@ function PublicRestApi(app) {
 
     function readProducts(req, res, next) {
         var email = (req.user || {}).email;
-        var from = Number(req.query.from) || 0;
-        var limit = Number(req.query.limit) || DEFAULT_LIMIT;
         var category = req.query.q;
 
-        console.log('[API] Reading public products[%s]: from=%d, limit=%d, category=[%s]',
-            email, from, limit, category);
+        console.log('[API] Reading public products[%s]: category=[%s]', email, category);
 
         Product.find({category: category})
             .sort('-popularity')
-            .skip(from)
-            .limit(limit)
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }

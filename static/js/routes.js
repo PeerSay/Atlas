@@ -5,13 +5,21 @@ angular
     .run(routesRun)
     .config(routesConfig);
 
-routesRun.$inject = ['$rootScope', '$state', '$stateParams'];
-function routesRun($rootScope, $state, $stateParams) {
+routesRun.$inject = ['$rootScope', '$state', '$stateParams', '$location', '$window'];
+function routesRun($rootScope, $state, $stateParams, $location, $window) {
     // To access them from any scope of app. For example for:
     // <li ng-class="{ active: $state.includes('auth') }">
     //
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;
+
+    // GoogleAnalytics
+    //
+    $rootScope.$on('$stateChangeSuccess', function (event, toState) {
+        if (!$window.ga) { return; }
+
+        $window.ga('send', 'pageview', {page: $location.path(), title: toState.name});
+    });
 }
 
 routesConfig.$inject = ['$stateProvider', '$urlRouterProvider', '$locationProvider'];

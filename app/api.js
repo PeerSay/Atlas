@@ -391,6 +391,7 @@ function RestApi(app) {
 
     function ensureAuthorized(req, res, next) {
         if (!req.user) {
+            console.log('[API] error: not authorized for %s %s', req.method, req.originalUrl);
             return errRes.notAuthorized(res, 'for API call');
         }
         next();

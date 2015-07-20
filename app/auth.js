@@ -347,6 +347,8 @@ function Auth(app) {
         var data = req.body;
         var restore = req.session.restore;
 
+        console.log('[AUTH] Restore complete attempt for [%s]', data.email);
+
         if (!restore) {
             console.log('[AUTH] Restore complete failed - no session');
             return res.json({error: 'no session'});
@@ -406,10 +408,15 @@ function Auth(app) {
     // Logout / expire
     //
     function logout(req, res) {
-        var email = req.user.email;
-        console.log('[AUTH] Logging out user [%s]', email);
+        if (req.user) {
+            var email = req.user.email;
+            console.log('[AUTH] Logging out user [%s]', email);
 
-        req.logout();
+            req.logout();
+        } else {
+            console.log('[AUTH] Logging out - skip: session expired');
+        }
+
         res.json({result: true});
     }
 

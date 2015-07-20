@@ -10,7 +10,8 @@ function psCollapse() {
         },
         link: function (scope, element, attr) {
             var $el = $(element).collapse({
-                parent: attr.psCollapseParent
+                parent: attr.psCollapseParent,
+                toggle: false
             });
 
             scope.$watch('ctl.open', function (newVal) {
@@ -28,7 +29,6 @@ function psCollapse() {
             element.on('$destroy', function () {
                 $el.off('shown.bs.collapse hidden.bs.collapse');
             });
-
         }
     };
 }

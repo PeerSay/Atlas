@@ -101,71 +101,60 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         .state('project.list', {
             url: '/projects',
             templateUrl: '/html/project-list.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details
         //
         .state('project.details', {
             url: '/projects/:projectId',
             templateUrl: '/html/project-details.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details > Dashboard
         //
         .state('project.details.dashboard', {
             url: '/dashboard',
             templateUrl: '/html/project-dashboard.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details > Decisions
         //
         .state('project.details.decisions', {
             url: '/decisions',
             templateUrl: '/html/project-decisions.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details > Notes
         //
         .state('project.details.notes', {
             url: '/notes',
             templateUrl: '/html/project-notes.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details > Essentials
         //
         .state('project.details.essentials', {
             url: '/essentials?edit={field}',
             templateUrl: '/html/project-essentials.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details > Requirements
         //
         .state('project.details.requirements', {
             url: '/requirements',
             templateUrl: '/html/project-requirements.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         })
         // Project > Details > Products
         //
         .state('project.details.products', {
             url: '/products',
             templateUrl: '/html/project-products.html',
-            resolve: {auth: authorizeUser}
+            resolve: {auth: ensureAuthorized}
         });
 }
 
-authorizeUser.$inject = ['$q', '$timeout', 'User'];
-function authorizeUser($q, $timeout, User) {
-    var authorized = User.isAuthorized();
-    if (authorized) {
-        // allow state transition
-        return $q.when();
-    } else {
-        $timeout(function () {
-            User.showLoginPage();
-        });
-
-        // cancel state transition
-        return $q.reject();
-    }
+ensureAuthorized.$inject = ['User'];
+function ensureAuthorized(User) {
+    return User.isAuthorized();
 }

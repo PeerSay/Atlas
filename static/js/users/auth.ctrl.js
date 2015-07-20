@@ -4,12 +4,13 @@ angular.module('PeerSay')
     .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['Location', '$state', '$window', 'User'];
-function AuthCtrl(Location, $state, $window, User) {
+AuthCtrl.$inject = ['$state', '$stateParams', '$window', 'User'];
+function AuthCtrl($state, $stateParams, $window, User) {
     var m = this;
     m.error = {
         show: false,
-        msg: "Something is wrong"
+        msg: "Something is wrong",
+        hide: hideError
     };
     m.errorLinkedIn = {
         show: false
@@ -27,8 +28,12 @@ function AuthCtrl(Location, $state, $window, User) {
     m.restorePwdComplete = restorePwdComplete;
 
 
-    showErrorFromQs();
-    getUserFromQs();
+    activate();
+
+    function activate() {
+        showErrorFromQs();
+        getEmailFromQs();
+    }
 
     // Login
     function login() {
@@ -144,30 +149,22 @@ function AuthCtrl(Location, $state, $window, User) {
     }
 
     function showErrorFromQs() {
-        var err = getValueFromQs('err');
+        var err = $stateParams['err'];
         if (err) {
             m.error.msg = err;
             m.error.show = true;
         }
     }
 
-    function getUserFromQs() {
-        var email = getValueFromQs('email');
+    function getEmailFromQs() {
+        var email = $stateParams['email'];
         if (email) {
             m.user.email = email;
         }
     }
 
-    function getValueFromQs(key) {
-        var qs = Location.search();
-        var value = qs && qs[key];
-        if (value) {
-            // remove err from url, no history, no model reload
-            Location
-                .skipReload()
-                .search(key, null)
-                .replace();
-        }
-        return value;
+    function hideError() {
+        m.error.show = false;
+        $state.go('.', null, {location: 'replace', inherit: false});
     }
 }

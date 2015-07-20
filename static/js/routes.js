@@ -13,12 +13,14 @@ function routesRun($rootScope, $state, $stateParams, $location, $window) {
     $rootScope.$state = $state;
     $rootScope.$stateParams = $stateParams;
 
-    // GoogleAnalytics
-    //
-    $rootScope.$on('$stateChangeSuccess', function (event, toState) {
-        if (!$window.ga) { return; }
+    $rootScope.$on('$stateChangeSuccess', function (event, toState/*, toParams*/) {
+        //console.log('>> $stateChangeSuccess to=%O, params=%O', toState, toParams);
 
-        $window.ga('send', 'pageview', {page: $location.path(), title: toState.name});
+        // GoogleAnalytics
+        //
+        if ($window.ga) {
+            $window.ga('send', 'pageview', {page: $location.path(), title: toState.name});
+        }
     });
 }
 
@@ -52,31 +54,31 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         // Auth > Login
         //
         .state('auth.login', {
-            url: '/login',
+            url: '/login?err',
             templateUrl: '/html/auth-login.html'
         })
         // Auth > Signup
         //
         .state('auth.signup', {
-            url: '/signup',
+            url: '/signup?err',
             templateUrl: '/html/auth-signup.html'
         })
         .state('auth.signup-success', {
-            url: '/signup/success',
+            url: '/signup/success?email',
             templateUrl: '/html/auth-signup-success.html'
         })
         .state('auth.signup-verified', {
-            url: '/signup/verified',
+            url: '/signup/verified?err',
             templateUrl: '/html/auth-signup-verified.html'
         })
         // Auth > Restore
         //
         .state('auth.restore', {
-            url: '/restore',
+            url: '/restore?err',
             templateUrl: '/html/auth-restore.html'
         })
         .state('auth.restore-complete', {
-            url: '/restore/complete',
+            url: '/restore/complete?err',
             templateUrl: '/html/auth-restore-complete.html'
         })
 
@@ -98,48 +100,72 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
         //
         .state('project.list', {
             url: '/projects',
-            templateUrl: '/html/project-list.html'
+            templateUrl: '/html/project-list.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details
         //
         .state('project.details', {
             url: '/projects/:projectId',
-            templateUrl: '/html/project-details.html'
+            templateUrl: '/html/project-details.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details > Dashboard
         //
         .state('project.details.dashboard', {
             url: '/dashboard',
-            templateUrl: '/html/project-dashboard.html'
+            templateUrl: '/html/project-dashboard.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details > Decisions
         //
         .state('project.details.decisions', {
             url: '/decisions',
-            templateUrl: '/html/project-decisions.html'
+            templateUrl: '/html/project-decisions.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details > Notes
         //
         .state('project.details.notes', {
             url: '/notes',
-            templateUrl: '/html/project-notes.html'
+            templateUrl: '/html/project-notes.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details > Essentials
         //
         .state('project.details.essentials', {
             url: '/essentials?edit={field}',
-            templateUrl: '/html/project-essentials.html'
+            templateUrl: '/html/project-essentials.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details > Requirements
         //
         .state('project.details.requirements', {
             url: '/requirements',
-            templateUrl: '/html/project-requirements.html'
+            templateUrl: '/html/project-requirements.html',
+            resolve: {auth: authorizeUser}
         })
         // Project > Details > Products
         //
         .state('project.details.products', {
             url: '/products',
-            templateUrl: '/html/project-products.html'
+            templateUrl: '/html/project-products.html',
+            resolve: {auth: authorizeUser}
         });
+}
+
+authorizeUser.$inject = ['$q', '$timeout', 'User'];
+function authorizeUser($q, $timeout, User) {
+    var authorized = User.isAuthorized();
+    if (authorized) {
+        // allow state transition
+        return $q.when();
+    } else {
+        $timeout(function () {
+            User.showLoginPage();
+        });
+
+        // cancel state transition
+        return $q.reject();
+    }
 }

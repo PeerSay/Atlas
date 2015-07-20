@@ -10,8 +10,8 @@ angular.module('PeerSay')
 // patch →  PATCH   /collection/id
 // delete → DELETE  /collection/id
 
-Backend.$inject = ['$http', '$q', 'Notification', 'Util'];
-function Backend($http, $q, Notification, _) {
+Backend.$inject = ['$rootScope', '$http', '$q', 'Notification', 'Util'];
+function Backend($rootScope, $http, $q, Notification, _) {
     var B = {
         // Middleware
         use: use,
@@ -27,6 +27,9 @@ function Backend($http, $q, Notification, _) {
     };
     var cache = {};
     var middleware = [];
+    var httpCodes = {
+        NOT_AUTHORIZED: 401
+    };
 
     function request(method) {
         return function (path, data, query) {
@@ -42,9 +45,17 @@ function Backend($http, $q, Notification, _) {
             }
 
             // Error handling
-            promise.catch(function () {
-                var err = 'Failed to ' + method + ': [' + url + ']';
-                Notification.showError('API Error', err);
+            promise.catch(function (reason) {
+                console.log('API error: ', reason);
+
+                if (reason.status === httpCodes.NOT_AUTHORIZED) {
+                    // Cannot call User method due to circular dependency
+                    $rootScope.$emit('ps.user.not-authorized');
+                }
+                else {
+                    var err = 'Failed to ' + method + ': [' + url + ']';
+                    Notification.showError('API Error', err);
+                }
                 invalidateCache(url);
             });
 
@@ -82,8 +93,8 @@ function Backend($http, $q, Notification, _) {
             .success(function (res) {
                 deferred.resolve(res);
             })
-            .error(function () {
-                deferred.reject();
+            .error(function (data, status/*, headers, config*/) {
+                deferred.reject({status: status, msg: data.error});
             });
     }
 

@@ -438,7 +438,11 @@ function Auth(app) {
     function redirectErrorQs(req, res, error, path) {
         path = path || req.path;
         var qs = '?err=' + error;
-        return res.redirect(path + qs);
+        var url = path + qs;
+
+        console.log('[AUTH] Redirect with err to=[%s]', url);
+
+        return res.redirect(url);
     }
 
     // Mail

@@ -49,7 +49,7 @@ function User($q, $rootScope, $state, $http, $timeout, Backend, Storage) {
                 }
                 else {
                     $timeout(function () {
-                        User.showLoginPage();
+                        showLoginPage();
                     });
                     deferred.reject();
                 }

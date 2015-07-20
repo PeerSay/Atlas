@@ -32,7 +32,7 @@ function ProjectListCtrl($state, $timeout, Projects) {
     }
 
     function editProject(id) {
-        return $state.go('project.details.dashboard', {projectId: id});
+        return $state.go('project.details.decisions', {projectId: id});
     }
 
     function removeProject(prj) {

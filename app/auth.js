@@ -25,6 +25,9 @@ function Auth(app) {
     var U = {};
 
     function setupRoutes() {
+        // Status
+        app.get('/api/auth/status', authStatus);
+
         // login
         app.get('/auth/login', sendAppEntry);
         app.post('/api/auth/login', jsonParser, authenticate); // api call that authenticates and establishes session
@@ -45,7 +48,7 @@ function Auth(app) {
         app.post('/api/auth/restore/complete', jsonParser, restorePasswordComplete);
 
         // logout
-        app.post('/api/auth/logout', logout); // api call!
+        app.post('/api/auth/logout', logout);
 
         // linkedin
         app.get('/auth/linkedin', authenticateByLinkedIn); // redirect to linkedin.com
@@ -87,6 +90,15 @@ function Auth(app) {
         passportVerifyLinkedIn
     ));
 
+    //Status
+    //
+    function authStatus(req, res) {
+        var authenticated = req.isAuthenticated();
+        var email = (req.user || {}).email;
+        console.log('[AUTH] Status for [%s] result=[%s]', email, authenticated);
+
+        return res.json({result: authenticated});
+    }
 
     // Register
     //
@@ -235,7 +247,8 @@ function Auth(app) {
         var appEntryUrl = req.session.attemptedUrl || defAppEntryUrl;
         req.session.attemptedUrl = null;
 
-        console.log('[AUTH] Proceed logged-in to [%s]', appEntryUrl);
+        var email = req.user.email;
+        console.log('[AUTH] Proceed logged-in [%s] to=[%s]', email, appEntryUrl);
 
         return res.redirect(appEntryUrl);
     }

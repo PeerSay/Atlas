@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .factory('User', User);
 
-User.$inject = ['$rootScope', '$state', '$http', 'Backend', 'Storage'];
-function User($rootScope, $state, $http, Backend, Storage) {
+User.$inject = ['$q', '$rootScope', '$state', '$http', '$timeout', 'Backend', 'Storage'];
+function User($q, $rootScope, $state, $http, $timeout, Backend, Storage) {
     var U = {};
 
     U.user = {};
@@ -30,7 +30,35 @@ function User($rootScope, $state, $http, Backend, Storage) {
     }
 
     function isAuthorized() {
-        return !!U.user.authorized;
+        // Returns promise, which prevents navigation to private pages when rejected
+        //
+        if (U.user.authorized) {
+            return $q.when();
+        }
+
+        var deferred = $q.defer();
+
+        // This is required for LinkedIn login, when app may start on any page
+        // and svc had no chance to init 'authorized' var, but user is already authorized by server,
+        // thus asking server to make sure.
+        $http.get('/api/auth/status')
+            .success(function (res) {
+                if (res.result) {
+                    updateUser({authorized: true});
+                    deferred.resolve();
+                }
+                else {
+                    $timeout(function () {
+                        User.showLoginPage();
+                    });
+                    deferred.reject();
+                }
+            })
+            .error(function () {
+                deferred.reject();
+            });
+
+        return deferred.promise;
     }
 
     function showLoginPage(params) {

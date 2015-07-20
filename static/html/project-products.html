@@ -141,13 +141,14 @@
                         ng-if="!cm.loadingMore && !filteredProducts.length">
                     <td colspan="6" class="text-center">
                         <span class="fa fa-info-circle"></span>
-                        <h4>Couldn't find anything<!--
-                                    --><span ng-if="cm.category.selected.name"> of category
-                                    <strong>{{cm.category.selected.name}}</strong></span>
-                            <span ng-if="!cm.category.selected.name">without category</span>.
+                        <h4>Category
+                                    <span ng-if="cm.category.selected.name">
+                                    <strong>{{cm.category.selected.name}}</strong>
+                                        is new.
+                                    </span>
                         </h4>
                         <p>
-                            Please choose another category.
+                            Please add new products, or choose a different category.
                         </p>
                     </td>
                 </tr>
@@ -166,6 +167,6 @@
         </div>
 
         <!--Done link-->
-        <a class="btn btn-primary pull-right" ui-sref="^.dashboard">Done</a>
+        <a class="btn btn-primary pull-right" ui-sref="^.decisions">Done</a>
     </div>
 </div>

@@ -9,19 +9,19 @@ topics = [
     {
         _id: '5597485d3dc107cb754537f3',
         name: 'Vendor, Reseller & Integrator',
-        description: 'details and impression about the service provider behind the solution',
+        description: 'Details and impressions about the vendor and/or service provider behind the solution',
         popularity: 80
     },
     {
         _id: '559748633dc107cb754537f4',
-        name: 'System Interfaces and user management',
-        description: 'specific interfaces that are required',
+        name: 'System Interfaces & Management Capabilities',
+        description: 'Interfaces with other systems, Administration, Logging & Monitoring',
         popularity: 50
     },
     {
         _id: '5597487a3dc107cb754537f6',
-        name: 'Risk management',
-        description: 'The security features of a threat prevention solution',
+        name: 'Risk Factors',
+        description: 'Considerations that impact the risk of choosing a product: Vendor stability, deployment complexity, etc.',
         popularity: 30
     },
     {
@@ -41,6 +41,13 @@ topics = [
         _id: '559748733dc107cb754537f5',
         name: 'Threat Prevention Functionality',
         description: 'The security features of a threat prevention solution',
+        popularity: 99
+    },
+
+    {
+        _id: '55acc1fa4c325a20daeac1d9',
+        name: 'Contact & Call Center Functionality',
+        description: 'Specific functionality of a contact/call center solution',
         popularity: 99
     }
 ];

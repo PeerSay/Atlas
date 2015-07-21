@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$scope', '$stateParams', '$timeout', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
-function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filterFilter, jsonpatch, _) {
+ProjectRequirementsCtrl.$inject = ['$q', '$scope', '$stateParams', '$timeout', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
+function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, filterFilter, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -10,51 +10,53 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
     m.project = null; // ref to shared
     m.patchObserver = null;
     m.loadingMore = true;
+    // Table selection/removal
     m.groups = GroupBy('topic');
-    // Table selection
     m.toggleReq = toggleReq;
+    m.removeReq = removeReq;
     // Search selection
     m.search = Search();
+    // Edit/add new
+    m.editFactory = EditFactory();
+    m.editNew = m.editFactory.create({'class': 'add-new'});
     //Filter
     m.filter = {
         visible: {removed: '!true'},
         selected: {selected: true, removed: '!true'}
     };
-    // Edit/add new
-    m.editFactory = EditFactory();
-    m.editNew = m.editFactory.create({'class': 'add-new'});
-    // Remove
-    m.removeLocalReq = removeLocalReq; //TODO - unselect if not-custom
 
 
     activate();
 
     function activate() {
-        Projects.readProject(m.projectId).then(function (res) {
+        var publicTopics, publicReqs;
+
+        var reqsQ = Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            m.patchObserver = jsonpatch.observe(m.project);
-
-            m.groups.addItems(res.requirements, true); // reset
-
-            var categoryName = res.selectedCategory;
-
-            // Public topics & reqs
-            Projects.readPublicTopics().then(function (res) {
-                m.groups.addGroups(res.topics, true);
-
-                // Loading all items!
-                return Projects.readPublicRequirements({q: categoryName})
-                    .then(function (res) {
-                        m.groups.addItems(res.requirements, false, {selected: false});
-                    })
-                    .finally(function () {
-                        m.loadingMore = false;
-                    });
-            });
+            observe(m.project);
+            return res.selectedCategory;
+        }).then(function (category) {
+            return Projects.readPublicRequirements({q: category})
+        }).then(function (res) {
+            publicReqs = res.requirements;
         });
 
+        var topicsQ = Projects.readPublicTopics().then(function (res) {
+            publicTopics = res.topics;
+        });
+
+        $q.all([reqsQ, topicsQ]).then(function () {
+            m.groups.addGroups(publicTopics, true);
+            m.groups.addItems(m.project.requirements, true/*local*/);
+            m.groups.addItems(publicReqs, false, {selected: false});
+        })
+    }
+
+    function observe(project) {
+        m.patchObserver = jsonpatch.observe(project);
+
         $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(m.project, m.patchObserver);
+            jsonpatch.unobserve(project, m.patchObserver);
         });
     }
 
@@ -87,12 +89,84 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         toggleReqVal(req, val);
     }
 
-    function toggleReqVal(req, val) {
-        req.selected = req.focus = val; //set focus on selected
+    function toggleReqVal(tableReq, val) {
+        tableReq.selected = tableReq.focus = val; //set focus on selected
 
-        addRemoveLocal(req);
+        if (tableReq.selected) {
+            addToProject(tableReq);
+        } else {
+            removeFromProject(tableReq);
+        }
         patchProject();
     }
+
+    function removeReq(tableReq) {
+        tableReq.selected = tableReq.focus = false;
+        tableReq.removed = true; // trick: hide with filter
+
+        removeFromProject(tableReq, true/*force*/);
+        patchProject();
+    }
+
+    function addToProject(req, shared) {
+        var found = getProjectReqById(req._id);
+
+        if (found.req) {
+            found.req.selected = true;
+        } else {
+            var newReq = shared ? req : angular.copy(req);
+            delete newReq.edit;
+            delete newReq.focus;
+            m.project.requirements.push(newReq); // patch!
+        }
+    }
+
+    function removeFromProject(tableReq, force) {
+        var found = getProjectReqById(tableReq._id);
+
+        if (found.req) {
+            if (!force) {
+                found.req.selected = false;
+            } else {
+                m.project.requirements.splice(found.idx, 1); // patch!
+            }
+        }
+    }
+
+    function getProjectReqById(id) {
+        var req = _.findWhere(m.project.requirements, {_id: id});
+        var idx = m.project.requirements.indexOf(req);
+        return {req: req, idx: idx};
+    }
+
+    /*function addRemoveLocal(req, forceRemove) {
+        var localReqs = m.project.requirements;
+        var localReq = _.findWhere(localReqs, {_id: req._id});
+        var localIdx = localReqs.indexOf(localReq);
+        var inProject = (localIdx >= 0);
+
+        //add
+        if (req.selected) {
+            if (inProject && localReq.custom) {
+                //console.log('>>Add: select local idx=%s', localIdx);
+                localReq.selected = true;
+            } else if (!inProject) {
+                //console.log('>>Add: push local copy?=%s', !req.custom);
+                localReqs.push(req.custom ? req : angular.copy(req)); // copy if not custom
+            }
+        }
+
+        //remove
+        if (!req.selected && inProject) {
+            if (!req.custom || forceRemove) {
+                //console.log('>>>>Remove: splice local idx=%s', localIdx);
+                localReqs.splice(localIdx, 1); // remove if not user-added
+            } else {
+                //console.log('>>>>Remove: unselect local idx=%s', localIdx);
+                localReq.selected = false;
+            }
+        }
+    }*/
 
     // Search
     //
@@ -238,7 +312,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 var savedReq = null;
                 if (isNew) {
                     savedReq = angular.extend({}, emptyNew, E.model, {selected: true});
-                    addRemoveLocal(savedReq);
+                    addToProject(savedReq, true/*shared*/);
                 } else {
                     savedReq = _.findWhere(m.project.requirements, {_id: req._id});
                     angular.extend(savedReq, E.model);
@@ -247,7 +321,8 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
                 patchProject().then(function (res) {
                     if (isNew && res) {
                         savedReq._id = res._id; //get id from server response
-                        m.groups.addItems([savedReq], true);
+                        m.groups.addItems([savedReq], true); // add to table
+                        m.groups.revealItem(savedReq);
                     }
                 });
             }
@@ -257,7 +332,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
 
                 var oldTopic = req.topic;
                 angular.extend(req, E.model);
-                m.groups.relocate(req, oldTopic, req.topic);
+                m.groups.relocateItem(req, oldTopic, req.topic);
             }
 
             function cancel() {
@@ -279,45 +354,6 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         return F;
     }
 
-    function removeLocalReq(req) {
-        req.selected = false;
-        req.removed = true; // trick: hide with filter
-
-        // Todo: remove from groups
-
-        addRemoveLocal(req, true/*force*/);
-        patchProject();
-    }
-
-    function addRemoveLocal(req, forceRemove) {
-        var localReqs = m.project.requirements;
-        var localReq = _.findWhere(localReqs, {_id: req._id});
-        var localIdx = localReqs.indexOf(localReq);
-        var inProject = (localIdx >= 0);
-
-        //add
-        if (req.selected) {
-            if (inProject && localReq.custom) {
-                //console.log('>>Add: select local idx=%s', localIdx);
-                localReq.selected = true;
-            } else if (!inProject) {
-                //console.log('>>Add: push local copy?=%s', !req.custom);
-                localReqs.push(req.custom ? req : angular.copy(req)); // copy if not custom
-            }
-        }
-
-        //remove
-        if (!req.selected && inProject) {
-            if (!req.custom || forceRemove) {
-                //console.log('>>>>Remove: splice local idx=%s', localIdx);
-                localReqs.splice(localIdx, 1); // remove if not user-added
-            } else {
-                //console.log('>>>>Remove: unselect local idx=%s', localIdx);
-                localReq.selected = false;
-            }
-        }
-    }
-
     // Grouping
     //
     function GroupBy(prop) {
@@ -328,7 +364,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         G.create = createNew;
         G.addGroups = addGroups;
         G.addItems = addItems;
-        G.relocate = relocate;
+        G.relocateItem = relocateItem;
         G.revealItem = revealItem;
         G.isVisible = isVisible;
 
@@ -421,7 +457,7 @@ function ProjectRequirementsCtrl($scope, $stateParams, $timeout, Projects, filte
         }
 
 
-        function relocate(req, oldName, name) {
+        function relocateItem(req, oldName, name) {
             if (oldName === name) { return; }
 
             var oldGroup = getGroup(oldName);

@@ -4,9 +4,10 @@ angular.module('PeerSay')
     .controller('MenuCtrl', MenuCtrl);
 
 
-MenuCtrl.$inject = ['$state', 'User', 'Projects'];
-function MenuCtrl($state, User, Projects) {
+MenuCtrl.$inject = ['$state', 'User', 'Projects', 'Notify'];
+function MenuCtrl($state, User, Projects, Notify) {
     var m = this;
+    m.notify = Notify;
     m.user = {
         displayName: '',
         logout: User.logout.bind(User)

@@ -27,20 +27,6 @@
 <!--Navbar/menu-->
 <div ui-view="menu"></div>
 
-<!--Notifications-->
-<div class="container-fluid" ng-controller="NotificationCtrl as m">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="alert alert-danger text-center notification" role="alert" ng-show="m.error.show" ng-cloak>
-                <button type="button" class="close" ng-click="m.hide()">
-                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-                <strong>{{ m.error.title }}:</strong> {{ m.error.msg }}
-            </div>
-        </div>
-    </div>
-</div>
-
 <!--Main content-->
 <div ui-view></div>
 
@@ -66,7 +52,7 @@
 <script src="/js/app.js"></script>
 <script src="/js/routes.js"></script>
 <script src="/js/menu.js"></script>
-<script src="/js/notif.js"></script>
+<script src="/js/notify.js"></script>
 <script src="/js/users/user.js"></script>
 <script src="/js/users/auth.ctrl.js"></script>
 <script src="/js/projects/projects.js"></script>

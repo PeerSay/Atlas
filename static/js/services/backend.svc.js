@@ -10,8 +10,8 @@ angular.module('PeerSay')
 // patch →  PATCH   /collection/id
 // delete → DELETE  /collection/id
 
-Backend.$inject = ['$rootScope', '$http', '$q', 'Notification', 'Util'];
-function Backend($rootScope, $http, $q, Notification, _) {
+Backend.$inject = ['$rootScope', '$http', '$q', '$timeout', 'Notify', 'Util'];
+function Backend($rootScope, $http, $q, $timeout, Notify, _) {
     var B = {
         // Middleware
         use: use,
@@ -35,13 +35,19 @@ function Backend($rootScope, $http, $q, Notification, _) {
         return function (path, data, query) {
             var url = buildUrl(path);
             var promise, deferred;
+            var saving = false;
 
             if (method === 'get') {
                 promise = readCached(url, query);
             } else {
+                saving = true;
                 deferred = $q.defer();
                 promise = deferred.promise;
                 doRequest(deferred, method, url, data);
+            }
+
+            if (saving) {
+                showSaveNotification(promise);
             }
 
             // Error handling
@@ -54,13 +60,23 @@ function Backend($rootScope, $http, $q, Notification, _) {
                 }
                 else {
                     var err = 'Failed to ' + method + ': [' + url + ']';
-                    Notification.showError('API Error', err);
+                    Notify.show('error', {title: 'API Error', text: err});
                 }
                 invalidateCache(url);
             });
 
             return promise;
         };
+    }
+
+    function showSaveNotification(promise) {
+        var delayQ = $timeout(_.noop, 1000);
+
+        Notify.show('save', {text: 'Saving...'});
+
+        $q.all([promise, delayQ]).then(function () {
+            Notify.show('save', {text: 'All changes saved'}, {hideAfter: 2000});
+        });
     }
 
     function readCached(url, query) {

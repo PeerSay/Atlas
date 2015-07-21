@@ -13,6 +13,7 @@ function Util($, $state) {
     U.findWhere = findWhere;
     U.filter = filter;
     U.removeItem = removeItem;
+    U.noop = noop;
     // Time
     U.now = getNow();
     U.timeIt = timeIt;
@@ -120,6 +121,10 @@ function Util($, $state) {
         return item;
     }
 
+    /**
+     * Noop
+     * */
+    function noop() {}
 
     /**
      * Debug utility: logging wrapper for ui-router $state.go()

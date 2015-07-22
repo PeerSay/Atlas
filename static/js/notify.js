@@ -4,18 +4,20 @@ angular.module('PeerSay')
     .factory('Notify', Notify)
     .directive('psNotify', psNotify);
 
-Notify.$inject = ['$timeout'];
-function Notify($timeout) {
+Notify.$inject = ['$rootScope', '$timeout'];
+function Notify($rootScope, $timeout) {
     var N = {};
-    N.model = {
-        /*type: 'error',
-        title: 'API error',
-        text: 'Failed to save /s/sdfsf/sdf',
-        show: true*/
-    };
+    N.model = {};
     N.show = show;
     N.hide = hide;
 
+
+    activate();
+
+    function activate() {
+        // Hide upon navigation
+        $rootScope.$on('$stateChangeStart', hide);
+    }
 
     function show(type, msg, options) {
         N.model = {type: type, title: msg.title, text: msg.text, show: true};

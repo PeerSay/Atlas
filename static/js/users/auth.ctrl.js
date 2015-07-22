@@ -4,17 +4,10 @@ angular.module('PeerSay')
     .controller('AuthCtrl', AuthCtrl);
 
 
-AuthCtrl.$inject = ['$state', '$stateParams', '$window', 'User'];
-function AuthCtrl($state, $stateParams, $window, User) {
+AuthCtrl.$inject = ['$q', '$state', '$stateParams', '$window', 'User', 'Notify', 'Util'];
+function AuthCtrl($q, $state, $stateParams, $window, User, Notify, _) {
     var m = this;
-    m.error = {
-        show: false,
-        msg: "Something is wrong",
-        hide: hideError
-    };
-    m.errorLinkedIn = {
-        show: false
-    };
+    // Form data
     m.user = {
         email: '',
         password: '',
@@ -22,10 +15,13 @@ function AuthCtrl($state, $stateParams, $window, User) {
         longSession: true
     };
     m.formSubmitControl = '';
+    // API calls
     m.login = login;
     m.signup = signup;
     m.restorePwd = restorePwd;
     m.restorePwdComplete = restorePwdComplete;
+    // Error notifications
+    m.notify = Notify;
 
 
     activate();
@@ -53,8 +49,7 @@ function AuthCtrl($state, $stateParams, $window, User) {
                     redirect('/auth/signup/success?email=' + m.user.email);
                 }
                 else if (res.error) {
-                    m.error.msg = res.error;
-                    m.error.show = true;
+                    m.notify.show('warn', {title: 'Error', text: res.error});
                     m.formSubmitControl = 'unlock';
                 }
                 else if (res.result) {
@@ -81,13 +76,11 @@ function AuthCtrl($state, $stateParams, $window, User) {
                     redirect('/auth/signup/success?email=' + m.user.email);
                 }
                 else if (res.error === 'duplicate') {
-                    m.error.msg = 'User already registered with email: ' + m.user.email;
-                    m.error.show = true;
+                    m.notify.show('warn', {title: 'Error', text: 'User already registered with email: ' + m.user.email});
                     m.formSubmitControl = 'unlock';
                 }
                 else if (res.error) {
-                    m.error.msg = res.error;
-                    m.error.show = true;
+                    m.notify.show('warn', {title: 'Error', text: res.error});
                     m.formSubmitControl = 'unlock';
                 }
                 else if (res.result) {
@@ -103,13 +96,10 @@ function AuthCtrl($state, $stateParams, $window, User) {
         return User.restorePwd(data)
             .then(function (res) {
                 if (res.error === 'linkedin') {
-                    m.error.show = false;
-                    m.errorLinkedIn.show = true;
+                    m.notify.show('linkedin', {title: 'Hey!', text: 'You are registered with LinkedIn.'});
                 }
                 else if (res.error) {
-                    m.errorLinkedIn.show = false;
-                    m.error.msg = res.error;
-                    m.error.show = true;
+                    m.notify.show('warn', {title: 'Error', text: res.error});
                 }
                 else if (res.result) {
                     // Go to state and prevent Back
@@ -127,8 +117,7 @@ function AuthCtrl($state, $stateParams, $window, User) {
         return User.restorePwdComplete(data)
             .then(function (res) {
                 if (res.error) {
-                    m.error.msg = res.error;
-                    m.error.show = true;
+                    m.notify.show('warn', {title: 'Error', text: res.error});
                 }
                 else if (res.result) {
                     // Go to state and prevent Back
@@ -138,6 +127,14 @@ function AuthCtrl($state, $stateParams, $window, User) {
                     // restore code (instead of email), which is not helpful..
                     // Submit login form to trigger browser save password dialog
                     //m.formSubmitControl = 'submit';
+                }
+            })
+            .catch(function (reason) {
+                // Common case is when browser auto-fills Code with user's email.
+                // In this case server will return 409 Conflict error because '@' in email is
+                // invalid char for code. Improving experience by showing normal warning here.
+                if (reason.status === _.const.http.CONFLICT) {
+                    m.notify.show('warn', {title: 'Invalid code', text: 'Please make sure to copy the code correctly from email.'});
                 }
             });
     }
@@ -151,9 +148,19 @@ function AuthCtrl($state, $stateParams, $window, User) {
     function showErrorFromQs() {
         var err = $stateParams['err'];
         if (err) {
-            m.error.msg = err;
-            m.error.show = true;
+            m.notify.show('warn', {title: 'Error', text: err});
+
+            // Temporarily override hide to erase error form qs
+            var origHide = m.notify.hide;
+            m.notify.hide = function () {
+                eraseErrorFromQs();
+                (m.notify.hide = origHide)();
+            };
         }
+    }
+
+    function eraseErrorFromQs() {
+        $state.go('.', null, {location: 'replace', inherit: false});
     }
 
     function getEmailFromQs() {
@@ -161,10 +168,5 @@ function AuthCtrl($state, $stateParams, $window, User) {
         if (email) {
             m.user.email = email;
         }
-    }
-
-    function hideError() {
-        m.error.show = false;
-        $state.go('.', null, {location: 'replace', inherit: false});
     }
 }

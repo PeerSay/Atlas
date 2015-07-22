@@ -1,7 +1,7 @@
 <div id="activate-res-dlg" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" ng-controller="AuthCtrl as m">
         <!--Success-->
-        <div class="modal-content" ng-show="!m.error.show">
+        <div class="modal-content" ng-show="!m.notify.model.show">
             <div class="modal-header">
                 <h4 class="modal-title">You're All Set!</h4>
             </div>
@@ -14,13 +14,15 @@
         </div>
 
         <!--Error-->
-        <div class="modal-content" ng-show="m.error.show">
+        <div class="modal-content" ng-show="m.notify.model.show">
             <div class="modal-header">
                 <h4 class="modal-title">Activation Failed!</h4>
             </div>
             <div class="modal-body">
-                <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
-                    The link you provided looks incorrect. Please make you copy-pasted the right link or just click it in email.
+                <div class="alert alert-warning text-center" role="alert">
+                    The link you provided looks incorrect.
+                    Please make you copy-pasted the right link or just click it in email.
+                    You account is not activated yet.
                 </div>
             </div>
             <div class="modal-footer">

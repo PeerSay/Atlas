@@ -6,16 +6,23 @@
                     <h2 class="panel-title">Forgot Password?</h2>
                 </div>
                 <div class="panel-body">
-                    <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
-                        <button type="button" class="close" aria-label="Close" ng-click="m.error.hide()">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <strong>Error:</strong> {{ m.error.msg }}
-                    </div>
-                    <div class="alert alert-warning text-center" role="alert" ng-show="m.errorLinkedIn.show">
-                        <strong>Hey!</strong> You are registered with LinkedIn.
-                        <a href="/auth/linkedin" target="_self">Login</a>
-                    </div>
+                    <!--Notify: Warning alert-->
+                    <ps-notify data-type="'warn'" data-ctl="notify = m.notify.model" ng-cloak>
+                        <div class="alert alert-warning text-center" role="alert">
+                            <button type="button" class="close" ng-click="m.notify.hide()">
+                                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                            <strong>{{ notify.title }}:</strong> {{ notify.text }}
+                        </div>
+                    </ps-notify>
+
+                    <!--Notify: LinkedIn alert-->
+                    <ps-notify data-type="'linkedin'" data-ctl="notify = m.notify.model" ng-cloak>
+                        <div class="alert alert-warning text-center" role="alert">
+                            <strong>{{ notify.title }}:</strong> {{ notify.text }}
+                            <a href="/auth/linkedin" target="_self">Login</a>
+                        </div>
+                    </ps-notify>
 
                     <p>A message will be sent to email address provided below.
                         Please follow the instructions inside to restore your password.</p>
@@ -28,7 +35,7 @@
                                 <span class="input-group-addon"><span class="fa fa-fw fa-envelope"></span></span>
                                 <div class="hint" ng-messages="m.form.email.$error" ng-class="{show: m.form.email.$touched}">
                                     <div ng-message="required">Required</div>
-                                    <div ng-message="email">Invalid email!</div>
+                                    <div ng-message="email">Invalid email</div>
                                 </div>
                                 <input type="email" name="email" class="form-control" placeholder="Your email"
                                         ng-model="m.user.email"

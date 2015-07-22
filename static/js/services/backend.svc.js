@@ -27,25 +27,24 @@ function Backend($rootScope, $http, $q, $timeout, Notify, _) {
     };
     var cache = {};
     var middleware = [];
-    var httpCodes = {
-        NOT_AUTHORIZED: 401
-    };
 
     function request(method) {
         return function (path, data, query) {
             var url = buildUrl(path);
             var promise, deferred;
-            var saving = false;
+            var isRead = (method === 'get');
 
-            if (method === 'get') {
+            Notify.hide();
+
+            if (isRead) {
                 promise = readCached(url, query);
             } else {
-                saving = true;
                 deferred = $q.defer();
                 promise = deferred.promise;
                 doRequest(deferred, method, url, data);
             }
 
+            var saving = !isRead && path[0] !== 'auth';
             if (saving) {
                 showSaveNotification(promise);
             }
@@ -54,7 +53,7 @@ function Backend($rootScope, $http, $q, $timeout, Notify, _) {
             promise.catch(function (reason) {
                 console.log('API error: ', reason);
 
-                if (reason.status === httpCodes.NOT_AUTHORIZED) {
+                if (reason.status === _.const.http.NOT_AUTHORIZED) {
                     // Cannot call User method due to circular dependency
                     $rootScope.$emit('ps.user.not-authorized');
                 }
@@ -63,6 +62,8 @@ function Backend($rootScope, $http, $q, $timeout, Notify, _) {
                     Notify.show('error', {title: 'API Error', text: err});
                 }
                 invalidateCache(url);
+
+                return $q.reject(reason); //re-throw
             });
 
             return promise;

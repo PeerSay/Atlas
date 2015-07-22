@@ -18,6 +18,13 @@ function Util($, $state) {
     U.now = getNow();
     U.timeIt = timeIt;
     U.stateDbg = stateDbg;
+    //Constants
+    U.const = {
+        http: {
+            NOT_AUTHORIZED: 401,
+            CONFLICT: 409
+        }
+    };
 
     var timed = {};
 

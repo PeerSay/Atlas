@@ -6,12 +6,15 @@
                     <h2 class="panel-title">Restore Password</h2>
                 </div>
                 <div class="panel-body">
-                    <div class="alert alert-warning text-center" role="alert" ng-show="m.error.show">
-                        <button type="button" class="close" aria-label="Close" ng-click="m.error.hide()">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <strong>Error:</strong> {{ m.error.msg }}.
-                    </div>
+                    <!--Notify: Warning alert-->
+                    <ps-notify data-type="'warn'" data-ctl="notify = m.notify.model" ng-cloak>
+                        <div class="alert alert-warning text-center" role="alert">
+                            <button type="button" class="close" ng-click="m.notify.hide()">
+                                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            </button>
+                            <strong>{{ notify.title }}:</strong> {{ notify.text }}
+                        </div>
+                    </ps-notify>
 
                     <p>A message was sent to your email address with one-time <strong>restore code</strong>.
                         Please copy that code and paste below. The code will expire in <strong>20 min</strong>.</p>

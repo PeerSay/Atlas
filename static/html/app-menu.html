@@ -20,6 +20,24 @@
             </a>
         </div>
 
+        <!--Notify: Saving-->
+        <ps-notify data-type="'save'" data-ctl="notify = menu.notify.model" ng-cloak>
+            <div class="notify-nav save ellipsis">{{ notify.text }}</div>
+        </ps-notify>
+
+        <!--Notify: API error-->
+        <ps-notify data-type="'error'" data-ctl="notify = menu.notify.model" ng-cloak>
+            <div class="notify-nav api-error">
+                <div class="alert alert-danger text-center" role="alert">
+                    <button type="button" class="close" ng-click="menu.notify.hide()">
+                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                    </button>
+                    <strong>{{ notify.title }}:</strong> {{ notify.text }}
+                </div>
+            </div>
+        </ps-notify>
+
+        <!--Collapsed menu-->
         <div class="navbar-collapse collapse">
             <p class="navbar-text visible-xs-block">Menu</p>
 

@@ -86,11 +86,41 @@
 .page-spacer {
   margin-bottom: 15px;
 }
-.notification {
-  margin-top: -20px;
-  padding: 8px;
-  font-size: 12px;
+
+/*
+* Notifications
+*/
+.notify {
+  .notify-nav {
+    position: absolute;
+    top: 0;
+    left: ~"calc(16.66666667% + 15px)";
+    right: ~"calc(16.66666667% + 30px)";
+    @media (max-width: @screen-lg-min) {
+      // Need more space to not overlap menu
+      right: ~"calc(16.66666667% + 60px)";
+    }
+    @media (max-width: @grid-float-breakpoint) {
+      left: 160px; //logo size
+      right: 70px; //menu btn size
+    }
+
+    &.save {
+      line-height: 50px;
+      font-size: 15px;
+      color: @navbar-inverse-link-color; //#9D9D9D;
+    }
+
+    &.api-error {
+      top: 10px;
+      .alert {
+        padding: 4px;
+        box-shadow: 1px 0 4px;
+      }
+    }
+  }
 }
+
 /*
 * Projects list
 */

@@ -13,10 +13,18 @@ function Util($, $state) {
     U.findWhere = findWhere;
     U.filter = filter;
     U.removeItem = removeItem;
+    U.noop = noop;
     // Time
     U.now = getNow();
     U.timeIt = timeIt;
     U.stateDbg = stateDbg;
+    //Constants
+    U.const = {
+        http: {
+            NOT_AUTHORIZED: 401,
+            CONFLICT: 409
+        }
+    };
 
     var timed = {};
 
@@ -120,6 +128,10 @@ function Util($, $state) {
         return item;
     }
 
+    /**
+     * Noop
+     * */
+    function noop() {}
 
     /**
      * Debug utility: logging wrapper for ui-router $state.go()

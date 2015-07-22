@@ -10,8 +10,8 @@ angular.module('PeerSay')
 // patch →  PATCH   /collection/id
 // delete → DELETE  /collection/id
 
-Backend.$inject = ['$rootScope', '$http', '$q', 'Notification', 'Util'];
-function Backend($rootScope, $http, $q, Notification, _) {
+Backend.$inject = ['$rootScope', '$http', '$q', '$timeout', 'Notify', 'Util'];
+function Backend($rootScope, $http, $q, $timeout, Notify, _) {
     var B = {
         // Middleware
         use: use,
@@ -27,16 +27,16 @@ function Backend($rootScope, $http, $q, Notification, _) {
     };
     var cache = {};
     var middleware = [];
-    var httpCodes = {
-        NOT_AUTHORIZED: 401
-    };
 
     function request(method) {
         return function (path, data, query) {
             var url = buildUrl(path);
             var promise, deferred;
+            var isRead = (method === 'get');
 
-            if (method === 'get') {
+            Notify.hide();
+
+            if (isRead) {
                 promise = readCached(url, query);
             } else {
                 deferred = $q.defer();
@@ -44,23 +44,40 @@ function Backend($rootScope, $http, $q, Notification, _) {
                 doRequest(deferred, method, url, data);
             }
 
+            var saving = !isRead && path[0] !== 'auth';
+            if (saving) {
+                showSaveNotification(promise);
+            }
+
             // Error handling
             promise.catch(function (reason) {
                 console.log('API error: ', reason);
 
-                if (reason.status === httpCodes.NOT_AUTHORIZED) {
+                if (reason.status === _.const.http.NOT_AUTHORIZED) {
                     // Cannot call User method due to circular dependency
                     $rootScope.$emit('ps.user.not-authorized');
                 }
                 else {
                     var err = 'Failed to ' + method + ': [' + url + ']';
-                    Notification.showError('API Error', err);
+                    Notify.show('error', {title: 'API Error', text: err});
                 }
                 invalidateCache(url);
+
+                return $q.reject(reason); //re-throw
             });
 
             return promise;
         };
+    }
+
+    function showSaveNotification(promise) {
+        var delayQ = $timeout(_.noop, 1000);
+
+        Notify.show('save', {text: 'Saving...'});
+
+        $q.all([promise, delayQ]).then(function () {
+            Notify.show('save', {text: 'All changes saved'}, {hideAfter: 2000});
+        });
     }
 
     function readCached(url, query) {

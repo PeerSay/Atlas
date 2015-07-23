@@ -58,8 +58,11 @@ When feature branch should be shared between developers:
     7. git pull / git push // also works without params due to link
 
 
-    Push to Heroku (staging server):
+    Push to master (deply to production!):
     1. git checkout master
-    2. git merge dev
-    3. git push heroku master
-    4. GoTo http://peersay.herokuapp.com/  
+    2. git merge --no-ff dev
+    3. git push		// This deploys to production Heroku app due to integration
+    4. Go to http://www.peer-say.com/
+
+Note: please don't do `git push heroku master` anymore, this is discouraged after Github repo is connected to Heroku app!
+See this: https://devcenter.heroku.com/articles/github-integration#faq

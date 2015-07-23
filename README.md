@@ -44,7 +44,7 @@ Simplified, the workflow is the following:
 When feature branch should be shared between developers:
 
     First dev:
-	1. git checkout -b feature-needs-2-devs // create local branch
+    1. git checkout -b feature-needs-2-devs // create local branch
     2. git commit -a -m "commit locally to save points of work"
     3. git push -u origin feature-needs-2-devs // push & create upstream link
                                                // if forgot -u, can fix later with:
@@ -60,9 +60,10 @@ When feature branch should be shared between developers:
 
     Push to master (deply to production!):
     1. git checkout master
-    2. git merge --no-ff dev
-    3. git push		// This deploys to production Heroku app due to integration
-    4. Go to http://www.peer-say.com/
+    2. git pull		// Get changes to your peers
+    3. git merge --no-ff dev
+    4. git push		// This deploys to production Heroku app due to integration
+    5. Go to http://www.peer-say.com/
 
 Note: please don't do `git push heroku master` anymore, this is discouraged after Github repo is connected to Heroku app!
 See this: https://devcenter.heroku.com/articles/github-integration#faq

@@ -49,6 +49,13 @@ topics = [
         name: 'Contact & Call Center Functionality',
         description: 'Specific functionality of a contact/call center solution',
         popularity: 99
+    },
+
+    {
+        _id: '55b0f027749dae4268bbc2d5',
+        name: 'Dealflow Management Functionality',
+        description: 'Specific functionality of a Dealflow Management solution',
+        popularity: 99
     }
 ];
 

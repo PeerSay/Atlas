@@ -65,6 +65,12 @@ categories = [
         name: 'Software Asset Management',
         domain: 'Asset Management',
         popularity: 25
+    },
+    {
+        _id: '55b0e4e2749dae4268bbc2d0',
+        name: 'Dealflow Management',
+        domain: 'Business Process',
+        popularity: 25
     }
 ];
 

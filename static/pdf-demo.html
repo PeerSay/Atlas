@@ -17,20 +17,16 @@
 
 </head>
 <body>
-<button type="button" id="generate" class="btn btn-primary">Gen PDF</button>
+<h1>DEMO presentation 1</h1>
+
+<h2>Some header</h2>
+
+<p>Some content</p>
 
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
 
 <script>
-    $(function () {
-        $('#generate').click(function () {
-            $.get('/api/pdf').then(function (res) {
-                var $el = $('<div/>').text(JSON.stringify(res));
-                $('body').append($el);
-            });
-        });
-    });
 </script>
 </body>
 </html>

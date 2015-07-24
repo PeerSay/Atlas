@@ -1,34 +1,34 @@
 var path = require('path');
 var express = require('express');
-var phantom = require('phantom');
+var phantom = require('./app/pdf/phantom-pdf');
 
 var app = express();
 var http = require('http').Server(app);
+var nextFile = nextFileFn();
 
 // Routs
 var static_dir = path.join(__dirname, '.', 'static');
 app.use(express.static(static_dir));
-app.get('/api/pdf', generatePDF);
+app.get('/api/pdf', respondPDF);
 
 
-function generatePDF(res, req, next) {
-    var url = '';
+function respondPDF(req, res, next) {
+    var url = "http://localhost:5005/pdf-demo.html";
 
-    phantom.create(function (ph) {
-        ph.createPage(function (page) {
-
-            page.open("http://www.google.com", function (status) {
-                console.log("opened google? ", status);
-
-
-                page.evaluate(function () { return document.title; }, function (result) {
-                    console.log('Page title is ' + result);
-                    ph.exit();
-                });
-            });
+    phantom.renderPDF(url, nextFile())
+        .then(function (file) {
+            res.json({result: file});
+        })
+        .catch(function (reason) {
+            res.json({error: reason.toString()});
         });
-    });
+}
 
+function nextFileFn() {
+    var i = 0;
+    return function () {
+        return './file' + (i++) + '.pdf';
+    }
 }
 
 // Run

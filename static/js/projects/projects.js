@@ -34,7 +34,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     // Patch
     P.patcher = Patcher();
     P.patchProject = patchProject;
-
+    // Presentations
+    P.readPresentations = readPresentations;
+    P.createPresentation = createPresentation;
 
     // Project list
     //
@@ -192,6 +194,21 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         return P;
     }
 
+    // Presentations
+    //
+    function readPresentations(id) {
+        return Backend.read(['projects', id, 'presentations']).then(function (data) {
+            return data.result;
+        });
+    }
+
+    function createPresentation(id, data) {
+        return Backend.create(['projects', id, 'presentations'], data).then(function (data) {
+            return data.result;
+        });
+    }
+
+    // Misc
     function getIdxById(id) {
         var prj = _.findWhere(P.projects, {id: id});
         var idx = P.projects.indexOf(prj);

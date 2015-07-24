@@ -20,7 +20,7 @@
             <div class="row side-bar" id="js-sidebar-affix">
                 <!--Overview-->
                 <div class="sidebar-section-col">
-                    <h4 class="toggle-edit">Overview</h4>
+                    <h4>Overview</h4>
                     <ul class="sub-menu">
                         <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
                         <li class="menu-item" ui-sref-active="active"><a ui-sref=".decisions">Decision Table</a></li>
@@ -29,6 +29,24 @@
                     <hr class="hidden-xs">
                     <div class="page-spacer visible-xs-block"></div>
                 </div>
+
+                <!--Presentations-->
+                <div class="sidebar-section-col">
+                    <h4>Presentations</h4>
+                    <ul class="sub-menu">
+                        <li class="menu-item" ui-sref-active="active"
+                                ng-repeat="pres in cm.presentations">
+                            <a ui-sref=".notes">{{:: pres.title }}</a>
+                        </li>
+                        <li>
+                            <button type="button" class="btn btn-xs btn-primary"
+                                    ng-click="cm.createPresentation()">Create</button>
+                        </li>
+                    </ul>
+                    <hr class="hidden-xs">
+                    <div class="page-spacer visible-xs-block"></div>
+                </div>
+
 
                 <!--Essentials-->
                 <div class="sidebar-section-col">

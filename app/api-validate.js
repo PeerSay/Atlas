@@ -42,7 +42,7 @@ function ApiValidate(app) {
 
     function validateBody(reg, res, next) {
         if (util.isEmptyObj(reg.body)) {
-            return errRes.badRequest(res, 'not JSON');
+            return errRes.badRequest(res, 'not JSON body');
         }
         next();
     }

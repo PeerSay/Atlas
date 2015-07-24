@@ -38,11 +38,6 @@ var projectSchema = new Schema({
 
     // Essentials
     //
-
-    //Migrate:
-    // - was:
-    //  startDate: { type: String }, plain string!
-    //  duration: { type: String }, plain string!
     time: {
         startDate: {type: Date},
         duration: {type: Number, min: 0},
@@ -50,8 +45,6 @@ var projectSchema = new Schema({
         durationLabels: {type: String, default: durationLabelEnum.join(',')}
     },
 
-    // Migrate:
-    // - was: budget:String
     budget: {
         amount: {type: Number, min: 0},
         amountMultiplier: {type: String, enum: amountMultiplierEnum, default: '----'},
@@ -60,9 +53,6 @@ var projectSchema = new Schema({
         currencyLabels: {type: String, default: currencyEnum.join(',')}
     },
 
-    // Migrate:
-    // - was summary/recommendations/notes (flat, String)
-    // - was description:String
     notes: {
         reasons: {type: String, default: ''}, // Ensures parent is always created
         goals: {type: String},
@@ -71,8 +61,8 @@ var projectSchema = new Schema({
         recommendations: {type: String}
     },
 
-    // Migrate:
-    // - was: criteria.vendors: []
+    // Criteria
+    //
     requirements: [{
         name: {type: String, required: true},
         description: {type: String},
@@ -83,8 +73,8 @@ var projectSchema = new Schema({
         mandatory: {type: Boolean, default: false}
     }],
 
-    // Migrate:
-    // - was: vendors - inside criteria! (can get any/first req to migrate)
+    // Products
+    //
     products: [{
         name: {type: String, required: true},
         description: {type: String},
@@ -103,9 +93,8 @@ var projectSchema = new Schema({
         custom: {type: Boolean, default: false}
     }],
 
-    // Migrate: was
-    // - grade was named score
-    // - weight/input was inside criteria arr
+    // Table
+    //
     table: [{
         reqId: {type: String, required: true},
         name: {type: String, required: true},
@@ -120,6 +109,20 @@ var projectSchema = new Schema({
             grade: {type: Number, min: 0, max: 10, default: 10},
             popularity: {type: Number, min: 0, max: 100, default: 0}
         }]
+    }],
+
+    // Presentations
+    //
+    presentations: [{
+        _id: false,
+        title: {type: String, required: true},
+        creationDate: {type: Date, default: Date.now},
+        resources: [{
+            title: {type: String, enum: ['logo', 'pdf'], required: true},
+            format: {type: String, enum: ['image', 'pdf'], required: true},
+            location: {type: String, required: true}
+        }]
+        // TODO: data or pages
     }]
 });
 projectSchema.set('toJSON', {virtuals: true});

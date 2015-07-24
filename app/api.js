@@ -39,11 +39,73 @@ function RestApi(app) {
         // project's table
         app.get('/api/projects/:id/table', readProjectTable);
         app.patch('/api/projects/:id/table', jsonParser, patchProjectTable);
+
+        // project's presentations
+        app.get('/api/projects/:id/presentations', readAllPresentations);
+        app.post('/api/projects/:id/presentations', createPresentation);
+        app.get('/api/projects/:id/presentations/:presId', readPresentation);
+        app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
         return U;
     }
 
-    // Waiting users
+    // Presentations
+    //
+    function readAllPresentations(req, res, next) {
+        var projectId = req.params.id;
+        var email = req.user.email;
 
+        console.log('[API] Reading presentations of project[%s] for user=[%s]', projectId, email);
+
+        Project.findById(projectId, 'presentations', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return errRes.notFound(res, projectId);
+            }
+
+            var result = prj.toJSON({transform: xformProjectTable});
+            console.log('[API] Reading presentations of project[%s] result: %s', projectId, JSON.stringify(result));
+
+            return res.json({result: result});
+        });
+    }
+
+    function createPresentation(req, res, next) {
+        var projectId = req.params.id;
+        var data = req.body;
+        var email = req.user.email;
+
+        console.log('[API] Creating presentation in project[%s] for user=[%s] with: ', projectId, email, data);
+
+        Project.findById(projectId, 'presentations', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return errRes.notFound(res, projectId);
+            }
+
+            var result = prj.presentations.push(data);
+            prj.save(function (err, newPrj) {
+                if (err) { return modelError(res, err); }
+
+                var list = newPrj.presentations;
+                var result = newPrj.presentations[list.length - 1]; // last in list
+                console.log('[API] Reading presentations of project[%s] result: %s', projectId, JSON.stringify(result));
+
+                return res.json({result: result});
+            });
+        });
+    }
+
+    function readPresentation(req, res, next) {
+
+    }
+
+    function patchPresentation(req, res, next) {
+
+    }
+
+
+    // Waiting users
+    //
     function addToWaitingUsers(req, res, next) {
         var data = req.body;
         var email = data.email;
@@ -83,7 +145,7 @@ function RestApi(app) {
     }
 
     // Say Hello
-
+    //
     function sendHelloMessage(req, res, next) {
         var data = req.body;
         var from = getFullEmail(data.email, data.name);
@@ -198,7 +260,7 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators -categories._id -table', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators -categories._id -table -presentations', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);

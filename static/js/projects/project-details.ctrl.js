@@ -12,9 +12,6 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
     m.project = null;
     m.requirements = [];
     m.products = [];
-    // Presentations
-    m.presentations = [];
-    m.createPresentation = createPresentation;
 
     //UI helpers
     m.sidebar = {
@@ -29,7 +26,6 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
 
     function activate() {
         readProject();
-        readPresentations();
 
         // Re-read on navigation to get fresh (not cached) object
         var off = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
@@ -46,21 +42,6 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
             m.requirements = res.requirements;
             m.products = res.products;
             return res;
-        });
-    }
-
-    // Presentations
-    //
-    function readPresentations() {
-        Projects.readPresentations(m.projectId).then(function (res) {
-            m.presentations = res.presentations;
-        });
-    }
-
-    function createPresentation() {
-        var data = { title: m.project.title };
-        Projects.createPresentation(m.projectId, data).then(function (res) {
-            m.presentations.push(res);
         });
     }
 

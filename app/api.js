@@ -43,6 +43,7 @@ function RestApi(app) {
         // project's presentations
         app.get('/api/projects/:id/presentations', readAllPresentations);
         app.post('/api/projects/:id/presentations', createPresentation);
+        app.delete('/api/projects/:id/presentations/:presId', deletePresentation);
         app.get('/api/projects/:id/presentations/:presId', readPresentation);
         app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
         return U;
@@ -62,7 +63,7 @@ function RestApi(app) {
                 return errRes.notFound(res, projectId);
             }
 
-            var result = prj.toJSON({transform: xformProjectTable});
+            var result = prj.toJSON({transform: xformProject});
             console.log('[API] Reading presentations of project[%s] result: %s', projectId, JSON.stringify(result));
 
             return res.json({result: result});
@@ -74,7 +75,7 @@ function RestApi(app) {
         var data = req.body;
         var email = req.user.email;
 
-        console.log('[API] Creating presentation in project[%s] for user=[%s] with: ', projectId, email, data);
+        console.log('[API] Creating presentation of project[%s] for user=[%s] with: ', projectId, email, data);
 
         Project.findById(projectId, 'presentations', function (err, prj) {
             if (err) { return next(err); }
@@ -82,13 +83,38 @@ function RestApi(app) {
                 return errRes.notFound(res, projectId);
             }
 
-            var result = prj.presentations.push(data);
-            prj.save(function (err, newPrj) {
+            var subDoc = prj.presentations.create(data);
+            var result = prj.presentations.push(subDoc);
+            prj.save(function (err) {
                 if (err) { return modelError(res, err); }
 
-                var list = newPrj.presentations;
-                var result = newPrj.presentations[list.length - 1]; // last in list
-                console.log('[API] Reading presentations of project[%s] result: %s', projectId, JSON.stringify(result));
+                var result = subDoc;
+                console.log('[API] Creating presentation of project[%s] result: %s', projectId, JSON.stringify(result));
+
+                return res.json({result: result});
+            });
+        });
+    }
+
+    function deletePresentation(req, res, next) {
+        var projectId = req.params.id;
+        var presId = req.params.presId;
+        var email = req.user.email;
+
+        console.log('[API] Removing presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
+
+        Project.findById(projectId, 'presentations', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return errRes.notFound(res, projectId);
+            }
+
+            prj.presentations.id(presId).remove();
+            prj.save(function (err) {
+                if (err) { return modelError(res, err); }
+
+                var result = true;
+                console.log('[API] Removing presentation[%s] of project[%s] result: %s', presId, projectId, JSON.stringify(result));
 
                 return res.json({result: result});
             });

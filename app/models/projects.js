@@ -1,15 +1,9 @@
 var _ = require('lodash');
 var mongoose = require('mongoose');
-var ShortId = require('mongoose-shortid-nodeps');
 var Schema = mongoose.Schema;
 var jsonPatch = require('fast-json-patch');
-
-
-/**
- * From: https://github.com/coreh/uid2
- * 62 characters in the ascii range that can be used in URLs without special encoding.
- */
-var UIDCHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+var psShortId = require('./short-id').psShortId;
+var presentationSubSchema = require('./presentations').presentationSubSchema;
 
 // Presets
 //
@@ -19,12 +13,6 @@ var defaultProject = {
 var durationLabelEnum = ['Days', 'Weeks', 'Months'];
 var amountMultiplierEnum = ['----', 'Thousands'];
 var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes (BTC is unofficial)
-var psShortId = {
-    type: ShortId,
-    len: 8,
-    alphabet: UIDCHARS,
-    retries: 10
-};
 
 // Schema
 //
@@ -113,17 +101,7 @@ var projectSchema = new Schema({
 
     // Presentations
     //
-    presentations: [{
-        _id: false,
-        title: {type: String, required: true},
-        creationDate: {type: Date, default: Date.now},
-        resources: [{
-            title: {type: String, enum: ['logo', 'pdf'], required: true},
-            format: {type: String, enum: ['image', 'pdf'], required: true},
-            location: {type: String, required: true}
-        }]
-        // TODO: data or pages
-    }]
+    presentations: [presentationSubSchema]
 });
 projectSchema.set('toJSON', {virtuals: true});
 

@@ -31,16 +31,25 @@
                 </div>
 
                 <!--Presentations-->
-                <div class="sidebar-section-col">
+                <div class="sidebar-section-col" ng-controller="ProjectPresentationsCtrl as pr">
                     <h4>Presentations</h4>
-                    <ul class="sub-menu">
-                        <li class="menu-item" ui-sref-active="active"
-                                ng-repeat="pres in cm.presentations">
-                            <a ui-sref=".notes">{{:: pres.title }}</a>
+                    <ul class="menu-table">
+                        <li class="trow" ui-sref-active="active"
+                                ng-repeat="pres in pr.list">
+                            <a href class="cell first ellipsis">{{:: pres.title }}</a>
+                            <a href class="cell min">
+                                <span class="fa fa-file-pdf-o icon muted"
+                                        ng-class="pres.pdf && 'normal' || 'muted'"></span>
+                            </a>
+                            <a href class="cell min" ng-click="pr.deletePresentation(pres)">
+                                <span class="fa fa-trash icon danger"></span>
+                            </a>
                         </li>
-                        <li>
-                            <button type="button" class="btn btn-xs btn-primary"
-                                    ng-click="cm.createPresentation()">Create</button>
+                        <li class="footer">
+                            <div class="trow">
+                                <button type="button" class="btn btn-xs btn-primary"
+                                        ng-click="pr.createPresentation()">Create</button>
+                            </div>
                         </li>
                     </ul>
                     <hr class="hidden-xs">

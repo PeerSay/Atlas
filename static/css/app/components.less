@@ -299,7 +299,7 @@
 * Selection lists
 */
 @selection-color: #17B7AD;
-@icon-color: indianred;
+@icon-color-danger: indianred;
 @form-bg: #FFFEEC;
 @form-chevron-color: #EBEAD9;
 
@@ -433,7 +433,7 @@
   }
 
   .table-icon {
-    color: @icon-color;
+    color: @icon-color-danger;
     opacity: .4;
     transition: opacity .3s ease;
     &:hover {
@@ -491,6 +491,49 @@
   .list-item {
     line-height: 16px;
     margin-bottom: 10px;
+  }
+
+  .menu-table {
+    display: table;
+    width: 100%;
+    .trow {
+      display: table-row;
+      .cell {
+        display: table-cell;
+        &.first {
+          max-width: 0; // required for ellipsis
+          width: 98%;
+        }
+        &.min {
+          width: 1%;
+          padding-left: 15px;
+          text-align: right;
+        }
+      }
+    }
+    .footer {
+      display: table-footer-group;
+      .btn {
+        margin-top: 10px;
+      }
+    }
+
+    .icon {
+      text-shadow: 0 1px 0 #fff;
+      opacity: .7;
+      &:hover {
+        opacity: 1;
+      }
+      &.muted {
+        color: #bcbcbc;
+      }
+      &.danger {
+        color: @icon-color-danger;
+      }
+      &.normal {
+        color: @selection-color;
+      }
+    }
   }
 }
 /*Full-screen toggle*/

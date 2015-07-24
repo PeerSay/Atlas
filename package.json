@@ -65,7 +65,8 @@
         "fast-json-patch": "~0.5.2",
         "q": "~1.4.1",
         "phantomjs": "~1.9.17",
-        "phantom": "~0.7.2"
+        "phantom": "~0.7.2",
+        "moment": "~2.10.3"
     },
     "devDependencies": {
         "grunt-contrib-watch": "~0.6.1",

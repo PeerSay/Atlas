@@ -13,7 +13,8 @@ Project Details
   .make-row();
   //Side-bar
   .sidebar-col {
-    .make-sm-column(2); // 1/6 of screen on non-mobile
+    .make-sm-column(3);
+    .make-lg-column(2);
 
     .sidebar-section-col {
       .make-xs-column(6); // 1/2 of screen on mobile
@@ -24,7 +25,10 @@ Project Details
     .side-bar {
       // Vertical scroll bar if no space
       position: fixed;
-      width: 100% * (1/6);
+      width: 100% * (1/4);
+      @media (min-width: @screen-lg-min) {
+        width: 100% * (1/6);
+      }
       height: ~"calc(100% - 117px)";
       overflow-y: auto;
       overflow-x: hidden;
@@ -38,7 +42,8 @@ Project Details
   }
   //Content
   .content-container-col {
-    .make-sm-column(10); // 5/6 of screen on non-mobile (all but sidebar)
+    .make-sm-column(9);
+    .make-lg-column(10);
 
     .content-col {
       .make-xs-column(12);

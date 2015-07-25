@@ -6,6 +6,7 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 var passport = require('passport');
+var swig = require('swig');
 
 // Setup config
 process.deploy = process.argv[2];
@@ -36,6 +37,13 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Swig templates
+app.engine('html', swig.renderFile);
+app.set('view engine', 'html');
+app.set('views', config.web.static_dir + '/tpl');
+app.set('view cache', false);
+swig.setDefaults({ cache: false }); //TODO - comment one of them
 
 
 // Setup routes

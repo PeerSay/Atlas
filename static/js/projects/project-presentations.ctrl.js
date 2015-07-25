@@ -39,7 +39,8 @@ function ProjectPresentationsCtrl($stateParams, Projects, _) {
         return {
             id: it._id,
             title: it.title,
-            pdf: _.findWhere(it.resources, {type: 'pdf'}) || null
+            pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).location,
+            htmlUrl: ['/my/projects', m.projectId, 'presentations', it._id, 'html'].join('/')
         };
     }
 
@@ -60,9 +61,8 @@ function ProjectPresentationsCtrl($stateParams, Projects, _) {
     }
 
     function renderPresentationPDF(pres) {
-        Projects.renderPresentation(m.projectId, pres.id).then(function (res) {
-            var idx = m.list.indexOf(pres);
-            m.list.splice(idx ,1);
+        Projects.renderPresentationPDF(m.projectId, pres.id).then(function (res) {
+            pres.pdfUrl = res;
         });
     }
 }

@@ -36,10 +36,12 @@
                     <ul class="menu-table">
                         <li class="trow" ui-sref-active="active"
                                 ng-repeat="pres in pr.list">
-                            <a href class="cell first ellipsis">{{:: pres.title }}</a>
-                            <a href class="cell min">
+                            <a href="{{:: pres.htmlUrl }}" target="_blank" class="cell first ellipsis">{{:: pres.title }}</a>
+                            <a href class="cell min"
+                                    ng-click="$event.stopPropagation(); !pres.pdfUrl && pr.renderPresentationPDF(pres)">
                                 <span class="fa fa-file-pdf-o icon muted"
-                                        ng-class="pres.pdf && 'normal' || 'muted'"></span>
+                                        ng-class="pres.pdfUrl && 'pdf' || 'muted'"
+                                        ps-tooltip="pres.pdfUrl && 'Open' || 'Render'"></span>
                             </a>
                             <a href class="cell min" ng-click="pr.deletePresentation(pres)">
                                 <span class="fa fa-trash icon danger"></span>

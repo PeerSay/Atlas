@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var path = require('path');
 var util = require('util');
 var jsonParser = require('body-parser').json();
 var jsonPatch = require('json-patch');
@@ -6,14 +7,17 @@ var jsonPointer = require('json-pointer');
 var swig = require('swig');
 
 // App dependencies
+var config = require('../app/config');
 var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
 var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
 var mailer = require('../app/email/mailer');
+var phantom = require('./pdf/phantom-pdf');
 
 var errorcodes = require('../app/errors');
 
+var STORAGE_PATH = path.join(__dirname, '..', 'storage');
 
 function RestApi(app) {
     var U = {};
@@ -44,8 +48,12 @@ function RestApi(app) {
         app.get('/api/projects/:id/presentations', readAllPresentations);
         app.post('/api/projects/:id/presentations', createPresentation);
         app.delete('/api/projects/:id/presentations/:presId', deletePresentation);
-        app.get('/api/projects/:id/presentations/:presId', readPresentation);
-        app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
+        //app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
+
+        // NOT API - return html/pdf content!
+        app.get('/my/projects/:id/presentations/:presId/html', renderPresentationHTML);
+        //  app.get('/my/projects/:id/presentations/:presId?type=pdf', readPresentationPDF);
+        app.post('/api/projects/:id/presentations/:presId/render-pdf', renderPresentationPDF);
         return U;
     }
 
@@ -109,7 +117,12 @@ function RestApi(app) {
                 return errRes.notFound(res, projectId);
             }
 
-            prj.presentations.id(presId).remove();
+            var pres = prj.presentations.id(presId);
+            if (!pres) {
+                return errRes.notFound(res, presId);
+            }
+
+            pres.remove();
             prj.save(function (err) {
                 if (err) { return modelError(res, err); }
 
@@ -121,12 +134,71 @@ function RestApi(app) {
         });
     }
 
-    function readPresentation(req, res, next) {
+    function renderPresentationHTML(req, res, next) {
+        var projectId = req.params.id;
+        var presId = req.params.presId;
+        var email = (req.user || {}).email; // PhantomJS calls this not-authenticated
 
+        console.log('[API] Rendering HTML presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
+
+        Project.findById(projectId, 'presentations', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return res.render('404', {resource: 'project-' + projectId});
+            }
+
+            var pres = prj.presentations.id(presId);
+            if (!pres) {
+                return res.render('404', {resource: 'presentation'});
+            }
+
+            console.log('[API] Rendering HTML presentation[%s] of project[%s] locals: %s',
+                presId, projectId, JSON.stringify(pres));
+
+            res.render('presentation', pres);
+        });
     }
 
-    function patchPresentation(req, res, next) {
+    function renderPresentationPDF(req, res, next) {
+        var projectId = req.params.id;
+        var presId = req.params.presId;
+        var email = req.user.email;
 
+        console.log('[API] Rendering PDF presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
+
+        Project.findById(projectId, 'presentations', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return errRes.notFound(res, projectId);
+            }
+
+            var pres = prj.presentations.id(presId);
+            if (!pres) {
+                return errRes.notFound(res, presId);
+            }
+
+            console.log('[API] Rendering PDF presentation[%s] of project[%s] locals: %s',
+                presId, projectId, JSON.stringify(pres));
+
+            var baseUrl = 'http://localhost:' + config.web.port;
+            var htmlUrl = baseUrl + ['/my/projects', projectId, 'presentations', presId, 'html'].join('/');
+            var filePath = path.join(STORAGE_PATH, pres.title + '.pdf');
+
+            phantom.renderPDF(htmlUrl, filePath)
+                .then(function (file) {
+                    var fileUrl = file;
+                    /*pres.resources.push({
+                        type: 'pdf',
+                        format: 'pdf',
+                        location: fileUrl
+                    });*/
+
+                    res.json({result: fileUrl});
+                })
+                .catch(function (reason) {
+                    res.json({error: reason.toString()});
+                });
+        });
     }
 
 

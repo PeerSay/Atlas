@@ -22,10 +22,10 @@ function startProcess() {
         onExit: exitCallback
     };
 
-    console.log('[PH] new process...');
+    console.log(' [PH] new process...');
 
     phantom.create(function (ph) {
-        console.log('[PH] process started');
+        console.log(' [PH] process started');
         deferred.resolve(ph);
     }, options);
 
@@ -81,7 +81,7 @@ function render(page, url, outPath) {
                     console.log("[PH] file rendered to [%s]", outPath);
 
                     page.close();
-                    console.log("[PH] page closed");
+                    console.log("[PH] page closed - done");
 
                     deferred.resolve(outPath);
                 });

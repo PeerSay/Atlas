@@ -38,6 +38,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.readPresentations = readPresentations;
     P.createPresentation = createPresentation;
     P.deletePresentation = deletePresentation;
+    P.renderPresentationPDF = renderPresentationPDF;
 
     // Project list
     //
@@ -213,6 +214,13 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         return Backend.remove(['projects', id, 'presentations', presId]).then(function (data) {
             return data.result;
         });
+    }
+
+    function renderPresentationPDF(id, presId) {
+        return Backend.create(['projects', id, 'presentations', presId, 'render-pdf'], {fake: 1})
+            .then(function (data) {
+                return data.result;
+            });
     }
 
     // Misc

@@ -1,4 +1,5 @@
 // External dependencies
+var path = require('path');
 var express = require("express");
 var compression = require('compression');
 var cookieParser = require('cookie-parser');
@@ -26,6 +27,7 @@ var http = require('http').Server(app);
 app.disable('x-powered-by');
 app.use(compression());
 app.use(express.static(config.web.static_dir));
+app.use('/files', express.static(path.join(__dirname, '.', 'files'))); // files
 app.use(cookieParser());
 app.use(session({
     secret: '8a779a89-8e82-4c31-80a0-284eed6ee12f',

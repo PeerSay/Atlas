@@ -17,7 +17,7 @@ var phantom = require('./pdf/phantom-pdf');
 
 var errorcodes = require('../app/errors');
 
-var STORAGE_PATH = path.join(__dirname, '..', 'storage');
+var FILES_PATH = path.join(__dirname, '..', 'files');
 
 function RestApi(app) {
     var U = {};
@@ -47,12 +47,12 @@ function RestApi(app) {
         // project's presentations
         app.get('/api/projects/:id/presentations', readAllPresentations);
         app.post('/api/projects/:id/presentations', createPresentation);
-        app.delete('/api/projects/:id/presentations/:presId', deletePresentation);
+        app.delete('/api/projects/:id/presentations/:presId', removePresentation);
         //app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
 
         // NOT API - return html/pdf content!
         app.get('/my/projects/:id/presentations/:presId/html', renderPresentationHTML);
-        //  app.get('/my/projects/:id/presentations/:presId?type=pdf', readPresentationPDF);
+        //app.get('/my/projects/:id/presentations/:presId/pdf', readPresentationPDF); // redirect to PDF file
         app.post('/api/projects/:id/presentations/:presId/render-pdf', renderPresentationPDF);
         return U;
     }
@@ -68,10 +68,10 @@ function RestApi(app) {
         Project.findById(projectId, 'presentations', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
-                return errRes.notFound(res, projectId);
+                return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var result = prj.toJSON({transform: xformProject});
+            var result = prj.toJSON({transform: xformProjectTable});
             console.log('[API] Reading presentations of project[%s] result: %s', projectId, JSON.stringify(result));
 
             return res.json({result: result});
@@ -88,7 +88,7 @@ function RestApi(app) {
         Project.findById(projectId, 'presentations', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
-                return errRes.notFound(res, projectId);
+                return errRes.notFound(res, 'project:' + projectId);
             }
 
             var subDoc = prj.presentations.create(data);
@@ -104,22 +104,25 @@ function RestApi(app) {
         });
     }
 
-    function deletePresentation(req, res, next) {
+    function removePresentation(req, res, next) {
         var projectId = req.params.id;
         var presId = req.params.presId;
         var email = req.user.email;
+
+        // TODO - remove files
 
         console.log('[API] Removing presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
 
         Project.findById(projectId, 'presentations', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
-                return errRes.notFound(res, projectId);
+                return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var pres = prj.presentations.id(presId);
+            var obj = _.find(prj.presentations, {id: Number(presId)});
+            var pres = prj.presentations.id(obj._id);
             if (!pres) {
-                return errRes.notFound(res, presId);
+                return errRes.notFound(res, 'pres:' + presId);
             }
 
             pres.remove();
@@ -147,7 +150,8 @@ function RestApi(app) {
                 return res.render('404', {resource: 'project-' + projectId});
             }
 
-            var pres = prj.presentations.id(presId);
+            var obj = _.find(prj.presentations, {id: Number(presId)});
+            var pres = obj && prj.presentations.id(obj._id);
             if (!pres) {
                 return res.render('404', {resource: 'presentation'});
             }
@@ -169,31 +173,41 @@ function RestApi(app) {
         Project.findById(projectId, 'presentations', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
-                return errRes.notFound(res, projectId);
+                return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var pres = prj.presentations.id(presId);
+            var obj = _.find(prj.presentations, {id: Number(presId)});
+            var pres = prj.presentations.id(obj._id);
             if (!pres) {
-                return errRes.notFound(res, presId);
+                return errRes.notFound(res, 'pres:' + presId);
             }
 
             console.log('[API] Rendering PDF presentation[%s] of project[%s] locals: %s',
                 presId, projectId, JSON.stringify(pres));
 
-            var baseUrl = 'http://localhost:' + config.web.port;
+            var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host
             var htmlUrl = baseUrl + ['/my/projects', projectId, 'presentations', presId, 'html'].join('/');
-            var filePath = path.join(STORAGE_PATH, pres.title + '.pdf');
+
+            var fileName = pres.title + '.pdf';
+            var filePath = path.join(FILES_PATH, projectId, fileName);
+            var fileUrl = ['/files', projectId, encodeRFC5987ValueChars(fileName)].join('/'); // relative!
 
             phantom.renderPDF(htmlUrl, filePath)
                 .then(function (file) {
-                    var fileUrl = file;
-                    /*pres.resources.push({
+                    var resource = {
                         type: 'pdf',
                         format: 'pdf',
                         location: fileUrl
-                    });*/
+                    };
 
-                    res.json({result: fileUrl});
+                    console.log('[API] Rendered PDF presentation[%s] of project[%s] to [%s]',
+                        presId, projectId, file);
+
+                    pres.resources.push(resource);
+                    prj.save(function (err) {
+                        if (err) { return modelError(res, err); }
+                        res.json({result: fileUrl});
+                    });
                 })
                 .catch(function (reason) {
                     res.json({error: reason.toString()});
@@ -201,6 +215,17 @@ function RestApi(app) {
         });
     }
 
+    // Courtesy by MDN
+    function encodeRFC5987ValueChars(str) {
+        return encodeURIComponent(str).
+            // Note that although RFC3986 reserves "!", RFC5987 does not,
+            // so we do not need to escape it
+            replace(/['()]/g, escape). // i.e., %27 %28 %29
+            replace(/\*/g, '%2A').
+            // The following are not required for percent-encoding per RFC5987,
+            // so we can allow for a little better readability over the wire: |`^
+            replace(/%(?:7C|60|5E)/g, unescape);
+    }
 
     // Waiting users
     //

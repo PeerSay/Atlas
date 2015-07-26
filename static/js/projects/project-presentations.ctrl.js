@@ -37,32 +37,35 @@ function ProjectPresentationsCtrl($stateParams, Projects, _) {
 
     function buildListItem(it) {
         return {
-            id: it._id,
+            id: it.id,
             title: it.title,
             pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).location,
-            htmlUrl: ['/my/projects', m.projectId, 'presentations', it._id, 'html'].join('/')
+            htmlUrl: ['/my/projects', m.projectId, 'presentations', it.id, 'html'].join('/')
         };
     }
 
     function createPresentation() {
-        var data = { title: Projects.current.project.title };
+        var data = {title: Projects.current.project.title};
         Projects.createPresentation(m.projectId, data).then(function (res) {
             m.list.push(buildListItem(res));
         });
     }
 
     function deletePresentation(pres) {
-        console.log('>> Delete', pres.id);
-
         Projects.deletePresentation(m.projectId, pres.id).then(function (res) {
             var idx = m.list.indexOf(pres);
-            m.list.splice(idx ,1);
+            m.list.splice(idx, 1);
         });
     }
 
     function renderPresentationPDF(pres) {
-        Projects.renderPresentationPDF(m.projectId, pres.id).then(function (res) {
-            pres.pdfUrl = res;
-        });
+        pres.rendering = true;
+        Projects.renderPresentationPDF(m.projectId, pres.id)
+            .then(function (res) {
+                pres.pdfUrl = res;
+            })
+            .finally(function () {
+                pres.rendering = false;
+            });
     }
 }

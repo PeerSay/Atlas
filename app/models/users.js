@@ -5,23 +5,12 @@ var ShortId = require('mongoose-shortid-nodeps');
 
 var util = require('../../app/util');
 var config = require('../../app/config');
-var projects = require('../../app/models/projects');
-var Project = projects.ProjectModel;
+var Project = require('../../app/models/projects').ProjectModel;
+var Settings = require('../../app/models/settings').SettingsModel;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000; // TODO - test
 var errors = require('../../app/errors');
-
-
-// Service model required for short incremental ids
-//
-var settingsSchema = new Schema({
-    nextUserId: { type: Number, default: 1 }
-});
-var Settings = mongoose.model('Settings', settingsSchema);
-Settings
-    .findOneAndUpdate({}, {}, {upsert: true})
-    .exec();
 
 
 // Schemas
@@ -185,10 +174,10 @@ userSchema.pre('save', function ensureId(next) {
     if (!user.isNew) { return next(); }
 
     // ensure auto-increment of user.id
-    Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
+    Settings.nextId('user', function (err, res) {
         if (err) { return next(err); }
 
-        user.id = settings.nextUserId;
+        user.id = res;
         next();
     });
 });
@@ -236,6 +225,5 @@ var User = mongoose.model('User', userSchema);
 
 
 module.exports = {
-    SettingsModel: Settings,
     UserModel: User
 };

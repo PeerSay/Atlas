@@ -41,7 +41,7 @@ bower_components
 .tmp
 .doc
 .pocs
-storage
+files
 
 # .css files are derived as we use LESS
 *.css

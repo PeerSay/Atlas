@@ -2,7 +2,7 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var jsonPatch = require('fast-json-patch');
-var psShortId = require('./short-id').psShortId;
+var psShortId = require('./lib/short-id').psShortId;
 var presentationSubSchema = require('./presentations').presentationSubSchema;
 
 // Presets

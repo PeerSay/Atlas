@@ -134,8 +134,8 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                         col = groupColIdx[key] = {
                             cells: [],
                             grade: function () {
-                                var totalWeight = calcTotalWeight();
-                                if (!totalWeight) { return 0; }
+                                var groupWeight = calcGroupWeight();
+                                if (!groupWeight) { return 0; }
 
                                 var totalGrade =  this.cells.reduce(function (prev, cur) {
                                     var weight = cur.req.weight;
@@ -143,8 +143,11 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                                     return prev + grade * weight;
                                 }, 0);
 
-                                var ave = Math.round(totalGrade / totalWeight * 10) / 10; // .1
+                                var ave = Math.round(totalGrade / groupWeight * 10) / 10; // .1
                                 return ave;
+
+//                                return totalGrade;
+
                             }
                         };
                         G.cols.push(col);
@@ -156,11 +159,16 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                     var totalWeight = calcTotalWeight();
                     if (!totalWeight) { return 0; }
 
+                    var groupWeight = calcGroupWeight();
+                    var weightPercents = Math.round(groupWeight / totalWeight * 100);
+                    return weightPercents;
+                }
+
+                function calcGroupWeight() {
                     var groupWeight = rows.reduce(function (prev, cur) {
                         return prev + cur.req.weight;
                     }, 0);
-                    var weightPercents = Math.round(groupWeight / totalWeight * 100);
-                    return weightPercents;
+                    return groupWeight;
                 }
 
                 function calcTotalWeight() {

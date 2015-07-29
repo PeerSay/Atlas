@@ -39,7 +39,7 @@ function ProjectPresentationsCtrl($stateParams, Projects, _) {
         return {
             id: it.id,
             title: it.title,
-            pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).location,
+            pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).genericUrl,
             htmlUrl: ['/my/projects', m.projectId, 'presentations', it.id, 'html'].join('/')
         };
     }

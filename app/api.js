@@ -5,6 +5,7 @@ var jsonParser = require('body-parser').json();
 var jsonPatch = require('json-patch');
 var jsonPointer = require('json-pointer');
 var swig = require('swig');
+var fs = require('fs');
 
 // App dependencies
 var config = require('../app/config');
@@ -14,6 +15,7 @@ var Project = require('../app/models/projects').ProjectModel;
 var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
 var mailer = require('../app/email/mailer');
 var phantom = require('./pdf/phantom-pdf');
+var s3 = require('./pdf/s3');
 
 var errorcodes = require('../app/errors');
 
@@ -49,11 +51,12 @@ function RestApi(app) {
         app.post('/api/projects/:id/presentations', createPresentation);
         app.delete('/api/projects/:id/presentations/:presId', removePresentation);
         //app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
+        app.post('/api/projects/:id/presentations/:presId/render-pdf', renderPresentationPDF);
 
         // NOT API - return html/pdf content!
         app.get('/my/projects/:id/presentations/:presId/html', renderPresentationHTML);
-        //app.get('/my/projects/:id/presentations/:presId/pdf', readPresentationPDF); // redirect to PDF file
-        app.post('/api/projects/:id/presentations/:presId/render-pdf', renderPresentationPDF);
+        app.get('/my/projects/:id/presentations/:presId/pdf', readPresentationPDF); // redirect to PDF file
+
         return U;
     }
 
@@ -153,7 +156,7 @@ function RestApi(app) {
             var obj = _.find(prj.presentations, {id: Number(presId)});
             var pres = obj && prj.presentations.id(obj._id);
             if (!pres) {
-                return res.render('404', {resource: 'presentation'});
+                return res.render('404', {resource: 'presentation-' + presId});
             }
 
             console.log('[API] Rendering HTML presentation[%s] of project[%s] locals: %s',
@@ -182,7 +185,7 @@ function RestApi(app) {
                 return errRes.notFound(res, 'pres:' + presId);
             }
 
-            console.log('[API] Rendering PDF presentation[%s] of project[%s] locals: %s',
+            console.log('[API] Rendering PDF presentation[%s] of project[%s], locals: %s',
                 presId, projectId, JSON.stringify(pres));
 
             var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host
@@ -190,42 +193,96 @@ function RestApi(app) {
 
             var fileName = pres.title + '.pdf';
             var filePath = path.join(FILES_PATH, projectId, fileName);
-            var fileUrl = ['/files', projectId, encodeRFC5987ValueChars(fileName)].join('/'); // relative!
 
             phantom.renderPDF(htmlUrl, filePath)
+                .catch(function (reason) {
+                    res.json({error: reason.toString()});
+                })
                 .then(function (file) {
+                    console.log('[API] Rendered PDF presentation[%s] of project[%s], res=[%s]',
+                        presId, projectId, file);
+
+                    // Update resource
                     var resource = {
                         type: 'pdf',
                         format: 'pdf',
-                        location: fileUrl
+                        fileName: fileName
                     };
-
-                    console.log('[API] Rendered PDF presentation[%s] of project[%s] to [%s]',
-                        presId, projectId, file);
-
-                    pres.resources.push(resource);
+                    var subdoc = pres.resources.create(resource);
+                    pres.resources.push(subdoc);
                     prj.save(function (err) {
                         if (err) { return modelError(res, err); }
-                        res.json({result: fileUrl});
+
+                        if (!config.s3.enable) {
+                            // Return generic url!
+                            res.json({result: subdoc.genericUrl});
+                        }
+
+                        // Upload to S3
+                        console.log('[API] Uploading PDF presentation[%s] of project[%s] to S3',
+                            presId, projectId);
+
+                        s3.upload(filePath, {subDir: projectId, fileName: fileName}, function (err, data) {
+                            if (err) {
+                                // TODO - correct error code
+                                return errRes.notFound(res, 'failed to persist to S3');
+                            }
+
+                            console.log('[API] Upload PDF presentation[%s] of project[%s] to S3 success, res=[%s]',
+                                presId, projectId, data.Location);
+
+                            res.json({result: subdoc.genericUrl});
+                        });
                     });
-                })
-                .catch(function (reason) {
-                    res.json({error: reason.toString()});
                 });
         });
     }
 
-    // Courtesy by MDN
-    function encodeRFC5987ValueChars(str) {
-        return encodeURIComponent(str).
-            // Note that although RFC3986 reserves "!", RFC5987 does not,
-            // so we do not need to escape it
-            replace(/['()]/g, escape). // i.e., %27 %28 %29
-            replace(/\*/g, '%2A').
-            // The following are not required for percent-encoding per RFC5987,
-            // so we can allow for a little better readability over the wire: |`^
-            replace(/%(?:7C|60|5E)/g, unescape);
+
+    function readPresentationPDF(req, res, next) {
+        var projectId = req.params.id;
+        var presId = req.params.presId;
+        var email = req.user.email;
+
+        console.log('[API] Reading PDF presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
+
+        Project.findById(projectId, 'presentations', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return res.render('404', {resource: 'project-' + projectId});
+            }
+
+            var obj = _.find(prj.presentations, {id: Number(presId)});
+            var pres = prj.presentations.id(obj._id);
+            if (!pres) {
+                return res.render('404', {resource: 'presentation-' + presId});
+            }
+
+            var resource = _.find(pres.resources, {type: 'pdf'});
+            if (!resource) {
+                return res.render('404', {resource: 'pdf'});
+            }
+
+            var filePath = path.join(FILES_PATH, projectId, resource.fileName), stat;
+
+            // Try local path first which is probably faster and the only option on 'dev'
+            try {
+                stat = fs.lstatSync(filePath);
+                if (stat.isFile()) {
+                    return res.redirect(resource.localUrl);
+                }
+            } catch(e) {}
+
+            // Then try S3 url which may not exist and is used on stage/prod
+            if (resource.s3Url) {
+                return res.redirect(resource.s3Url);
+            }
+            else {
+                return res.redirect('/tpl/');
+            }
+        });
     }
+
 
     // Waiting users
     //

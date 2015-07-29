@@ -18,5 +18,11 @@ module.exports = {
     },
     email: {
         enable: false
+    },
+    s3: {
+        enable: false,
+        bucket_name: '',
+        aws_access_key: '',
+        aws_secret_key: ''
     }
 };

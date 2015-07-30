@@ -8,9 +8,37 @@
     </div>
     <div class="panel-body">
         <div class="row">
+            <!--List-->
+            <div class="right-sidebar-col">
+                <h4>Presentations</h4>
+                <table class="table table-condensed present-table">
+                    <tbody>
+                    <tr ng-repeat="pres in pr.list">
+                        <td>
+                            <a href="{{:: pres.htmlUrl }}" target="_blank">{{:: pres.title }}</a>
+                        </td>
+                        <td class="icon-cell">
+                            <a ng-href="{{ pres.pdfUrl }}" target="_blank">
+                                <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'Open'"></span>
+                            </a>
+                        </td>
+                        <td class="icon-cell">
+                            <a href ng-click="pr.deletePresentation(pres)">
+                                <span class="fa fa-trash icon danger"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <button type="button" class="btn btn-primary pull-right"
+                        ng-click="pr.createPresentation()">Generate
+                </button>
+            </div>
             <!--Outline-->
             <div class="content-right-sidebar-col">
                 <h4>Presentation Outline</h4>
+
                 <form class="present-form">
                     <!--Overview-->
                     <div class="form-group">
@@ -26,6 +54,7 @@
                             <input type="checkbox">
                             <span class="underlined">Mandatory requirements</span>
                         </label>
+
                         <p class="hint-text text-sm">Mandatory Requirements, taken from the Criteria section.</p>
                     </div>
                     <!--Products-->
@@ -34,6 +63,7 @@
                             <input type="checkbox">
                             <span class="underlined">Products</span>
                         </label>
+
                         <p class="hint-text text-sm">Products under evaluation, taken from the Products section.</p>
                     </div>
                     <!--Table-->
@@ -42,6 +72,7 @@
                             <input type="checkbox">
                             <span class="underlined">Decision Table</span>
                         </label>
+
                         <p class="hint-text text-sm">Several slides presenting how the products compared on different topics and overall decision.</p>
                     </div>
                     <!--Summary-->
@@ -66,39 +97,11 @@
                         <img src="//placehold.it/48x48" width="48">
                         <input type="file" id="pres-logo">
                     </div>
+
+                    <button type="button" class="btn btn-primary pull-right"
+                            ng-click="pr.createPresentation()">Generate
+                    </button>
                 </form>
-            </div>
-
-            <!--List-->
-            <div class="right-sidebar-col">
-                <h4>Presentations</h4>
-
-                <ul class="present-table">
-                    <li class="trow" ui-sref-active="active"
-                            ng-repeat="pres in pr.list">
-                        <a href="{{:: pres.htmlUrl }}" target="_blank" class="cell first ellipsis">{{:: pres.title }}</a>
-                        <a class="cell min" ng-if="!pres.pdfUrl"
-                                ng-click="pr.renderPresentationPDF(pres); $event.stopPropagation()">
-                                <span class="fa fa-file-pdf-o icon muted" ps-tooltip="'Render'"
-                                        ng-if="!pres.rendering"></span>
-                                <span class="fa fa-spinner fa-spin" ps-tooltip="'Rendering'"
-                                        ng-if="pres.rendering"></span>
-                        </a>
-                        <a class="cell min" ng-if="pres.pdfUrl"
-                                ng-href="{{ pres.pdfUrl }}" target="_blank">
-                            <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'Open'"></span>
-                        </a>
-                        <a href class="cell min" ng-click="pr.deletePresentation(pres)">
-                            <span class="fa fa-trash icon danger"></span>
-                        </a>
-                    </li>
-                    <li class="footer">
-                        <div class="trow">
-                            <button type="button" class="btn btn-primary"
-                                    ng-click="pr.createPresentation()">Generate</button>
-                        </div>
-                    </li>
-                </ul>
             </div>
         </div>
 

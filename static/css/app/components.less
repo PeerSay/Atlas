@@ -578,7 +578,7 @@
 
   img {
     float: left;
-    margin-right: 15px;
+    margin: 0 15px 15px 0;
   }
 }
 
@@ -587,32 +587,9 @@
   border-right: 1px dotted @table-border-color;
 }
 .present-table {
-  display: table;
-  width: 100%;
-  .trow {
-    display: table-row;
-    &:nth-child(2) {
-      background: @gray-lighter;
-    }
-    .cell {
-      display: table-cell;
-      padding: 3px 0;
-      &.first {
-        max-width: 0; // required for ellipsis
-        width: 98%;
-      }
-      &.min {
-        width: 1%;
-        padding-left: 15px;
-        text-align: right;
-      }
-    }
-  }
-  .footer {
-    display: table-footer-group;
-    .btn {
-      margin-top: 30px;
-    }
+  .icon-cell {
+    width: 1%;
+    padding: 5px 8px;
   }
 
   .icon {
@@ -621,9 +598,6 @@
     cursor: pointer;
     &:hover {
       opacity: 1;
-    }
-    &.muted {
-      color: #bcbcbc;
     }
     &.danger {
       color: @icon-color-danger;

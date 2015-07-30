@@ -35,10 +35,10 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.patcher = Patcher();
     P.patchProject = patchProject;
     // Presentations
-    P.readPresentations = readPresentations;
-    P.createPresentation = createPresentation;
-    P.deletePresentation = deletePresentation;
-    P.renderPresentationPDF = renderPresentationPDF;
+    P.readPresentation = readPresentation;
+    P.patchPresentation = patchPresentation;
+    P.createPresentationSnapshot = createPresentationSnapshot;
+    P.deletePresentationSnapshot = deletePresentationSnapshot;
 
     // Project list
     //
@@ -198,29 +198,26 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
 
     // Presentations
     //
-    function readPresentations(id) {
-        return Backend.read(['projects', id, 'presentations']).then(function (data) {
+    function readPresentation(projectId) {
+        return Backend.read(['projects', projectId, 'presentation']).then(function (data) {
             return data.result;
         });
     }
 
-    function createPresentation(id, data) {
-        return Backend.create(['projects', id, 'presentations'], data).then(function (data) {
+    function patchPresentation(projectId, data) {
+        return Backend.patch(['projects', projectId, 'presentation'], data);
+    }
+
+    function createPresentationSnapshot(id, data) {
+        return Backend.create(['projects', id, 'presentation', 'snapshots'], data).then(function (data) {
             return data.result;
         });
     }
 
-    function deletePresentation(id, presId) {
-        return Backend.remove(['projects', id, 'presentations', presId]).then(function (data) {
+    function deletePresentationSnapshot(id, snapId) {
+        return Backend.remove(['projects', id, 'presentations', 'snapshots', snapId]).then(function (data) {
             return data.result;
         });
-    }
-
-    function renderPresentationPDF(id, presId) {
-        return Backend.create(['projects', id, 'presentations', presId, 'render-pdf'], {fake: 1})
-            .then(function (data) {
-                return data.result;
-            });
     }
 
     // Misc

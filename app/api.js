@@ -46,56 +46,84 @@ function RestApi(app) {
         app.get('/api/projects/:id/table', readProjectTable);
         app.patch('/api/projects/:id/table', jsonParser, patchProjectTable);
 
-        // project's presentations
-        app.get('/api/projects/:id/presentations', readAllPresentations);
-        app.post('/api/projects/:id/presentations', createPresentation);
-        app.delete('/api/projects/:id/presentations/:presId', removePresentation);
-        //app.patch('/api/projects/:id/presentations/:presId', patchPresentation);
-        app.post('/api/projects/:id/presentations/:presId/render-pdf', renderPresentationPDF);
+        // project's presentation
+        app.get('/api/projects/:id/presentation', readPresentation);
+        app.patch('/api/projects/:id/presentation', patchPresentation);
+
+        app.post('/api/projects/:id/presentation/snapshots', createPresentationSnapshot);
+        app.delete('/api/projects/:id/presentation/snapshots/:snapId', removePresentationSnapshot);
+        //app.post('/api/projects/:id/presentation/:presId/render-pdf', renderPresentationPDF);
 
         // NOT API - return html/pdf content!
-        app.get('/my/projects/:id/presentations/:presId/html', renderPresentationHTML);
-        app.get('/my/projects/:id/presentations/:presId/pdf', readPresentationPDF); // redirect to PDF file
+        app.get('/my/projects/:id/presentation/:presId/html', renderPresentationHTML);
+        app.get('/my/projects/:id/presentation/:presId/pdf', readPresentationPDF); // redirect to PDF file
 
         return U;
     }
 
     // Presentations
     //
-    function readAllPresentations(req, res, next) {
+    function readPresentation(req, res, next) {
         var projectId = req.params.id;
         var email = req.user.email;
 
-        console.log('[API] Reading presentations of project[%s] for user=[%s]', projectId, email);
+        console.log('[API] Reading presentation of project[%s] for user=[%s]', projectId, email);
 
-        Project.findById(projectId, 'presentations', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var result = prj.toJSON({transform: xformProjectTable});
-            console.log('[API] Reading presentations of project[%s] result: %s', projectId, JSON.stringify(result));
+            var result = prj.toJSON({transform: xformDeleteProp('id')});
+            console.log('[API] Reading presentation of project[%s] result: %s', projectId, JSON.stringify(result));
 
             return res.json({result: result});
         });
     }
 
-    function createPresentation(req, res, next) {
+    function patchPresentation(req, res, next) {
+        var projectId = req.params.id;
+        var data = req.body;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Patching presentation of project[%s] for user=[%s] with %s', projectId, email, JSON.stringify(data));
+
+        Project.findById(projectId, 'presentation.data', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return errRes.notFound(res, 'project' + projectId);
+            }
+
+            // Patch
+            applyPatch(prj.presentation.data, data, function (err, patchRes) {
+                if (err) { return modelError(res, err); }
+
+                console.log('[API] Patched presentation of project[%s] result:', projectId, patchRes);
+
+                return res.json({result: patchRes});
+            });
+        });
+    }
+
+    // Presentation Snapshots
+    //
+    function createPresentationSnapshot(req, res, next) {
         var projectId = req.params.id;
         var data = req.body;
         var email = req.user.email;
 
         console.log('[API] Creating presentation of project[%s] for user=[%s] with: ', projectId, email, data);
 
-        Project.findById(projectId, 'presentations', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var subDoc = prj.presentations.create(data);
-            var result = prj.presentations.push(subDoc);
+            var subDoc = prj.presentation.create(data);
+            var result = prj.presentation.push(subDoc);
             prj.save(function (err) {
                 if (err) { return modelError(res, err); }
 
@@ -107,7 +135,7 @@ function RestApi(app) {
         });
     }
 
-    function removePresentation(req, res, next) {
+    function removePresentationSnapshot(req, res, next) {
         var projectId = req.params.id;
         var presId = req.params.presId;
         var email = req.user.email;
@@ -116,14 +144,14 @@ function RestApi(app) {
 
         console.log('[API] Removing presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
 
-        Project.findById(projectId, 'presentations', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var obj = _.find(prj.presentations, {id: Number(presId)});
-            var pres = prj.presentations.id(obj._id);
+            var obj = _.find(prj.presentation, {id: Number(presId)});
+            var pres = prj.presentation.id(obj._id);
             if (!pres) {
                 return errRes.notFound(res, 'pres:' + presId);
             }
@@ -147,14 +175,14 @@ function RestApi(app) {
 
         console.log('[API] Rendering HTML presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
 
-        Project.findById(projectId, 'presentations', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return res.render('404', {resource: 'project-' + projectId});
             }
 
-            var obj = _.find(prj.presentations, {id: Number(presId)});
-            var pres = obj && prj.presentations.id(obj._id);
+            var obj = _.find(prj.presentation, {id: Number(presId)});
+            var pres = obj && prj.presentation.id(obj._id);
             if (!pres) {
                 return res.render('404', {resource: 'presentation-' + presId});
             }
@@ -173,14 +201,14 @@ function RestApi(app) {
 
         console.log('[API] Rendering PDF presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
 
-        Project.findById(projectId, 'presentations', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var obj = _.find(prj.presentations, {id: Number(presId)});
-            var pres = prj.presentations.id(obj._id);
+            var obj = _.find(prj.presentation, {id: Number(presId)});
+            var pres = prj.presentation.id(obj._id);
             if (!pres) {
                 return errRes.notFound(res, 'pres:' + presId);
             }
@@ -189,7 +217,7 @@ function RestApi(app) {
                 presId, projectId, JSON.stringify(pres));
 
             var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host
-            var htmlUrl = baseUrl + ['/my/projects', projectId, 'presentations', presId, 'html'].join('/');
+            var htmlUrl = baseUrl + ['/my/projects', projectId, 'presentation', presId, 'html'].join('/');
 
             var fileName = pres.title + '.pdf';
             var filePath = path.join(FILES_PATH, projectId, fileName);
@@ -246,14 +274,14 @@ function RestApi(app) {
 
         console.log('[API] Reading PDF presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
 
-        Project.findById(projectId, 'presentations', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return res.render('404', {resource: 'project-' + projectId});
             }
 
-            var obj = _.find(prj.presentations, {id: Number(presId)});
-            var pres = prj.presentations.id(obj._id);
+            var obj = _.find(prj.presentation, {id: Number(presId)});
+            var pres = prj.presentation.id(obj._id);
             if (!pres) {
                 return res.render('404', {resource: 'presentation-' + presId});
             }
@@ -440,13 +468,13 @@ function RestApi(app) {
                 return errRes.notFound(res, email);
             }
 
-            Project.findById(project_id, '-_id -id -__v -collaborators -categories._id -table -presentations', function (err, prj) {
+            Project.findById(project_id, '-_id -id -__v -collaborators -categories._id -table -presentation', function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
                     return errRes.notFound(res, project_id);
                 }
 
-                var result = prj.toJSON({transform: xformProject});
+                var result = prj.toJSON({transform: xformDeleteProp('id')});
                 console.log('[API] Reading project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
@@ -508,7 +536,7 @@ function RestApi(app) {
                     return errRes.notFound(res, project_id);
                 }
 
-                var result = prj.toJSON({transform: xformProjectTable});
+                var result = prj.toJSON({transform: xformDeleteProp('_id')});
                 console.log('[API] Reading table of project[%s] result: %s', project_id, JSON.stringify(result));
 
                 return res.json({result: result});
@@ -615,14 +643,11 @@ function RestApi(app) {
         return ret;
     }
 
-    function xformProject(doc, ret) {
-        delete ret.id; // id=null returned despite '-id'
-        return ret;
-    }
-
-    function xformProjectTable(doc, ret) {
-        delete ret._id;
-        return ret;
+    function xformDeleteProp(prop) {
+        return function (doc, ret) {
+            delete ret[prop];
+            return ret;
+        };
     }
 
     // Validation & logging

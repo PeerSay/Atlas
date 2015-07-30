@@ -8,15 +8,15 @@ var Settings = require('../../app/models/settings').SettingsModel;
 
 // Resource schema
 //
+/*
 var resourceSchema = new Schema({
-    format: {type: String, enum: ['image', 'pdf'], required: true},
+    format: {type: String, enum: ['image', 'pdf', 'html'], required: true},
     fileName: {type: String, required: true}
 }, {
     toObject: { virtuals: true },
     toJSON: { virtuals: true }
 });
 
-/*
 resourceSchema.virtual('genericUrl').get(function () {
     var resource = this;
     var projectId = resource.parent().parent()._id;
@@ -62,14 +62,20 @@ function encodeRFC5987ValueChars(str) {
 
 */
 
+
+var resourceJSON = {
+    format: {type: String, enum: ['image', 'pdf', 'html'], default: 'image', required: true},
+    fileName: {type: String}
+};
+
 // Snapshot schema
 //
 var snapshotSchema = new Schema({
     id: { type: Number, unique: true },
     title: {type: String, required: true},
     created: {type: Date, default: Date.now},
-    html: resourceSchema,
-    pdf: resourceSchema
+    html: resourceJSON,
+    pdf: resourceJSON
 });
 
 
@@ -106,38 +112,34 @@ snapshotSchema.pre('save', function ensureTitle(next) {
 });
 
 
-// Data schema
-//
-var dataSchema = new Schema({
-    overview: {
-        include: { type: Boolean, default: true },
-        overviewText: {type: String}
-    },
-    requirements: {
-        include: { type: Boolean, default: true }
-    },
-    products: {
-        include: { type: Boolean, default: true }
-    },
-    table: {
-        include: { type: Boolean, default: true }
-    },
-    notes: {
-        include: { type: Boolean, default: true },
-        summaryText: {type: String},
-        recommendationText: {type: String}
-    },
-    logo: {
-        include: { type: Boolean, default: false },
-        resource: resourceSchema
-    }
-});
-
-
 // Presentation Schema
 //
 var presentationSchema = new Schema({
-    data: dataSchema,
+    id: false,
+    data: {
+        overview: {
+            include: {type: Boolean, default: true},
+            overviewText: {type: String, default: ''}
+        },
+        requirements: {
+            include: {type: Boolean, default: true}
+        },
+        products: {
+            include: {type: Boolean, default: true}
+        },
+        table: {
+            include: {type: Boolean, default: true}
+        },
+        notes: {
+            include: {type: Boolean, default: true},
+            summaryText: {type: String, default: ''},
+            recommendationText: {type: String, default: ''}
+        },
+        logo: {
+            include: {type: Boolean, default: false},
+            resource: resourceJSON
+        }
+    },
     snapshots: [snapshotSchema]
 });
 

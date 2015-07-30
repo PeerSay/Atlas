@@ -41,55 +41,64 @@
 
                 <form class="present-form">
                     <!--Overview-->
-                    <div class="form-group">
+                    <div class="form-group present-item" ng-class="{include: pr.data.overview.include}">
                         <label class="checkbox-label">
-                            <input type="checkbox">
+                            <input type="checkbox" ng-model="pr.data.overview.include"
+                                    ng-change="pr.patchPresentation()">
                             <span class="underlined">Overview</span>
                         </label>
-                        <textarea id="pres-overview" class="form-control resize-vert" rows="3"></textarea>
+                        <textarea id="pres-overview" class="form-control resize-vert" rows="3"
+                                ng-model="pr.data.overview.overviewText"
+                                ps-focus-on="pr.data.overview.include"></textarea>
                     </div>
                     <!--Requirements-->
-                    <div class="form-group">
+                    <div class="form-group present-item" ng-class="{include: pr.data.requirements.include}">
                         <label class="checkbox-label">
-                            <input type="checkbox">
+                            <input type="checkbox" ng-model="pr.data.requirements.include"
+                                    ng-change="pr.patchPresentation()">
                             <span class="underlined">Mandatory requirements</span>
                         </label>
 
                         <p class="hint-text text-sm">Mandatory Requirements, taken from the Criteria section.</p>
                     </div>
                     <!--Products-->
-                    <div class="form-group">
+                    <div class="form-group present-item" ng-class="{include: pr.data.products.include}">
                         <label class="checkbox-label">
-                            <input type="checkbox">
+                            <input type="checkbox" ng-model="pr.data.products.include"
+                                    ng-change="pr.patchPresentation()">
                             <span class="underlined">Products</span>
                         </label>
 
                         <p class="hint-text text-sm">Products under evaluation, taken from the Products section.</p>
                     </div>
                     <!--Table-->
-                    <div class="form-group">
+                    <div class="form-group present-item" ng-class="{include: pr.data.table.include}">
                         <label class="checkbox-label">
-                            <input type="checkbox">
+                            <input type="checkbox" ng-model="pr.data.table.include"
+                                    ng-change="pr.patchPresentation()">
                             <span class="underlined">Decision Table</span>
                         </label>
 
                         <p class="hint-text text-sm">Several slides presenting how the products compared on different topics and overall decision.</p>
                     </div>
                     <!--Summary-->
-                    <div class="form-group">
+                    <div class="form-group present-item" ng-class="{include: pr.data.notes.include}">
                         <label class="checkbox-label">
-                            <input type="checkbox">
+                            <input type="checkbox" ng-model="pr.data.notes.include"
+                                    ng-change="pr.patchPresentation()">
                             <span class="underlined">Summary and Recommendations</span>
                         </label>
 
                         <label for="pres-summary" class="hint-label text-sm">Summary</label>
-                        <textarea id="pres-summary" class="form-control resize-vert" rows="3"></textarea>
+                        <textarea id="pres-summary" class="form-control resize-vert" rows="3"
+                                ng-model="pr.data.notes.summaryText"></textarea>
 
                         <label for="pres-recommend" class="hint-label text-sm">Recommendations</label>
-                        <textarea id="pres-recommend" class="form-control resize-vert" rows="3"></textarea>
+                        <textarea id="pres-recommend" class="form-control resize-vert" rows="3"
+                                ng-model="pr.data.notes.recommendationText"></textarea>
                     </div>
                     <!--Logo-->
-                    <div class="form-group">
+                    <div class="form-group present-item clearfix" ng-class="{include: 0}">
                         <label class="checkbox-label">
                             <input type="checkbox">
                             <span class="underlined">Logo</span>

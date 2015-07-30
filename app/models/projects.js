@@ -101,7 +101,7 @@ var projectSchema = new Schema({
 
     // Presentation
     //
-    presentation: presentationSchema
+    presentation: presentationSchema.tree // Cannot nest single subdoc!
 });
 projectSchema.set('toJSON', {virtuals: true});
 

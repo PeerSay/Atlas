@@ -31,36 +31,12 @@
                 </div>
 
                 <!--Presentations-->
-                <div class="sidebar-section-col" ng-controller="ProjectPresentationsCtrl as pr">
-                    <h4>Presentations</h4>
-                    <ul class="menu-table">
-                        <li class="trow" ui-sref-active="active"
-                                ng-repeat="pres in pr.list">
-                            <a href="{{:: pres.htmlUrl }}" target="_blank" class="cell first ellipsis">{{:: pres.title }}</a>
-                            <a class="cell min" ng-if="!pres.pdfUrl"
-                                    ng-click="pr.renderPresentationPDF(pres); $event.stopPropagation()">
-                                <span class="fa fa-file-pdf-o icon muted" ps-tooltip="'Render'"
-                                        ng-if="!pres.rendering"></span>
-                                <span class="fa fa-spinner fa-spin" ps-tooltip="'Rendering'"
-                                        ng-if="pres.rendering"></span>
-                            </a>
-                            <a class="cell min" ng-if="pres.pdfUrl"
-                                    ng-href="{{ pres.pdfUrl }}" target="_blank">
-                                <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'Open'"></span>
-                            </a>
-                            <a href class="cell min" ng-click="pr.deletePresentation(pres)">
-                                <span class="fa fa-trash icon danger"></span>
-                            </a>
-                        </li>
-                        <li class="footer">
-                            <div class="trow">
-                                <button type="button" class="btn btn-xs btn-primary"
-                                        ng-click="pr.createPresentation()">Create</button>
-                            </div>
-                        </li>
-                    </ul>
+                <div class="sidebar-section-col">
+                    <h4 class="menu-item" ui-sref-active="active">
+                        <a class="toggle-value" ui-sref=".presentations">Presentations</a>
+                    </h4>
                     <hr class="hidden-xs">
-                    <div class="page-spacer visible-xs-block"></div>
+                    <!--<div class="page-spacer visible-xs-block"></div>-->
                 </div>
 
 

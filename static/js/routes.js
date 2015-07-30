@@ -151,6 +151,13 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             url: '/products',
             templateUrl: '/html/project-products.html',
             resolve: {auth: ensureAuthorized}
+        })
+        // Project > Details > Presentations
+        //
+        .state('project.details.presentations', {
+            url: '/presentations',
+            templateUrl: '/html/project-presentations.html',
+            resolve: {auth: ensureAuthorized}
         });
 }
 

@@ -1,0 +1,108 @@
+<!--Panel-->
+<div class="panel panel-default tile has-fullscreen-toggle" ng-controller="ProjectPresentationsCtrl as pr">
+    <div class="panel-heading">
+        <h3 class="text-center">
+            <span class="fa fa-file-pdf-o"></span>
+            Presentations
+        </h3>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <!--Outline-->
+            <div class="content-right-sidebar-col">
+                <h4>Presentation Outline</h4>
+                <form class="present-form">
+                    <!--Overview-->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span class="underlined">Overview</span>
+                        </label>
+                        <textarea id="pres-overview" class="form-control resize-vert" rows="3"></textarea>
+                    </div>
+                    <!--Requirements-->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span class="underlined">Mandatory requirements</span>
+                        </label>
+                        <p class="hint-text text-sm">Mandatory Requirements, taken from the Criteria section.</p>
+                    </div>
+                    <!--Products-->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span class="underlined">Products</span>
+                        </label>
+                        <p class="hint-text text-sm">Products under evaluation, taken from the Products section.</p>
+                    </div>
+                    <!--Table-->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span class="underlined">Decision Table</span>
+                        </label>
+                        <p class="hint-text text-sm">Several slides presenting how the products compared on different topics and overall decision.</p>
+                    </div>
+                    <!--Summary-->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span class="underlined">Summary and Recommendations</span>
+                        </label>
+
+                        <label for="pres-summary" class="hint-label text-sm">Summary</label>
+                        <textarea id="pres-summary" class="form-control resize-vert" rows="3"></textarea>
+
+                        <label for="pres-recommend" class="hint-label text-sm">Recommendations</label>
+                        <textarea id="pres-recommend" class="form-control resize-vert" rows="3"></textarea>
+                    </div>
+                    <!--Logo-->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            <span class="underlined">Logo</span>
+                        </label>
+                        <img src="//placehold.it/48x48" width="48">
+                        <input type="file" id="pres-logo">
+                    </div>
+                </form>
+            </div>
+
+            <!--List-->
+            <div class="right-sidebar-col">
+                <h4>Presentations</h4>
+
+                <ul class="present-table">
+                    <li class="trow" ui-sref-active="active"
+                            ng-repeat="pres in pr.list">
+                        <a href="{{:: pres.htmlUrl }}" target="_blank" class="cell first ellipsis">{{:: pres.title }}</a>
+                        <a class="cell min" ng-if="!pres.pdfUrl"
+                                ng-click="pr.renderPresentationPDF(pres); $event.stopPropagation()">
+                                <span class="fa fa-file-pdf-o icon muted" ps-tooltip="'Render'"
+                                        ng-if="!pres.rendering"></span>
+                                <span class="fa fa-spinner fa-spin" ps-tooltip="'Rendering'"
+                                        ng-if="pres.rendering"></span>
+                        </a>
+                        <a class="cell min" ng-if="pres.pdfUrl"
+                                ng-href="{{ pres.pdfUrl }}" target="_blank">
+                            <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'Open'"></span>
+                        </a>
+                        <a href class="cell min" ng-click="pr.deletePresentation(pres)">
+                            <span class="fa fa-trash icon danger"></span>
+                        </a>
+                    </li>
+                    <li class="footer">
+                        <div class="trow">
+                            <button type="button" class="btn btn-primary"
+                                    ng-click="pr.createPresentation()">Generate</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!--Done link-->
+        <!--<a class="btn btn-primary pull-right" ui-sref="^.decisions">Done</a>-->
+    </div>
+</div>

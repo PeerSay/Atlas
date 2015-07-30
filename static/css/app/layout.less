@@ -8,10 +8,10 @@ Project Details
     .make-xs-column(12);
   }
 }
-
 .content-row {
   .make-row();
-  //Side-bar
+
+  //Left Side-bar
   .sidebar-col {
     .make-sm-column(3);
     .make-lg-column(2);
@@ -20,7 +20,6 @@ Project Details
       .make-xs-column(6); // 1/2 of screen on mobile
       .make-sm-column(12);
     }
-
 
     .side-bar {
       // Vertical scroll bar if no space
@@ -40,6 +39,7 @@ Project Details
       }
     }
   }
+
   //Content
   .content-container-col {
     .make-sm-column(9);
@@ -52,13 +52,21 @@ Project Details
       }
       transition: width .3s ease;
     }
+
+    // Right side-bar
+    .content-right-sidebar-col {
+      .make-sm-column(8);
+    }
+    .right-sidebar-col {
+      .make-sm-column(4);
+    }
   }
 }
 /*
 Selector page's form
 */
 .selector-edit-form {
-  .label-col{
+  .label-col {
     .make-sm-column(2);
   }
   .control-col {

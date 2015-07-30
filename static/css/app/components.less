@@ -493,53 +493,11 @@
     line-height: 16px;
     margin-bottom: 10px;
   }
-
-  .menu-table {
-    display: table;
-    width: 100%;
-    .trow {
-      display: table-row;
-      .cell {
-        display: table-cell;
-        &.first {
-          max-width: 0; // required for ellipsis
-          width: 98%;
-        }
-        &.min {
-          width: 1%;
-          padding-left: 15px;
-          text-align: right;
-        }
-      }
-    }
-    .footer {
-      display: table-footer-group;
-      .btn {
-        margin-top: 10px;
-      }
-    }
-
-    .icon {
-      text-shadow: 0 1px 0 #fff;
-      opacity: .7;
-      cursor: pointer;
-      &:hover {
-        opacity: 1;
-      }
-      &.muted {
-        color: #bcbcbc;
-      }
-      &.danger {
-        color: @icon-color-danger;
-      }
-      &.pdf {
-        color: @pdf-color;
-        font-weight: bold;
-      }
-    }
-  }
 }
-/*Full-screen toggle*/
+
+/*
+* Full-screen toggle
+*/
 .fullscreen-toggle {
   display: none;
   position: absolute;
@@ -581,6 +539,103 @@
     display: block;
   }
 }
+
+/*
+* Presentations
+*/
+
+.present-form {
+
+  .checkbox-label {
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      float: left;
+    }
+
+    .underlined {
+      display: block;
+      margin-left: 20px;
+      padding-bottom: 3px;
+      border-bottom: 1px solid @table-border-color;
+    }
+  }
+
+  .text-sm {
+    font-size: 12px;
+    font-weight: normal;
+    color: @gray-light;
+  }
+  .hint-text{
+    margin-left: 30px;
+    margin-top: -5px;
+  }
+  .hint-label{
+    margin-bottom: 0;
+  }
+
+  img {
+    float: left;
+    margin-right: 15px;
+  }
+}
+
+// List
+.content-right-sidebar-col {
+  border-right: 1px dotted @table-border-color;
+}
+.present-table {
+  display: table;
+  width: 100%;
+  .trow {
+    display: table-row;
+    &:nth-child(2) {
+      background: @gray-lighter;
+    }
+    .cell {
+      display: table-cell;
+      padding: 3px 0;
+      &.first {
+        max-width: 0; // required for ellipsis
+        width: 98%;
+      }
+      &.min {
+        width: 1%;
+        padding-left: 15px;
+        text-align: right;
+      }
+    }
+  }
+  .footer {
+    display: table-footer-group;
+    .btn {
+      margin-top: 30px;
+    }
+  }
+
+  .icon {
+    text-shadow: 0 1px 0 #fff;
+    opacity: .7;
+    cursor: pointer;
+    &:hover {
+      opacity: 1;
+    }
+    &.muted {
+      color: #bcbcbc;
+    }
+    &.danger {
+      color: @icon-color-danger;
+    }
+    &.pdf {
+      color: @pdf-color;
+      font-weight: bold;
+    }
+  }
+}
+
+
 /*
 * Override Bootstrap
 */

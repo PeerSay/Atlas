@@ -13,7 +13,7 @@
             <!--Reasons-->
             <div class="form-group">
                 <label for="es-reason" class="control-label">Please describe the reasons for this project evaluation:</label>
-                        <textarea id="es-reason" class="form-control vert"
+                        <textarea id="es-reason" class="form-control resize-vert"
                                 placeholder="Example: There's a strong need to add an extra 10TB storage to the company's backup server."
                                 ng-model="cm.project.notes.reasons"
                                 ng-blur="cm.patchProject()"
@@ -48,7 +48,7 @@
             <!--Goals-->
             <div class="form-group">
                 <label for="es-goal" class="control-label">What are the project goals?</label>
-                        <textarea id="es-goal" class="form-control vert"
+                        <textarea id="es-goal" class="form-control resize-vert"
                                 placeholder="Example: The new backup system should extend the current 6TB transparently."
                                 ng-model="cm.project.notes.goals"
                                 ng-blur="cm.patchProject()"

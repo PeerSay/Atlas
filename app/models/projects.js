@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var jsonPatch = require('fast-json-patch');
 var psShortId = require('./lib/short-id').psShortId;
-var presentationSubSchema = require('./presentations').presentationSubSchema;
+var presentationSchema = require('./presentations').presentationSchema;
 
 // Presets
 //
@@ -99,9 +99,9 @@ var projectSchema = new Schema({
         }]
     }],
 
-    // Presentations
+    // Presentation
     //
-    presentations: [presentationSubSchema]
+    presentation: presentationSchema
 });
 projectSchema.set('toJSON', {virtuals: true});
 

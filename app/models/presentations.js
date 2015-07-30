@@ -6,9 +6,9 @@ var config = require('../../app/config');
 var Settings = require('../../app/models/settings').SettingsModel;
 
 
-//Schema - resources
-var resourceSubSchema = new Schema({
-    type: {type: String, enum: ['logo', 'pdf'], required: true},
+// Resource schema
+//
+var resourceSchema = new Schema({
     format: {type: String, enum: ['image', 'pdf'], required: true},
     fileName: {type: String, required: true}
 }, {
@@ -16,19 +16,17 @@ var resourceSubSchema = new Schema({
     toJSON: { virtuals: true }
 });
 
-
-
-resourceSubSchema.virtual('genericUrl').get(function () {
+/*
+resourceSchema.virtual('genericUrl').get(function () {
     var resource = this;
     var projectId = resource.parent().parent()._id;
     var presId = resource.parent().id;
 
     // Generic URL for clients is /my/projects/:id/presentations/:presId/pdf
-    //
     return ['/my/projects', projectId, 'presentations', presId, 'pdf'].join('/');
 });
 
-resourceSubSchema.virtual('localUrl').get(function () {
+resourceSchema.virtual('localUrl').get(function () {
     var resource = this;
     var projectId = resource.parent().parent()._id;
     var safeFileName = encodeRFC5987ValueChars(resource.fileName);
@@ -37,7 +35,7 @@ resourceSubSchema.virtual('localUrl').get(function () {
     return ['/files', projectId, safeFileName].join('/');
 });
 
-resourceSubSchema.virtual('s3Url').get(function () {
+resourceSchema.virtual('s3Url').get(function () {
     if (!config.s3.enable) {
         return null;
     }
@@ -56,29 +54,30 @@ function encodeRFC5987ValueChars(str) {
         // Note that although RFC3986 reserves "!", RFC5987 does not,
         // so we do not need to escape it
         replace(/['()]/g, escape). // i.e., %27 %28 %29
-        replace(/\*/g, '%2A').
+        replace(/\*!/g, '%2A').
         // The following are not required for percent-encoding per RFC5987,
         // so we can allow for a little better readability over the wire: |`^
         replace(/%(?:7C|60|5E)/g, unescape);
 }
 
+*/
 
-//Schema - presentations
-var presentationSubSchema = new Schema({
+// Snapshot schema
+//
+var snapshotSchema = new Schema({
     id: { type: Number, unique: true },
     title: {type: String, required: true},
     created: {type: Date, default: Date.now},
-    resources: [resourceSubSchema]
-    // TODO: data or pages
+    html: resourceSchema,
+    pdf: resourceSchema
 });
 
 
-presentationSubSchema.pre('save', function ensureId(next) {
+snapshotSchema.pre('save', function ensureId(next) {
     var pres = this;
     if (!pres.isNew) { return next(); }
 
-    // ensure auto-increment of id
-
+    // Ensure auto-increment of id
     var projectId = this.parent()._id;
     Settings.nextId('pres-' + projectId, function (err, res) {
         if (err) { return next(err); }
@@ -88,7 +87,7 @@ presentationSubSchema.pre('save', function ensureId(next) {
     });
 });
 
-presentationSubSchema.pre('save', function ensureTitle(next) {
+snapshotSchema.pre('save', function ensureTitle(next) {
     var pres = this;
     if (!pres.isNew) { return next(); }
 
@@ -106,6 +105,43 @@ presentationSubSchema.pre('save', function ensureTitle(next) {
     });
 });
 
+
+// Data schema
+//
+var dataSchema = new Schema({
+    overview: {
+        include: { type: Boolean, default: true },
+        overviewText: {type: String}
+    },
+    requirements: {
+        include: { type: Boolean, default: true }
+    },
+    products: {
+        include: { type: Boolean, default: true }
+    },
+    table: {
+        include: { type: Boolean, default: true }
+    },
+    notes: {
+        include: { type: Boolean, default: true },
+        summaryText: {type: String},
+        recommendationText: {type: String}
+    },
+    logo: {
+        include: { type: Boolean, default: false },
+        resource: resourceSchema
+    }
+});
+
+
+// Presentation Schema
+//
+var presentationSchema = new Schema({
+    data: dataSchema,
+    snapshots: [snapshotSchema]
+});
+
+
 module.exports = {
-    presentationSubSchema: presentationSubSchema
+    presentationSchema: presentationSchema
 };

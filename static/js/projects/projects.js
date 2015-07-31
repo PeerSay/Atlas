@@ -205,16 +205,19 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     }
 
     function patchPresentation(projectId, data) {
+        Backend.invalidateCache(['projects', projectId, 'presentation']);
         return Backend.patch(['projects', projectId, 'presentation'], data);
     }
 
     function createPresentationSnapshot(projectId, data) {
+        Backend.invalidateCache(['projects', projectId, 'presentation']);
         return Backend.create(['projects', projectId, 'presentation', 'snapshots'], data).then(function (data) {
             return data.result;
         });
     }
 
     function deletePresentationSnapshot(projectId, snapId) {
+        Backend.invalidateCache(['projects', projectId, 'presentation']);
         return Backend.remove(['projects', projectId, 'presentation', 'snapshots', snapId]).then(function (data) {
             return data.result;
         });

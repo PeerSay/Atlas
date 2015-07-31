@@ -153,6 +153,7 @@ function RestApi(app) {
             var obj = _.find(snapshots, {id: Number(snapId)});
             var snap = obj && snapshots.id(obj._id);
             if (!snap) {
+                console.log('[API] Removing presentation snapshot[%s] of project[%s] failed - not found', snapId, projectId);
                 return errRes.notFound(res, 'snap:' + snapId);
             }
 

@@ -32,8 +32,11 @@
                     </tbody>
                 </table>
 
-                <button type="button" class="btn btn-primary pull-right"
-                        ng-click="pr.createPresentationSnapshot()">Generate
+                <button type="button" class="btn btn-primary"
+                        ng-click="pr.createPresentationSnapshot()"
+                        ng-disabled="pr.creating">
+                    <span ng-if="!pr.creating">Generate</span>
+                    <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>
                 </button>
             </div>
             <!--Outline-->
@@ -112,7 +115,10 @@
                     </div>
 
                     <button type="button" class="btn btn-primary pull-right"
-                            ng-click="pr.createPresentationSnapshot()">Generate
+                            ng-click="pr.createPresentationSnapshot()"
+                            ng-disabled="pr.creating">
+                        <span ng-if="!pr.creating">Generate</span>
+                        <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>
                     </button>
                 </form>
             </div>

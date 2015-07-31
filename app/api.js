@@ -110,7 +110,8 @@ function RestApi(app) {
         var data = req.body;
         var email = req.user.email;
 
-        console.log('[API] Creating presentation snapshot of project[%s] for user=[%s] with: ', projectId, email, data);
+        console.log('[API] Creating presentation snapshot of project[%s] for user=[%s] with: %s',
+            projectId, email, JSON.stringify(data));
 
         Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
@@ -150,7 +151,7 @@ function RestApi(app) {
 
             var snapshots = prj.presentation.snapshots;
             var obj = _.find(snapshots, {id: Number(snapId)});
-            var snap = snapshots.id(obj._id);
+            var snap = obj && snapshots.id(obj._id);
             if (!snap) {
                 return errRes.notFound(res, 'snap:' + snapId);
             }
@@ -184,7 +185,7 @@ function RestApi(app) {
 
             var snapshots = prj.presentation.snapshots;
             var obj = _.find(snapshots, {id: Number(snapId)});
-            var snap = snapshots.id(obj._id).toObject(); // read all virtual props
+            var snap = obj && snapshots.id(obj._id).toObject(); // read all virtual props
             if (!snap) {
                 return res.render('404', {resource: 'snapshot-' + snapId});
             }

@@ -61,9 +61,15 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) 
     //
     function createPresentationSnapshot() {
         var data = {title: Projects.current.project.title};
-        Projects.createPresentationSnapshot(m.projectId, data).then(function (res) {
-            m.snapshots.push(buildListItem(res));
-        });
+
+        m.creating = true;
+        Projects.createPresentationSnapshot(m.projectId, data)
+            .then(function (res) {
+                m.snapshots.push(buildListItem(res));
+            })
+            .finally(function () {
+                m.creating = false;
+            });
     }
 
     function deletePresentationSnapshot(snap) {

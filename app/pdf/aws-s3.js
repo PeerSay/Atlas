@@ -6,8 +6,11 @@ var config = require('../../app/config');
 var AWS_ACCESS_KEY = config.s3.aws_access_key;
 var AWS_SECRET_KEY = config.s3.aws_secret_key;
 var S3_BUCKET = config.s3.bucket_name;
+var enabled = config.s3.enable;
 
 AWS.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
+
+console.log(' [S3] enabled: %s', enabled && S3_BUCKET);
 
 
 function upload(fileOnDisk, to, cb) {

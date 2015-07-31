@@ -208,14 +208,14 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         return Backend.patch(['projects', projectId, 'presentation'], data);
     }
 
-    function createPresentationSnapshot(id, data) {
-        return Backend.create(['projects', id, 'presentation', 'snapshots'], data).then(function (data) {
+    function createPresentationSnapshot(projectId, data) {
+        return Backend.create(['projects', projectId, 'presentation', 'snapshots'], data).then(function (data) {
             return data.result;
         });
     }
 
-    function deletePresentationSnapshot(id, snapId) {
-        return Backend.remove(['projects', id, 'presentations', 'snapshots', snapId]).then(function (data) {
+    function deletePresentationSnapshot(projectId, snapId) {
+        return Backend.remove(['projects', projectId, 'presentation', 'snapshots', snapId]).then(function (data) {
             return data.result;
         });
     }

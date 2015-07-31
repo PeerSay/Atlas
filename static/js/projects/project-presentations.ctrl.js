@@ -7,13 +7,13 @@ ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonp
 function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) {
     var m = this;
     m.projectId = $stateParams.projectId;
-    m.patchObserver = null;
     m.data = {};
     m.snapshots = [];
-    m.createPresentation = createPresentation;
+    m.patchObserver = null;
     m.patchPresentation = patchPresentation;
-    m.deletePresentation = deletePresentation;
-    m.renderPresentationPDF = renderPresentationPDF;
+    m.creating = false;
+    m.createPresentationSnapshot = createPresentationSnapshot;
+    m.deletePresentationSnapshot = deletePresentationSnapshot;
 
 
     activate();
@@ -43,36 +43,33 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) 
     }
 
     function buildSnapshotsList(arr) {
-        var list = [];
-        _.forEach(arr, function (it) {
-            var item = buildListItem(it);
-            list.push(item);
+        return _.map(arr, function (it) {
+            return buildListItem(it);
         });
-        return list;
     }
 
     function buildListItem(it) {
         return {
             id: it.id,
             title: it.title,
-            pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).genericUrl,
-            htmlUrl: ['/my/projects', m.projectId, 'presentations', it.id, 'html'].join('/')
+            /*pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).genericUrl,
+            htmlUrl: ['/my/projects', m.projectId, 'presentations', it.id, 'html'].join('/')*/
         };
     }
 
     // Snapshots
     //
-    function createPresentation() {
+    function createPresentationSnapshot() {
         var data = {title: Projects.current.project.title};
-        Projects.createPresentation(m.projectId, data).then(function (res) {
-            m.list.push(buildListItem(res));
+        Projects.createPresentationSnapshot(m.projectId, data).then(function (res) {
+            m.snapshots.push(buildListItem(res));
         });
     }
 
-    function deletePresentation(pres) {
-        Projects.deletePresentation(m.projectId, pres.id).then(function (res) {
-            var idx = m.list.indexOf(pres);
-            m.list.splice(idx, 1);
+    function deletePresentationSnapshot(snap) {
+        Projects.deletePresentationSnapshot(m.projectId, snap.id).then(function (res) {
+            var idx = m.snapshots.indexOf(snap);
+            m.snapshots.splice(idx, 1);
         });
     }
 

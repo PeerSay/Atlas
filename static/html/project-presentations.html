@@ -8,22 +8,22 @@
     </div>
     <div class="panel-body">
         <div class="row">
-            <!--List-->
+            <!--Snapshots-->
             <div class="right-sidebar-col">
                 <h4>Presentations</h4>
                 <table class="table table-condensed present-table">
                     <tbody>
-                    <tr ng-repeat="pres in pr.list">
+                    <tr ng-repeat="snap in pr.snapshots">
                         <td>
-                            <a href="{{:: pres.htmlUrl }}" target="_blank">{{:: pres.title }}</a>
+                            <a href="{{:: snap.htmlUrl }}" target="_blank">{{:: snap.title }}</a>
                         </td>
                         <td class="icon-cell">
-                            <a ng-href="{{ pres.pdfUrl }}" target="_blank">
+                            <a ng-href="{{ snap.pdfUrl }}" target="_blank">
                                 <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'Open'"></span>
                             </a>
                         </td>
                         <td class="icon-cell">
-                            <a href ng-click="pr.deletePresentation(pres)">
+                            <a href ng-click="pr.deletePresentationSnapshot(snap)">
                                 <span class="fa fa-trash icon danger"></span>
                             </a>
                         </td>
@@ -32,7 +32,7 @@
                 </table>
 
                 <button type="button" class="btn btn-primary pull-right"
-                        ng-click="pr.createPresentation()">Generate
+                        ng-click="pr.createPresentationSnapshot()">Generate
                 </button>
             </div>
             <!--Outline-->
@@ -49,7 +49,8 @@
                         </label>
                         <textarea id="pres-overview" class="form-control resize-vert" rows="3"
                                 ng-model="pr.data.overview.overviewText"
-                                ps-focus-on="pr.data.overview.include"></textarea>
+                                ps-focus-on="pr.data.overview.include"
+                                ng-blur="pr.patchPresentation()"></textarea>
                     </div>
                     <!--Requirements-->
                     <div class="form-group present-item" ng-class="{include: pr.data.requirements.include}">
@@ -91,11 +92,13 @@
 
                         <label for="pres-summary" class="hint-label text-sm">Summary</label>
                         <textarea id="pres-summary" class="form-control resize-vert" rows="3"
-                                ng-model="pr.data.notes.summaryText"></textarea>
+                                ng-model="pr.data.notes.summaryText"
+                                ng-blur="pr.patchPresentation()"></textarea>
 
                         <label for="pres-recommend" class="hint-label text-sm">Recommendations</label>
                         <textarea id="pres-recommend" class="form-control resize-vert" rows="3"
-                                ng-model="pr.data.notes.recommendationText"></textarea>
+                                ng-model="pr.data.notes.recommendationText"
+                                ng-blur="pr.patchPresentation()"></textarea>
                     </div>
                     <!--Logo-->
                     <div class="form-group present-item clearfix" ng-class="{include: 0}">
@@ -108,7 +111,7 @@
                     </div>
 
                     <button type="button" class="btn btn-primary pull-right"
-                            ng-click="pr.createPresentation()">Generate
+                            ng-click="pr.createPresentationSnapshot()">Generate
                     </button>
                 </form>
             </div>

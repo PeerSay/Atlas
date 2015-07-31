@@ -14,8 +14,6 @@ var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
 var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
 var mailer = require('../app/email/mailer');
-var phantom = require('./pdf/phantom-pdf');
-var s3 = require('./pdf/s3');
 
 var errorcodes = require('../app/errors');
 
@@ -39,7 +37,7 @@ function RestApi(app) {
         // projects
         app.post('/api/projects', jsonParser, createProject);
         app.get('/api/projects/:id', readProject);
-        app.delete('/api/projects/:id', removeProject);
+        app.delete('/api/projects/:id', deleteProject);
         app.patch('/api/projects/:id', jsonParser, patchProject);
 
         // project's table
@@ -51,8 +49,7 @@ function RestApi(app) {
         app.patch('/api/projects/:id/presentation', patchPresentation);
 
         app.post('/api/projects/:id/presentation/snapshots', createPresentationSnapshot);
-        app.delete('/api/projects/:id/presentation/snapshots/:snapId', removePresentationSnapshot);
-        //app.post('/api/projects/:id/presentation/:presId/render-pdf', renderPresentationPDF);
+        app.delete('/api/projects/:id/presentation/snapshots/:snapId', deletePresentationSnapshot);
 
         // NOT API - return html/pdf content!
         app.get('/my/projects/:id/presentation/:presId/html', renderPresentationHTML);
@@ -75,7 +72,7 @@ function RestApi(app) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var result = prj.toJSON({transform: xformDeleteProp('id')});
+            var result = prj.toJSON(/*{transform: xformDeleteProp('id')}*/); // TODO
             console.log('[API] Reading presentation of project[%s] result: %s', projectId, JSON.stringify(result));
 
             return res.json({result: result});
@@ -114,7 +111,7 @@ function RestApi(app) {
         var data = req.body;
         var email = req.user.email;
 
-        console.log('[API] Creating presentation of project[%s] for user=[%s] with: ', projectId, email, data);
+        console.log('[API] Creating presentation snapshot of project[%s] for user=[%s] with: ', projectId, email, data);
 
         Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
@@ -122,46 +119,49 @@ function RestApi(app) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var subDoc = prj.presentation.create(data);
-            var result = prj.presentation.push(subDoc);
-            prj.save(function (err) {
+            var snapshots = prj.presentation.snapshots;
+            var subDoc = snapshots.create(data);
+            snapshots.push(subDoc);
+
+            prj.save(function (err, newPrj) {
                 if (err) { return modelError(res, err); }
 
                 var result = subDoc;
-                console.log('[API] Creating presentation of project[%s] result: %s', projectId, JSON.stringify(result));
+                console.log('[API] Creating presentation snapshot of project[%s] result: %s', projectId, JSON.stringify(result));
 
                 return res.json({result: result});
             });
         });
     }
 
-    function removePresentationSnapshot(req, res, next) {
+    function deletePresentationSnapshot(req, res, next) {
         var projectId = req.params.id;
-        var presId = req.params.presId;
+        var snapId = req.params.snapId;
         var email = req.user.email;
 
         // TODO - remove files
 
-        console.log('[API] Removing presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
+        console.log('[API] Removing presentation snapshot[%s] of project[%s] for user=[%s]', snapId, projectId, email);
 
-        Project.findById(projectId, 'presentation', function (err, prj) {
+        Project.findById(projectId, 'presentation.snapshots', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var obj = _.find(prj.presentation, {id: Number(presId)});
-            var pres = prj.presentation.id(obj._id);
-            if (!pres) {
-                return errRes.notFound(res, 'pres:' + presId);
+            var snapshots = prj.presentation.snapshots;
+            var obj = _.find(snapshots, {id: Number(snapId)});
+            var snap = snapshots.id(obj._id);
+            if (!snap) {
+                return errRes.notFound(res, 'snap:' + snapId);
             }
 
-            pres.remove();
+            snap.remove();
             prj.save(function (err) {
                 if (err) { return modelError(res, err); }
 
                 var result = true;
-                console.log('[API] Removing presentation[%s] of project[%s] result: %s', presId, projectId, JSON.stringify(result));
+                console.log('[API] Removing presentation snapshot[%s] of project[%s] result: %s', snapId, projectId, JSON.stringify(result));
 
                 return res.json({result: result});
             });
@@ -426,7 +426,7 @@ function RestApi(app) {
         });
     }
 
-    function removeProject(req, res, next) {
+    function deleteProject(req, res, next) {
         var project_id = req.params.id;
         var user = req.user;
         var email = user.email;

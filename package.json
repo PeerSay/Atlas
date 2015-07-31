@@ -42,6 +42,7 @@
         "time-grunt": "~1.0.0",
         "load-grunt-tasks": "~0.6.0",
         "path": "~0.4.9",
+        "fs-extra": "~0.22.1",
         "lodash": "~2.4.1",
         "express": "~4.9.1",
         "compression": "~1.1.0",

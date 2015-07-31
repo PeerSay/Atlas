@@ -15,15 +15,16 @@
                     <tbody>
                     <tr ng-repeat="snap in pr.snapshots">
                         <td>
-                            <a href="{{:: snap.htmlUrl }}" target="_blank">{{:: snap.title }}</a>
+                            <a href="{{:: snap.html.url }}" target="_blank">{{:: snap.title }}</a>
                         </td>
                         <td class="icon-cell">
-                            <a ng-href="{{ snap.pdfUrl }}" target="_blank">
-                                <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'Open'"></span>
+                            <a ng-href="{{ snap.pdf.url }}" target="_blank">
+                                <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'View PDF'"></span>
                             </a>
                         </td>
                         <td class="icon-cell">
-                            <a href ng-click="pr.deletePresentationSnapshot(snap)">
+                            <a href ng-click="pr.deletePresentationSnapshot(snap)"
+                                    ps-tooltip="'Delete'">
                                 <span class="fa fa-trash icon danger"></span>
                             </a>
                         </td>

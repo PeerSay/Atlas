@@ -52,8 +52,8 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) 
         return {
             id: it.id,
             title: it.title,
-            /*pdfUrl: (_.findWhere(it.resources, {type: 'pdf'}) || {}).genericUrl,
-            htmlUrl: ['/my/projects', m.projectId, 'presentations', it.id, 'html'].join('/')*/
+            html: it.html,
+            pdf: it.pdf
         };
     }
 

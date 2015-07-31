@@ -52,8 +52,7 @@ function RestApi(app) {
         app.delete('/api/projects/:id/presentation/snapshots/:snapId', deletePresentationSnapshot);
 
         // NOT API - return html/pdf content!
-        app.get('/my/projects/:id/presentation/:presId/html', renderPresentationHTML);
-        app.get('/my/projects/:id/presentation/:presId/pdf', readPresentationPDF); // redirect to PDF file
+        app.get('/my/projects/:id/presentation/snapshots/:snapId/:type', readPresentationSnapshotResource);
 
         return U;
     }
@@ -168,12 +167,14 @@ function RestApi(app) {
         });
     }
 
-    function renderPresentationHTML(req, res, next) {
+    function readPresentationSnapshotResource(req, res, next) {
         var projectId = req.params.id;
-        var presId = req.params.presId;
+        var snapId = req.params.snapId;
+        var fileType = req.params.type;
         var email = (req.user || {}).email; // PhantomJS calls this not-authenticated
 
-        console.log('[API] Rendering HTML presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
+        console.log('[API] Reading snapshot-[%s] of presentation[%s] of project[%s] for user=[%s]',
+            fileType, snapId, projectId, email);
 
         Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
@@ -181,134 +182,49 @@ function RestApi(app) {
                 return res.render('404', {resource: 'project-' + projectId});
             }
 
-            var obj = _.find(prj.presentation, {id: Number(presId)});
-            var pres = obj && prj.presentation.id(obj._id);
-            if (!pres) {
-                return res.render('404', {resource: 'presentation-' + presId});
+            var snapshots = prj.presentation.snapshots;
+            var obj = _.find(snapshots, {id: Number(snapId)});
+            var snap = snapshots.id(obj._id).toObject(); // read all virtual props
+            if (!snap) {
+                return res.render('404', {resource: 'snapshot-' + snapId});
             }
 
-            console.log('[API] Rendering HTML presentation[%s] of project[%s] locals: %s',
-                presId, projectId, JSON.stringify(pres));
+            console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], res: ',
+                fileType, snapId, projectId, JSON.stringify(snap));
 
-            res.render('presentation', pres);
-        });
-    }
+            // Redirect to local or s3 file
+            var resource = snap[fileType];
+            var filePath = path.join(FILES_PATH, projectId, resource.fileName);
+            if (isFileExistsSync(filePath)) {
+                // If exists, redirect to local file
+                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]: ',
+                    fileType, snapId, projectId, resource.localUrl);
 
-    function renderPresentationPDF(req, res, next) {
-        var projectId = req.params.id;
-        var presId = req.params.presId;
-        var email = req.user.email;
-
-        console.log('[API] Rendering PDF presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
-
-        Project.findById(projectId, 'presentation', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return errRes.notFound(res, 'project:' + projectId);
+                return res.redirect(resource.localUrl);
             }
+            else if (options.s3.enable) {
+                // Otherwise, redirect to S3
+                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]: ',
+                    fileType, snapId, projectId, resource.s3Url);
 
-            var obj = _.find(prj.presentation, {id: Number(presId)});
-            var pres = prj.presentation.id(obj._id);
-            if (!pres) {
-                return errRes.notFound(res, 'pres:' + presId);
-            }
-
-            console.log('[API] Rendering PDF presentation[%s] of project[%s], locals: %s',
-                presId, projectId, JSON.stringify(pres));
-
-            var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host
-            var htmlUrl = baseUrl + ['/my/projects', projectId, 'presentation', presId, 'html'].join('/');
-
-            var fileName = pres.title + '.pdf';
-            var filePath = path.join(FILES_PATH, projectId, fileName);
-
-            phantom.renderPDF(htmlUrl, filePath)
-                .catch(function (reason) {
-                    res.json({error: reason.toString()});
-                })
-                .then(function (file) {
-                    console.log('[API] Rendered PDF presentation[%s] of project[%s], res=[%s]',
-                        presId, projectId, file);
-
-                    // Update resource
-                    var resource = {
-                        type: 'pdf',
-                        format: 'pdf',
-                        fileName: fileName
-                    };
-                    var subdoc = pres.resources.create(resource);
-                    pres.resources.push(subdoc);
-                    prj.save(function (err) {
-                        if (err) { return modelError(res, err); }
-
-                        if (!config.s3.enable) {
-                            // Return generic url!
-                            res.json({result: subdoc.genericUrl});
-                        }
-
-                        // Upload to S3
-                        console.log('[API] Uploading PDF presentation[%s] of project[%s] to S3',
-                            presId, projectId);
-
-                        s3.upload(filePath, {subDir: projectId, fileName: fileName}, function (err, data) {
-                            if (err) {
-                                // TODO - correct error code
-                                return errRes.notFound(res, 'failed to persist to S3');
-                            }
-
-                            console.log('[API] Upload PDF presentation[%s] of project[%s] to S3 success, res=[%s]',
-                                presId, projectId, data.Location);
-
-                            res.json({result: subdoc.genericUrl});
-                        });
-                    });
-                });
-        });
-    }
-
-
-    function readPresentationPDF(req, res, next) {
-        var projectId = req.params.id;
-        var presId = req.params.presId;
-        var email = req.user.email;
-
-        console.log('[API] Reading PDF presentation[%s] of project[%s] for user=[%s]', presId, projectId, email);
-
-        Project.findById(projectId, 'presentation', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return res.render('404', {resource: 'project-' + projectId});
-            }
-
-            var obj = _.find(prj.presentation, {id: Number(presId)});
-            var pres = prj.presentation.id(obj._id);
-            if (!pres) {
-                return res.render('404', {resource: 'presentation-' + presId});
-            }
-
-            var resource = _.find(pres.resources, {type: 'pdf'});
-            if (!resource) {
-                return res.render('404', {resource: 'pdf'});
-            }
-
-            var filePath = path.join(FILES_PATH, projectId, resource.fileName), stat;
-
-            // Try local path first which is probably faster and the only option on 'dev'
-            try {
-                stat = fs.lstatSync(filePath);
-                if (stat.isFile()) {
-                    return res.redirect(resource.localUrl);
-                }
-            } catch(e) {}
-
-            // Then try S3 url which may not exist and is used on stage/prod
-            if (resource.s3Url) {
                 return res.redirect(resource.s3Url);
             }
             else {
-                return res.redirect('/tpl/');
+                return res.render('404', {resource: 'no file'});
             }
         });
+    }
+
+    function isFileExistsSync(filePath) {
+        var stat;
+        try {
+            stat = fs.lstatSync(filePath);
+            if (stat.isFile()) {
+                return true;
+            }
+        } catch(e) {}
+
+        return false;
     }
 
 

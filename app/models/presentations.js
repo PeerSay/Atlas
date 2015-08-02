@@ -180,6 +180,7 @@ function renderSnapshotHTML(project, name, cb) {
 function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
     var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host // TODO - auth
     var htmlUrl = baseUrl + ['/files', toSubDir, encodeRFC5987ValueChars(htmlFileName)].join('/');
+    htmlUrl += '?print-pdf'; // this triggers pdf.css for reveal.js page
     var fileName = title + '.pdf';
     var fileDir = path.join(FILES_PATH, toSubDir);
     var filePath = path.join(fileDir, fileName);

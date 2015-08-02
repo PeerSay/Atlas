@@ -102,7 +102,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
                 var G = {};
                 G.addRow = addRow;
                 G.weight = calcWeightPercents;
-                G.cols = [];
+                G.grades = [];
 
                 var rows = [];
                 var groupColIdx = {};
@@ -150,7 +150,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
                             }
                         };
-                        G.cols.push(col);
+                        G.grades.push(col);
                     }
                     return col;
                 }

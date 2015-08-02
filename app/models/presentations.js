@@ -3,14 +3,13 @@ var path = require('path');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var moment = require('moment');
-var swig = require('swig');
 var fs = require('fs-extra');
 
 var config = require('../../app/config');
 var Settings = require('../../app/models/settings').SettingsModel;
 var s3 = require('../../app/pdf/aws-s3');
 var phantom = require('../../app/pdf/phantom-pdf');
-var presentationTpl = swig.compileFile(path.join(__dirname, '../../static/tpl/presentation.html'));
+var render = require('../../app/pdf/render-tpl');
 var FILES_PATH = path.join(__dirname, '../../files');
 
 
@@ -106,9 +105,7 @@ snapshotSchema.pre('save', function ensureHTML(next) {
 
     // Render HTML template to file
     var project = this.parent();
-    var projectId = project._id;
-    var data = _.extend({}, project.presentation.data, {title: snap.title});
-    renderSnapshotHTML(data, projectId, function (err, fileName) {
+    renderSnapshotHTML(project, snap.title, function (err, fileName) {
         if (err) { return next(err); }
 
         snap.html.fileName = fileName;
@@ -150,13 +147,16 @@ snapshotSchema.pre('save', function ensurePDF(next) {
 
 // Util
 //
-function renderSnapshotHTML(locals, toSubDir, cb) {
-    var fileName = locals.title + '.html';
+function renderSnapshotHTML(project, name, cb) {
+    var fileName = name + '.html';
+    var toSubDir = project._id;
     var fileDir = path.join(FILES_PATH, toSubDir);
     var filePath = path.join(fileDir, fileName);
-    var html = presentationTpl(locals);
 
     console.log('[DB] Rendering HTML to [%s]', filePath);
+
+    // Rendering with Swig
+    var html = render.renderTemplate(project);
 
     fs.mkdirp(fileDir, function (err) {
         if (err) {

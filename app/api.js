@@ -113,25 +113,27 @@ function RestApi(app) {
         console.log('[API] Creating presentation snapshot of project[%s] for user=[%s] with: %s',
             projectId, email, JSON.stringify(data));
 
-        Project.findById(projectId, 'presentation', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return errRes.notFound(res, 'project:' + projectId);
-            }
+        Project.findById(projectId)
+            .populate('collaborators') // need user in presentation
+            .exec(function (err, prj) {
+                if (err) { return next(err); }
+                if (!prj) {
+                    return errRes.notFound(res, 'project:' + projectId);
+                }
 
-            var snapshots = prj.presentation.snapshots;
-            var subDoc = snapshots.create(data);
-            snapshots.push(subDoc);
+                var snapshots = prj.presentation.snapshots;
+                var subDoc = snapshots.create(data);
+                snapshots.push(subDoc);
 
-            prj.save(function (err, newPrj) {
-                if (err) { return modelError(res, err); }
+                prj.save(function (err, newPrj) {
+                    if (err) { return modelError(res, err); }
 
-                var result = subDoc;
-                console.log('[API] Creating presentation snapshot of project[%s] result: %s', projectId, JSON.stringify(result));
+                    var result = subDoc;
+                    console.log('[API] Creating presentation snapshot of project[%s] result: %s', projectId, JSON.stringify(result));
 
-                return res.json({result: result});
+                    return res.json({result: result});
+                });
             });
-        });
     }
 
     function deletePresentationSnapshot(req, res, next) {
@@ -204,7 +206,7 @@ function RestApi(app) {
 
                 return res.redirect(resource.localUrl);
             }
-            else if (options.s3.enable) {
+            else if (config.s3.enable) {
                 // Otherwise, redirect to S3
                 console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]: ',
                     fileType, snapId, projectId, resource.s3Url);

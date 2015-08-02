@@ -1,66 +1,228 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>PeerSay - Presenetaions</title>
-    <link rel="icon" href="/images/logo-figure-x65.png">
-    <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <title>PeerSay - Presentation</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="/bower_components/reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="/bower_components/reveal.js/css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <!--<link rel="stylesheet" href="lib/css/zenburn.css">-->
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ?
+                '/bower_components/reveal.js/css/print/pdf.css' :
+                '/bower_components/reveal.js/css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <!--<script src="lib/js/html5shiv.js"></script>-->
+    <![endif]-->
+
     <style>
-        html {
-            height: 100%;
+        .pull-left {
+            text-align: left;
         }
-        body {
-            background: #99EAFF;
-            width: 100%;
-        }
-        body.center {
-            display: table;
-            height: 100%;
-        }
-        body.center2 {
-            height: 90%;
-        }
-        .slide.center {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-        }
-        .slide.center2 {
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%);
-            text-align: center;
-        }
-        h1 {
-            font-size: 68px;
-            /*font-size: 6vw;*/
-        }
-        h2 {
-            font-size: 56px;
-            /*font-size: 5vw;*/
-        }
-        p {
-            font-size: 34px;
-            /*font-size: 3vw;*/
+        ul {
+            display: block;
         }
     </style>
 </head>
-<body class="center2">
+<body>
 
-<section class="slide center2">
-    <h1>{{ title }}</h1>
-    <h2>Some header</h2>
-    <p>Some content and more</p>
-</section>
+<div class="reveal">
+    <div class="slides">
+        <!--Title page-->
+        <section>
+            <h1>{{ title.title }}</h1>
 
-<!--
-<script src="/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
--->
+            <p class="pull-left">
+                <small>Presented by <a href="mailto:{{ title.user.email }}">{{ title.user.name || title.user.email }}</a></small>
+                <br>
+                <small>Date: {{ title.date }}</small>
+            </p>
+        </section>
+
+        <!--Overview page-->
+        {% if overview.include %}
+        <section>
+            <h2>Overview</h2>
+            <p>
+                {{ overview.overviewText|escape|replace('\n', '<br>', 'g')|safe }}
+            </p>
+        </section>
+        {% endif %}
+
+        <!--Requirements-->
+        {% if requirements.include %}
+        <section>
+            {% for i, bucket in requirements.list %}
+            <section>
+                <h2>Mandatory Requirements {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
+                {% if bucket.length %}
+                <table>
+                    <thead>
+                    <tr>
+                        <td>Requirement</td>
+                        <td>Description</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for j, req in bucket %}
+                    <tr>
+                        <td>{{ req.name }}</td>
+                        <td>{{ req.description }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </section>
+            {% endfor %}
+
+            <!--Empty list-->
+            {% if !requirements.list.length %}
+            <h2>Mandatory Requirements</h2>
+            <p>(Here there will be requirements)</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!--Products-->
+        {% if products.include %}
+        <section>
+            {% for i, bucket in products.list %}
+            <section>
+                <h2>Candidate products {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
+                {% if bucket.length > 0 %}
+                <table>
+                    <thead>
+                    <tr>
+                        <td>Product</td>
+                        <td>Description</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for j, prod in bucket %}
+                    <tr>
+                        <td>{{ prod.name }}</td>
+                        <td>{{ prod.description }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </section>
+            {% endfor %}
+
+            <!--Empty list-->
+            {% if !products.list.length %}
+            <h2>Candidate products</h2>
+            <p>(Here there will be products)</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!--Table-->
+        {% if table.include %}
+        <section>
+            <section>
+                <h2>Decision table</h2>
+                <h3>TODO</h3>
+                {% if table.topics.length > 0 %}
+                <table>
+                    <thead>
+                    <tr>
+                        {% for i, col in table.topics.columns %}
+                        <td>{{ col.header.value }}</td>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+                {% endif %}
+            </section>
+        </section>
+        {% endif %}
+
+        <!--Summary & recommendations-->
+        {% if notes.include %}
+        <section>
+            <h2>Summary & Recommendation</h2>
+            <ul class="pull-left">
+                <li>
+                    {{ notes.summaryText|escape|replace('\n', '<br>', 'g')|safe }}
+                </li>
+                <li>
+                    {{ notes.recommendationText|escape|replace('\n', '<br>', 'g')|safe }}
+                </li>
+            </ul>
+        </section>
+        {% endif %}
+
+        <!--Demo: themes-->
+        <section id="themes">
+            <h2>Themes</h2>
+            <p>
+                Themes are configurable: <br>
+                <!-- Hacks to swap themes after the page has loaded. Not flexible and only intended for the reveal.js demo deck. -->
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/black.css'); return false;">Black (default)</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/white.css'); return false;">White</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/league.css'); return false;">League</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/beige.css'); return false;">Beige</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/simple.css'); return false;">Simple</a> <br>
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/serif.css'); return false;">Serif</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/blood.css'); return false;">Blood</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
+                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/solarized.css'); return false;">Solarized</a>
+            </p>
+        </section>
+    </div>
+</div>
+
+<script src="/bower_components/reveal.js/lib/js/head.min.js"></script>
+<script src="/bower_components/reveal.js/js/reveal.js"></script>
 <script>
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            /*{ src: 'plugin/markdown/marked.js', condition: function () {return !!document.querySelector('[data-markdown]');} },
+             { src: 'plugin/markdown/markdown.js', condition: function () {return !!document.querySelector('[data-markdown]');} },
+             { src: 'plugin/highlight/highlight.js', async: true,
+             condition: function () {return !!document.querySelector('pre code');},
+             callback: function () {hljs.initHighlightingOnLoad();}
+             },*/
+            {src: '/bower_components/reveal.js/plugin/zoom-js/zoom.js', async: true}
+            /*,{src: 'plugin/notes/notes.js', async: true}*/
+        ]
+    });
 </script>
 </body>
 </html>

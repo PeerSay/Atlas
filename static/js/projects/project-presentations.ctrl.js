@@ -27,7 +27,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) 
             m.data = res.presentation.data;
             m.patchObserver = jsonpatch.observe(m.data);
 
-            m.snapshots = buildSnapshotsList(res.presentation.snapshots);
+            m.snapshots = res.presentation.snapshots;
         });
 
         $scope.$on('$destroy', function () {
@@ -42,21 +42,6 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) 
         return Projects.patchPresentation(m.projectId, patch);
     }
 
-    function buildSnapshotsList(arr) {
-        return _.map(arr, function (it) {
-            return buildListItem(it);
-        });
-    }
-
-    function buildListItem(it) {
-        return {
-            id: it.id,
-            title: it.title,
-            html: it.html,
-            pdf: it.pdf
-        };
-    }
-
     // Snapshots
     //
     function createPresentationSnapshot() {
@@ -65,7 +50,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, _) 
         m.creating = true;
         Projects.createPresentationSnapshot(m.projectId, data)
             .then(function (res) {
-                m.snapshots.push(buildListItem(res));
+                m.snapshots.push(res);
             })
             .finally(function () {
                 m.creating = false;

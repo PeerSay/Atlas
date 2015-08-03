@@ -34,9 +34,11 @@
                 <div class="sidebar-section-col">
                     <h4 class="menu-item" ui-sref-active="active">
                         <a class="toggle-value" ui-sref=".presentations">Presentations</a>
+                        <div class="label label-primary"
+                                ng-if="cm.snapshots.length > 0"
+                                >{{ cm.snapshots.length }}</div>
                     </h4>
                     <hr class="hidden-xs">
-                    <!--<div class="page-spacer visible-xs-block"></div>-->
                 </div>
 
 

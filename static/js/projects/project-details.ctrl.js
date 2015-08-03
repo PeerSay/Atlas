@@ -12,6 +12,7 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
     m.project = null;
     m.requirements = [];
     m.products = [];
+    m.snapshots = [];
 
     //UI helpers
     m.sidebar = {
@@ -27,7 +28,7 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
     function activate() {
         readProject();
 
-        // Re-read on navigation to get fresh (not cached) object
+        // Re-read on navigation to get fresh (not cached) objects
         var off = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
             if(toState.name === 'project.list') { return; } // back to list
             readProject();
@@ -42,6 +43,9 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
             m.requirements = res.requirements;
             m.products = res.products;
             return res;
+        });
+        Projects.readPresentation(m.projectId).then(function (res) {
+            m.snapshots = res.presentation.snapshots;
         });
     }
 

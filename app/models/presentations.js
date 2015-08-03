@@ -134,6 +134,18 @@ snapshotSchema.pre('save', function ensurePDF(next) {
 });
 
 
+// Post hooks
+//
+
+snapshotSchema.post('remove', function ensureLocalUnlink(doc) {
+    var projectId = this.parent()._id;
+    var fileDir = path.join(FILES_PATH, projectId);
+
+    unlinkFile(path.join(fileDir, doc.pdf.fileName));
+    unlinkFile(path.join(fileDir, doc.html.fileName));
+});
+
+
 /*TODO
  *
  * s3.upload(filePath, {subDir: projectId, fileName: fileName}, function (err, data) {
@@ -227,6 +239,17 @@ function encodeRFC5987ValueChars(str) {
         // so we can allow for a little better readability over the wire: |`^
         replace(/%(?:7C|60|5E)/g, unescape);
 }
+
+function unlinkFile(path) {
+    try {
+        fs.removeSync(path);
+    } catch(e) {
+        console.log('[DB] Unlinking[%s] failed: ', path, e);
+        return;
+    }
+    console.log('[DB] Unlinked[%s]', path);
+}
+
 
 // Presentation Schema
 //

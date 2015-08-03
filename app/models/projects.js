@@ -1,9 +1,14 @@
 var _ = require('lodash');
+var path = require('path');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var jsonPatch = require('fast-json-patch');
 var psShortId = require('./lib/short-id').psShortId;
 var presentationSchema = require('./presentations').presentationSchema;
+var fs = require('fs-extra');
+
+var FILES_PATH = path.join(__dirname, '../../files');
+
 
 // Presets
 //
@@ -135,8 +140,9 @@ projectSchema.statics.createByUser = function (project, user, next) {
 projectSchema.statics.removeByUser = function (project_id, user, next) {
     Project.findOneAndRemove({_id: project_id}, function (err, doc) {
         if (err) { return next(err); }
-
         if (!doc) { return next(null, null); } // Not found!
+
+        doc.remove(); // this triggers 'remove' hook
 
         // Remove stub sub-doc
         var stubPrj = _.find(user.projects, {_ref: project_id});
@@ -190,18 +196,18 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
 
     if (isEmptyTable(doc)) {
         doc.table = [];
-        console.log('[DB]: Sync table for[%s] skipped - empty', doc.id);
+        console.log('[DB] Sync table for[%s] skipped - empty', doc.id);
         return next();
     }
 
     var oldTable = buildOldTable(doc.table);
     var newTable = buildNewTable(doc.requirements, doc.products);
     var patches = buildPatch(oldTable, newTable);
-    console.log('[DB]: Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
+    console.log('[DB] Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
 
     if (patches.length) {
         patchTable(doc, patches);
-        console.log('[DB]: Sync table for[%s] patch applied', doc.id);
+        console.log('[DB] Sync table for[%s] patch applied', doc.id);
     }
 
     next();
@@ -275,9 +281,19 @@ function patchTable(doc, patches) {
         jsonPatch.apply(doc, patches, true /*validate*/);
     }
     catch (e) {
-        console.log('[DB]: Sync table: patch exception: ', e);
+        console.log('[DB] Sync table: patch exception: ', e);
     }
 }
+
+// Post hooks
+//
+projectSchema.post('remove', function ensureLocalDirUnlink(doc) {
+    var projectId = doc._id;
+    var fileDir = path.join(FILES_PATH, projectId);
+
+    console.log('[DB] Unlinking dir [%s]', fileDir);
+    fs.removeSync(fileDir);
+});
 
 
 // Model

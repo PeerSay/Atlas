@@ -6,6 +6,7 @@ var moment = require('moment');
 var fs = require('fs-extra');
 
 var config = require('../../app/config');
+var util = require('../../app/util');
 var Settings = require('../../app/models/settings').SettingsModel;
 var s3 = require('../../app/pdf/aws-s3');
 var phantom = require('../../app/pdf/phantom-pdf');
@@ -17,6 +18,7 @@ var resourceJSON = function (def) {
     return {
         format: {type: String, enum: ['image', 'pdf', 'html'], default: def, required: true},
         fileName: {type: String, default: ''},
+        sizeBytes: {type: Number},
         url: {type: String} // defined only by path getter
     }
 };
@@ -105,10 +107,11 @@ snapshotSchema.pre('save', function ensureHTML(next) {
 
     // Render HTML template to file
     var project = this.parent();
-    renderSnapshotHTML(project, snap.title, function (err, fileName) {
+    renderSnapshotHTML(project, snap.title, function (err, fileName, sizeBytes) {
         if (err) { return next(err); }
 
         snap.html.fileName = fileName;
+        snap.html.sizeBytes = sizeBytes;
         next();
     });
 });
@@ -121,10 +124,11 @@ snapshotSchema.pre('save', function ensurePDF(next) {
     var project = this.parent();
     var projectId = project._id;
 
-    renderSnapshotPDF(snap.html.fileName, projectId, snap.title, function (err, fileName) {
+    renderSnapshotPDF(snap.html.fileName, projectId, snap.title, function (err, fileName, sizeBytes) {
         if (err) { return next(err); }
 
         snap.pdf.fileName = fileName;
+        snap.pdf.sizeBytes = sizeBytes;
         next();
     });
 });
@@ -170,12 +174,13 @@ function renderSnapshotHTML(project, name, cb) {
                 return cb(err);
             }
 
-            console.log('[DB] Render HTML res=[%s]', fileName);
-            cb(null, fileName);
+            var size = util.fileSizeSync(filePath);
+            console.log('[DB] Render HTML res=[%s], size=[%s]', fileName, size);
+
+            cb(null, fileName, size);
         });
     });
 }
-
 
 function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
     var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host // TODO - auth
@@ -194,8 +199,10 @@ function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
             cb(err);
         })
         .then(function (file) {
-            console.log('[DB] Render PDF res=[%s]', fileName);
-            cb(null, fileName);
+            var size = util.fileSizeSync(filePath);
+            console.log('[DB] Render PDF res=[%s], size=[%s]', fileName, size);
+
+            cb(null, fileName, size);
         });
 }
 

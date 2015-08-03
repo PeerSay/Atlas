@@ -1,5 +1,8 @@
 var crypto = require('crypto');
+var fs = require('fs');
 
+// Authentication
+//
 function randomBase64(bytes_num, cb) {
     return crypto.randomBytes(bytes_num, function (err, buf) {
         if (err) cb(err);
@@ -40,14 +43,33 @@ function genRestorePwdKey() {
     return Math.random().toString(36).substring(9);
 }
 
-// Credit: http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
-// @unused
-function isValidDate(d) {
-    if (Object.prototype.toString.call(d) !== "[object Date]")
-        return false;
-    return !isNaN(d.getTime());
+// FS
+//
+
+function isFileExistsSync(filePath) {
+    var stat;
+    try {
+        stat = fs.lstatSync(filePath);
+        if (stat.isFile()) {
+            return true;
+        }
+    } catch(e) {}
+
+    return false;
 }
 
+function fileSizeSync(filePath) {
+    var stat;
+    try {
+        stat = fs.statSync(filePath);
+    } catch(e) {
+        return 0;
+    }
+    return stat.size;
+}
+
+// Misc
+//
 
 function isEmptyObj(obj) {
     return !Object.keys(obj).length;
@@ -63,7 +85,10 @@ module.exports = {
     hasher: hasher,
     randomBase64: randomBase64,
     genRestorePwdKey: genRestorePwdKey,
-    isValidDate: isValidDate,
+
+    isFileExistsSync: isFileExistsSync,
+    fileSizeSync: fileSizeSync,
+
     isEmptyObj: isEmptyObj,
     baseURL: baseURL
 };

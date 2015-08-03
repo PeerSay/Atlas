@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var path = require('path');
-var util = require('util');
+var format = require('util').format;
 var jsonParser = require('body-parser').json();
 var jsonPatch = require('json-patch');
 var jsonPointer = require('json-pointer');
@@ -9,6 +9,7 @@ var fs = require('fs');
 
 // App dependencies
 var config = require('../app/config');
+var util = require('../app/util');
 var errRes = require('../app/api-errors');
 var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
@@ -199,7 +200,7 @@ function RestApi(app) {
             // Redirect to local or s3 file
             var resource = snap[fileType];
             var filePath = path.join(FILES_PATH, projectId, resource.fileName);
-            if (isFileExistsSync(filePath)) {
+            if (util.isFileExistsSync(filePath)) {
                 // If exists, redirect to local file
                 console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]: ',
                     fileType, snapId, projectId, resource.localUrl);
@@ -214,23 +215,13 @@ function RestApi(app) {
                 return res.redirect(resource.s3Url);
             }
             else {
+                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], not found=[%s]: ',
+                    fileType, snapId, projectId, filePath);
+
                 return res.render('404', {resource: 'no file'});
             }
         });
     }
-
-    function isFileExistsSync(filePath) {
-        var stat;
-        try {
-            stat = fs.lstatSync(filePath);
-            if (stat.isFile()) {
-                return true;
-            }
-        } catch(e) {}
-
-        return false;
-    }
-
 
     // Waiting users
     //
@@ -604,11 +595,11 @@ function RestApi(app) {
                 }
             },
             CastError: function () {
-                var msg = util.format('Cannot cast [%s] to type [%s]', err.value, err.type);
+                var msg = format('Cannot cast [%s] to type [%s]', err.value, err.type);
                 return msg;
             },
             'default': function () {
-                return util.format('Exception: ', err.message);
+                return format('Exception: ', err.message);
             }
         };
 

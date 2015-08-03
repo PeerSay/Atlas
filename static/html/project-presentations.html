@@ -31,16 +31,16 @@
                     </tr>
                     </tbody>
                 </table>
-
-                <button type="button" class="btn btn-primary"
+            </div>
+            <!--Outline-->
+            <div class="content-right-sidebar-col">
+                <button type="button" class="btn btn-primary pull-right"
                         ng-click="pr.createPresentationSnapshot()"
                         ng-disabled="pr.creating">
                     <span ng-if="!pr.creating">Generate</span>
                     <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>
                 </button>
-            </div>
-            <!--Outline-->
-            <div class="content-right-sidebar-col">
+
                 <h4>Presentation Outline</h4>
 
                 <form class="present-form">

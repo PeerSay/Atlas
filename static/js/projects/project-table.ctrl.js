@@ -15,6 +15,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
     var table = Table(m);
     m.tableView = table.getView();
     m.getCsv = TableModel.getCsv.bind(TableModel);
+    m.patchProject = patchProject;
 
 
     // Called by Table
@@ -38,7 +39,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
 
         Projects.patchProject(m.projectId, patch);
     }
-
 
     // Table Class
     function Table(ctrl) {

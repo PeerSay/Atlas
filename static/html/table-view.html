@@ -42,6 +42,7 @@
                 <div ng-if=":: cell.type === 'text' ">
                     <textarea class="cell-input noresize"
                             ng-model="cell.model.value"
+                            ps-ctrl="view.ctrl"
                             ps-table-input="cell"
                             msd-elastic></textarea>
                 </div>
@@ -50,6 +51,7 @@
                     <input type="number" class="cell-input center"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
+                            ps-ctrl="view.ctrl"
                             ps-table-input="cell"
                             ps-input-number
                             ps-tooltip="cell.model.tooltip()"

@@ -20,6 +20,7 @@ function psTableInput() {
                 return $inputCol.add($gradeCol)
             };
 
+            var ctrl = scope.$eval(attrs.psCtrl);
             var cell = scope.$eval(attrs.psTableInput);
             var model = cell.model;
 
@@ -31,7 +32,7 @@ function psTableInput() {
                 $(this).focus();
             });
 
-            // Make active on clicking cell outside input (of cell is larger)
+            // Make active on clicking cell outside input (if cell is larger)
             $td.click(function () {
                 $el.focus();
             });
@@ -45,7 +46,9 @@ function psTableInput() {
             $el.on('blur', function () {
                 $td.removeClass('edited');
                 scope.$apply(function () {
-                    model.save();
+                    if (model.save()) {
+                        ctrl.patchProject();
+                    }
                 });
             });
 

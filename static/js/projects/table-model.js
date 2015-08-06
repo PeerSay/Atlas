@@ -151,7 +151,6 @@ function TableModel() {
             }
 
             obj[path] = oldValue = M.value;
-            m.patchProject();
             return true
         }
 

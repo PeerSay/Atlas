@@ -41,6 +41,9 @@ function ApiValidate(app) {
     }
 
     function validateBody(reg, res, next) {
+        if (reg.is('multipart/*')) {
+            return next(); // allow file uploads
+        }
         if (util.isEmptyObj(reg.body)) {
             return errRes.badRequest(res, 'not JSON body');
         }

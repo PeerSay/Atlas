@@ -29,6 +29,11 @@
         ul {
             display: block;
         }
+        .reveal section img.logo {
+            max-height: 500px;
+            border: none;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -37,6 +42,10 @@
     <div class="slides">
         <!--Title page-->
         <section>
+            {% if logo.include && title.logoUrl %}
+            <img src="{{ title.logoUrl }}" class="logo">
+            {% endif %}
+
             <h1>{{ title.title }}</h1>
 
             <p class="pull-left">

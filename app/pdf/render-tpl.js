@@ -14,7 +14,8 @@ function renderTemplate(project) {
         user: {
             email: user.email,
             name: (user.name || {}).full || ''
-        }
+        },
+        logoUrl: settings.logo.image.url
     };
     var reqs = {
         include: settings.requirements.include,
@@ -41,7 +42,7 @@ function renderTemplate(project) {
 
     var locals = _.extend({}, settings, {title: titlePage}, {requirements: reqs}, {products: prods});
 
-    console.log('>>>Locals:', locals);
+    //console.log('>>>Locals:', locals);
 
     var presentationTpl = swig.compileFile(path.join(__dirname, '../../static/tpl/presentation.html'));
 

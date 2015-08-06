@@ -2,10 +2,11 @@ var _ = require('lodash');
 var path = require('path');
 var format = require('util').format;
 var jsonParser = require('body-parser').json();
+var multer = require('multer');
 var jsonPatch = require('json-patch');
 var jsonPointer = require('json-pointer');
 var swig = require('swig');
-var fs = require('fs');
+var fs = require('fs-extra');
 
 // App dependencies
 var config = require('../app/config');
@@ -15,13 +16,21 @@ var User = require('../app/models/users').UserModel;
 var Project = require('../app/models/projects').ProjectModel;
 var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
 var mailer = require('../app/email/mailer');
-
 var errorcodes = require('../app/errors');
 
 var FILES_PATH = path.join(__dirname, '..', 'files');
 
+
 function RestApi(app) {
     var U = {};
+
+    // Files upload
+    var upload = multer({
+        storage: multer.diskStorage({
+            destination: uploadDir,
+            filename: uploadFileName
+        })
+    });
 
     function setupRoutes() {
         // Logging & auth
@@ -48,12 +57,14 @@ function RestApi(app) {
         // project's presentation
         app.get('/api/projects/:id/presentation', readPresentation);
         app.patch('/api/projects/:id/presentation', patchPresentation);
-
         app.post('/api/projects/:id/presentation/snapshots', createPresentationSnapshot);
         app.delete('/api/projects/:id/presentation/snapshots/:snapId', deletePresentationSnapshot);
+        // logo upload
+        app.post('/api/projects/:id/presentation/upload/logo', upload.single('logo'), uploadLogoFile);
 
-        // NOT API - return html/pdf content!
+        // NOT API - return html/pdf/image content!
         app.get('/my/projects/:id/presentation/snapshots/:snapId/:type', readPresentationSnapshotResource);
+        app.get('/my/projects/:id/presentation/logo', readPresentationLogo);
 
         return U;
     }
@@ -72,7 +83,7 @@ function RestApi(app) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var result = prj.toJSON(/*{transform: xformDeleteProp('id')}*/); // TODO
+            var result = prj.toJSON({getters: true, virtuals: false});
             console.log('[API] Reading presentation of project[%s] result: %s', projectId, JSON.stringify(result));
 
             return res.json({result: result});
@@ -223,6 +234,101 @@ function RestApi(app) {
         });
     }
 
+    // Logo upload / read
+    //
+    function uploadDir(req, file, cb) {
+        var projectId = req.params.id;
+        var fileDir = path.join(FILES_PATH, projectId);
+
+        // Directory must exist as required by multer
+        fs.mkdirp(fileDir, function (err) {
+            if (err) {
+                console.log('[API] Upload logo: failed to create dir[%s]', fileDir);
+                return cb(err);
+            }
+
+            cb(null, fileDir);
+        });
+    }
+
+    function uploadFileName(req, file, cb) {
+        var ext = path.extname(file.originalname);
+        cb(null, file.fieldname + ext);
+    }
+
+    function uploadLogoFile(req, res, next) {
+        var projectId = req.params.id;
+        var email = req.user.email;
+
+        console.log('[API] Upload presentation logo of project[%s] for user=[%s]',
+            projectId, email);
+
+        if (!req.file) {
+            console.log('[API] Upload presentation logo of project[%s] error: no file');
+            return errRes.notValid(res, 'no file');
+        }
+
+        Project.findById(projectId, 'presentation', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return errRes.notFound(res, 'project:' + projectId);
+            }
+
+            var resource = prj.presentation.data.logo.image;
+            resource.fileName = req.file.filename;
+            resource.sizeBytes = req.file.size;
+
+            prj.save(function (err) {
+                if (err) { return modelError(res, err); }
+
+                var result = true;
+                console.log('[API] Upload presentation logo of project[%s] result: %s', projectId, resource.fileName);
+
+                return res.json({result: result});
+            });
+        });
+    }
+
+    function readPresentationLogo(req, res, next) {
+        var projectId = req.params.id;
+        var email = (req.user || {}).email; // PhantomJS calls this not-authenticated
+
+        console.log('[API] Reading presentation logo of project[%s] for user=[%s]',
+            projectId, email);
+
+        Project.findById(projectId, 'presentation', function (err, prj) {
+            if (err) { return next(err); }
+            if (!prj) {
+                return res.render('404', {resource: 'project-' + projectId});
+            }
+
+            // Redirect to local or s3 file
+            var resource = prj.presentation.data.logo.image;
+            var filePath = path.join(FILES_PATH, projectId, resource.fileName);
+            if (util.isFileExistsSync(filePath)) {
+                // If exists, redirect to local file
+                console.log('[API] Reading presentation logo of project[%s], redirect=[%s]: ',
+                    projectId, resource.localUrl);
+
+                return res.redirect(resource.localUrl);
+            }
+            else if (config.s3.enable) {
+                // Otherwise, redirect to S3
+                console.log('[API] Reading presentation logo of project[%s], redirect=[%s]: ',
+                    projectId, resource.s3Url);
+
+                return res.redirect(resource.s3Url);
+            }
+            else {
+                console.log('[API] Reading presentation logo of project[%s], not found=[%s]: ',
+                    projectId, filePath);
+
+                return res.render('404', {resource: 'no file'});
+            }
+        });
+    }
+
+
     // Waiting users
     //
     function addToWaitingUsers(req, res, next) {
@@ -280,7 +386,7 @@ function RestApi(app) {
 
         mailer.send(tpl, locals); // async!
 
-        return res.json({ result: true });
+        return res.json({result: true});
     }
 
     function getFullEmail(email, name) {

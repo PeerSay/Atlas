@@ -14,5 +14,6 @@ angular.module('PeerSay', [
     'ngTable',
     'monospaced.elastic',
     'ng-context-menu',
-    'ui.select'
+    'ui.select',
+    'ngFileUpload'
 ]);

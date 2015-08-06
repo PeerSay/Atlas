@@ -32,40 +32,40 @@ var snapshotSchema = new Schema({
     html: resourceJSON('html'),
     pdf: resourceJSON('pdf')
 }, {
-    toJSON: { getters: true, virtuals: false}, // client app only sees path getter (generic url)
-    toObject: { virtuals: true} // server can see path and virtual getters (+ local & s3 urls)
+    toJSON: {getters: true, virtuals: false}, // client app only sees path getter (generic url)
+    toObject: {virtuals: true} // server can see path and virtual getters (+ local & s3 urls)
 });
 
 snapshotSchema.path('html.url').get(function () {
     var snap = this;
     var projectId = snap.parent()._id;
-    return getResourceUrls(projectId, snap, 'html').generic;
+    return getSnapshotResourceUrls(projectId, snap, 'html').generic;
 });
 snapshotSchema.virtual('html.localUrl').get(function () {
     var snap = this;
     var projectId = snap.parent()._id;
-    return getResourceUrls(projectId, snap, 'html').local;
+    return getSnapshotResourceUrls(projectId, snap, 'html').local;
 });
 snapshotSchema.virtual('html.s3Url').get(function () {
     var snap = this;
     var projectId = snap.parent()._id;
-    return getResourceUrls(projectId, snap, 'html').s3;
+    return getSnapshotResourceUrls(projectId, snap, 'html').s3;
 });
 
 snapshotSchema.path('pdf.url').get(function () {
     var snap = this;
     var projectId = snap.parent()._id;
-    return getResourceUrls(projectId, snap, 'pdf').generic;
+    return getSnapshotResourceUrls(projectId, snap, 'pdf').generic;
 });
 snapshotSchema.virtual('pdf.localUrl').get(function () {
     var snap = this;
     var projectId = snap.parent()._id;
-    return getResourceUrls(projectId, snap, 'pdf').local;
+    return getSnapshotResourceUrls(projectId, snap, 'pdf').local;
 });
 snapshotSchema.virtual('pdf.s3Url').get(function () {
     var snap = this;
     var projectId = snap.parent()._id;
-    return getResourceUrls(projectId, snap, 'pdf').s3;
+    return getSnapshotResourceUrls(projectId, snap, 'pdf').s3;
 });
 
 
@@ -196,7 +196,7 @@ function renderSnapshotHTML(project, name, cb) {
 
 function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
     var baseUrl = 'http://localhost:' + config.web.port; // Phantom is running on the same host // TODO - auth
-    var htmlUrl = baseUrl + ['/files', toSubDir, encodeRFC5987ValueChars(htmlFileName)].join('/');
+    var htmlUrl = baseUrl + ['/files', toSubDir, util.encodeURIComponentExt(htmlFileName)].join('/');
     htmlUrl += '?print-pdf'; // this triggers pdf.css for reveal.js page
     var fileName = title + '.pdf';
     var fileDir = path.join(FILES_PATH, toSubDir);
@@ -218,8 +218,8 @@ function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
         });
 }
 
-function getResourceUrls(projectId, snap, type) {
-    var safeFileName = encodeRFC5987ValueChars(snap[type].fileName);
+function getSnapshotResourceUrls(projectId, snap, type) {
+    var safeFileName = util.encodeURIComponentExt(snap[type].fileName);
     var bucketName = config.s3.bucket_name;
 
     return {
@@ -229,21 +229,10 @@ function getResourceUrls(projectId, snap, type) {
     };
 }
 
-function encodeRFC5987ValueChars(str) {
-    return encodeURIComponent(str).
-        // Note that although RFC3986 reserves "!", RFC5987 does not,
-        // so we do not need to escape it
-        replace(/['()]/g, escape). // i.e., %27 %28 %29
-        replace(/\*!/g, '%2A').
-        // The following are not required for percent-encoding per RFC5987,
-        // so we can allow for a little better readability over the wire: |`^
-        replace(/%(?:7C|60|5E)/g, unescape);
-}
-
 function unlinkFile(path) {
     try {
         fs.removeSync(path);
-    } catch(e) {
+    } catch (e) {
         console.log('[DB] Unlinking[%s] failed: ', path, e);
         return;
     }
@@ -275,8 +264,8 @@ var presentationSchema = new Schema({
             recommendationText: {type: String, default: ''}
         },
         logo: {
-            include: {type: Boolean, default: false},
-            resource: resourceJSON('image')
+            include: {type: Boolean, default: true},
+            image: resourceJSON('image')
         }
     },
     snapshots: [snapshotSchema]

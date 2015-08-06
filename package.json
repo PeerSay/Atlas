@@ -68,7 +68,8 @@
         "phantomjs": "~1.9.17",
         "phantom": "~0.7.2",
         "moment": "~2.10.3",
-        "aws-sdk": "~2.1.41"
+        "aws-sdk": "~2.1.41",
+        "multer": "~1.0.1"
     },
     "devDependencies": {
         "grunt-contrib-watch": "~0.6.1",

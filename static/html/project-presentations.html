@@ -105,13 +105,28 @@
                                 ng-blur="pr.patchPresentation()"></textarea>
                     </div>
                     <!--Logo-->
-                    <div class="form-group present-item clearfix" ng-class="{include: 0}">
+                    <div class="form-group present-item clearfix" ng-class="{include: pr.data.logo.include}">
                         <label class="checkbox-label">
-                            <input type="checkbox">
+                            <input type="checkbox" ng-model="pr.data.logo.include"
+                                    ng-change="pr.patchPresentation()">
                             <span class="underlined">Logo</span>
                         </label>
-                        <img src="//placehold.it/48x48" width="48">
-                        <input type="file" id="pres-logo">
+                        <img width="48"
+                                src="{{ pr.logoUrl }}"
+                                ngf-src="pr.logoFile"
+                                ngf-default-src="'//placehold.it/48x48'"
+                                ngf-accept="'image/*'">
+
+                        <input type="file" accept="image/*" id="pres-logo"
+                                ngf-select
+                                ngf-multiple="false"
+                                ngf-reset-on-click="false"
+                                ng-model="pr.logoFile"
+                                ng-click="pr.data.logo.include = true; pr.patchPresentation()">
+
+                        <ps-progress class="upload-progress"
+                                value="pr.uploadProgress.value"
+                                ng-show="pr.uploadProgress.show"></ps-progress>
                     </div>
 
                     <button type="button" class="btn btn-primary pull-right"

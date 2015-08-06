@@ -7,6 +7,9 @@ var psShortId = require('./lib/short-id').psShortId;
 var presentationSchema = require('./presentations').presentationSchema;
 var fs = require('fs-extra');
 
+var config = require('../../app/config');
+var util = require('../../app/util');
+
 var FILES_PATH = path.join(__dirname, '../../files');
 
 
@@ -294,6 +297,36 @@ projectSchema.post('remove', function ensureLocalDirUnlink(doc) {
     console.log('[DB] Unlinking dir [%s]', fileDir);
     fs.removeSync(fileDir);
 });
+
+
+// Presentation logo
+projectSchema.path('presentation.data.logo.image.url').get(function () {
+    var projectId = this._id;
+    var resource = this.presentation.data.logo.image;
+    return resource.fileName && getLogoResourceUrls(projectId, resource.fileName).generic;
+});
+projectSchema.virtual('presentation.data.logo.image.localUrl').get(function () {
+    var projectId = this._id;
+    var resource = this.presentation.data.logo.image;
+    return resource.fileName && getLogoResourceUrls(projectId, resource.fileName).local;
+});
+projectSchema.virtual('presentation.data.logo.image.s3Url').get(function () {
+    var projectId = this._id;
+    var resource = this.presentation.data.logo.image;
+    return resource.fileName && getLogoResourceUrls(projectId, resource.fileName).s3;
+});
+
+
+function getLogoResourceUrls(projectId, fileName) {
+    var safeFileName = util.encodeURIComponentExt(fileName);
+    var bucketName = config.s3.bucket_name;
+
+    return {
+        generic: ['/my/projects', projectId, 'presentation/logo'].join('/'),
+        local: ['/files', projectId, safeFileName].join('/'),
+        s3: ['https://s3.amazonaws.com', bucketName, projectId, safeFileName].join('/')
+    };
+}
 
 
 // Model

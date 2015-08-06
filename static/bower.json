@@ -32,6 +32,7 @@
         "angular-elastic": "~2.4.2",
         "ng-table": "~0.5.4",
         "ng-context-menu": "~1.0.1",
+        "ng-file-upload": "~6.0.3",
         "bootstrap": "~3.3.5",
         "eonasdan-bootstrap-datetimepicker": "~4.14.30",
         "bootstrap-social": "~4.9.0",

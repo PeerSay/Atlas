@@ -283,12 +283,7 @@ function RestApi(app) {
             upload(req, null, function (err) {
                 if (err) {
                     console.log('[API] Upload presentation logo of project[%s] error: ', projectId, err.toString());
-
-                    // TODO - this never sends response!
-                    // see bug: https://github.com/expressjs/multer/issues/168
-                    //return res.json({result: false});
-
-                    return next(err);
+                    return errRes.notValid(res, err.code);
                 }
 
                 if (!req.file) {

@@ -126,12 +126,15 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
                 m.uploadProgress.success = true;
             })
             .error(function (data, status, headers, config) {
-                if (status === 500) {
+                if (status === 409 && data.error.indexOf('LIMIT_FILE_SIZE') >= 0) {
                     // Due to multer bug we see generic 500 error instead of custom json
                     Notify.show('error', {title: 'Logo upload error', text: '1 MB limit exceeded'});
                 }
                 else if (status === 409) {
                     Notify.show('error', {title: 'Logo upload error', text: 'Not image format'});
+                }
+                else {
+                    Notify.show('error', {title: 'Logo upload error', text: 'Unexpected'});
                 }
             })
             .finally(function () {

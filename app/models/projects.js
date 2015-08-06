@@ -203,7 +203,7 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
         return next();
     }
 
-    var oldTable = buildOldTable(doc.table);
+    var oldTable = buildOldTable(doc);
     var newTable = buildNewTable(doc.requirements, doc.products);
     var patches = buildPatch(oldTable, newTable);
     console.log('[DB] Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
@@ -224,23 +224,17 @@ function isEmptyTable(doc) {
     return !selectedReqs || !selectedProds;
 }
 
-function buildOldTable(table) {
+function buildOldTable(doc) {
     // doc.table is Mongoose object with many additional props,
-    // we need to get pure data to generate correct patch form it
-    var res = [];
-    _.forEach(table, function (row) {
-        var dataRow = _.pick(row, 'reqId', 'name', 'topic', 'weight', 'popularity', 'mandatory');
-        dataRow.products = [];
-
-        _.forEach(row.products, function (prod) {
-            var col = _.pick(prod, 'prodId', 'name', 'input', 'grade','popularity');
-            dataRow.products.push(col);
-        });
-
-        res.push(dataRow);
+    // we need to get pure data to generate correct patch from it
+    var json = doc.toJSON({
+        transform: function (doc, ret) {
+            delete ret._id;
+            delete ret.id;
+        }
     });
 
-    return res;
+    return json.table;
 }
 
 function buildNewTable(requirements, products) {

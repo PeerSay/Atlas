@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectTableCtrl', ProjectTableCtrl);
 
-ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'jsonpatch', 'Util'];
-function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpatch, _) {
+ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'TableModel', 'jsonpatch', 'Util'];
+function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableModel, jsonpatch, _) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -14,7 +14,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     // Table model/view
     var table = Table(m);
     m.tableView = table.getView();
-    m.getCsv = table.getCsv.bind(table);
+    m.getCsv = TableModel.getCsv.bind(TableModel);
 
 
     // Called by Table
@@ -24,8 +24,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         });
 
         return Projects.readProjectTable(m.projectId).then(function (res) {
-            //console.log('>>', res.table);
-
             m.project = {table: res.table};
             m.patchObserver = jsonpatch.observe(m.project);
 
@@ -46,15 +44,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
     function Table(ctrl) {
         var T = {};
         T.getView = getView;
-        T.model = {
-            columns: [],
-            rows: []
-        };
-        T.groups = Groups();
-        T.getCsv = Exporter(T.model).getCsv;
 
-        var columnIdx = {};
-        var view = {};
         // ngTable params
         var settings = {
             counts: [], // remove paging
@@ -65,6 +55,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         var parameters = {
             count: 2 // must be at least one prop different from defaults!
         };
+        var view = {};
 
         // ngTable stuff
         function getView() {
@@ -74,431 +65,22 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
         }
 
         function groupBy(row) {
-            var key = T.groups.add(row);
+            var key = TableModel.groups.add(row);
             return key;
         }
 
-        // Groups
-        //
-        function Groups() {
-            var G = {};
-            G.add = add;
-            G.get = get;
-            var cache = {};
-
-            function get(key) {
-                return cache[key];
-            }
-
-            function add(row) {
-                var key = row.req.topic || '(no name)';
-                var group = cache[key] = cache[key] || Group();
-                group.addRow(row);
-
-                return key;
-            }
-
-            function Group() {
-                var G = {};
-                G.addRow = addRow;
-                G.weight = calcWeightPercents;
-                G.grades = [];
-
-                var rows = [];
-                var groupColIdx = {};
-
-                function addRow(row) {
-                    rows.push(row);
-                    addCols(row);
-                }
-
-                function addCols(row) {
-                    var gradeCells = _.map(row.cells, function (cell) {
-                        return cell.class === 'grade' ? cell : null;
-                    });
-
-                    _.forEach(gradeCells, function (cell, idx) {
-                        var colKey = 'group-grade-' + idx;
-                        addCol(colKey, {req: row.req, grade: cell.model});
-                    });
-                }
-
-                function addCol(key, data) {
-                    var col = getColumn(key);
-                    col.cells.push(data);
-                }
-
-                function getColumn(key) {
-                    var col = groupColIdx[key];
-                    if (!col) {
-                        col = groupColIdx[key] = {
-                            cells: [],
-                            grade: function () {
-                                var groupWeight = calcGroupWeight();
-                                if (!groupWeight) { return 0; }
-
-                                var totalGrade =  this.cells.reduce(function (prev, cur) {
-                                    var weight = cur.req.weight;
-                                    var grade = cur.grade.value;
-                                    return prev + grade * weight;
-                                }, 0);
-
-                                var ave = Math.round(totalGrade / groupWeight * 10) / 10; // .1
-                                return ave;
-
-//                                return totalGrade;
-
-                            }
-                        };
-                        G.grades.push(col);
-                    }
-                    return col;
-                }
-
-                function calcWeightPercents() {
-                    var totalWeight = calcTotalWeight();
-                    if (!totalWeight) { return 0; }
-
-                    var groupWeight = calcGroupWeight();
-                    var weightPercents = Math.round(groupWeight / totalWeight * 100);
-                    return weightPercents;
-                }
-
-                function calcGroupWeight() {
-                    var groupWeight = rows.reduce(function (prev, cur) {
-                        return prev + cur.req.weight;
-                    }, 0);
-                    return groupWeight;
-                }
-
-                function calcTotalWeight() {
-                    var weights = columnIdx['weight'].cells;
-                    return weights.reduce(function (prev, cur) {
-                        return prev + cur.model.value;
-                    }, 0);
-                }
-
-                return G;
-            }
-
-            return G;
-        }
-
         // Model
-        //
         function getData($defer) {
             ctrl.activate().then(function (reqs) {
-                buildModel(reqs);
-                view.columns = T.model.columns;
-                view.rows = T.model.rows;
-                view.groups = T.groups;
+                var model = TableModel.buildModel(reqs);
+                view.columns = model.columns;
+                view.rows = model.rows;
+                view.groups = TableModel.groups;
 
-                $defer.resolve(T.model.rows);
+                $defer.resolve(model.rows);
             });
-        }
-
-        function buildModel(reqs) {
-            addHeader('name', {label: 'Requirement'});
-            addFooter('name', {label: 'Total:', type: 'static'});
-
-            addHeader('mandatory', {label: 'Mandatory', 'class': 'min'});
-            addFooter('mandatory', {label: '', type: 'static'});
-
-            addHeader('weight', {label: 'Weight', 'class': 'min'});
-            addFooter('weight', {label: '100%', type: 'static', 'class': 'center'});
-
-            _.forEach(reqs, function (req, rowIdx) {
-                addCell('name', rowIdx, req, {
-                    label: req.name,
-                    type: 'static'
-                });
-                addCell('mandatory', rowIdx, req, {
-                    label: req.mandatory ? 'fa-check' : '',
-                    type: 'icon',
-                    'class': 'center'
-                });
-                addCell('weight', rowIdx, req, {
-                    model: CellModel(req, 'weight', {
-                        tooltipFn: weightPercentComputeFn,
-                        muteRowFn: muteOnZeroFn
-                    }),
-                    type: 'number',
-                    max: 100
-                });
-
-                _.forEach(req.products, function (prod) {
-                    // Input
-                    var colInputKey = 'prod-input-' + prod.prodId;
-                    addHeader(colInputKey, {label: prod.name, 'class': 'text-input'});
-                    addCell(colInputKey, rowIdx, req, {
-                        model: CellModel(prod, 'input'),
-                        type: 'text'
-                    });
-                    addFooter(colInputKey, {label: '', type: 'static'});
-
-                    // Grade
-                    var colGradeKey = 'prod-grade-' + prod.prodId;
-                    addHeader(colGradeKey, {label: 'Grade', 'class': 'grade'});
-                    addCell(colGradeKey, rowIdx, req, {
-                        model: CellModel(prod, 'grade', {
-                            max: gradeMaxInRowFn(req, prod),
-                            muteProdFn: muteProdFnFn(req),
-                            tooltipFn: mandatoryTooltipFnFn(req)
-                        }),
-                        type: 'number', max: 10,
-                        'class': 'grade'
-                    });
-                    addFooter(colGradeKey, {
-                        model: {
-                            value: productGradeComputeFn(colGradeKey),
-                            max: totalGradeMaxFn(colGradeKey)
-                        },
-                        type: 'func',
-                        'class': 'grade'
-                    });
-                });
-            });
-        }
-
-        function getColumn(key) {
-            var col = columnIdx[key];
-            if (!col) {
-                col = columnIdx[key] = {};
-                T.model.columns.push(col);
-            }
-            return col;
-        }
-
-        function addHeader(key, data) {
-            var col = getColumn(key);
-            col.header = data;
-        }
-
-        function addFooter(key, data) {
-            var col = getColumn(key);
-            col.footer = data;
-        }
-
-        function addColumnCell(key, cell) {
-            var col = getColumn(key);
-            col.cells = col.cells || [];
-            col.cells.push(cell);
-        }
-
-        function addCell(colKey, rowIdx, req, data) {
-            var row = T.model.rows[rowIdx];
-            if (!row) {
-                row = {
-                    req: req,
-                    cells: []
-                };
-                T.model.rows.push(row);
-            }
-
-            var cell = data;
-            row.cells.push(cell);
-            addColumnCell(colKey, cell);
-        }
-
-        // Binding/Models
-        //
-        function CellModel(obj, path, addon) {
-            var M = {};
-            M.value = obj[path]; // binded!
-            M.max = (addon || {}).max;
-            M.save = saveValue;
-            M.toString = toString;
-
-            if (addon && addon.tooltipFn) {
-                M.tooltip = addon.tooltipFn(M);
-            }
-            if (addon && addon.muteRowFn) {
-                M.muteRow = addon.muteRowFn(M);
-            }
-            if (addon && addon.muteProdFn) {
-                M.muteProd = addon.muteProdFn(M);
-            }
-
-            var oldValue = m.value;
-
-            function saveValue() {
-                //console.log('>>Saving: ', M.value);
-
-                if (!validate()) {
-                    M.value = oldValue;
-                    return false;
-                }
-
-                obj[path] = oldValue = M.value;
-                m.patchProject();
-                return true
-            }
-
-            function validate() {
-                var invalid = (!M.value && M.value !== 0);
-                return !invalid;
-            }
-
-            function toString() {
-                var val = angular.isDefined(M.value) ? M.value : '';
-                var addon = M.tooltip ? ['/', M.tooltip()].join('') : '';
-                return val + addon;
-            }
-
-            return M;
-        }
-
-        // Computed vals
-        //
-        function productGradeComputeFn(colKey) {
-            return function () {
-                //console.log('>>Reduced!');
-
-                var grades = columnIdx[colKey].cells;
-                var weights = columnIdx['weight'].cells;
-
-                var total = weights.reduce(function (prev, current, i) {
-                    var weight = current.model.value;
-                    var grade = grades[i].model.value;
-                    return {
-                        weight: prev.weight + weight,
-                        grade: prev.grade + grade * weight
-                    };
-                }, {weight: 0, grade: 0});
-
-                var ave = total.weight ? total.grade / total.weight : 0; // weighted average
-                if (ave) {
-                    ave = Math.round(ave * 10) / 10; // .1
-                }
-                return ave;
-            }
-        }
-
-        function weightPercentComputeFn(cellModel) {
-            return function () {
-                var value = cellModel.value;
-                var weights = columnIdx['weight'].cells;
-
-                var totalWeight = weights.reduce(function (prev, current) {
-                    var weight = current.model.value;
-                    return prev + weight;
-                }, 0);
-
-                var percent = totalWeight ? Math.round(value / totalWeight * 100) : 0;
-                return percent + '%';
-            };
-        }
-
-        function gradeMaxInRowFn(req, prod) {
-            return function () {
-                var value = prod.grade;
-                if (!value) { return false;}
-
-                var max = req.products.reduce(function (prev, current) {
-                    var grade = current.grade;
-                    return Math.max(prev, grade);
-                }, 0);
-
-                return (value === max);
-            };
-        }
-
-        function totalGradeMaxFn(colKey) {
-            return function () {
-                var value = columnIdx[colKey].footer.model.value();
-                if (!value) { return false; }
-
-                var max = T.model.columns.reduce(function (prev, current) {
-                    var model = current.footer.model;
-                    var total = model ? model.value() : 0;
-                    return Math.max(prev, total);
-                }, 0);
-
-                return (value === max);
-            }
-        }
-
-        function muteOnZeroFn(model) {
-            return function () {
-                return (model.value === 0);
-            };
-        }
-
-        function muteProdFnFn(req) {
-            return function (model) {
-                return function () {
-                    return req.mandatory && (model.value === 0);
-                };
-            };
-        }
-
-
-        function mandatoryTooltipFnFn(req) {
-            return function (model) {
-                return function () {
-                    var unsupported = req.mandatory && (model.value === 0);
-                    return  unsupported ? 'Unsupported mandatory requirement' : '';
-                };
-            };
         }
 
         return T;
-    }
-
-    // Export
-    //
-    function Exporter(model) {
-        var E = {};
-        E.getCsv = getCsv;
-
-        function getCsv() {
-            // Header
-            var res = getRowStr(model.columns, function (col) {
-                return col.header.label;
-            });
-            //console.log('>>> CSV Titles: ', res);
-
-            // Rows
-            _.forEach(model.rows, function (row) {
-                res += getRowStr(row.cells, function (cell) {
-                    return (cell.type === 'static') ? cell.label : cell.model.toString();
-                });
-            });
-            //console.log('>>> CSV Rows: ', res);
-
-            // Footer
-            res += getRowStr(model.columns, function (col) {
-                var cell = col.footer;
-                return (cell.type === 'static') ? cell.label : cell.model.value();
-            });
-            //console.log('>>> CSV: ', res);
-            return res;
-        }
-
-        function getRowStr(arr, valFn) {
-            var res = '';
-            _.forEach(arr, function (it, j) {
-                var val = valFn(it);
-                var txt = stringify(val);
-                if (j > 0) {
-                    res += ',';
-                }
-                res += txt;
-            });
-            return (res += '\n');
-        }
-
-        function stringify(val) {
-            var str = (val === null) ? '' : val.toString();
-            var res = str
-                .replace(/^\s*/, '').replace(/\s*$/, '') // trim spaces
-                .replace(/"/g, '""'); // replace quotes with double quotes;
-            if (res.search(/("|,|\n)/g) >= 0) {
-                res = '"' + res + '"'; // quote if contains special chars
-            }
-            return res;
-        }
-
-        return E;
     }
 }

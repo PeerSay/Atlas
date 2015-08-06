@@ -19,18 +19,24 @@ var mailer = require('../app/email/mailer');
 var errorcodes = require('../app/errors');
 
 var FILES_PATH = path.join(__dirname, '..', 'files');
-
+var UPLOAD_LIMIT = 1024 * 1024; //1MB
 
 function RestApi(app) {
     var U = {};
 
     // Files upload
-    var upload = multer({
+    var uploader = multer({
         storage: multer.diskStorage({
-            destination: uploadDir,
-            filename: uploadFileName
-        })
+            destination: logoUploadDir,
+            filename: logoUploadFileName
+        }),
+        fileFilter: logoAcceptFormat,
+        limits: {
+            files: 1,
+            fileSize: UPLOAD_LIMIT
+        }
     });
+    var upload = uploader.single('logo'); // name of the field specified on client
 
     function setupRoutes() {
         // Logging & auth
@@ -60,7 +66,7 @@ function RestApi(app) {
         app.post('/api/projects/:id/presentation/snapshots', createPresentationSnapshot);
         app.delete('/api/projects/:id/presentation/snapshots/:snapId', deletePresentationSnapshot);
         // logo upload
-        app.post('/api/projects/:id/presentation/upload/logo', upload.single('logo'), uploadLogoFile);
+        app.post('/api/projects/:id/presentation/upload/logo', uploadLogoFile);
 
         // NOT API - return html/pdf/image content!
         app.get('/my/projects/:id/presentation/snapshots/:snapId/:type', readPresentationSnapshotResource);
@@ -236,7 +242,7 @@ function RestApi(app) {
 
     // Logo upload / read
     //
-    function uploadDir(req, file, cb) {
+    function logoUploadDir(req, file, cb) {
         var projectId = req.params.id;
         var fileDir = path.join(FILES_PATH, projectId);
 
@@ -251,9 +257,14 @@ function RestApi(app) {
         });
     }
 
-    function uploadFileName(req, file, cb) {
+    function logoUploadFileName(req, file, cb) {
         var ext = path.extname(file.originalname);
         cb(null, file.fieldname + ext);
+    }
+
+    function logoAcceptFormat(req, file, cb) {
+        var IMAGE_RE =/image\/.*/;
+        cb(null, IMAGE_RE.test(file.mimetype));
     }
 
     function uploadLogoFile(req, res, next) {
@@ -263,28 +274,41 @@ function RestApi(app) {
         console.log('[API] Upload presentation logo of project[%s] for user=[%s]',
             projectId, email);
 
-        if (!req.file) {
-            console.log('[API] Upload presentation logo of project[%s] error: no file');
-            return errRes.notValid(res, 'no file');
-        }
-
         Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var resource = prj.presentation.data.logo.image;
-            resource.fileName = req.file.filename;
-            resource.sizeBytes = req.file.size;
+            upload(req, null, function (err) {
+                if (err) {
+                    console.log('[API] Upload presentation logo of project[%s] error: ', projectId, err.toString());
 
-            prj.save(function (err) {
-                if (err) { return modelError(res, err); }
+                    // TODO - this never sends response!
+                    // see bug: https://github.com/expressjs/multer/issues/168
+                    //return res.json({result: false});
 
-                var result = true;
-                console.log('[API] Upload presentation logo of project[%s] result: %s', projectId, resource.fileName);
+                    return next(err);
+                }
 
-                return res.json({result: result});
+                if (!req.file) {
+                    console.log('[API] Upload presentation logo of project[%s] error: no file');
+                    return errRes.notValid(res, 'bad file');
+                }
+
+                // Update model
+                var resource = prj.presentation.data.logo.image;
+                resource.fileName = req.file.filename;
+                resource.sizeBytes = req.file.size;
+
+                prj.save(function (err) {
+                    if (err) { return modelError(res, err); }
+
+                    var result = true;
+                    console.log('[API] Upload presentation logo of project[%s] result: %s', projectId, resource.fileName);
+
+                    return res.json({result: result});
+                });
             });
         });
     }

@@ -111,6 +111,10 @@
                                     ng-change="pr.patchPresentation()">
                             <span class="underlined">Logo</span>
                         </label>
+
+                        <span class="fa fa-check upload-ok pull-right"
+                                ng-if="pr.uploadProgress.success"></span>
+
                         <img width="48"
                                 src="{{ pr.logoUrl }}"
                                 ngf-src="pr.logoFile"
@@ -122,7 +126,7 @@
                                 ngf-multiple="false"
                                 ngf-reset-on-click="false"
                                 ng-model="pr.logoFile"
-                                ng-click="pr.data.logo.include = true; pr.patchPresentation()">
+                                ng-click="pr.onFileSelectClick()">
 
                         <ps-progress class="upload-progress"
                                 value="pr.uploadProgress.value"

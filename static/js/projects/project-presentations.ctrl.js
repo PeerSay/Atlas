@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectPresentationsCtrl', ProjectPresentationsCtrl);
 
-ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonpatch', 'Upload'];
-function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upload) {
+ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonpatch', 'Upload', 'Notify'];
+function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upload, Notify) {
     var m = this;
     m.projectId = $stateParams.projectId;
     m.data = {};
@@ -17,10 +17,12 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
     // Logo upload
     m.logoFile = null;
     m.logoUrl = '//placehold.it/48x48';
+    m.onFileSelectClick = onFileSelectClick;
     m.uploadLogo = uploadLogo;
     m.uploadProgress = {
         show: false,
-        value: 0
+        value: 0,
+        success: false
     };
 
 
@@ -90,8 +92,18 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
             });
     }
 
-    // Logo
+    // Logo upload
+    //
+    function onFileSelectClick() {
+        m.data.logo.include = true;
+        patchPresentation();
+        Notify.hide();
+        m.uploadProgress.success = false;
+    }
+
     function uploadLogo(file) {
+        if (!file) { return; } // cancelled
+
         var logoUploadUrl = ['/api/projects', m.projectId, 'presentation/upload/logo'].join('/');
         var options = {
             method: 'POST',
@@ -101,19 +113,26 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
         };
 
         m.uploadProgress.show = true;
+        m.uploadProgress.value = 0;
 
         Upload.upload(options)
             .progress(function (evt) {
-                if (!evt.config.file) { return; }
+                if (!evt.config.file) { return; } // cancelled
 
                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                 m.uploadProgress.value = progressPercentage;
             })
-            .success(function (data, status, headers, config) {
-                console.log('file ' + config.file.name + ' uploaded. Response: ' + JSON.stringify(data));
+            .success(function () {
+                m.uploadProgress.success = true;
             })
             .error(function (data, status, headers, config) {
-                console.log('Logo upload error: ' + status);
+                if (status === 500) {
+                    // Due to multer bug we see generic 500 error instead of custom json
+                    Notify.show('error', {title: 'Logo upload error', text: '1 MB limit exceeded'});
+                }
+                else if (status === 409) {
+                    Notify.show('error', {title: 'Logo upload error', text: 'Not image format'});
+                }
             })
             .finally(function () {
                 m.uploadProgress.show = false;

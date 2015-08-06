@@ -25,9 +25,10 @@
             <!--Group weight-->
             <td class="strong center" ng-if="group.$hideRows">{{ groupObj.weight() }}%</td>
             <!--Group grades-->
-            <td colspan="2" class="strong text-right align-fix"
-                    ng-if="group.$hideRows"
-                    ng-repeat="groupCol in groupObj.cols">{{ groupCol.grade() | number:1 }}</td>
+            <td ng-if="group.$hideRows" ng-repeat-start="groupCol in groupObj.grades"></td>
+            <td ng-if="group.$hideRows" ng-repeat-end class="strong grade">
+                {{ groupCol.grade() }}
+            </td>
         </tr>
         <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">

@@ -1,5 +1,15 @@
-angular.module('PeerSay')
-    .factory('TableModel', TableModel);
+// Can be used on both client and server, thus declared as either Angular
+// or CommonJS module, depending on environment
+
+(function (global, factory) {
+    if (global.angular) {
+        angular.module('PeerSay')
+            .factory('TableModel', factory);
+    }
+    else if (typeof exports === 'object' && typeof module !== 'undefined') {
+        module.exports = factory();
+    }
+})(this, TableModel);
 
 
 function TableModel() {

@@ -34,6 +34,9 @@
             border: none;
             padding: 10px;
         }
+        table.compact td {
+            font-size: 70%; /*TODO - depends on table columns number?*/
+        }
     </style>
 </head>
 <body>
@@ -160,19 +163,34 @@
         <section>
             <section>
                 <h2>Decision table</h2>
-                <h3>TODO</h3>
-                {% if table.topics.length > 0 %}
-                <table>
+                {% if table.topics %}
+                <table class="compact">
                     <thead>
                     <tr>
-                        {% for i, col in table.topics.columns %}
-                        <td>{{ col.header.value }}</td>
+                        {% for i, head in table.topics.headers %}
+                        <td>{{ head }}</td>
                         {% endfor %}
                     </tr>
                     </thead>
                     <tbody>
-
+                        {% for i, group in table.topics.groups %}
+                        <tr>
+                            <td colspan="2">{{ group.name }}</td>
+                            <td>{{ group.weight }}%</td>
+                            {% for j, grade in group.grades %}
+                            <td></td>
+                            <td>{{ grade }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
                     </tbody>
+                    <tfoot>
+                    <tr>
+                        {% for i, foot in table.topics.footers %}
+                        <td>{{ foot }}</td>
+                        {% endfor %}
+                    </tr>
+                    </tfoot>
                 </table>
                 {% endif %}
             </section>

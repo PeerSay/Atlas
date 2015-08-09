@@ -193,6 +193,11 @@
                     </tfoot>
                 </table>
                 {% endif %}
+
+                <!--Empty table-->
+                {% if !table.topics %}
+                <p>(Here there will be table)</p>
+                {% endif %}
             </section>
         </section>
         {% endif %}

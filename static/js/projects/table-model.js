@@ -26,7 +26,16 @@ function TableModel() {
 
     // Build
     //
+    function reset() {
+        T.model.columns = [];
+        T.model.rows = [];
+        T.groups = Groups();
+        columnIdx = {};
+    }
+
     function buildModel(reqs) {
+        reset();
+
         addHeader('name', {label: 'Requirement'});
         addFooter('name', {label: 'Total:', type: 'static'});
 

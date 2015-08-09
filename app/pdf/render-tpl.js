@@ -36,8 +36,9 @@ function renderTemplate(project) {
     if (prods.include) {
         prods.list = splitListFn(4)(project.products);
     }
-    if (table.include) {
+    if (table.include && project.table.length) {
         var model = tableModel.buildModel(project.table);
+        model.groups = initGroups(model);
         table.topics = getTopicsTable(model);
     }
 
@@ -58,6 +59,7 @@ function getTopicsTable(model) {
         var label = col.header.label;
         return headerSubst[label] || label;
     });
+    //console.log('>>Headers', headers);
 
     var footers = _.map(model.columns, function (col) {
         var foot = col.footer;
@@ -69,8 +71,10 @@ function getTopicsTable(model) {
         }
         return label;
     });
+    //console.log('>> footers', footers);
 
-    var groups = buildGroups(model);
+    var groups = buildGroups(model.groups);
+    //console.log('>> Groups', groups);
 
     return {
         headers: headers,
@@ -79,15 +83,18 @@ function getTopicsTable(model) {
     };
 }
 
-function buildGroups(model) {
-    var groups = [];
+function initGroups(model) {
     var groupIdx = {};
     _.forEach(model.rows, function (row) {
         var key = tableModel.groups.add(row);
         var group = groupIdx[key] = groupIdx[key] || [];
         group.push(row);
     });
+    return groupIdx;
+}
 
+function buildGroups(groupIdx) {
+    var groups = [];
     _.forEach(groupIdx, function (rows, key) {
         var groupObj = tableModel.groups.get(key);
         var group = {

@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', '$filter', 'Projects', 'budgetFilter', 'FullScreen'];
-function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects, budgetFilter, FullScreen) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', '$filter', 'Projects', 'FullScreen'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects, FullScreen) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -13,13 +13,6 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
     m.requirements = [];
     m.products = [];
     m.snapshots = [];
-
-    //UI helpers
-    m.sidebar = {
-        amountText: amountText,
-        amountHtml: amountHtml,
-        dateDurationText: dateDurationText
-    };
     //Full screen
     m.fullscreen = FullScreen;
 
@@ -47,26 +40,5 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
         Projects.readPresentation(m.projectId).then(function (res) {
             m.snapshots = res.presentation.snapshots;
         });
-    }
-
-    // UI helpers
-    function amountHtml() {
-        return budgetFilter(m.project.budget);
-    }
-
-    function amountText() {
-        return budgetFilter(m.project.budget, true);
-    }
-
-    function dateDurationText() {
-        var text = '';
-        if (m.project.time.duration) {
-            text += [m.project.time.duration, m.project.time.durationLabel, ' '].join(' ');
-        }
-        if (m.project.time.startDate) {
-            var date = $filter('date')(m.project.time.startDate, 'MM/dd/yyyy');
-            text += ['@', date].join(' ');
-        }
-        return text;
     }
 }

@@ -131,13 +131,6 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
             templateUrl: '/html/project-notes.html',
             resolve: {auth: ensureAuthorized}
         })
-        // Project > Details > Essentials
-        //
-        .state('project.details.essentials', {
-            url: '/essentials?edit={field}',
-            templateUrl: '/html/project-essentials.html',
-            resolve: {auth: ensureAuthorized}
-        })
         // Project > Details > Requirements
         //
         .state('project.details.requirements', {

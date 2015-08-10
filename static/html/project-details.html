@@ -2,14 +2,8 @@
     <!--Title-->
     <div class="title-row">
         <div class="title-col">
-            <h3 class="page-title toggle-edit text-center">
-                <a class="toggle-value"
-                        ui-sref=".essentials({edit: 'reasons'})"
-                        data-placement="right"
-                        ps-tooltip="cm.project.reasons">
-                    {{ cm.project.title }}
-                    <span class="fa fa-edit hover-edit"></span>
-                </a>
+            <h3 class="page-title text-center">
+                {{ cm.project.title }}
             </h3>
         </div>
     </div>
@@ -39,42 +33,6 @@
                                 >{{ cm.snapshots.length }}</div>
                     </h4>
                     <hr class="hidden-xs">
-                </div>
-
-
-                <!--Essentials-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".essentials({})">Essentials</a>
-                    </h4>
-                    <ul>
-                        <!--Budget-->
-                        <li ng-if="cm.project.budget.amount">
-                            <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: 'budget'})"
-                                    ps-tooltip="cm.sidebar.amountText()">
-                                <span ng-bind-html="cm.sidebar.amountHtml()"></span>
-                            </a>
-                        </li>
-                        <!--Resources-->
-                        <li ng-if="cm.project.notes.resources">
-                            <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: 'resources'})"
-                                    ps-tooltip="cm.project.notes.resources">
-                                {{ cm.project.notes.resources }}
-                            </a>
-                        </li>
-                        <!--Time frame-->
-                        <li ng-if="cm.project.time.duration || cm.project.time.startDate">
-                            <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})"
-                                    ps-tooltip="cm.sidebar.dateDurationText()">
-                                {{ cm.sidebar.dateDurationText() }}
-                            </a>
-                        </li>
-                    </ul>
-                    <hr class="hidden-xs">
-                    <div class="page-spacer visible-xs-block"></div>
                 </div>
 
                 <div class="clearfix visible-xs-block"></div>

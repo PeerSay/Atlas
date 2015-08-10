@@ -27,7 +27,8 @@ function renderTemplate(project) {
     };
     var table = {
         include: settings.table.include,
-        topics: null
+        topics: null,
+        superTopic: null
     };
 
     if (reqs.include) {
@@ -39,7 +40,9 @@ function renderTemplate(project) {
     if (table.include && project.table.length) {
         var model = tableModel.buildModel(project.table);
         model.groups = initGroups(model);
+
         table.topics = getTopicsTable(model);
+        table.superTopic = getSuperTopicTable(model);
     }
 
     var locals = _.extend({}, settings, {title: titlePage}, {requirements: reqs}, {products: prods}, {table: table});
@@ -63,12 +66,8 @@ function getTopicsTable(model) {
 
     var footers = _.map(model.columns, function (col) {
         var foot = col.footer;
-        var label = '';
-        if (foot.type === 'static') {
-            label = foot.label;
-        } else if (foot.type === 'func') {
-            label = foot.model ? foot.model.value() : '';
-        }
+        var label = (foot.type === 'static') ? foot.label :
+            (foot.type === 'func') ? foot.model && foot.model.value() : '';
         return label;
     });
     //console.log('>> footers', footers);
@@ -83,6 +82,40 @@ function getTopicsTable(model) {
     };
 }
 
+function getSuperTopicTable(model) {
+    var headers = _.map(model.columns, function (col) {
+        return col.header.label;
+    });
+
+    var groups = buildGroups(model.groups);
+    var superTopic = findSuperTopic(model, groups);
+    var groupObj = tableModel.groups.get(superTopic.name);
+
+    var rows = [];
+    _.forEach(groupObj.rows, function (row) {
+        var cells = _.map(row.cells, function (cell) {
+            return (cell.type === 'static') ? cell.label :
+                (cell.type === 'icon') ? !!cell.label : cell.model.toString();
+        });
+        rows.push(cells);
+    });
+    //console.log('>> rows', rows);
+
+    var footers = _.map(model.columns, function (col) {
+        var foot = col.footer;
+        var label = (foot.type === 'static') ? foot.label :
+            (foot.type === 'func') ? foot.model && foot.model.value() : '';
+        return label;
+    });
+
+    return {
+        headers: headers,
+        groups: [superTopic],
+        rows: rows,
+        footers: footers
+    }
+}
+
 function initGroups(model) {
     var groupIdx = {};
     _.forEach(model.rows, function (row) {
@@ -93,22 +126,49 @@ function initGroups(model) {
     return groupIdx;
 }
 
+function buildGroup(name) {
+    var groupObj = tableModel.groups.get(name);
+    var group = {
+        name: name,
+        weight: groupObj.weight(),
+        grades: []
+    };
+    _.forEach(groupObj.grades, function (obj) {
+        group.grades.push(obj.grade());
+    });
+    return group;
+}
+
 function buildGroups(groupIdx) {
     var groups = [];
     _.forEach(groupIdx, function (rows, key) {
-        var groupObj = tableModel.groups.get(key);
-        var group = {
-            name: key,
-            weight: groupObj.weight(),
-            grades: []
-        };
-        _.forEach(groupObj.grades, function (obj) {
-            group.grades.push(obj.grade());
-        });
-
-        groups.push(group);
+        groups.push(buildGroup(key));
     });
     return groups;
+}
+
+function findSuperTopic(model, groups) {
+    var winnerCols = _.filter(model.columns, function (col) {
+        var foot = col.footer;
+        return (foot.type === 'func') && foot.model.max();
+    });
+    var winnerGradeIdxs = _.map(winnerCols, function (col) {
+        var colIdx = model.columns.indexOf(col);
+        return (colIdx - 4) / 2; // grade idx = 2i + 4
+    });
+
+    _.forEach(groups, function (group) {
+        group.score = 0;
+        _.forEach(winnerGradeIdxs, function (idx) {
+            group.score += group.grades[idx] * group.weight;
+        });
+    });
+
+    var winner = groups.reduce(function (acc, cur) {
+        return (acc.score < cur.score) ? cur : acc;
+    }, groups[0]);
+
+    return winner;
 }
 
 function splitListFn(num) {

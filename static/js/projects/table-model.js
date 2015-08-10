@@ -179,8 +179,9 @@ function TableModel() {
         }
 
         function toString() {
-            var val = angular.isDefined(M.value) ? M.value : '';
-            var addon = M.tooltip ? ['/', M.tooltip()].join('') : '';
+            var val = (typeof M.value !== 'undefined') ? M.value : '';
+            var tooltip = M.tooltip && M.tooltip();
+            var addon = tooltip ? ['/', tooltip].join('') : '';
             return val + addon;
         }
 
@@ -306,12 +307,12 @@ function TableModel() {
             G.addRow = addRow;
             G.weight = calcWeightPercents;
             G.grades = [];
+            G.rows = []; // used by presentations
 
-            var rows = [];
             var groupColIdx = {};
 
             function addRow(row) {
-                rows.push(row);
+                G.rows.push(row);
                 addCols(row);
             }
 
@@ -365,7 +366,7 @@ function TableModel() {
             }
 
             function calcGroupWeight() {
-                var groupWeight = rows.reduce(function (prev, cur) {
+                var groupWeight = G.rows.reduce(function (prev, cur) {
                     return prev + cur.req.weight;
                 }, 0);
                 return groupWeight;
@@ -400,7 +401,8 @@ function TableModel() {
             // Rows
             model.rows.forEach(function (row) {
                 res += getRowStr(row.cells, function (cell) {
-                    return (cell.type === 'static') ? cell.label : cell.model.toString();
+                    return (cell.type === 'static') ? cell.label :
+                        (cell.type === 'icon') ? !!cell.label : cell.model.toString();
                 });
             });
             //console.log('>>> CSV Rows: ', res);

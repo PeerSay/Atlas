@@ -45,37 +45,39 @@
     <div class="slides">
         <!--Title page-->
         <section>
-            {% if logo.include && title.logoUrl %}
-            <img src="{{ title.logoUrl }}" class="logo">
-            {% endif %}
+            <section>
+                {% if logo.include && title.logoUrl %}
+                <img src="{{ title.logoUrl }}" class="logo">
+                {% endif %}
 
-            <h1>{{ title.title }}</h1>
+                <h1>{{ title.title }}</h1>
 
-            <p class="pull-left">
-                <small>Presented by <a href="mailto:{{ title.user.email }}">{{ title.user.name || title.user.email }}</a></small>
-                <br>
-                <small>Date: {{ title.date }}</small>
-            </p>
-        </section>
+                <p class="pull-left">
+                    <small>Presented by <a href="mailto:{{ title.user.email }}">{{ title.user.name || title.user.email }}</a></small>
+                    <br>
+                    <small>Date: {{ title.date }}</small>
+                </p>
+            </section>
 
-        <!--Themes-->
-        <section id="themes">
-            <h2>Select theme</h2>
-            <p>
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/white.css'); return false;">White (default)</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/black.css'); return false;">Black</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
-                <!--
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/league.css'); return false;">League</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/beige.css'); return false;">Beige</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/simple.css'); return false;">Simple</a> <br>
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/serif.css'); return false;">Serif</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/blood.css'); return false;">Blood</a> -
-                <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/solarized.css'); return false;">Solarized</a>
-                -->
-            </p>
+            <!-- Footer: Themes-->
+            <section id="themes">
+                <h2>Select theme</h2>
+                <p>
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/white.css'); return false;">White (default)</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/black.css'); return false;">Black</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
+                    <!--
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/league.css'); return false;">League</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/beige.css'); return false;">Beige</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/simple.css'); return false;">Simple</a> <br>
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/serif.css'); return false;">Serif</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/blood.css'); return false;">Blood</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/solarized.css'); return false;">Solarized</a>
+                    -->
+                </p>
+            </section>
         </section>
 
         <!--Overview page-->
@@ -199,6 +201,54 @@
                 <p>(Here there will be table)</p>
                 {% endif %}
             </section>
+
+            {% if table.superTopic %}
+            <section>
+                <h2>Decision table (2)</h2>
+                <table class="compact">
+                    <thead>
+                    <tr>
+                        {% for i, head in table.superTopic.headers %}
+                        <td>{{ head }}</td>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <!--Group row: always one! -->
+                    <tbody>
+                    {% for i, group in table.superTopic.groups %}
+                    <tr>
+                        <td colspan="2">{{ group.name }}</td>
+                        <td>{{ group.weight }}%</td>
+                        {% for j, grade in group.grades %}
+                        <td></td>
+                        <td>{{ grade }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+
+                    <!--Reqs rows-->
+                    <tbody>
+                    {% for i, row in table.superTopic.rows %}
+                    <tr>
+                        {% for j, cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+
+                    <tfoot>
+                    <tr>
+                        {% for i, foot in table.superTopic.footers %}
+                        <td>{{ foot }}</td>
+                        {% endfor %}
+                    </tr>
+                    </tfoot>
+                </table>
+            </section>
+            {% endif %}
         </section>
         {% endif %}
 

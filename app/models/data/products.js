@@ -305,6 +305,42 @@ products = [
         description: 'www.mydealflow.com',
         category: 'Dealflow Management',
         popularity: 99
+    },
+
+    {
+        _id: '55ca0d709ed935aaf2543498',
+        name: 'License Dashboard',
+        description: 'License Management cloud service (www.licensedashboard.com)',
+        category: 'Software Asset Management',
+        popularity: 15
+    },
+    {
+        _id: '55ca0e579ed935aaf2543499',
+        name: 'Aspera SmartTrack',
+        description: 'Software license optimization, automated software asset management from Desktop to Data Center ',
+        category: 'Software Asset Management',
+        popularity: 15
+    },
+    {
+        _id: '55ca0f869ed935aaf254349a',
+        name: 'Flexera Flexnet Management Platform',
+        description: 'Hardware and Software asset management and license optimization',
+        category: 'Software Asset Management',
+        popularity: 15
+    },
+    {
+        _id: '55ca1024f9973b7703967eac',
+        name: 'Snow License Manager',
+        description: 'Software and Hardware asset management, license optimization and application usage metrics',
+        category: 'Software Asset Management',
+        popularity: 15
+    },
+    {
+        _id: '55ca1135628e2c1b9abb1279',
+        name: 'ServiceNow Asset Management',
+        description: 'Tracks hardware, software, and virtual infrastructure assets throughout their lifecycle',
+        category: 'Software Asset Management',
+        popularity: 15
     }
 ];
 

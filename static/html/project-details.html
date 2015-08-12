@@ -1,69 +1,18 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as cm">
-    <!--Title-->
-    <div class="title-row">
-        <div class="title-col">
-            <h3 class="page-title text-center">
-                {{ cm.project.title }}
-            </h3>
-        </div>
-    </div>
-
-    <div class="content-row">
-        <!--Left side-bar-->
-        <div class="sidebar-col">
-            <div class="row side-bar" id="js-sidebar-affix">
-                <!--Overview-->
-                <div class="sidebar-section-col">
-                    <h4>Overview</h4>
-                    <ul class="sub-menu">
-                        <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
-                        <li class="menu-item" ui-sref-active="active"><a ui-sref=".decisions">Decision Table</a></li>
-                        <!--<li class="menu-item" ui-sref-active="active"><a ui-sref=".notes">Notes</a></li>-->
-                    </ul>
-                    <hr class="hidden-xs">
-                    <div class="page-spacer visible-xs-block"></div>
-                </div>
-
-                <!--Products-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".products">
-                            Products
-                            <div class="label label-primary"
-                                    ng-if="(cm.products | filter:{selected: true}).length > 0"
-                                    >{{ (cm.products | filter:{selected: true}).length }}</div>
-                        </a>
-                    </h4>
-                </div>
-
-                <!--Criteria-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".requirements">
-                            Criteria
-                            <div class="label label-primary"
-                                    ng-if="(cm.requirements | filter:{selected: true}).length > 0"
-                                    >{{ (cm.requirements | filter:{selected: true}).length }}</div>
-                        </a>
-                    </h4>
-                </div>
-
-                <!--Presentations-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".presentations">Presentations</a>
-                        <div class="label label-primary"
-                                ng-if="cm.snapshots.length > 0"
-                                >{{ cm.snapshots.length }}</div>
-                    </h4>
+    <div class="row">
+        <div class="container-col"
+                ng-class="{'full-screen': cm.fullscreen.on}">
+            <!--Title-->
+            <div class=row>
+                <div class="col-xs-12">
+                    <h3 class="page-title text-center">
+                        {{ cm.project.title }}
+                    </h3>
                 </div>
             </div>
-        </div>
-
-        <!--Center Col: content-->
-        <div class="content-container-col">
-            <div class="row">
-                <div class="content-col" ng-class="{'full': cm.fullscreen.on}">
+            <!--Content-->
+            <div class=row>
+                <div class="content-col">
                     <!--Content panel-->
                     <div ui-view></div>
 
@@ -74,18 +23,65 @@
                     </div>
                 </div>
             </div>
+            <!--Side-bar-->
+            <div class="sidebar-container">
+                <!--Toggler-->
+                <div class="sidebar-toggler">
+                    <button type="button" ng-click="cm.fullscreen.toggle()">
+                        <span class="fa fa-caret-left"></span>
+                    </button>
+                </div>
+                <div class="sidebar-scroll">
+                    <!--Menu-->
+                    <div class="sidebar-menu">
+                        <!--Overview-->
+                        <div class="sidebar-menu-section">
+                            <h4>Overview</h4>
+                            <ul class="sub-menu">
+                                <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
+                                <li class="menu-item" ui-sref-active="active"><a ui-sref=".decisions">Decision Table</a></li>
+                                <!--<li class="menu-item" ui-sref-active="active"><a ui-sref=".notes">Notes</a></li>-->
+                            </ul>
+                            <hr>
+                            <div class="page-spacer visible-xs-block"></div>
+                        </div>
+
+                        <!--Products-->
+                        <div class="sidebar-menu-section">
+                            <h4 class="menu-item" ui-sref-active="active">
+                                <a class="toggle-value" ui-sref=".products">
+                                    Products
+                                    <div class="label label-primary"
+                                            ng-if="(cm.products | filter:{selected: true}).length > 0"
+                                            >{{ (cm.products | filter:{selected: true}).length }}</div>
+                                </a>
+                            </h4>
+                        </div>
+
+                        <!--Criteria-->
+                        <div class="sidebar-menu-section">
+                            <h4 class="menu-item" ui-sref-active="active">
+                                <a class="toggle-value" ui-sref=".requirements">
+                                    Criteria
+                                    <div class="label label-primary"
+                                            ng-if="(cm.requirements | filter:{selected: true}).length > 0"
+                                            >{{ (cm.requirements | filter:{selected: true}).length }}</div>
+                                </a>
+                            </h4>
+                        </div>
+
+                        <!--Presentations-->
+                        <div class="sidebar-menu-section">
+                            <h4 class="menu-item" ui-sref-active="active">
+                                <a class="toggle-value" ui-sref=".presentations">Presentations</a>
+                                <div class="label label-primary"
+                                        ng-if="cm.snapshots.length > 0"
+                                        >{{ cm.snapshots.length }}</div>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<!--Init JS plugins-->
-<script>
-    $(function () {
-        // Sidebar affix
-        $('#js-sidebar-affix').affix({
-            offset: {
-                top: 60
-            }
-        });
-    });
-</script>

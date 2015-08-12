@@ -56,7 +56,7 @@ function psTableInput() {
             if (cell.model.muteRow) {
                 scope.$watch(cell.model.muteRow, function (newVal/*, oldVal*/) {
                     $tr.toggleClass('muted', newVal);
-                })
+                });
             }
 
             //Mute columns if mandatory requirement is not met
@@ -67,8 +67,20 @@ function psTableInput() {
                     var $prodCells = productCells();
                     var anyMuted = ($prodCells.filter('.culprit').length > 0);
                     $prodCells.toggleClass('muted', anyMuted);
-                })
+                });
             }
+
+            // Show invalid input (numbers only) by applying class on parent
+            if (cell.type === 'number') {
+                scope.$watch(function () {
+                    return ngModel.$invalid;
+                }, function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        $td.toggleClass('invalid', newVal);
+                    }
+                });
+            }
+
         }
     };
 }

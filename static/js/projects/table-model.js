@@ -174,8 +174,15 @@ function TableModel() {
         }
 
         function validate() {
-            var invalid = (!M.value && M.value !== 0);
-            return !invalid;
+            if (typeof M.value === 'undefined') {
+                // angular undefs value if it is not valid according to model-options
+                return false;
+            }
+            if (typeof M.value === 'number') {
+                M.value = parseInt(M.value, 10); // remove fraction part
+                return true;
+            }
+            return true;
         }
 
         function toString() {
@@ -198,8 +205,8 @@ function TableModel() {
             var weights = columnIdx['weight'].cells;
 
             var total = weights.reduce(function (prev, current, i) {
-                var weight = current.model.value;
-                var grade = grades[i].model.value;
+                var weight = current.model.value || 0;
+                var grade = grades[i].model.value || 0;
                 return {
                     weight: prev.weight + weight,
                     grade: prev.grade + grade * weight
@@ -216,11 +223,11 @@ function TableModel() {
 
     function weightPercentComputeFn(cellModel) {
         return function () {
-            var value = cellModel.value;
+            var value = cellModel.value || 0;
             var weights = columnIdx['weight'].cells;
 
             var totalWeight = weights.reduce(function (prev, current) {
-                var weight = current.model.value;
+                var weight = current.model.value || 0;
                 return prev + weight;
             }, 0);
 
@@ -235,7 +242,7 @@ function TableModel() {
             if (!value) { return false;}
 
             var max = req.products.reduce(function (prev, current) {
-                var grade = current.grade;
+                var grade = current.grade || 0;
                 return Math.max(prev, grade);
             }, 0);
 

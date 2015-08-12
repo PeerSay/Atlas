@@ -33,8 +33,7 @@
         <!--Rows & cells-->
         <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
             <td class="cell" ng-repeat="cell in row.cells"
-                    ng-class="[cell.type, cell.class]"
-                    ng-class="{'winner' : cell.model.max()}"
+                    ng-class="[cell.type, cell.class].concat(cell.model.max() && 'winner' || '')"
                     ng-click="focusInputEl(cell)">
                 <!--Label cell-->
                 <div ng-if=":: cell.type === 'static' ">{{:: cell.label }}</div>
@@ -55,6 +54,7 @@
                             ps-table-input="cell"
                             ps-input-number
                             ps-tooltip="cell.model.tooltip()"
+                            required
                             >
                 </div>
                 <!--Mandatory icon cell-->

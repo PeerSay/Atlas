@@ -3,6 +3,7 @@
 @header-bg: #f5f5f5;
 @winner-bg: #f5fffa;
 @edit-bg: #f9fbdb;
+@warn-bg: #fbe1dd;
 @winner-cup-color: #00805a;
 @border-vert-color: #ddd;
 @min-text-column-width: 180px;
@@ -122,6 +123,9 @@
       }
       &.edited {
         background: @edit-bg !important;
+      }
+      &.invalid {
+        background: @warn-bg !important;
       }
       &.static {
         background: @header-bg;

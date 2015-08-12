@@ -25,7 +25,7 @@ function User($q, $rootScope, $state, $http, $timeout, Backend, Storage) {
 
         $rootScope.$on('ps.user.not-authorized', function () {
             updateUser(null);
-            showLoginPage({err: 'Session is expired. Please login again.'});
+            showLoginPage({err: 'Session has expired. Please login again.'});
         });
     }
 

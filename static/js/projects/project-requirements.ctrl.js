@@ -9,6 +9,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
     // Data / Edit
     m.project = null; // ref to shared
     m.patchObserver = null;
+    m.patchProject = patchProject;
     m.loadingMore = true;
     // Table selection/removal
     m.groups = GroupBy('topic');
@@ -24,31 +25,57 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         visible: {removed: '!true'},
         selected: {selected: true, removed: '!true'}
     };
+    //Category
+    m.onCategoryChange = populateSelectionList;
 
 
     activate();
 
     function activate() {
-        var publicTopics, publicReqs;
-
-        var reqsQ = Projects.readProject(m.projectId).then(function (res) {
+        Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
             observe(m.project);
+        });
+
+        populateSelectionList();
+    }
+
+    function populateSelectionList() {
+        loadSelectionListData().then(function (resArr) {
+            var publicTopics = resArr[0];
+            var localReqs = resArr[1];
+            var publicReqs = resArr[2];
+
+            m.search.reset();
+            m.groups
+                .reset()
+                .addGroups(publicTopics)
+                .addItems(localReqs, true/*local*/)
+                .addItems(publicReqs, false, {selected: false});
+        });
+    }
+
+    function loadSelectionListData() {
+        m.loadingMore = true;
+
+        var publicTopicsQ = Projects.readPublicTopics().then(function (res) {
+            return res.topics;
+        });
+
+        var localReqsQ = Projects.readProject(m.projectId).then(function (res) {
+            return res.requirements;
+        });
+
+        var publicReqsQ = Projects.readProject(m.projectId).then(function (res) {
             return res.selectedCategory;
         }).then(function (category) {
             return Projects.readPublicRequirements({q: category})
         }).then(function (res) {
-            publicReqs = res.requirements;
+            return res.requirements;
         });
 
-        var topicsQ = Projects.readPublicTopics().then(function (res) {
-            publicTopics = res.topics;
-        });
-
-        $q.all([reqsQ, topicsQ]).then(function () {
-            m.groups.addGroups(publicTopics, true);
-            m.groups.addItems(m.project.requirements, true/*local*/);
-            m.groups.addItems(publicReqs, false, {selected: false});
+        return $q.all([publicTopicsQ, localReqsQ, publicReqsQ]).finally(function () {
+            m.loadingMore = false;
         })
     }
 
@@ -139,44 +166,20 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         return {req: req, idx: idx};
     }
 
-    /*function addRemoveLocal(req, forceRemove) {
-        var localReqs = m.project.requirements;
-        var localReq = _.findWhere(localReqs, {_id: req._id});
-        var localIdx = localReqs.indexOf(localReq);
-        var inProject = (localIdx >= 0);
-
-        //add
-        if (req.selected) {
-            if (inProject && localReq.custom) {
-                //console.log('>>Add: select local idx=%s', localIdx);
-                localReq.selected = true;
-            } else if (!inProject) {
-                //console.log('>>Add: push local copy?=%s', !req.custom);
-                localReqs.push(req.custom ? req : angular.copy(req)); // copy if not custom
-            }
-        }
-
-        //remove
-        if (!req.selected && inProject) {
-            if (!req.custom || forceRemove) {
-                //console.log('>>>>Remove: splice local idx=%s', localIdx);
-                localReqs.splice(localIdx, 1); // remove if not user-added
-            } else {
-                //console.log('>>>>Remove: unselect local idx=%s', localIdx);
-                localReq.selected = false;
-            }
-        }
-    }*/
-
     // Search
     //
     function Search() {
         var S = {};
         S.model = {};
         S.list = [];
+        S.reset = reset;
         S.add = add;
         S.onSelect = select;
         S.onAddNew = addNew;
+
+        function reset() {
+            S.list = [];
+        }
 
         function add(req) {
             S.list.push(req);
@@ -262,7 +265,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
                     }
                 },
                 onAddNew: function (value) {
-                    return m.groups.create(value);
+                    return m.groups.createNew(value);
                 }
             };
             E.groups = function () {
@@ -359,71 +362,55 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
     function GroupBy(prop) {
         var G = {};
         G.list = [];
-        G.get = getGroup;
-        G.getOpenGroup = getOpenGroup;
-        G.create = createNew;
+        //Populate
+        G.reset = reset;
         G.addGroups = addGroups;
         G.addItems = addItems;
+        G.createNew = createByName;
+        //Query
+        G.get = getGroup;
+        G.getOpenGroup = getOpenGroup;
+        //Other
         G.relocateItem = relocateItem;
         G.revealItem = revealItem;
-        G.isVisible = isVisible;
 
         var groupIdx = {};
         var itemIdx = {};
         var nextId = nextIdFn();
 
-        function getGroup(topic) {
-            return groupIdx[topic];
+        // Populate
+        //
+        function reset() {
+            G.list = [];
+            groupIdx = {};
+            itemIdx = {};
+            return G;
         }
 
-        function getOpenGroup() {
-            return _.findWhere(G.list, {open: true});
+        function addGroups(groups) {
+            _.forEach(groups, addGroup);
+            return G;
         }
 
-        function addGroups(groups, shared) {
-            _.forEach(groups, function (it) {
-                var group = groupIdx[it.name];
-                if (!group) {
-                    //console.log('>>Adding group new:', it.name);
+        function addGroup(data) {
+            var name = data.name;
+            var group = groupIdx[name];
+            if (!group) {
+                group = {
+                    data: angular.copy(data),
+                    reqs: [],
+                    id: nextId(),
+                    open: false,
+                    editNew:  m.editFactory.create({topic: name})
+                };
+                group.q = Query(group);
 
-                    // shared through Projects svc should be copied to prevent duplicates in reqs
-                    // across Ctrl instantiations
-                    group = shared ? angular.copy(it) : it;
-                    group.reqs = group.reqs || [];
-                    group.id = nextId();
-                    group.sel = Selected(group);
-                    group.editNew = m.editFactory.create({topic: it.name});
-
-                    groupIdx[it.name] = group;
-                    G.list.push(group);
-                } else {
-                    //console.log('>>Adding group exiting:', group.name);
-
-                    // add props from global list missing in groups created from private items
-                    angular.extend(group, it, {custom: false});
-                }
-            });
-        }
-
-        function nextIdFn() {
-            var id = 0;
-            return function () {
-                return 'group-' + (id++);
-            };
-        }
-
-        function createNew(name) {
-            return {
-                reqs: [],
-                name: name,
-                popularity: 100,
-                custom: true
-            };
-        }
-
-        function addGroupByName(name) {
-            var group = createNew(name);
-            addGroups([group]);
+                groupIdx[name] = group;
+                G.list.push(group);
+            }
+            else {
+                angular.extend(group.data, data); // XXX -custom: false?
+            }
             return group;
         }
 
@@ -437,26 +424,67 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
                 itemIdx[it._id] = true;
 
                 // Add group
-                var key = it[prop];
-                var group = groupIdx[key];
+                var name = it[prop];
+                var group = getGroup(name);
                 if (!group) {
-                    group = addGroupByName(key);
+                    group = addGroup(createByName(name));
                 }
 
                 // Need a copy to separate project's items which are observable
                 var copy = angular.extend({}, it, extend);
 
                 // Req's edit form
-                copy.edit = m.editFactory.create({topic: key, req: copy});
+                copy.edit = m.editFactory.create({topic: name, req: copy});
 
                 m.search.add(copy); // search list
                 group.reqs.push(copy); // select table
 
                 //console.log('>>Adding item to group[%s](%s): ', group.name, group.reqs.length, it.name);
             });
+
+            return G;
         }
 
+        function createByName(name) {
+            return {
+                reqs: [],
+                name: name,
+                popularity: 100,
+                custom: true
+            };
+        }
 
+        function nextIdFn() {
+            var id = 0;
+            return function () {
+                return 'group-' + (id++);
+            };
+        }
+
+        // Query
+        //
+        function getGroup(name) {
+            return groupIdx[name];
+        }
+
+        function getOpenGroup() {
+            return _.findWhere(G.list, {open: true});
+        }
+
+        function Query(group) {
+            var S = {};
+            S.selectedNum = function () {
+                return filterFilter(group.reqs, m.filter.selected).length;
+            };
+            S.visible = function () {
+                var arr = filterFilter(group.reqs, m.filter.visible);
+                return (arr.length !== 0);
+            };
+            return S;
+        }
+
+        // Other
+        //
         function relocateItem(req, oldName, name) {
             if (oldName === name) { return; }
 
@@ -468,7 +496,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
 
             var group = getGroup(name);
             if (!group) {
-                group = addGroupByName(name);
+                group = addGroup(createByName(name));
             }
             group.reqs.push(req);
         }
@@ -477,20 +505,6 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
             // Reveal if hidden by accordion & focus it
             var group = getGroup(req.topic);
             group.open = true; // triggers accordion open
-        }
-
-        function isVisible(group) {
-            var arr = filterFilter(group.reqs, m.filter.visible);
-            return (arr.length !== 0);
-        }
-
-        //Selected
-        function Selected(group) {
-            var S = {};
-            S.number = function () {
-                return filterFilter(group.reqs, m.filter.selected).length;
-            };
-            return S;
         }
 
         return G;

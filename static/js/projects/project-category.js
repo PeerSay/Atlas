@@ -9,7 +9,7 @@ function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
 
     var parent = $scope.$parent.$parent.cm; // ng-include adds another parent
     var projectId = parent.projectId;
-    var project = parent.project;
+    var project = null; // delayed
     var offSelect = CategorySelect.on(function (evt, type) {
         var dispatch = {
             select: selectCategory,
@@ -29,7 +29,9 @@ function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
         });
 
         Projects.readProject(projectId).then(function (res) {
-            CategorySelect.load(res.categories); // custom
+            project = parent.project;
+
+            CategorySelect.load(res.categories, {top: true}); // custom
 
             if (res.selectedCategory) {
                 CategorySelect.init(res.selectedCategory);
@@ -43,9 +45,9 @@ function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
     }
 
     function selectCategory(name) {
-        var categoryName = project.selectedCategory = name;
+        project.selectedCategory = name;
         parent.patchProject();
-        parent.onCategoryChange(categoryName);
+        parent.onCategoryChange(name);
     }
 
     function addCategory(item) {
@@ -80,13 +82,15 @@ function CategorySelect($rootScope, _) {
     };
     //For the outer world
     C.init = init;
-    C.getSelected = getSelected;
     C.load = load;
     C.reset = reset;
     C.on = on;
 
-    function load(items) {
-        C.vm.list = C.vm.list.concat(items);
+    function load(items, options) {
+        var top = options && options.top;
+        C.vm.list = top ?
+            [].concat(items, C.vm.list) :
+            [].concat(C.vm.list, items);
     }
 
     function reset() {

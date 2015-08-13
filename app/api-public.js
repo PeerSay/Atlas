@@ -22,7 +22,6 @@ function PublicRestApi(app) {
         app.get('/api/public/categories', readCategories);
         app.get('/api/public/products', readProducts);
 
-
         return U;
     }
 
@@ -38,7 +37,7 @@ function PublicRestApi(app) {
             .select('-__v')
             .exec(function (err, data) {
                 if (err) { return next(err); }
-                console.log('[API] Reading public result: items: %d', data.length);
+                console.log('[API] Reading public topics result: items: %d', data.length);
 
                 res.json({result: data});
             });

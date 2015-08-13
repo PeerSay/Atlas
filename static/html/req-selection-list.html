@@ -2,7 +2,7 @@
 <div class="panel-group selection-list" id="accordion" role="tablist">
     <!--Topic list-->
     <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
-            ng-if="cm.groups.isVisible(group)"
+            ng-if="group.q.visible()"
             ng-class="{visible: group.open}">
         <!--Topic-->
         <div class="panel-heading topic-widget clearfix" role="tab"
@@ -17,13 +17,13 @@
             <!--Title-->
             <h4 class="panel-title topic-header">
                 <span class="fa fa-caret-right caret-icon"></span>
-                {{:: group.name || '(no topic)' }}
+                {{:: group.data.name || '(no topic)' }}
                 <span class="label label-primary"
-                        ng-if="group.sel.number()">{{ group.sel.number() }}</span>
+                        ng-if="group.q.selectedNum()">{{ group.q.selectedNum() }}</span>
             </h4>
             <!--Sub-title-->
             <div class="topic-details">
-                <span>{{:: group.description }}</span>
+                <span>{{:: group.data.description }}</span>
             </div>
         </div>
         <!--Collapsible content-->

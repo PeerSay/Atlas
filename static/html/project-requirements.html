@@ -7,6 +7,9 @@
         </h3>
     </div>
     <div class="panel-body">
+        <!--Select Category-->
+        <div ng-include="'/html/category-select.html'"></div>
+
         <!--Buttons & search row-->
         <form class="row">
             <!--Col2 - Select/Add Products-->
@@ -48,5 +51,12 @@
 
         <!--Done link-->
         <a class="btn btn-primary pull-right" ui-sref="^.decisions">Done</a>
+
+        <!--Load more-->
+        <div class="load-more" ng-if="cm.loadingMore">
+            <button type="button" class="btn btn-xxs btn-default" disabled>
+                <span class="fa fa-refresh fa-spin"></span>
+            </button>
+        </div>
     </div>
 </div>

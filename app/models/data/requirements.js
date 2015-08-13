@@ -523,7 +523,7 @@ requirements = [
     {
         _id: '55cafb2c628e2c1b9abb127c',
         name: 'Inventory Management',
-        description: 'Manage all assets - softwre, hardware, licenses, etc.',
+        description: 'Manage all assets - software, hardware, licenses, etc.',
         topic: 'Software Asset Management Functionality',
         popularity: 50,
         category: 'Software Asset Management'

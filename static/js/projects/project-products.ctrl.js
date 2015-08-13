@@ -1,27 +1,16 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'filterFilter', 'Util', 'jsonpatch'];
-function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, jsonpatch) {
+ProjectProductsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'Util', 'jsonpatch'];
+function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
     // Data / Edit
     m.project = {};
     m.patchObserver = null;
-    // Loading
-    var QUERY_LIMIT = 10;
-    var loadFrom = 0;
-    m.noLoadMore = false;
+    m.patchProject = patchProject;
     m.loadingMore = true;
-    m.loadMoreProducts = loadMoreProducts;
-    // Categories
-    m.category = {}; // ui-select model
-    m.categories = [];
-    m.groupByCategory = groupByCategory;
-    m.selectCategory = selectCategory;
-    m.addCategory = addCategory;
-    m.deleteCategory = deleteCategory;
     // Products / Selection
     m.product = {}; // ui-select model
     m.products = [];
@@ -51,6 +40,8 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
     m.cancelAddNew = cancelAddNew;
     m.saveAddNew = saveAddNew;
     m.removeCustomProduct = removeCustomProduct;
+    // Categories
+    m.onCategoryChange = onCategoryChange;
 
 
     activate();
@@ -60,21 +51,9 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
             m.project = res;
             m.patchObserver = jsonpatch.observe(m.project);
 
-            // Categories
-            var categoryName = res.selectedCategory;
-            if (categoryName) {
-                m.category.selected = {name: categoryName}; // TODO: extend after read
-            }
-            m.categories = [].concat(res.categories); // copy of custom
-
-            Projects.readPublicCategories(m.projectId).then(function (res) {
-                m.categories = [].concat(m.categories, res.categories);
-            });
-
             // Products
             addProductsToList(res.products, true);
-
-            loadPublicProducts({q: categoryName, from: 0, limit: QUERY_LIMIT});
+            loadPublicProducts({q: res.selectedCategory});
         });
 
         $scope.$on('$destroy', function () {
@@ -115,81 +94,19 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
         m.loadingMore = true;
         return Projects.readPublicProducts(params)
             .then(function (res) {
-                var len = res.products.length;
-                var lastBatch = (len < QUERY_LIMIT);
-                if (len) {
-                    loadFrom += len;
-                    addProductsToList(res.products, false, {selected: false});
-                }
-                if (lastBatch) {
-                    m.noLoadMore = true;
-                }
+                addProductsToList(res.products, false, {selected: false});
             })
             .finally(function () {
                 m.loadingMore = false;
             });
     }
 
-    function loadMoreProducts(reset) {
-        var categoryName = (m.category.selected || {}).name || '';
-        var params = {
-            q: categoryName,
-            from: loadFrom,
-            limit: QUERY_LIMIT
-        };
-
-        if (reset) {
-            params.from = 0;
-            m.noLoadMore = false;
-            loadFrom = 0;
-        }
-
-        loadPublicProducts(params);
-    }
-
     // Category
     //
-    function groupByCategory(item) {
-        return item.domain || '';
-    }
-
-    function selectCategory(category) {
-        m.project.selectedCategory = category.name;
-        patchProject();
-
+    function onCategoryChange(categoryName) {
         // Build new list of products
         addProductsToList(m.project.products, true); //reset!
-        loadMoreProducts(true);
-    }
-
-    function addCategory(val) {
-        var exist = _.findWhere(m.categories, {name: val});
-        if (exist) { return; } // XXX - API must handle too
-
-        var item = {
-            name: val,
-            domain: '',
-            custom: true
-        };
-        m.categories.unshift(item); // all
-
-        m.project.categories.unshift(item); // custom
-        patchProject();
-
-        return item;
-    }
-
-    function deleteCategory(category) {
-        _.removeItem(m.categories, category);
-        _.removeItem(m.project.categories, category);
-
-        var categoryName = (m.category.selected || {}).name || '';
-        if (category.name === categoryName) {
-            m.category = {};
-            m.project.selectedCategory = null;
-        }
-
-        patchProject();
+        loadPublicProducts({q: categoryName});
     }
 
     //Selection
@@ -236,9 +153,8 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, filterFilter, _, js
     }
 
     function saveAddNew() {
-        var categoryName = (m.category.selected || {}).name || '';
-        var product = angular.extend({}, emptyNew, m.addNew.model);
-        product.category = categoryName;
+        var categoryName = m.project.selectedCategory;
+        var product = angular.extend({}, emptyNew, m.addNew.model, {category: categoryName});
 
         addRemoveToProject(product);
         patchProject().then(function (res) {

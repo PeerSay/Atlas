@@ -8,30 +8,8 @@
     </div>
     <div class="panel-body">
         <!--Select Category-->
-        <form>
-            <div class="form-group">
-                <ui-select ng-model="cm.category.selected" theme="bootstrap"
-                        tagging="cm.addCategory"
-                        tagging-tokens="ENTER"
-                        tagging-label="(adding new)"
-                        on-select="cm.selectCategory($model)">
-                    <!--Label don't work-->
-                    <ui-select-match placeholder="Select or search a category or domain...">
-                        {{ $select.selected.name }}
-                        <span class="fa fa-check"></span>
-                    </ui-select-match>
-                    <ui-select-choices repeat="category in cm.categories | filter:$select.search track by category.name"
-                            group-by="cm.groupByCategory">
-                        <span ng-bind-html="category.name | highlight: $select.search"></span>
-                        <span ng-if="category.name == cm.category.selected.name" class="fa fa-check"></span>
-                                <span ng-if="category.custom" class="delete-category"
-                                        ng-click="cm.deleteCategory(category)">
-                                    <span class="fa fa-trash"></span> <span class="link">Delete</span>
-                                </span>
-                    </ui-select-choices>
-                </ui-select>
-            </div>
-        </form>
+        <div ng-include="'/html/category-select.html'"></div>
+
         <!--Top form-->
         <form class="row">
             <!--Col2 - Select/Add Products-->
@@ -153,11 +131,9 @@
                     </td>
                 </tr>
                 <!--Load more-->
-                <tr ng-if="!cm.noLoadMore">
+                <tr ng-if="cm.loadingMore">
                     <td colspan="5" class="text-center">
-                        <button type="button" class="btn btn-xxs btn-default load-more"
-                                ng-class="{loading: cm.loadingMore}"
-                                ng-click="cm.loadMoreProducts()">
+                        <button type="button" class="btn btn-xxs btn-default">
                             <span class="fa fa-refresh fa-spin"></span>
                         </button>
                     </td>

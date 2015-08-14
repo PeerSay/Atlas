@@ -13,7 +13,7 @@
                 <h4>Presentations</h4>
                 <table class="table table-condensed present-table">
                     <tbody>
-                    <tr ng-repeat="snap in pr.snapshots">
+                    <tr ng-repeat="snap in pr.snapshots | orderBy:'-id' track by snap.id">
                         <td>
                             <a href="{{:: snap.html.url }}" target="_blank">{{:: snap.title }}</a>
                         </td>

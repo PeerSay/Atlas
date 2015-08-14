@@ -28,7 +28,7 @@ function nextFileFn() {
     var i = 0;
     return function () {
         return './file' + (i++) + '.pdf';
-    }
+    };
 }
 
 // Run

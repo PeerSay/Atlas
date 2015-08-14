@@ -142,7 +142,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     function readPublicRequirements(params) {
         return Backend.read(['public', 'requirements'], null, params).then(function (data) {
             return {requirements: data.result};
-        })
+        });
     }
 
     // Products / Categories

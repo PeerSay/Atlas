@@ -20,7 +20,7 @@ var defaultProject = {
 };
 var durationLabelEnum = ['Days', 'Weeks', 'Months'];
 var amountMultiplierEnum = ['----', 'Thousands'];
-var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes (BTC is unofficial)
+var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes
 
 // Schema
 //
@@ -114,11 +114,11 @@ var projectSchema = new Schema({
 projectSchema.set('toJSON', {virtuals: true});
 
 
-projectSchema.statics.createByUser = function (project, user, next) {
-    project = (project || defaultProject);
-    project.collaborators = [user._id];
+projectSchema.statics.createByUser = function (data, user, next) {
+    data = (data || defaultProject);
+    data.collaborators = [user._id];
 
-    Project.create(project, function (err, prj) {
+    Project.create(data, function (err, prj) {
         if (err) { return next(err); }
 
         // Create stub sub-doc
@@ -170,7 +170,7 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
     if (!project.isModified('title')) { return next(); }
 
     Project
-        .findById(id, 'collaborators')// XXX: can avoid?
+        .findById(id, 'collaborators')
         .populate('collaborators', 'projects')
         .exec(function (err, prj) {
             if (err) { return next(err); }
@@ -326,7 +326,6 @@ function getLogoResourceUrls(projectId, fileName) {
 // Model
 //
 var Project = mongoose.model('Projects2', projectSchema);
-
 
 module.exports = {
     ProjectModel: Project

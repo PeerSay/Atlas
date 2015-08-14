@@ -7,9 +7,8 @@ var config = require('../app/config');
 
 // Dependencies to Mock
 var errors = require('../app/errors');
-var user = require('../app/models/users');
-var User = user.UserModel;
-var Settings = user.SettingsModel;
+var User = require('../app/models/users').UserModel;
+var Settings = require('../app/models/settings').SettingsModel;
 
 // --> Connect to test DB
 var DB_URL = 'mongodb://localhost/peersay_test';
@@ -33,7 +32,7 @@ describe('User Model', function () {
         before(function (done) {
             // Ensure initial id=1
             Settings.remove().exec();
-            Settings.findOneAndUpdate({}, {}, {upsert: true}).exec();
+
             // Ensure one verified User exists
             User.create({name: 'me', email: 'some@email.com', password: '1', needVerify: false}, done);
         });

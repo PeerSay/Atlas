@@ -19,7 +19,7 @@ var errors = require('../../app/errors');
 var projectStubSchema = new Schema({
     title: { type: String, required: true },
     _stub: { type: Boolean, default: true },
-    _ref: { type: ShortId, ref: 'Project' }
+    _ref: { type: ShortId, ref: 'Projects2' }
 });
 
 var userSchema = new Schema({

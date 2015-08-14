@@ -87,7 +87,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
 
             var copy = angular.extend({}, it, extend);
             m.products.push(copy);
-        })
+        });
     }
 
     function loadPublicProducts(params) {

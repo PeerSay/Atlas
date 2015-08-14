@@ -26,7 +26,13 @@ var agent = request.agent(app);
 var companyEmail = 'PeerSay <team@peer-say.com>';
 
 // Mock config
-process.deploy = {web: {}, db: {hash_iters: 100}, auth: {linkedin : {api_key: 'x', secret_key: 'x'}}, email: {enable: false, auth: {}}};
+process.deploy = {
+    web: {},
+    db: {hash_iters: 100},
+    auth: {linkedin : {api_key: 'x', secret_key: 'x'}},
+    email: {enable: false, auth: {}},
+    s3: {enable: false}
+};
 var config = require('../app/config');
 
 // Dependencies to Mock

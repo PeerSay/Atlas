@@ -69,14 +69,14 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         var publicReqsQ = Projects.readProject(m.projectId).then(function (res) {
             return res.selectedCategory;
         }).then(function (category) {
-            return Projects.readPublicRequirements({q: category})
+            return Projects.readPublicRequirements({q: category});
         }).then(function (res) {
             return res.requirements;
         });
 
         return $q.all([publicTopicsQ, localReqsQ, publicReqsQ]).finally(function () {
             m.loadingMore = false;
-        })
+        });
     }
 
     function observe(project) {
@@ -257,7 +257,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
                     this.selected = {name: topic};
                 },
                 value: function () {
-                    return (this.selected || {}).name || ''
+                    return (this.selected || {}).name || '';
                 },
                 onSelect: function (m) {
                     if (m) {

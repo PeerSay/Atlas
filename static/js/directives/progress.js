@@ -25,7 +25,7 @@ function psProgress() {
                 $el.css({
                     width: scope.value + '%',
                     backgroundColor: getBgColor(scope.value)
-                })
+                });
             }
 
             function getBgColor(val) {

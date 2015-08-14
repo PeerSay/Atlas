@@ -170,7 +170,7 @@ function TableModel() {
             }
 
             obj[path] = oldValue = M.value;
-            return true
+            return true;
         }
 
         function validate() {
@@ -218,7 +218,7 @@ function TableModel() {
                 ave = Math.round(ave * 10) / 10; // .1
             }
             return ave;
-        }
+        };
     }
 
     function weightPercentComputeFn(cellModel) {
@@ -262,7 +262,7 @@ function TableModel() {
             }, 0);
 
             return (value === max);
-        }
+        };
     }
 
     function muteOnZeroFn(model) {

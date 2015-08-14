@@ -17,7 +17,7 @@ function psTableInput() {
                 // using jquery.column.js plugin
                 var $inputCol = $cells.nthCol($td.index());
                 var $gradeCol = $cells.nthCol($td.index() + 1);
-                return $inputCol.add($gradeCol)
+                return $inputCol.add($gradeCol);
             };
 
             var ctrl = scope.$eval(attrs.psCtrl);

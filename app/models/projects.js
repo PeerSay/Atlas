@@ -122,7 +122,7 @@ projectSchema.statics.createByUser = function (data, user, next) {
     // If category during creation is new, then add it to project's local list
     if (data.customCategory) {
         project.categories.push({
-            name: data.selectedCategory,
+            name: data.category,
             custom: true
         });
     }

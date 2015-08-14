@@ -177,15 +177,15 @@ function Projects(Backend, User, _) {
             return Backend.patch(['projects', id], data);
         }
 
-        function invalidateCache(id, data) {
-            var patch = data[0]; // XXX - only first!
-
-            if (patch.path === '/selectedCategory') {
+        function invalidateCache(id, patches) {
+            var categoryChanged = _.findWhere(patches, {path: '/selectedCategory'});
+            if (categoryChanged) {
                 // Project category/title is changed => invalidate Project stubs to get new titles
                 Backend.invalidateCache(['user']);
             }
 
-            if (/\/products|\/requirements/.test(patch.path)) {
+            var tableChanged = /\/products|\/requirements/.test(patches[0].path); // always single patch?
+            if (tableChanged) {
                 Backend.invalidateCache(['projects', id, 'table']);
             }
 

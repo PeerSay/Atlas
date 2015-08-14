@@ -36,6 +36,8 @@ function ProjectListCategoryCtrl($scope, CategorySelect, Projects, _) {
     }
 
     function selectCategory(name) {
+        if (name === newProject.category) { return;}
+
         newProject.category = name;
         newProject.customCategory = false;
     }
@@ -43,6 +45,7 @@ function ProjectListCategoryCtrl($scope, CategorySelect, Projects, _) {
     function addCategory(item) {
         newProject.category = item.name;
         newProject.customCategory = true;
+        parent.createProject(); // create & open on Enter
     }
 
     function removeCategory(name, isSelected) {

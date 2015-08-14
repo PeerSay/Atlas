@@ -8,7 +8,9 @@
     </div>
     <div class="panel-body">
         <!--Select Category-->
-        <div ng-include="'/html/category-select.html'"></div>
+        <form ng-controller="ProjectCategoryCtrl as category">
+            <div ng-include="'/html/category-select.html'"></div>
+        </form>
 
         <!--Buttons & search row-->
         <form class="row">

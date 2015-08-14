@@ -26,7 +26,7 @@ var resourceJSON = function (def) {
 // Snapshot schema
 //
 var snapshotSchema = new Schema({
-    id: {type: Number, unique: true},
+    id: {type: Number}, // cannot enforce unique on subdocs
     title: {type: String, required: true},
     created: {type: Date, default: Date.now},
     html: resourceJSON('html'),

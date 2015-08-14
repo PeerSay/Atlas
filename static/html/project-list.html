@@ -52,30 +52,27 @@
             </a>
 
             <!--Create Project Dialog-->
-            <div class="panel panel-default dialog" ng-show="list.create.showDlg">
+            <div class="panel panel-default dialog" ng-if="list.create.showDlg">
                 <div class="panel-heading">
                     <h3 class="panel-title">Create Project</h3>
                     <button type="button" class="btn close" ng-click="list.toggleCreateDlg(false)"
-                            ng-disabled="list.creating">
+                            ng-disabled="list.create.progress">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
                 </div>
                 <div class="panel-body">
                     <form name="list.form" ng-submit="list.createProject()">
-                        <div class="form-group">
-                            <label for="project-title" class="control-label">Title</label>
-                            <input type="text" id="project-title" class="form-control"
-                                    placeholder='Like "Storage Project" for example...'
-                                    required
-                                    ng-model="list.create.title"
-                                    ps-focus-on="list.create.showDlg"
-                                    ng-disabled="list.creating">
-                        </div>
+                        <!--Select Category-->
+                        Selected: {{ list.newProject.category }}
+                        <div ng-controller="ProjectListCategoryCtrl as category"
+                                ng-include="'/html/category-select.html'"></div>
+
+                        <!--Submit-->
                         <button type="submit" class="btn btn-success"
-                                ng-disabled="list.form.$invalid || list.creating"
+                                ng-disabled="!list.newProject.category || list.create.progress"
                                 >
-                            <span ng-if="!list.creating">Create</span>
-                            <span ng-if="list.creating"><span class="fa fa-spinner fa-spin"></span> Creating</span>
+                            <span ng-if="!list.create.progress">Create</span>
+                            <span ng-if="list.create.progress"><span class="fa fa-spinner fa-spin"></span> Creating</span>
                         </button>
                     </form>
                 </div>

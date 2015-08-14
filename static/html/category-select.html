@@ -1,24 +1,23 @@
-<form ng-controller="ProjectCategoryCtrl as cat">
-    <div class="form-group" ng-init="sel = cat.categories">
-        <ui-select ng-model="sel.model.selected" theme="bootstrap"
-                tagging="sel.add"
-                tagging-tokens="ENTER"
-                tagging-label="(adding new)"
-                on-select="sel.select($model)">
-            <!--Label don't work (see bug)-->
-            <ui-select-match placeholder="Select or search a category or domain...">
-                {{ $select.selected.name }}
-                <span class="fa fa-check"></span>
-            </ui-select-match>
-            <ui-select-choices repeat="category in sel.list | filter:$select.search track by category.name"
-                    group-by="sel.groupBy">
-                <span ng-bind-html="category.name | highlight: $select.search"></span>
-                <span ng-if="category.name === sel.model.selected.name" class="fa fa-check"></span>
+<!--Requires a Controller exposed like 'as category'-->
+<div class="form-group" ng-init="sel = category.categories">
+    <ui-select ng-model="sel.model.selected" theme="bootstrap"
+            tagging="sel.add"
+            tagging-tokens="ENTER"
+            tagging-label="(adding new)"
+            on-select="sel.select($model)">
+        <!--Label don't work (ui-select bug)-->
+        <ui-select-match placeholder="Select or search a category or domain...">
+            {{ $select.selected.name }}
+            <span class="fa fa-check"></span>
+        </ui-select-match>
+        <ui-select-choices repeat="category in sel.list | filter:$select.search track by category.name"
+                group-by="sel.groupBy">
+            <span ng-bind-html="category.name | highlight: $select.search"></span>
+            <span ng-if="category.name === sel.model.selected.name" class="fa fa-check"></span>
                 <span ng-if="category.custom" class="delete-category"
                         ng-click="sel.remove(category)">
                     <span class="fa fa-trash"></span> <span class="link">Delete</span>
                 </span>
-            </ui-select-choices>
-        </ui-select>
-    </div>
-</form>
+        </ui-select-choices>
+    </ui-select>
+</div>

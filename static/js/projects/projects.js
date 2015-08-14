@@ -3,15 +3,15 @@
 angular.module('PeerSay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['Backend', 'User', 'Util', '$q', 'Storage', '$timeout'];
-function Projects(Backend, User, _, $q, Storage, $timeout) {
+Projects.$inject = ['Backend', 'User', 'Util'];
+function Projects(Backend, User, _) {
     var P = {};
 
     // List
     P.projects = [];
     P.create = {
         showDlg: false,
-        title: ''
+        progress: false
     };
     P.toggleCreateDlg = toggleCreateDlg;
     P.getProjectStubs = getProjectStubs;
@@ -19,9 +19,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.removeProject = removeProject;
     // Details
     P.current = {
-        project: {
-            title: ''
-        },
+        project: {},
         table: []
     };
     // Read
@@ -52,15 +50,16 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         });
     }
 
-    function createProject() {
-        return Backend.create(['projects'], {title: P.create.title})
+    function createProject(data) {
+        P.create.progress = true;
+        return Backend.create(['projects'], data)
             .then(function (data) {
                 P.projects.push(data.result);
                 return data.result;
             })
             .finally(function () {
                 P.create.showDlg = false;
-                P.create.title = '';
+                P.create.progress = false;
             });
     }
 
@@ -181,8 +180,8 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         function invalidateCache(id, data) {
             var patch = data[0]; // XXX - only first!
 
-            if (patch.path === '/title') {
-                // Project title is changed => invalidate Project stubs to get new titles
+            if (patch.path === '/selectedCategory') {
+                // Project category/title is changed => invalidate Project stubs to get new titles
                 Backend.invalidateCache(['user']);
             }
 

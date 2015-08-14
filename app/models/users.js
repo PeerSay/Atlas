@@ -114,10 +114,7 @@ userSchema.statics.register = function (email, password, user_data, cb) {
         User.create(user_data, function (err, user) {
             if (err) { return cb(err); }
 
-            Project.createByUser(null/*default*/, user, function (err) {
-                if (err) { return cb(err); }
-                return cb(null, user, errors.AUTH_NEW_OK);
-            });
+            return cb(null, user, errors.AUTH_NEW_OK);
         })
     });
 };

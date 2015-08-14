@@ -15,9 +15,6 @@ var FILES_PATH = path.join(__dirname, '../../files');
 
 // Presets
 //
-var defaultProject = {
-    title: 'Welcome Project'
-};
 var durationLabelEnum = ['Days', 'Weeks', 'Months'];
 var amountMultiplierEnum = ['----', 'Thousands'];
 var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes
@@ -115,18 +112,29 @@ projectSchema.set('toJSON', {virtuals: true});
 
 
 projectSchema.statics.createByUser = function (data, user, next) {
-    data = (data || defaultProject);
-    data.collaborators = [user._id];
+    var project = {
+        title: data.category,
+        selectedCategory: data.category,
+        collaborators: [user._id],
+        categories: []
+    };
 
-    Project.create(data, function (err, prj) {
+    // If category during creation is new, then add it to project's local list
+    if (data.customCategory) {
+        project.categories.push({
+            name: data.selectedCategory,
+            custom: true
+        });
+    }
+
+    Project.create(project, function (err, prj) {
         if (err) { return next(err); }
 
         // Create stub sub-doc
-        var subDoc = {
-            title: prj.title,
+        user.projects.push({
+            title: prj.selectedCategory,
             _ref: prj._id
-        };
-        user.projects.push(subDoc); // save() is required for sub-doc!
+        });
 
         user.save(function (err, user) {
             if (err) { return next(err); }
@@ -161,6 +169,16 @@ projectSchema.statics.removeByUser = function (project_id, user, next) {
     });
 };
 
+projectSchema.pre('save', function ensureTitle(next) {
+    var project = this;
+
+    // Make up title after category
+    if (!project.isModified('selectedCategory')) { return next(); }
+
+    project.title = project.selectedCategory || '(None)';
+
+    next();
+});
 
 projectSchema.pre('save', function ensureStubsUpdated(next) {
     var project = this;

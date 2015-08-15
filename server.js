@@ -7,12 +7,10 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 var passport = require('passport');
-var swig = require('swig');
 
 // Setup config
 process.deploy = process.argv[2];
 var config = require('./app/config');
-
 
 // Connect to DB
 console.log(' [DB] url: %s, security: %d', config.db.url, config.db.hash_iters);
@@ -26,8 +24,11 @@ var http = require('http').Server(app);
 // Set web options & middleware
 app.disable('x-powered-by');
 app.use(compression());
+
 app.use(express.static(config.web.static_dir));
-app.use('/files', express.static(path.join(__dirname, '.', 'files'))); // files
+app.use('/bower_components', express.static(path.join(__dirname, 'static', 'bower_components')));
+app.use('/files', express.static(path.join(__dirname, 'files')));
+
 app.use(cookieParser());
 app.use(session({
     secret: '8a779a89-8e82-4c31-80a0-284eed6ee12f',
@@ -39,13 +40,6 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Swig templates
-app.engine('html', swig.renderFile);
-app.set('view engine', 'html');
-app.set('views', config.web.static_dir + '/tpl');
-app.set('view cache', false);
-swig.setDefaults({ cache: false }); //TODO - comment one of them
 
 
 // Setup routes

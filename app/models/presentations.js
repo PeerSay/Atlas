@@ -134,6 +134,19 @@ snapshotSchema.pre('save', function ensurePDF(next) {
 });
 
 
+snapshotSchema.pre('save', function ensureBackupToS3(next) {
+    var snap = this;
+    if (!snap.isNew) { return next(); }
+
+    // Need to upload at most 3 files: pdf, html and logo(optionally)
+    var project = this.parent();
+
+    uploadFilesToS3(project, snap, function (err) {
+        if (err) { return next(err); }
+        next();
+    });
+});
+
 // Post hooks
 //
 
@@ -145,21 +158,6 @@ snapshotSchema.post('remove', function ensureLocalUnlink(doc) {
     unlinkFile(path.join(fileDir, doc.html.fileName));
 });
 
-
-/*TODO
- *
- * s3.upload(filePath, {subDir: projectId, fileName: fileName}, function (err, data) {
- if (err) {
- // TODO - correct error code
- return errRes.notFound(res, 'failed to persist to S3');
- }
-
- console.log('[API] Upload PDF presentation[%s] of project[%s] to S3 success, res=[%s]',
- presId, projectId, data.Location);
-
- res.json({result: subdoc.genericUrl});
- });
- * */
 
 // Util
 //
@@ -239,6 +237,41 @@ function unlinkFile(path) {
     console.log('[DB] Unlinked[%s]', path);
 }
 
+function uploadFilesToS3(project, snap, cb) {
+    var projectId = project._id;
+    var fileDir = path.join(FILES_PATH, projectId);
+    var files = [];
+
+    files.push({
+        name: snap.pdf.fileName,
+        path: path.join(fileDir, snap.pdf.fileName),
+        contentType: 'application/pdf'
+    });
+    files.push({
+        name: snap.html.fileName,
+        path: path.join(fileDir, snap.html.fileName),
+        contentType: 'text/html'
+    });
+    var logo = project.presentation.data.logo.image;
+    if (logo.fileName) {
+        files.push({
+            name: logo.fileName,
+            path: path.join(fileDir, logo.fileName),
+            contentType: 'image/' + path.extname(logo.fileName).replace('.', '')
+        });
+    }
+
+    //console.log('>> ensureBackupToS3', files);
+
+    s3.upload(files, {subDir: projectId})
+        .then(function (res) {
+            console.log('[DB] Upload files to S3 success: %s', JSON.stringify(res));
+            cb(null);
+        })
+        .catch(function (reason) {
+            cb(reason);
+        });
+}
 
 // Presentation Schema
 //

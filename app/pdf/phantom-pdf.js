@@ -1,4 +1,4 @@
-var Q = require('Q');
+var Q = require('q');
 var path = require('path');
 var phantom = require('phantom');
 

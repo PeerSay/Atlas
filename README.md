@@ -63,3 +63,4 @@ When feature branch should be shared between developers:
     2. git merge dev
     3. git push heroku master
     4. GoTo http://peersay.herokuapp.com/  
+

@@ -42,9 +42,15 @@ body {
   .make-sm-column-offset(3);
   .make-lg-column(8);
   .make-lg-column-offset(2);
-  &.full-screen {
+  &.full-screen:not(.no-menu){
+    .make-lg-column(10);
+  }
+  &.no-menu {
     .make-xs-column(12);
     .make-xs-column-offset(0);
+    &:not(.full-screen) {
+      .make-lg-column(10);
+    }
   }
   transition: all .3s ease;
 
@@ -84,7 +90,7 @@ body {
 
   // Hidden state
   transition: left .3s ease;
-  .full-screen & {
+  .no-menu & {
     left: ~"calc(-25% + 15px)";
     @media (min-width: @screen-lg-min) {
       left: ~"calc(-16.6667% + 15px)";
@@ -111,7 +117,7 @@ body {
     // Hidden state
     opacity: 1;
     transition: opacity .3s ease;
-    .full-screen & {
+    .no-menu & {
       opacity: 0;
     }
   }

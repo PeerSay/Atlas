@@ -1,7 +1,7 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as cm">
     <div class="row">
         <div class="container-col"
-                ng-class="{'full-screen': cm.fullscreen.on}">
+                ng-class="{'no-menu': cm.noMenu.on, 'full-screen': cm.fullScreen.on}">
             <!--Title-->
             <div class=row>
                 <div class="col-xs-12">
@@ -18,7 +18,7 @@
 
                     <!--Full screen toggle-->
                     <div class="fullscreen-toggle"
-                            ng-click="cm.fullscreen.toggle()">
+                            ng-click="cm.fullScreen.toggle()">
                         <span class="fa fa-chevron-right"></span>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
             <div class="sidebar-container">
                 <!--Toggler-->
                 <div class="sidebar-toggler">
-                    <button type="button" ng-click="cm.fullscreen.toggle()">
+                    <button type="button" ng-click="cm.noMenu.toggle()">
                         <span class="fa fa-caret-left"></span>
                     </button>
                 </div>

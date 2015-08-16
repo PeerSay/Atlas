@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects', 'FullScreen', 'Backend'];
-function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, FullScreen, Backend) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects', 'StorageRecord'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, StorageRecord) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -14,7 +14,8 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, FullScre
     m.products = [];
     m.snapshots = [];
     //Full screen
-    m.fullscreen = FullScreen;
+    m.fullScreen = StorageRecord.boolean('fs');
+    m.noMenu = StorageRecord.boolean('no-menu');
 
     activate();
 

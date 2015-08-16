@@ -5,7 +5,7 @@
         <a class="btn btn-default export header-btn"
                 ng-mousedown="csv.generate()"
                 ng-href="{{ csv.link() }}"
-                download="export.csv"
+                download="{{ table.shared.project.title }}.csv"
                 ps-export-csv="csv"
                 data-get-csv="table.getCsv()"
                 ng-disabled="!view.rows.length">
@@ -33,9 +33,5 @@
                         ng-init="view = table.tableView"></div>
             </div>
         </div>
-
-        <!--Done link - not needed in the Table-->
-        <!--a class="btn btn-primary pull-right" ui-sref="^.dashboard"
-                ng-if="!table.loading">Take me to the Dashboard</a-->
     </div>
 </div>

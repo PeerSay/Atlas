@@ -6,6 +6,7 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
     var m = this;
 
     m.projectId = $stateParams.projectId;
+    m.shared = Projects.current; // for title
     m.project = null;
     m.patchObserver = null;
     m.patchProject = patchProject;
@@ -15,7 +16,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
     var table = Table(m);
     m.tableView = table.getView();
     m.getCsv = TableModel.getCsv.bind(TableModel);
-    m.patchProject = patchProject;
 
 
     // Called by Table

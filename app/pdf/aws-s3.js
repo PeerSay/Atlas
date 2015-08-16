@@ -1,6 +1,7 @@
 var Q = require('q');
 var fs = require('fs');
 var AWS = require('aws-sdk');
+var format = require('util').format;
 
 // Configure
 var config = require('../../app/config');
@@ -14,11 +15,13 @@ AWS.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY}
 console.log(' [S3] enabled: %s', enabled && S3_BUCKET);
 
 
-function skip() {
-    return Q.fcall(function () {
-        console.log('[S3] SKIPPED - disabled by config');
-        return "disabled by config";
-    });
+function skip(op) {
+    return function () {
+        return Q.fcall(function () {
+            console.log('[S3] SKIPPED %s - disabled by config', op);
+            return format("%s disabled by config", op);
+        });
+    }
 }
 
 function createBucket(bucketName) {
@@ -42,13 +45,12 @@ function createBucket(bucketName) {
 }
 
 //@formatter:off
-/*
- fileSpecs is: {
+/* fileSpecs = {
    name: '',
    path: '',
    contentType: ''
  }
- */
+*/
 //@formatter:on
 function uploadOne(file, bucketName) {
     var deferred = Q.defer();
@@ -63,7 +65,7 @@ function uploadOne(file, bucketName) {
     };
     var s3 = new AWS.S3();
 
-    console.log("[S3] Uploading[%s] to: %s", file.name, bucketName);
+    console.log("[S3] Uploading[%s] to[%s]", file.name, bucketName);
 
     s3.upload(uploadParams)
         .on('httpUploadProgress', function (evt) {
@@ -83,8 +85,6 @@ function uploadOne(file, bucketName) {
 function upload(fileSpecs, to) {
     var bucketName = S3_BUCKET + '/' + to.subDir;
 
-    if (!enabled) { return skip(); }
-
     return createBucket(bucketName)
         .then(function () {
             var fileQs = fileSpecs.map(function (file) {
@@ -96,30 +96,81 @@ function upload(fileSpecs, to) {
         .catch(function (reason) {
             console.log('[S3] Error: ', reason);
             return Q.reject(reason);
-        })
+        });
 }
 
-function remove(from, cb) {
-    var s3 = new AWS.S3();
-    var bucket = S3_BUCKET + '/' + from.subDir;
-    var params = {
-        Bucket: bucket,
-        Key: from.fileName
+//@formatter:off
+/* from = {
+   name: '',
+   subDir: ''
+ }
+*/
+//@formatter:on
+function removeOne(from) {
+    var deferred = Q.defer();
+    var bucketName = S3_BUCKET + '/' + from.subDir;
+    var deleteParams = {
+        Bucket: bucketName,
+        Key: from.name
     };
+    var s3 = new AWS.S3();
 
-    s3.deleteObject(params, function (err, data) {
+    console.log("[S3] Removing[%s] from[%s]", from.name, bucketName);
+
+    s3.deleteObject(deleteParams, function (err, data) {
         if (err) {
-            console.log('[S3] Delete error: ', err);
-            return cb(err);
+            deferred.reject(new Error('deleteObject failed: ', err.toString()));
+        } else {
+            deferred.resolve('ok');
         }
+    });
 
-        console.log('[S3] Delete success');
-        cb(null, data);
+    return deferred.promise;
+}
+
+
+function remove(fromSpecs) {
+    var fileQs = fromSpecs.map(function (from) {
+        return removeOne(from);
+    });
+
+    return Q.all(fileQs).catch(function (reason) {
+        console.log('[S3] Error: ', reason);
+        return Q.reject(reason);
     });
 }
 
+function _removeBucket(subDir) {
+    var deferred = Q.defer();
+    var bucketName = S3_BUCKET + '/' + subDir;
+    var params = {
+        Bucket: bucketName
+    };
+    var s3 = new AWS.S3();
+
+    console.log("[S3] Removing bucket[%s]", bucketName);
+
+    s3.deleteBucket(params, function (err, data) {
+        if (err) {
+            deferred.reject(new Error('deleteBucket failed: ', err.toString()));
+        }
+        else {
+            deferred.resolve('ok');
+        }
+    });
+
+    return deferred.promise;
+}
+
+function removeBucket(subDir) {
+    return _removeBucket(subDir).catch(function (reason) {
+        console.log('[S3] Error: ', reason);
+        return Q.reject(reason);
+    });
+}
 
 module.exports = {
-    upload: upload,
-    remove: remove
+    upload: enabled ? upload : skip('upload'),
+    remove: enabled ? remove : skip('remove'),
+    removeBucket: enabled ? removeBucket : skip('removeBucket')
 };

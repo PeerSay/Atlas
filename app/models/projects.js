@@ -9,6 +9,7 @@ var fs = require('fs-extra');
 
 var config = require('../../app/config');
 var util = require('../../app/util');
+var s3 = require('../../app/pdf/aws-s3');
 
 var FILES_PATH = path.join(__dirname, '../../files');
 
@@ -300,17 +301,6 @@ function patchTable(doc, patches) {
     }
 }
 
-// Post hooks
-//
-projectSchema.post('remove', function ensureLocalDirUnlink(doc) {
-    var projectId = doc._id;
-    var fileDir = path.join(FILES_PATH, projectId);
-
-    console.log('[DB] Unlinking dir [%s]', fileDir);
-    fs.removeSync(fileDir);
-});
-
-
 // Presentation logo
 projectSchema.path('presentation.data.logo.image.url').get(function () {
     var projectId = this._id;
@@ -339,6 +329,25 @@ function getLogoResourceUrls(projectId, fileName) {
         s3: ['https://s3.amazonaws.com', bucketName, projectId, safeFileName].join('/')
     };
 }
+
+// Post hooks
+//
+projectSchema.post('remove', function ensureLocalDirUnlink(doc) {
+    var projectId = doc._id;
+    var fileDir = path.join(FILES_PATH, projectId);
+
+    console.log('[DB] Unlinking dir [%s]', fileDir);
+    fs.removeSync(fileDir);
+});
+
+projectSchema.post('remove', function ensureS3removeBucket(doc) {
+    var projectId = doc._id;
+
+    console.log('[DB] Removing S3 bucket [%s]', projectId);
+    s3.removeBucket(projectId).then(function (res) {
+        console.log('[DB] Remove S3 bucket - success: %s', JSON.stringify(res));
+    });
+});
 
 
 // Model

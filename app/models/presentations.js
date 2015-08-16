@@ -150,12 +150,18 @@ snapshotSchema.pre('save', function ensureBackupToS3(next) {
 // Post hooks
 //
 
-snapshotSchema.post('remove', function ensureLocalUnlink(doc) {
+snapshotSchema.post('remove', function ensureLocalUnlink(snap) {
     var projectId = this.parent()._id;
     var fileDir = path.join(FILES_PATH, projectId);
 
-    unlinkFile(path.join(fileDir, doc.pdf.fileName));
-    unlinkFile(path.join(fileDir, doc.html.fileName));
+    unlinkFile(path.join(fileDir, snap.pdf.fileName));
+    unlinkFile(path.join(fileDir, snap.html.fileName));
+});
+
+snapshotSchema.post('remove', function ensureS3delete(snap) {
+    var project = this.parent();
+
+    removeFilesFromS3(project, snap);
 });
 
 
@@ -261,8 +267,6 @@ function uploadFilesToS3(project, snap, cb) {
         });
     }
 
-    //console.log('>> ensureBackupToS3', files);
-
     s3.upload(files, {subDir: projectId})
         .then(function (res) {
             console.log('[DB] Upload files to S3 success: %s', JSON.stringify(res));
@@ -271,6 +275,22 @@ function uploadFilesToS3(project, snap, cb) {
         .catch(function (reason) {
             cb(reason);
         });
+}
+
+function removeFilesFromS3(project, snap) {
+    var projectId = project._id;
+    var fromSpecs = [{
+        name: snap.pdf.fileName,
+        subDir: projectId
+    }, {
+        name: snap.html.fileName,
+        subDir: projectId
+    }];
+    // logo is removed on project remove
+
+    s3.remove(fromSpecs).then(function (res) {
+        console.log('[DB] Remove files from S3 success: %s', JSON.stringify(res));
+    });
 }
 
 // Presentation Schema

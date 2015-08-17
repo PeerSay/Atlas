@@ -301,20 +301,25 @@ function TableModel() {
             return cache[key];
         }
 
-        function add(row) {
+        function add(row, expandedState) {
             var key = row.req.topic || '(no name)';
-            var group = cache[key] = cache[key] || Group();
+            var group = cache[key] = cache[key] || Group(expandedState);
             group.addRow(row);
 
             return key;
         }
 
-        function Group() {
+        function Group(expandedState) {
             var G = {};
             G.addRow = addRow;
             G.weight = calcWeightPercents;
             G.grades = [];
             G.rows = []; // used by presentations
+            if (expandedState) {
+                // This is StorageRecord instance. Cannot instantiate it here because
+                // this module must not have angular dependency injection as it's used by server too.
+                G.expanded = expandedState;
+            }
 
             var groupColIdx = {};
 

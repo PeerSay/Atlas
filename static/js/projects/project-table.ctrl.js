@@ -1,8 +1,8 @@
 angular.module('PeerSay')
     .controller('ProjectTableCtrl', ProjectTableCtrl);
 
-ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'TableModel', 'jsonpatch', 'Util'];
-function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableModel, jsonpatch, _) {
+ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'TableModel', 'jsonpatch', 'StorageRecord'];
+function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableModel, jsonpatch, StorageRecord) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -65,8 +65,13 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
         }
 
         function groupBy(row) {
-            var key = TableModel.groups.add(row);
+            var expandedState = StorageRecord.boolean(getExpandedGroupKey(row.req.topic));
+            var key = TableModel.groups.add(row, expandedState);
             return key;
+        }
+
+        function getExpandedGroupKey(topic) {
+            return ['table', m.projectId, topic.replace(/\W/g, '')].join('-');
         }
 
         // Model

@@ -164,6 +164,13 @@ requirements = [
         topic: 'System Interfaces & Management Capabilities',
         popularity: 60
     },
+    {
+        _id: '55b0ebe3749dae4268bbc2d4',
+        name: 'Mobile compatibility',
+        description: 'The type and quality of the Mobile interface - native app, responsive web-interface, etc.',
+        topic: 'System Interfaces & Management Capabilities',
+        popularity: 60
+    },
 
     {
         _id: '559cf8cbd21e2f6d44eb640a',
@@ -454,6 +461,63 @@ requirements = [
         topic: 'Contact & Call Center Functionality',
         popularity: 50,
         category: 'Contact & Call Center'
+    },
+
+    {
+        _id: '55b0f12d749dae4268bbc2d6',
+        name: 'Customizable pipeline process',
+        description: 'The ability to customize the process to fit the steps and terminology that you use',
+        topic: 'Dealflow Management Functionality',
+        popularity: 90,
+        category: 'Dealflow Management'
+    },
+    {
+        _id: '55b0f19d749dae4268bbc2d7',
+        name: 'Pipeline reports',
+        description: 'Built-in and customizable reports for monitoring deals in the pipeline',
+        topic: 'Dealflow Management Functionality',
+        popularity: 90,
+        category: 'Dealflow Management'
+    },
+    {
+        _id: '55b0f220749dae4268bbc2d8',
+        name: 'Search capabilities',
+        description: 'The ability to search using free-text or predefined filters',
+        topic: 'Dealflow Management Functionality',
+        popularity: 80,
+        category: 'Dealflow Management'
+    },
+    {
+        _id: '55b0f246749dae4268bbc2d9',
+        name: 'Team collaboration',
+        description: 'Allow multiple people to share and collaborate on a deal',
+        topic: 'Dealflow Management Functionality',
+        popularity: 80,
+        category: 'Dealflow Management'
+    },
+    {
+        _id: '55b0f2b6749dae4268bbc2da',
+        name: 'Interact via Email',
+        description: 'The ability to email notes and files directly into the system',
+        topic: 'Dealflow Management Functionality',
+        popularity: 70,
+        category: 'Dealflow Management'
+    },
+    {
+        _id: '55b0f2c6749dae4268bbc2db',
+        name: 'Manage tasks',
+        description: 'Enables the team to assign and monitor tasks related to the deal',
+        topic: 'Dealflow Management Functionality',
+        popularity: 80,
+        category: 'Dealflow Management'
+    },
+    {
+        _id: '55b0f2d9749dae4268bbc2dc',
+        name: 'Cashflow monitoring',
+        description: 'Provides investment summary reports on the deals',
+        topic: 'Dealflow Management Functionality',
+        popularity: 60,
+        category: 'Dealflow Management'
     }
 ];
 

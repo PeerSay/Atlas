@@ -40,14 +40,21 @@ topics = [
     {
         _id: '559748733dc107cb754537f5',
         name: 'Threat Prevention Functionality',
-        description: 'The security features of a threat prevention solution',
+        description: 'The security features of a Threat Prevention solution',
         popularity: 99
     },
 
     {
         _id: '55acc1fa4c325a20daeac1d9',
         name: 'Contact & Call Center Functionality',
-        description: 'Specific functionality of a contact/call center solution',
+        description: 'Specific functionality of a Contact/Call Center solution',
+        popularity: 99
+    },
+
+    {
+        _id: '55b0f027749dae4268bbc2d5',
+        name: 'Dealflow Management Functionality',
+        description: 'Specific functionality of a Dealflow Management solution',
         popularity: 99
     }
 ];

@@ -15,7 +15,7 @@
         <!--Top form-->
         <form class="row">
             <!--Col2 - Select/Add Products-->
-            <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group">
+            <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group form-group-lg">
                 <ui-select ng-model="cm.product.selected" theme="bootstrap"
                         tagging="cm.addNotFoundProduct"
                         tagging-tokens="ENTER"
@@ -135,7 +135,7 @@
                 <!--Load more-->
                 <tr ng-if="cm.loadingMore">
                     <td colspan="5" class="text-center">
-                        <button type="button" class="btn btn-xxs btn-default">
+                        <button type="button" class="btn btn-xxs btn-default" disabled>
                             <span class="fa fa-refresh fa-spin"></span>
                         </button>
                     </td>

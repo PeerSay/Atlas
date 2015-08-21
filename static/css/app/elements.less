@@ -134,6 +134,7 @@ ul {
   }
 }
 
+
 /*
 Inputs
 */
@@ -161,5 +162,34 @@ textarea {
   }
   &.noresize {
     resize: none;
+  }
+}
+
+// Input states
+@input-border-focus: #ccc;
+.form-control{
+  .box-shadow(~"none");
+  &:focus {
+    background-color: @input-bg-focus;
+    outline: 0;
+    .box-shadow(~"none");
+  }
+}
+
+/*
+*Large controls
+*/
+@font-size-large: 16px;
+@padding-large-vertical: 5px;
+@input-border-radius-large: 2px;
+
+//Social btn
+.btn-social{
+  .button-size(@padding-large-vertical, @padding-large-horizontal, @font-size-large, @line-height-large, @input-border-radius-large);
+  &:hover {
+    color: #fff !important;//override ps theme
+  }
+  :first-child {
+    line-height: 32px;
   }
 }

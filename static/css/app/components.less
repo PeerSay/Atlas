@@ -151,7 +151,7 @@
     transition: all .3s;
 
     // Panel header
-    h3 {
+    h2 {
       margin: 10px 0 5px;
     }
     .header-btn {
@@ -504,6 +504,9 @@
   }
 
   .sidebar-menu {
+    @menu-border-width: 3px;
+    @menu-active-bg: #dcdcdc;
+    @menu-hover-bg: #e5e5e5;
     .menu-item {
       position: relative;
       a {
@@ -513,16 +516,16 @@
       }
       &.active {
         margin-left: -15px;
-        padding-left: 11px;
-        border-left: 4px solid @brand-primary;
-        background-color: #DCDCDC;
-        box-shadow: 0 1px 0 0 #F0F0F0, 0 -1px 0 0 #BFBFBF;
+        padding-left: 15px - @menu-border-width;
+        border-left: @menu-border-width solid @brand-primary;
+        background-color: @menu-active-bg;
+        //box-shadow: 0 1px 0 0 #F0F0F0, 0 -1px 0 0 #BFBFBF;
         font-weight: bold;
       }
       &:hover:not(.active) {
         margin-left: -15px;
         padding-left: 15px;
-        background-color: #e5e5e5;
+        background-color: @menu-hover-bg;
       }
       .label {
         position: absolute;
@@ -706,6 +709,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: 20px;
+    font-weight: normal; // override for it's child of .btn
   }
 
   //Disabled ui-select

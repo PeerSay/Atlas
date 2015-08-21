@@ -183,7 +183,7 @@ module.exports = function (grunt) {
                 src: [
                     'html/*.html',
                     'tpl/*.html',
-                    'fonts/*.{ttf,otf}',
+                    'fonts/{,*/}*.{eot,otf,ttf,woff,woff2}',
                     'images/{,*/}*.{png,jpg,gif}'
                 ],
                 dest: 'dist/'

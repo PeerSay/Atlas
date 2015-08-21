@@ -58,9 +58,6 @@ function Auth(app) {
         app.get('/projects', ensureAuthenticated, sendAppEntry); // send on F5
         app.get('/projects/*', ensureAuthenticated, sendAppEntry); // send on F5
 
-        // XXX
-        app.get('/app-theme/*', sendAppEntry2); // send on F5
-
         return U;
     }
 
@@ -409,11 +406,6 @@ function Auth(app) {
 
         res.sendFile('app.html', {root: config.web.static_dir});
     }
-
-    function sendAppEntry2(req, res) {
-        res.sendFile('/app-theme/index.html', {root: config.web.static_dir});
-    }
-
 
     function ensureAuthenticated(req, res, next) {
         if (req.isAuthenticated()) {

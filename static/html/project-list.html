@@ -1,9 +1,9 @@
 <div class="container-fluid" ng-controller="ProjectListCtrl as list">
     <div class="row">
         <div class="col-xs-12">
-            <h3 class="page-title text-center">
+            <h1 class="page-title text-center">
                 <span class="fa fa-list-alt"></span> My projects
-            </h3>
+            </h1>
         </div>
     </div>
     <div class="row">
@@ -12,7 +12,7 @@
             <span ng-if="prj.muted" class="fa fa-spinner fa-spin"></span>
             <a class="panel panel-default tile" href ng-click="list.editProject(prj.id)">
                 <div class="panel-body">
-                    <h4 class="name">{{ prj.title }}</h4>
+                    <h3 class="name">{{ prj.title }}</h3>
                 </div>
             </a>
             <!--Menu-->
@@ -37,7 +37,7 @@
         <div class="list-item-col">
             <a class="panel panel-default tile create-new" href ng-click="list.toggleCreateDlg(true)">
                 <div class="panel-body">
-                    <h4 class="text-center">Create New...</h4>
+                    <h3 class="text-center">Create New...</h3>
                 </div>
             </a>
 

@@ -1,10 +1,10 @@
 <!--Panel-->
 <div class="panel panel-default tile has-fullscreen-toggle" ng-controller="ProjectDashboardCtrl as board">
     <div class="panel-heading">
-        <h3 class="text-center">
+        <h2 class="text-center">
             <span class="fa fa-dashboard"></span>
             Dashboard
-        </h3>
+        </h2>
     </div>
     <div class="panel-body">
         <!--Load indicator-->
@@ -18,9 +18,9 @@
         <div class="row" ng-if="!board.loading">
             <!--Criteria-->
             <div class="col-xs-12 col-sm-6 page-spacer">
-                <h4 class="toggle-edit text-center">
+                <h3 class="toggle-edit text-center">
                     <a ui-sref="^.requirements">Criteria</a>
-                </h4>
+                </h3>
                 <p ng-if="!board.requirements.initialized">
                     There are not criteria selected yet. PeerSay presents popular criteria,
                     and let you select or add criteria that are important for your project's success.
@@ -38,9 +38,9 @@
 
             <!--Products-->
             <div class="col-xs-12 col-sm-6 page-spacer">
-                <h4 class="toggle-edit text-center">
+                <h3 class="toggle-edit text-center">
                     <a ui-sref="^.products">Products</a>
-                </h4>
+                </h3>
                 <p ng-if="!board.products.initialized">
                     There are no products selected yet. PeerSay presents popular products
                     per category, and allows you to view grades and opinions based on different criteria.
@@ -61,9 +61,9 @@
         <div class="row" ng-if="!board.loading">
             <!--Decision-->
             <div class="col-xs-12 col-sm-6 page-spacer">
-                <h4 class="toggle-edit text-center">
+                <h3 class="toggle-edit text-center">
                     <a ui-sref="^.decisions">Decision Table</a>
-                </h4>
+                </h3>
                 <p ng-if="!board.decisions.initialized">
                     Please select <a ui-sref="^.products">Products</a>
                     and <a ui-sref="^.requirements">Criteria</a> in order to make a decision,

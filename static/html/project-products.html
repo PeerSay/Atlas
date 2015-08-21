@@ -1,10 +1,10 @@
 <!--Panel-->
 <div class="panel panel-default tile has-fullscreen-toggle" ng-controller="ProjectProductsCtrl as cm">
     <div class="panel-heading">
-        <h3 class="text-center">
+        <h2 class="text-center">
             <span class="fa fa-bar-chart"></span>
             Products
-        </h3>
+        </h2>
     </div>
     <div class="panel-body">
         <!--Select Category-->
@@ -38,14 +38,14 @@
                         ng-click="cm.toggleAddNew()"
                         ng-class="{active: cm.addNew.show}"
                         >
-                    <span class="fa fa-plus-circle"></span> New
+                    <span class="fa fa-plus"></span> New
                 </button>
             </div>
         </form>
 
         <!--Add form-->
         <form name="cm.addForm" class="form-horizontal selector-edit-form add-new page-spacer" ng-show="cm.addNew.show">
-            <div class="form-group form-group-sm">
+            <div class="form-group">
                 <label for="prod-name" class="label-col control-label text-left-important">Name:</label>
                 <div class="control-col">
                     <input type="text" id="prod-name" class="form-control" placeholder="Name"
@@ -54,17 +54,17 @@
                             required>
                 </div>
             </div>
-            <div class="form-group form-group-sm">
+            <div class="form-group">
                 <label for="prod-descr" class="label-col control-label text-left-important">Description:</label>
                 <div class="control-col">
                     <input type="text" id="prod-descr" class="form-control" placeholder="Description"
                             ng-model="cm.addNew.model.description">
                 </div>
             </div>
-            <div class="form-group form-group-sm">
+            <div class="form-group">
                 <div class="label-col"></div>
                 <div class="control-col">
-                    <button type="button" class="btn btn-sm btn-primary"
+                    <button type="button" class="btn btn-primary"
                             ng-click="cm.saveAddNew()"
                             ng-disabled="cm.addForm.$invalid">Add</button>
                     <button type="button" class="btn close inline-close"

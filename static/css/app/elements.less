@@ -1,8 +1,6 @@
 /*
 * Standard elements
 */
-
-@app-body-bg: #ececec;
 body {
   background: @app-body-bg;
 }
@@ -13,30 +11,95 @@ ul {
   padding: 0;
 }
 
-textarea {
-  resize: both; /* none|horizontal|vertical|both */
-  &.resize-vert {
-    resize: vertical;
-  }
-  &.noresize {
-    resize: none;
-  }
-}
-
 .modal-dialog {
   /*It's better to cover full page on mobile*/
   margin-top: 10px;
 }
 
-/*See Angular ngCloak*/
-[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-  display: none !important;
+/*
+* Labels
+*/
+.label {
+  border-radius: 10px;
 }
+
 
 /*
 * Buttons
 */
+@border-radius-base: 2px;
+@padding-base-vertical: 4px;
+//Primary
+@btn-primary-border: @btn-primary-bg;
+@btn-primary-bg-focus: #2980b9;
+@btn-primary-bg-active: #206796;
+@btn-primary-color-active: @btn-primary-color;
+@btn-primary-bg-disabled: #4ab4e2;
+@btn-primary-color-disabled: lighten(@btn-primary-bg-disabled, 20%);
+//Default
+@btn-default-border: #d2d2d2;
+@btn-default-bg-focus: #eee;
+@btn-default-border-focus: #cecece;
+@btn-default-bg-active: #f2f2f2;
+@btn-default-border-active: @brand-primary;
+@btn-default-bg-disabled: #fefefe;
+@btn-default-border-disabled: @btn-default-border;
+@btn-default-color-disabled: @btn-default-border;
+
+.make-button(@bg-focus, @border-focus, @bg-active, @border-active, @color-active, @bg-disabled, @border-disabled, @color-disabled) {
+  &:hover,
+  &:focus,
+  &.focus {
+    outline: none;
+    background-color: @bg-focus;
+    border-color: @border-focus;
+  }
+  &:active,
+  &.active {
+    color: @color-active;
+    background-color: @bg-active;
+    border-color: @border-active;
+    //box-shadow: none;
+    &:hover,
+    &:focus,
+    &.focus {
+      background-color: darken(@bg-active, 5%);
+      border-color: darken(@border-active, 5%);
+    }
+  }
+
+  &.disabled,
+  &[disabled] {
+    &,
+    &:hover,
+    &:focus,
+    &.focus,
+    &:active,
+    &.active {
+      color: @color-disabled;
+      background-color: @bg-disabled;
+      border-color: @border-disabled;
+      opacity: 1;
+    }
+  }
+}
+
 .btn {
+  &.btn-primary {
+    .make-button(@btn-primary-bg-focus, @btn-primary-bg-focus,
+      @btn-primary-bg-active, @btn-primary-bg-active, @btn-primary-color-active,
+      @btn-primary-bg-disabled, @btn-primary-bg-disabled, @btn-primary-color-disabled);
+  }
+  &.btn-default {
+    .make-button(@btn-default-bg-focus, @btn-default-border-focus,
+      @btn-default-bg-active, @btn-default-border-active, @btn-default-border-active,
+      @btn-default-bg-disabled, @btn-default-border-disabled, @btn-default-color-disabled);
+  }
+  //Icon
+  .fa {
+    padding-right: 3px;
+  }
+
   &.full-width {
     width: 100%;
     text-align: center;
@@ -55,12 +118,6 @@ textarea {
   //Extra small
   &.btn-xxs {
     padding: 1px 10px;
-  }
-
-  //Disabled ui-select
-  &.ui-select-toggle[disabled] {
-    background-color: @input-bg-disabled;
-    opacity: 1;
   }
 }
 
@@ -94,5 +151,15 @@ input[type=number] {
       top: 0; right: 0;
       height: 20px;
     }
+  }
+}
+
+textarea {
+  resize: both; /* none|horizontal|vertical|both */
+  &.resize-vert {
+    resize: vertical;
+  }
+  &.noresize {
+    resize: none;
   }
 }

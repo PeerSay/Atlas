@@ -5,9 +5,9 @@
             <!--Title-->
             <div class=row>
                 <div class="col-xs-12">
-                    <h3 class="page-title text-center">
+                    <h1 class="page-title text-center">
                         {{ cm.project.selectedCategory || '(None)' }}
-                    </h3>
+                    </h1>
                 </div>
             </div>
             <!--Content-->
@@ -36,7 +36,7 @@
                     <div class="sidebar-menu">
                         <!--Overview-->
                         <div class="sidebar-menu-section">
-                            <h4>Overview</h4>
+                            <h3>Overview</h3>
                             <ul class="sub-menu">
                                 <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
                                 <li class="menu-item" ui-sref-active="active"><a ui-sref=".decisions">Decision Table</a></li>
@@ -48,36 +48,36 @@
 
                         <!--Products-->
                         <div class="sidebar-menu-section">
-                            <h4 class="menu-item" ui-sref-active="active">
+                            <h3 class="menu-item" ui-sref-active="active">
                                 <a class="toggle-value" ui-sref=".products">
                                     Products
                                     <div class="label label-primary"
                                             ng-if="(cm.products | filter:{selected: true}).length > 0"
                                             >{{ (cm.products | filter:{selected: true}).length }}</div>
                                 </a>
-                            </h4>
+                            </h3>
                         </div>
 
                         <!--Criteria-->
                         <div class="sidebar-menu-section">
-                            <h4 class="menu-item" ui-sref-active="active">
+                            <h3 class="menu-item" ui-sref-active="active">
                                 <a class="toggle-value" ui-sref=".requirements">
                                     Criteria
                                     <div class="label label-primary"
                                             ng-if="(cm.requirements | filter:{selected: true}).length > 0"
                                             >{{ (cm.requirements | filter:{selected: true}).length }}</div>
                                 </a>
-                            </h4>
+                            </h3>
                         </div>
 
                         <!--Presentations-->
                         <div class="sidebar-menu-section">
-                            <h4 class="menu-item" ui-sref-active="active">
+                            <h3 class="menu-item" ui-sref-active="active">
                                 <a class="toggle-value" ui-sref=".presentations">Presentations</a>
                                 <div class="label label-primary"
                                         ng-if="cm.snapshots.length > 0"
                                         >{{ cm.snapshots.length }}</div>
-                            </h4>
+                            </h3>
                         </div>
                     </div>
                 </div>

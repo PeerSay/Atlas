@@ -219,20 +219,20 @@ function RestApi(app) {
             var filePath = path.join(FILES_PATH, projectId, resource.fileName);
             if (util.isFileExistsSync(filePath)) {
                 // If exists, redirect to local file
-                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]: ',
+                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]',
                     fileType, snapId, projectId, resource.localUrl);
 
                 return res.redirect(resource.localUrl);
             }
             else if (config.s3.enable) {
                 // Otherwise, redirect to S3
-                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]: ',
+                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]',
                     fileType, snapId, projectId, resource.s3Url);
 
                 return res.redirect(resource.s3Url);
             }
             else {
-                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], not found=[%s]: ',
+                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], not found=[%s]',
                     fileType, snapId, projectId, filePath);
 
                 return res.render('404', {resource: 'no file'});

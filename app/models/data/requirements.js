@@ -45,7 +45,7 @@ requirements = [
     },
     {
         _id: '55974b343dc107cb75453821',
-        name: 'Level of expertise on the product',
+        name: 'Integrator/Reseller Level of expertise on the product',
         description: 'The experience and exprtise level of the reseller or integrator',
         topic: 'Vendor, Reseller & Integrator',
         popularity: 90
@@ -518,6 +518,127 @@ requirements = [
         topic: 'Dealflow Management Functionality',
         popularity: 60,
         category: 'Dealflow Management'
+    },
+
+    {
+        _id: '55cafb2c628e2c1b9abb127c',
+        name: 'Inventory Management',
+        description: 'Manage all assets - softwre, hardware, licenses, etc.',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb3d628e2c1b9abb127d',
+        name: 'Asset Discovery',
+        description: 'Is discovery supported and in what method (agent, agent-less, external, etc.',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb50628e2c1b9abb127e',
+        name: 'Data Integration',
+        description: 'Integrate with 3rd party inventory tools and other complementing solutions',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb62628e2c1b9abb127f',
+        name: 'Software Metering',
+        description: 'Measuring and monitoring usage and behavior of software assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb79628e2c1b9abb1280',
+        name: 'Software Utilization Analysis',
+        description: 'Analysis of software usage patterns and its implications',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb8e628e2c1b9abb1281',
+        name: 'Hardware Asset Discovery',
+        description: 'Automatiaclly detecting harware assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb9e628e2c1b9abb1282',
+        name: 'Datacenter & Server Management',
+        description: 'Managing servers and other datacenter assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbb4628e2c1b9abb1283',
+        name: 'Virtual Environments Management',
+        description: 'Ability to manage virtual assets (e.g. VMWare, Citrix, etc.)',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbc7628e2c1b9abb1284',
+        name: 'Web Application Metering',
+        description: 'Ability to monitor and measure web application usage',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbde628e2c1b9abb1285',
+        name: 'Cloud Application Metering',
+        description: 'Ability to monitor and measure cloud application usage',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbee628e2c1b9abb1286',
+        name: 'Mobile Application Management',
+        description: 'Manage mobile apps',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc04628e2c1b9abb1287',
+        name: 'Hardware Asset Management',
+        description: 'Ability to manage hardware assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc15628e2c1b9abb1288',
+        name: 'Contracts Management',
+        description: 'Manage contracts related to managed assets to control coverage, renewals, etc.',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc27628e2c1b9abb1289',
+        name: 'Intelligent Software Reconciliation',
+        description: 'Compare purchased licenses and entitlement with actual usage',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc37628e2c1b9abb128a',
+        name: 'Advanced License Management',
+        description: 'Ability to manage specific licenses and idenitfy overlaps, gaps and optimizations',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
     }
 ];
 

@@ -43,7 +43,6 @@ topics = [
         description: 'The security features of a Threat Prevention solution',
         popularity: 99
     },
-
     {
         _id: '55acc1fa4c325a20daeac1d9',
         name: 'Contact & Call Center Functionality',
@@ -55,6 +54,12 @@ topics = [
         _id: '55b0f027749dae4268bbc2d5',
         name: 'Dealflow Management Functionality',
         description: 'Specific functionality of a Dealflow Management solution',
+        popularity: 99
+    },
+    {
+        _id: '55caf205628e2c1b9abb127b',
+        name: 'Software Asset Management Functionality',
+        description: 'Specific functionality of a Software Asset Management (SAM) solution',
         popularity: 99
     }
 ];

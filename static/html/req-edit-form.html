@@ -15,7 +15,7 @@
                     {{ $select.selected.name }}
                 </ui-select-match>
                 <ui-select-choices
-                        repeat="group in ctl.groups().list | filter:$select.search">
+                        repeat="group in ctl.topic.list() | filter:$select.search | orderBy:'-popularity'">
                     <span ng-bind-html="group.name | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>

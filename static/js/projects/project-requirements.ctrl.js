@@ -253,6 +253,15 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
             E.model = pick(emptyNew);
             E.topic = { // ui-select model
                 selected: {},
+                _list: null,
+                list: function () {
+                    return this._list = this._list || _.map(m.groups.list, function (group) {
+                            return {
+                                name: group.data.name,
+                                popularity: group.data.popularity
+                            };
+                        });
+                },
                 init: function (topic) {
                     this.selected = {name: topic};
                 },
@@ -265,6 +274,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
                     }
                 },
                 onAddNew: function (value) {
+                    this._list = null;
                     return m.groups.createNew(value);
                 }
             };
@@ -274,7 +284,12 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
             var req = spec.req || null;
 
             function getTopic() {
-                return spec.topic || (m.groups.getOpenGroup() || {}).name || '';
+                return spec.topic || getOpenGroupName();
+            }
+
+            function getOpenGroupName() {
+                var group = m.groups.getOpenGroup();
+                return group ? group.data.name : '';
             }
 
             function toggleClick(data) {

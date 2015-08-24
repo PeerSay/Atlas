@@ -9,22 +9,19 @@
 @td-bg-even: #eaeff7;
 @td-warn-bg: #fbe5d6;
 @td-warn-color: #aeaeae;
+@td-winner-bg: #c5e0b4;
+@foot-winner-bg: #00b050;
 
 .reveal .table {
-  &.compact td {
-    font-size: 70%; /*TODO - depends on table columns number?*/
-  }
-
   td {
     border: @table-border;
     color: @td-color;
   }
+  tr:last-child td {
+    border-bottom: @table-border; // override reveal
+  }
 
   tbody {
-    tr:last-child td {
-      border-bottom: @table-border; // override reveal
-    }
-
     tr {
       background-color: @td-bg-even;
       &:nth-of-type(odd) {
@@ -36,12 +33,24 @@
       color: @td-warn-color;
       background-color: @td-warn-bg;
     }
+
+    td.winner {
+      background-color: @td-winner-bg;
+    }
   }
 
-  thead tr td {
-    border-bottom: @th-border-bottom;
+  thead tr td,
+  tfoot tr td {
     color: @th-color;
     background-color: @th-bg;
+  }
+  thead tr td {
+    border-bottom: @th-border-bottom;
+  }
+  tfoot tr td {
+    &.winner {
+      background-color: @foot-winner-bg;
+    }
   }
 }
 

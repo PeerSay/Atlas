@@ -87,7 +87,7 @@ function getProductsTable(products, model) {
 function getTopicsTable(model) {
     var headerSubst = {
         'Mandatory': ' ', // space!
-        'Requirement': 'Topic'
+        'Requirement': ' '
     };
     var headers = _.map(model.columns, function (col) {
         var label = col.header.label;

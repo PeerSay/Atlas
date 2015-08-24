@@ -1,0 +1,47 @@
+@table-border: 3px solid #fff;
+
+@th-border-bottom: 5px solid #fff;
+@th-color: #fff;
+@th-bg: #5b9bd5;
+
+@td-color: #333;
+@td-bg-odd: #d2deef;
+@td-bg-even: #eaeff7;
+@td-warn-bg: #fbe5d6;
+@td-warn-color: #aeaeae;
+
+.reveal .table {
+  &.compact td {
+    font-size: 70%; /*TODO - depends on table columns number?*/
+  }
+
+  td {
+    border: @table-border;
+    color: @td-color;
+  }
+
+  tbody {
+    tr:last-child td {
+      border-bottom: @table-border; // override reveal
+    }
+
+    tr {
+      background-color: @td-bg-even;
+      &:nth-of-type(odd) {
+        background-color: @td-bg-odd;
+      }
+    }
+
+    tr.warning td {
+      color: @td-warn-color;
+      background-color: @td-warn-bg;
+    }
+  }
+
+  thead tr td {
+    border-bottom: @th-border-bottom;
+    color: @th-color;
+    background-color: @th-bg;
+  }
+}
+

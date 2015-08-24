@@ -30,15 +30,15 @@ function renderTemplate(project) {
         topics: null,
         superTopic: null
     };
+    var model = tableModel.buildModel(project.table);
 
     if (reqs.include) {
         reqs.list = splitListFn(4)(_.filter(project.requirements, {mandatory: true}));
     }
     if (prods.include) {
-        prods.list = splitListFn(4)(project.products);
+        prods.list = getProductsTable(project.products, model);
     }
     if (table.include && project.table.length) {
-        var model = tableModel.buildModel(project.table);
         model.groups = initGroups(model);
 
         table.topics = getTopicsTable(model);
@@ -51,6 +51,37 @@ function renderTemplate(project) {
     var presentationTpl = swig.compileFile(path.join(__dirname, '../../static/tpl/presentation.html'));
 
     return presentationTpl(locals);
+}
+
+function getProductsTable(products, model) {
+    var res = products;
+    var prodIdx = products.reduce(function (acc, cur) {
+        acc[cur.name] = cur;
+        return acc;
+    }, {});
+
+
+    var curProd = null;
+    _.forEach(model.columns, function (col) {
+        var header = col.header;
+        if (header.class === 'text-input') {
+            curProd = prodIdx[header.label];
+        }
+        if (!curProd) { return; }
+
+        var cells = col.cells;
+        var isGradeCol = (cells[0].class === 'grade');
+        var anyMuted = isGradeCol && !!_.find(col.cells, function (cell) {
+            return cell.model.muteProd();
+        });
+
+        if (anyMuted) {
+            curProd.class = 'warning';
+            curProd.warning = 'Did not meet mandatory requirements';
+        }
+    });
+
+    return [res];
 }
 
 function getTopicsTable(model) {
@@ -182,7 +213,6 @@ function splitListFn(num) {
         }, []);
     };
 }
-
 
 
 module.exports = {

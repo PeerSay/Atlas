@@ -168,8 +168,9 @@ module.exports = function (grunt) {
                     paths: ["static/css"]
                 },
                 files: {
+                    "static/css/index.css": "static/css/index.less",
                     "static/css/app.css": "static/css/app.less",
-                    "static/css/index.css": "static/css/index.less"
+                    "static/css/tpl.css": "static/css/tpl.less"
                 }
             }
         },

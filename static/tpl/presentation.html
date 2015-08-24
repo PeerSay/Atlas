@@ -9,7 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
     <link rel="stylesheet" href="/bower_components/reveal.js/css/reveal.css">
-    <link rel="stylesheet" href="/bower_components/reveal.js/css/theme/white.css" id="theme">
+    <link rel="stylesheet" href="/bower_components/reveal.js/css/theme/sky.css" id="theme">
+    <link rel="stylesheet" href="/css/tpl.css">
 
     <!-- Printing and PDF exports -->
     <script>
@@ -33,9 +34,6 @@
             max-height: 500px;
             border: none;
             padding: 10px;
-        }
-        table.compact td {
-            font-size: 70%; /*TODO - depends on table columns number?*/
         }
     </style>
 </head>
@@ -63,12 +61,12 @@
             <section id="themes">
                 <h2>Select theme</h2>
                 <p>
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/white.css'); return false;">White (default)</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky (default)</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/white.css'); return false;">White</a> -
                     <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/black.css'); return false;">Black</a> -
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky</a> -
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
                     <!--
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
                     <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/league.css'); return false;">League</a> -
                     <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/beige.css'); return false;">Beige</a> -
                     <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/simple.css'); return false;">Simple</a> <br>
@@ -97,7 +95,7 @@
             <section>
                 <h2>Mandatory Requirements {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
                 {% if bucket.length %}
-                <table>
+                <table class="table">
                     <thead>
                     <tr>
                         <td>Requirement</td>
@@ -132,7 +130,7 @@
             <section>
                 <h2>Candidate products {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
                 {% if bucket.length > 0 %}
-                <table>
+                <table class="table compact">
                     <thead>
                     <tr>
                         <td>Product</td>
@@ -141,9 +139,10 @@
                     </thead>
                     <tbody>
                     {% for j, prod in bucket %}
-                    <tr>
+                    <tr class="{{ prod.class }}">
                         <td>{{ prod.name }}</td>
-                        <td>{{ prod.description }}</td>
+                        {% if prod.warning %}<td>{{ prod.warning }}</td>
+                        {% else %}<td>{{ prod.description }}</td>{% endif %}
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -166,7 +165,7 @@
             <section>
                 <h2>Decision table</h2>
                 {% if table.topics %}
-                <table class="compact">
+                <table class="table compact">
                     <thead>
                     <tr>
                         {% for i, head in table.topics.headers %}
@@ -205,7 +204,7 @@
             {% if table.superTopic %}
             <section>
                 <h2>Decision table (2)</h2>
-                <table class="compact">
+                <table class="table compact">
                     <thead>
                     <tr>
                         {% for i, head in table.superTopic.headers %}

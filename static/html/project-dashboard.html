@@ -19,15 +19,15 @@
             <!--Criteria-->
             <div class="col-xs-12 col-sm-6 page-spacer">
                 <h3 class="toggle-edit text-center">
-                    <a ui-sref="^.requirements">Criteria</a>
+                    <a ui-sref="^.requirements">Requirements</a>
                 </h3>
                 <p ng-if="!board.requirements.initialized">
-                    There are not criteria selected yet. PeerSay presents popular criteria,
-                    and let you select or add criteria that are important for your project's success.
-                    Follow <a ui-sref="^.requirements">this link</a> to add Criteria.
+                    There are no Requirements selected yet. PeerSay presents popular requirements,
+                    and let you select or add requirements that are important for your project's success.
+                    Follow <a ui-sref="^.requirements">this link</a> to add requirements.
                 </p>
                 <div ng-if="board.requirements.initialized">
-                    <p>There are <span> {{:: board.requirements.data.length }}</span> criteria selected:</p>
+                    <p>There are <span> {{:: board.requirements.data.length }}</span> requirements selected:</p>
                     <ul >
                         <li ng-repeat="req in board.requirements.data | orderBy:'-popularity' track by req._id">
                             {{ req.name }}
@@ -43,7 +43,7 @@
                 </h3>
                 <p ng-if="!board.products.initialized">
                     There are no products selected yet. PeerSay presents popular products
-                    per category, and allows you to view grades and opinions based on different criteria.
+                    per category, and allows you to view grades and opinions based on different requirements.
                     Go to the <a ui-sref="^.products">Products page</a> to add Products.
                 </p>
                 <div ng-if="board.products.initialized">
@@ -66,7 +66,7 @@
                 </h3>
                 <p ng-if="!board.decisions.initialized">
                     Please select <a ui-sref="^.products">Products</a>
-                    and <a ui-sref="^.requirements">Criteria</a> in order to make a decision,
+                    and <a ui-sref="^.requirements">Requirements</a> in order to make a decision,
                     using <a ui-sref="^.decisions">the table</a>.
                 </p>
                 <div ng-if="board.decisions.initialized">

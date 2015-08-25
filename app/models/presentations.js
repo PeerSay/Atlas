@@ -29,6 +29,7 @@ var snapshotSchema = new Schema({
     id: {type: Number}, // cannot enforce unique on subdocs
     title: {type: String, required: true},
     created: {type: Date, default: Date.now},
+    visited: {type: Boolean, default: false},
     html: resourceJSON('html'),
     pdf: resourceJSON('pdf'),
     logo: resourceJSON('image')

@@ -49,15 +49,20 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            m.patchObserver = jsonpatch.observe(m.project);
+            observe(m.project);
 
             // Products
             addProductsToList(res.products, true);
             loadPublicProducts({q: res.selectedCategory});
         });
 
+    }
+
+    function observe(project) {
+        m.patchObserver = jsonpatch.observe(project);
+
         $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(m.project, m.patchObserver);
+            jsonpatch.unobserve(project, m.patchObserver);
         });
     }
 

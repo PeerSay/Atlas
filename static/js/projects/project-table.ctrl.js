@@ -20,16 +20,20 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
 
     // Called by Table
     function activate() {
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(m.project, m.patchObserver);
-        });
-
         return Projects.readProjectTable(m.projectId).then(function (res) {
             m.project = {table: res.table};
-            m.patchObserver = jsonpatch.observe(m.project);
+            observe(m.project);
 
             m.loading = false;
             return res.table;
+        });
+    }
+
+    function observe(project) {
+        m.patchObserver = jsonpatch.observe(project);
+
+        $scope.$on('$destroy', function () {
+            jsonpatch.unobserve(project, m.patchObserver);
         });
     }
 

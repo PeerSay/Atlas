@@ -11,19 +11,22 @@
             <!--Snapshots-->
             <div class="right-sidebar-col">
                 <h4>Presentations</h4>
-                <table class="table table-condensed present-table">
+                <table class="table table-condensed snapshot-table">
                     <tbody>
                     <tr ng-repeat="snap in pr.snapshots | orderBy:'-id' track by snap.id">
                         <td>
-                            <a href="{{:: snap.html.url }}" target="_blank">{{:: snap.title }}</a>
+                            <a href="{{:: snap.html.url }}" target="_blank"
+                                    ng-class="{'not-visited': !snap.visited}"
+                                    ng-click="pr.visitSnapshot(snap)">{{:: snap.title }}</a>
                         </td>
                         <td class="icon-cell">
-                            <a ng-href="{{ snap.pdf.url }}" target="_blank">
+                            <a ng-href="{{ snap.pdf.url }}" target="_blank"
+                                    ng-click="pr.visitSnapshot(snap)">
                                 <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'View PDF'"></span>
                             </a>
                         </td>
                         <td class="icon-cell">
-                            <a href ng-click="pr.deletePresentationSnapshot(snap)"
+                            <a href ng-click="pr.deleteSnapshot(snap)"
                                     ps-tooltip="'Delete'">
                                 <span class="fa fa-trash icon danger"></span>
                             </a>
@@ -35,7 +38,7 @@
             <!--Outline-->
             <div class="content-right-sidebar-col">
                 <button type="button" class="btn btn-primary pull-right"
-                        ng-click="pr.createPresentationSnapshot()"
+                        ng-click="pr.createSnapshot()"
                         ng-disabled="pr.creating">
                     <span ng-if="!pr.creating">Generate</span>
                     <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>
@@ -134,7 +137,7 @@
                     </div>
 
                     <button type="button" class="btn btn-primary pull-right"
-                            ng-click="pr.createPresentationSnapshot()"
+                            ng-click="pr.createSnapshot()"
                             ng-disabled="pr.creating">
                         <span ng-if="!pr.creating">Generate</span>
                         <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>

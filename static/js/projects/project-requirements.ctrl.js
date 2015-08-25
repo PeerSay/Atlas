@@ -40,6 +40,14 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         populateSelectionList();
     }
 
+    function observe(project) {
+        m.patchObserver = jsonpatch.observe(project);
+
+        $scope.$on('$destroy', function () {
+            jsonpatch.unobserve(project, m.patchObserver);
+        });
+    }
+
     function populateSelectionList() {
         loadSelectionListData().then(function (resArr) {
             var publicTopics = resArr[0];
@@ -76,14 +84,6 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
 
         return $q.all([publicTopicsQ, localReqsQ, publicReqsQ]).finally(function () {
             m.loadingMore = false;
-        });
-    }
-
-    function observe(project) {
-        m.patchObserver = jsonpatch.observe(project);
-
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(project, m.patchObserver);
         });
     }
 

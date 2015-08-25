@@ -7,13 +7,15 @@ ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonp
 function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upload, Notify) {
     var m = this;
     m.projectId = $stateParams.projectId;
+    m.presentation = null;
     m.data = {};
     m.snapshots = [];
     m.patchObserver = null;
     m.patchPresentation = patchPresentation;
     m.creating = false;
-    m.createPresentationSnapshot = createPresentationSnapshot;
-    m.deletePresentationSnapshot = deletePresentationSnapshot;
+    m.createSnapshot = createSnapshot;
+    m.deleteSnapshot = deleteSnapshot;
+    m.visitSnapshot = visitSnapshot;
     // Logo upload
     m.logoFile = null;
     m.logoUrl = '//placehold.it/48x48';
@@ -40,15 +42,20 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
 
     function readPresentation() {
         Projects.readPresentation(m.projectId).then(function (res) {
-            m.data = res.presentation.data;
-            m.patchObserver = jsonpatch.observe(m.data);
+            m.presentation = res.presentation;
+            observe(m.presentation);
 
+            m.data = res.presentation.data;
             m.snapshots = res.presentation.snapshots;
             m.logoUrl = m.data.logo.image.url || m.logoUrl;
         });
+    }
+
+    function observe(pres) {
+        m.patchObserver = jsonpatch.observe(pres);
 
         $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(m.data, m.patchObserver);
+            jsonpatch.unobserve(pres, m.patchObserver);
         });
     }
 
@@ -61,7 +68,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
 
     // Snapshots
     //
-    function createPresentationSnapshot() {
+    function createSnapshot() {
         var data = {title: Projects.current.project.title};
 
         m.creating = true;
@@ -74,22 +81,24 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
             });
     }
 
-    function deletePresentationSnapshot(snap) {
+    function deleteSnapshot(snap) {
         Projects.deletePresentationSnapshot(m.projectId, snap.id).then(function (res) {
             var idx = m.snapshots.indexOf(snap);
             m.snapshots.splice(idx, 1);
         });
     }
 
-    function renderPresentationPDF(pres) {
-        pres.rendering = true;
-        Projects.renderPresentationPDF(m.projectId, pres.id)
-            .then(function (res) {
-                pres.pdfUrl = res;
-            })
-            .finally(function () {
-                pres.rendering = false;
-            });
+    function visitSnapshot(snap) {
+        // Manually build patch
+        var idx = m.snapshots.indexOf(snap); // XXX - subject to index-based patch issues!
+        var patch = {
+            op: 'replace',
+            path: ['/snapshots', idx, 'visited'].join('/'),
+            value: true
+        };
+        return Projects.patchPresentation(m.projectId, [patch]).then(function () {
+            snap.visited = true;
+        });
     }
 
     // Logo upload

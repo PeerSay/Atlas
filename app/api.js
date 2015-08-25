@@ -97,20 +97,20 @@ function RestApi(app) {
 
     function patchPresentation(req, res, next) {
         var projectId = req.params.id;
-        var data = req.body;
+        var patches = req.body;
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Patching presentation of project[%s] for user=[%s] with %s', projectId, email, JSON.stringify(data));
+        console.log('[API] Patching presentation of project[%s] for user=[%s] with %s', projectId, email, JSON.stringify(patches));
 
-        Project.findById(projectId, 'presentation.data', function (err, prj) {
+        Project.findById(projectId, 'presentation', function (err, prj) {
             if (err) { return next(err); }
             if (!prj) {
                 return errRes.notFound(res, 'project' + projectId);
             }
 
             // Patch
-            applyPatch(prj.presentation.data, data, function (err, patchRes) {
+            applyPatch(prj.presentation, patches, function (err, patchRes) {
                 if (err) { return modelError(res, err); }
 
                 console.log('[API] Patched presentation of project[%s] result:', projectId, patchRes);
@@ -560,6 +560,8 @@ function RestApi(app) {
      * */
     function applyPatch(model, patch, cb) {
         var firstPatch = patch[0]; // only first!
+        if (!firstPatch) { return cb(new Error('invalid patch!')); }
+
         var op = firstPatch.op;
         var result = {};
         result[op] = true;

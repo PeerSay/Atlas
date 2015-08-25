@@ -10,7 +10,7 @@ var util = require('../../app/util');
 var Settings = require('../../app/models/settings').SettingsModel;
 var s3 = require('../../app/pdf/aws-s3');
 var phantom = require('../../app/pdf/phantom-pdf');
-var render = require('../../app/pdf/render-tpl');
+var renderer = require('../../app/pdf/render-tpl');
 var FILES_PATH = path.join(__dirname, '../../files');
 
 
@@ -18,7 +18,7 @@ var resourceJSON = function (def) {
     return {
         format: {type: String, enum: ['image', 'pdf', 'html'], default: def, required: true},
         fileName: {type: String, default: ''},
-        sizeBytes: {type: Number},
+        sizeBytes: {type: Number, default: 0},
         url: {type: String} // defined only by path getter
     }
 };
@@ -30,45 +30,35 @@ var snapshotSchema = new Schema({
     title: {type: String, required: true},
     created: {type: Date, default: Date.now},
     html: resourceJSON('html'),
-    pdf: resourceJSON('pdf')
+    pdf: resourceJSON('pdf'),
+    logo: resourceJSON('image')
 }, {
     toJSON: {getters: true, virtuals: false}, // client app only sees path getter (generic url)
     toObject: {virtuals: true} // server can see path and virtual getters (+ local & s3 urls)
 });
 
+// Getter paths for resource's URL
+//
+
+snapshotSchema.path('logo.url').get(function () {
+    return getSnapshotResourceUrl(this.parent()._id, this, 'logo');
+});
 snapshotSchema.path('html.url').get(function () {
-    var snap = this;
-    var projectId = snap.parent()._id;
-    return getSnapshotResourceUrls(projectId, snap, 'html').generic;
+    return getSnapshotResourceUrl(this.parent()._id, this, 'html');
 });
-snapshotSchema.virtual('html.localUrl').get(function () {
-    var snap = this;
-    var projectId = snap.parent()._id;
-    return getSnapshotResourceUrls(projectId, snap, 'html').local;
-});
-snapshotSchema.virtual('html.s3Url').get(function () {
-    var snap = this;
-    var projectId = snap.parent()._id;
-    return getSnapshotResourceUrls(projectId, snap, 'html').s3;
-});
-
 snapshotSchema.path('pdf.url').get(function () {
-    var snap = this;
-    var projectId = snap.parent()._id;
-    return getSnapshotResourceUrls(projectId, snap, 'pdf').generic;
-});
-snapshotSchema.virtual('pdf.localUrl').get(function () {
-    var snap = this;
-    var projectId = snap.parent()._id;
-    return getSnapshotResourceUrls(projectId, snap, 'pdf').local;
-});
-snapshotSchema.virtual('pdf.s3Url').get(function () {
-    var snap = this;
-    var projectId = snap.parent()._id;
-    return getSnapshotResourceUrls(projectId, snap, 'pdf').s3;
+    return getSnapshotResourceUrl(this.parent()._id, this, 'pdf');
 });
 
+function getSnapshotResourceUrl(projectId, snap, type) {
+    var fileName = snap[type].fileName;
+    var safeFileName = util.encodeURIComponentExt(fileName);
 
+    return fileName && ['/files', projectId, safeFileName].join('/');
+}
+
+// Pre-Save hooks
+//
 snapshotSchema.pre('save', function ensureId(next) {
     var snap = this;
     if (!snap.isNew) { return next(); }
@@ -101,13 +91,33 @@ snapshotSchema.pre('save', function ensureTitle(next) {
     });
 });
 
+snapshotSchema.pre('save', function ensureLogo(next) {
+    var snap = this;
+    if (!snap.isNew) { return next(); }
+
+    // Copy project logo to snapshot, each snapshot may have different logo or none
+    var project = this.parent();
+    var logo = project.presentation.data.logo;
+    var notAvailable = logo.include && logo.image.fileName;
+
+    if (!notAvailable) { return next(); }
+
+    ensureSnapshotLogo(project, snap, logo, function (err, fileName, sizeBytes) {
+        if (err) { return next(err); }
+
+        snap.logo.fileName = fileName;
+        snap.logo.sizeBytes = sizeBytes;
+        next();
+    });
+});
+
 snapshotSchema.pre('save', function ensureHTML(next) {
     var snap = this;
     if (!snap.isNew) { return next(); }
 
     // Render HTML template to file
     var project = this.parent();
-    renderSnapshotHTML(project, snap.title, function (err, fileName, sizeBytes) {
+    renderSnapshotHTML(project, snap, function (err, fileName, sizeBytes) {
         if (err) { return next(err); }
 
         snap.html.fileName = fileName;
@@ -133,8 +143,7 @@ snapshotSchema.pre('save', function ensurePDF(next) {
     });
 });
 
-
-snapshotSchema.pre('save', function ensureBackupToS3(next) {
+snapshotSchema.pre('save', function ensureUploadToS3(next) {
     var snap = this;
     if (!snap.isNew) { return next(); }
 
@@ -149,13 +158,15 @@ snapshotSchema.pre('save', function ensureBackupToS3(next) {
 
 // Post hooks
 //
-
 snapshotSchema.post('remove', function ensureLocalUnlink(snap) {
     var projectId = this.parent()._id;
     var fileDir = path.join(FILES_PATH, projectId);
 
     unlinkFile(path.join(fileDir, snap.pdf.fileName));
     unlinkFile(path.join(fileDir, snap.html.fileName));
+    if (snap.logo.fileName) {
+        unlinkFile(path.join(fileDir, snap.logo.fileName));
+    }
 });
 
 snapshotSchema.post('remove', function ensureS3delete(snap) {
@@ -167,16 +178,64 @@ snapshotSchema.post('remove', function ensureS3delete(snap) {
 
 // Util
 //
-function renderSnapshotHTML(project, name, cb) {
-    var fileName = name + '.html';
+function ensureSnapshotLogo(project, snap, logo, cb) {
+    var projectId = project._id;
+    var fileName = snap.title + '.logo' + path.extname(logo.image.fileName);
+    var logoPath = path.join(FILES_PATH, projectId, logo.image.fileName);
+    var snapshotLogoPath = path.join(FILES_PATH, projectId, fileName);
+
+    if (util.isFileExistsSync(logoPath)) {
+        copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
+            if (err) { return cb(err); }
+            cb(null, fileName, logo.image.sizeBytes);
+        });
+    }
+    else {
+        // Copy back from S3 as project logs, just to turn it to snapshot logo and upload again later
+        // XXX - can be optimized!
+        var from = {
+            subDir: projectId,
+            fileName: logo.image.fileName
+        };
+        console.log('[DB] Snapshot logo: get from S3 from=%s to[%s]', JSON.stringify(from), snapshotLogoPath);
+
+        s3.getObject(from, logoPath)
+            .then(function () {
+                copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
+                    if (err) { return cb(err); }
+                    cb(null, fileName, logo.image.sizeBytes);
+                });
+            })
+            .catch(function (err) {
+                cb(err);
+            });
+    }
+}
+
+function copySnapshotLogo(logoPath, snapshotLogoPath, cb) {
+    console.log('[DB] Snapshot logo: copy from[%s] to[%s]', logoPath, snapshotLogoPath);
+
+    fs.copy(logoPath, snapshotLogoPath, function (err) {
+        if (err) {
+            console.log('[DB] Snapshot logo: failed to copy: %s', err);
+            return cb(err)
+        }
+        console.log('[DB] Snapshot logo copy - OK');
+        cb();
+    });
+}
+
+function renderSnapshotHTML(project, snap, cb) {
+    var fileName = snap.title + '.html';
     var toSubDir = project._id;
     var fileDir = path.join(FILES_PATH, toSubDir);
     var filePath = path.join(fileDir, fileName);
+    var logoUrl = snap.logo.url; //logo is copied first, so must be available by now
 
     console.log('[DB] Rendering HTML to [%s]', filePath);
 
     // Rendering with Swig
-    var html = render.renderTemplate(project);
+    var html = renderer.renderTemplate(project, logoUrl);
 
     fs.mkdirp(fileDir, function (err) {
         if (err) {
@@ -222,27 +281,6 @@ function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
         });
 }
 
-function getSnapshotResourceUrls(projectId, snap, type) {
-    var safeFileName = util.encodeURIComponentExt(snap[type].fileName);
-    var bucketName = config.s3.bucket_name;
-
-    return {
-        generic: ['/my/projects', projectId, 'presentation/snapshots', snap.id, type].join('/'),
-        local: ['/files', projectId, safeFileName].join('/'),
-        s3: ['https://s3.amazonaws.com', bucketName, projectId, safeFileName].join('/')
-    };
-}
-
-function unlinkFile(path) {
-    try {
-        fs.removeSync(path);
-    } catch (e) {
-        console.log('[DB] Unlinking[%s] failed: ', path, e);
-        return;
-    }
-    console.log('[DB] Unlinked[%s]', path);
-}
-
 function uploadFilesToS3(project, snap, cb) {
     var projectId = project._id;
     var fileDir = path.join(FILES_PATH, projectId);
@@ -258,12 +296,11 @@ function uploadFilesToS3(project, snap, cb) {
         path: path.join(fileDir, snap.html.fileName),
         contentType: 'text/html'
     });
-    var logo = project.presentation.data.logo.image;
-    if (logo.fileName) {
+    if (snap.logo.fileName) { // may not exist
         files.push({
-            name: logo.fileName,
-            path: path.join(fileDir, logo.fileName),
-            contentType: 'image/' + path.extname(logo.fileName).replace('.', '')
+            name: snap.logo.fileName,
+            path: path.join(fileDir, snap.logo.fileName),
+            contentType: 'image/' + path.extname(snap.logo.fileName).replace('.', '')
         });
     }
 
@@ -286,11 +323,26 @@ function removeFilesFromS3(project, snap) {
         name: snap.html.fileName,
         subDir: projectId
     }];
-    // logo is removed on project remove
+    if (snap.logo.fileName) { // may not exist
+        fromSpecs.push({
+            name: snap.logo.fileName,
+            subDir: projectId
+        });
+    }
 
     s3.remove(fromSpecs).then(function (res) {
         console.log('[DB] Remove files from S3 success: %s', JSON.stringify(res));
     });
+}
+
+function unlinkFile(path) {
+    try {
+        fs.removeSync(path);
+    } catch (e) {
+        console.log('[DB] Unlinking[%s] failed: ', path, e);
+        return;
+    }
+    console.log('[DB] Unlinked[%s]', path);
 }
 
 // Presentation Schema

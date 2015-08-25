@@ -170,6 +170,9 @@ projectSchema.statics.removeByUser = function (project_id, user, next) {
     });
 };
 
+// Pres-save hooks
+//
+
 projectSchema.pre('save', function ensureTitle(next) {
     var project = this;
 
@@ -302,35 +305,39 @@ function patchTable(doc, patches) {
 }
 
 // Presentation logo
+//
 projectSchema.path('presentation.data.logo.image.url').get(function () {
-    var projectId = this._id;
-    var resource = this.presentation.data.logo.image;
-    return resource.fileName && getLogoResourceUrls(projectId, resource.fileName).generic;
-});
-projectSchema.virtual('presentation.data.logo.image.localUrl').get(function () {
-    var projectId = this._id;
-    var resource = this.presentation.data.logo.image;
-    return resource.fileName && getLogoResourceUrls(projectId, resource.fileName).local;
-});
-projectSchema.virtual('presentation.data.logo.image.s3Url').get(function () {
-    var projectId = this._id;
-    var resource = this.presentation.data.logo.image;
-    return resource.fileName && getLogoResourceUrls(projectId, resource.fileName).s3;
-});
-
-
-function getLogoResourceUrls(projectId, fileName) {
+    var fileName = this.presentation.data.logo.image.fileName;
     var safeFileName = util.encodeURIComponentExt(fileName);
-    var bucketName = config.s3.bucket_name;
+    return fileName && ['/files', this._id, safeFileName].join('/');
+});
 
-    return {
-        generic: ['/my/projects', projectId, 'presentation/logo'].join('/'),
-        local: ['/files', projectId, safeFileName].join('/'),
-        s3: ['https://s3.amazonaws.com', bucketName, projectId, safeFileName].join('/')
+projectSchema.pre('save', function ensureLogoUploadToS3(next) {
+    var project = this;
+
+    // Upload new image to S3 after it is saved
+    if (!project.isModified('presentation.data.logo.image')) { return next(); }
+
+    var projectId = project._id;
+    var image = this.presentation.data.logo.image;
+    var file = {
+        name: image.fileName,
+        path: path.join(FILES_PATH, projectId, image.fileName),
+        contentType: 'image/' + path.extname(image.fileName).replace('.', '')
     };
-}
 
-// Post hooks
+    s3.upload([file], {subDir: projectId})
+        .then(function (res) {
+            console.log('[DB] Upload logo to S3 success: %s', JSON.stringify(res));
+            next();
+        })
+        .catch(function (reason) {
+            next(reason);
+        });
+});
+
+
+// Post-remove hooks
 //
 projectSchema.post('remove', function ensureLocalDirUnlink(doc) {
     var projectId = doc._id;

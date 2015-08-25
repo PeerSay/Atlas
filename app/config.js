@@ -4,6 +4,7 @@ var path = require('path');
 
 // Passed by Heroku
 var ENV_PORT = Number(process.env.PORT);
+var ENV_SERVER_URL = process.env.SERVER_URL;
 var ENV_DB_URL = process.env.MONGOHQ_URL;
 var ENV_LINKEDIN_API_KEY = process.env.LINKEDIN_API_KEY;
 var ENV_LINKEDIN_SECRET_KEY = process.env.LINKEDIN_SECRET_KEY;
@@ -57,6 +58,7 @@ function getConfig(param) {
         deploy: deploy,
         web: {
             port: local.web.port || ENV_PORT,
+            server_url: local.web.server_url || ENV_SERVER_URL,
             static_dir: local.web.static_dir || path.join(__dirname, '..', 'dist')
         },
         db: {

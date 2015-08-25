@@ -4,18 +4,20 @@ var moment = require('moment');
 var swig = require('swig');
 
 var tableModel = require('../../static/js/projects/table-model');
+var config = require('../../app/config');
 
-function renderTemplate(project) {
+function renderTemplate(project, logoUrl) {
     var settings = project.presentation.data;
     var user = project.collaborators[0]; // requires .populate()
+    var userName = (user.name || {}).full || '';
     var titlePage = {
         title: project.title,
         date: moment().format('DD/M/YYYY'),
         user: {
             email: user.email,
-            name: (user.name || {}).full || ''
+            name: userName
         },
-        logoUrl: settings.logo.image.url
+        logoUrl: logoUrl // may be empty
     };
     var reqs = {
         include: settings.requirements.include,
@@ -45,9 +47,16 @@ function renderTemplate(project) {
         table.superTopic = getSuperTopicTable(model);
     }
 
-    var locals = _.extend({}, settings, {title: titlePage}, {requirements: reqs}, {products: prods}, {table: table});
+    var locals = _.extend({}, settings, {
+        server: config.web.server_url,
+        title: titlePage,
+        requirements: reqs,
+        products: prods,
+        table: table
+    });
     //console.log('>>>Locals:', locals);
 
+    // TODO - move on top to compile & cache
     var presentationTpl = swig.compileFile(path.join(__dirname, '../../static/tpl/presentation.html'));
 
     return presentationTpl(locals);

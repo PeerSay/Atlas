@@ -194,6 +194,11 @@ module.exports = function (grunt) {
                     'dist/js/app.js': './.tmp/concat/js/app.js',
                     'dist/js/index.js': './.tmp/concat/js/index.js'
                 }
+            },
+            noRev: {
+                files: {
+                    'dist/css/tpl.css': 'static/css/tpl.css'
+                }
             }
         },
 
@@ -302,6 +307,7 @@ module.exports = function (grunt) {
             'cssmin',
             'rev',
             'copy:map',
+            'copy:noRev',
         'usemin',
         'fixSourceMap'
     ]);

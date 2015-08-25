@@ -44,6 +44,9 @@ function createBucket(bucketName) {
     return deferred.promise;
 }
 
+// upload
+//
+
 //@formatter:off
 /* fileSpecs = {
    name: '',
@@ -99,6 +102,9 @@ function upload(fileSpecs, to) {
         });
 }
 
+// remove
+//
+
 //@formatter:off
 /* from = {
    name: '',
@@ -140,6 +146,8 @@ function remove(fromSpecs) {
     });
 }
 
+// removeBucket
+//
 function _removeBucket(subDir) {
     var deferred = Q.defer();
     var bucketName = S3_BUCKET + '/' + subDir;
@@ -169,8 +177,36 @@ function removeBucket(subDir) {
     });
 }
 
+// getObject
+//
+//@formatter:off
+/* from = {
+   subDir: '',
+   fileName: ''
+ }
+*/
+//@formatter:on
+function getObject(from, toFilePath) {
+    var deferred = Q.defer();
+    var s3 = new AWS.S3();
+    var bucketName = S3_BUCKET + '/' + from.subDir;
+    var params = {Bucket: bucketName, Key: from.fileName};
+    var file = fs.createWriteStream(toFilePath)
+        .on('finish', function () {
+            deferred.resolve('ok');
+        })
+        .on('error', function (err) {
+            deferred.reject(err);
+        });
+
+    s3.getObject(params).createReadStream().pipe(file);
+
+    return deferred.promise;
+}
+
 module.exports = {
     upload: enabled ? upload : skip('upload'),
     remove: enabled ? remove : skip('remove'),
-    removeBucket: enabled ? removeBucket : skip('removeBucket')
+    removeBucket: enabled ? removeBucket : skip('removeBucket'),
+    getObject: enabled ? getObject: skip('getObject')
 };

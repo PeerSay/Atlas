@@ -10,6 +10,7 @@ var path = require('path');
 module.exports = {
     web: {
         port: 5000,
+        server_url: '//localhost:5000',
         static_dir: path.join(__dirname, '.', 'static')
     },
     db: {

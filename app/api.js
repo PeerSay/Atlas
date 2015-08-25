@@ -69,8 +69,7 @@ function RestApi(app) {
         app.post('/api/projects/:id/presentation/upload/logo', uploadLogoFile);
 
         // NOT API - return html/pdf/image content!
-        app.get('/my/projects/:id/presentation/snapshots/:snapId/:type', readPresentationSnapshotResource);
-        app.get('/my/projects/:id/presentation/logo', readPresentationLogo);
+        app.get('/files/:projectId/:fileName', readProjectFile);
 
         return U;
     }
@@ -189,55 +188,28 @@ function RestApi(app) {
         });
     }
 
-    function readPresentationSnapshotResource(req, res, next) {
-        var projectId = req.params.id;
-        var snapId = req.params.snapId;
-        var fileType = req.params.type;
-        var email = (req.user || {}).email; // PhantomJS calls this not-authenticated
+    function readProjectFile(req, res, next) {
+        var projectId = req.params.projectId;
+        var fileName = req.params.fileName;
+        var safeFileName = util.encodeURIComponentExt(fileName);
+        var s3Url = [req.protocol + '://s3.amazonaws.com', config.s3.bucket_name, projectId, safeFileName].join('/');
 
-        console.log('[API] Reading snapshot-[%s] of presentation[%s] of project[%s] for user=[%s]',
-            fileType, snapId, projectId, email);
+        // All resources, stored in DB or HTML files, use local urls which are served by static()
+        // So, we get here only if file is not found and we can only:
+        //  - return 404 if S3 disabled
+        //  - redirect to corresponding S3 file (if S3 enabled) => may lead to 404 as well
 
-        Project.findById(projectId, 'presentation', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return res.render('404', {resource: 'project-' + projectId});
-            }
+        if (config.s3.enable) {
+            console.log('[API] Read file[%s] of project[%s] missed - redirect=[%s]',
+                fileName, projectId, s3Url);
 
-            var snapshots = prj.presentation.snapshots;
-            var obj = _.find(snapshots, {id: Number(snapId)});
-            var snap = obj && snapshots.id(obj._id).toObject(); // read all virtual props
-            if (!snap) {
-                return res.render('404', {resource: 'snapshot-' + snapId});
-            }
+            return res.redirect(s3Url);
+        } else {
+            console.log('[API] Read file[%s] of project[%s] missed - 404',
+                fileName, projectId);
 
-            console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], res: ',
-                fileType, snapId, projectId, JSON.stringify(snap));
-
-            // Redirect to local or s3 file
-            var resource = snap[fileType];
-            var filePath = path.join(FILES_PATH, projectId, resource.fileName);
-            if (util.isFileExistsSync(filePath)) {
-                // If exists, redirect to local file
-                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]',
-                    fileType, snapId, projectId, resource.localUrl);
-
-                return res.redirect(resource.localUrl);
-            }
-            else if (config.s3.enable) {
-                // Otherwise, redirect to S3
-                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], redirect=[%s]',
-                    fileType, snapId, projectId, resource.s3Url);
-
-                return res.redirect(resource.s3Url);
-            }
-            else {
-                console.log('[API] Reading snapshot-[%s] presentation[%s] of project[%s], not found=[%s]',
-                    fileType, snapId, projectId, filePath);
-
-                return res.render('404', {resource: 'no file'});
-            }
-        });
+            return res.render('404', {resource: 'resourse-' + fileName});
+        }
     }
 
     // Logo upload / read
@@ -305,45 +277,6 @@ function RestApi(app) {
                     return res.json({result: result});
                 });
             });
-        });
-    }
-
-    function readPresentationLogo(req, res, next) {
-        var projectId = req.params.id;
-        var email = (req.user || {}).email; // PhantomJS calls this not-authenticated
-
-        console.log('[API] Reading presentation logo of project[%s] for user=[%s]',
-            projectId, email);
-
-        Project.findById(projectId, 'presentation', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return res.render('404', {resource: 'project-' + projectId});
-            }
-
-            // Redirect to local or s3 file
-            var resource = prj.presentation.data.logo.image;
-            var filePath = path.join(FILES_PATH, projectId, resource.fileName);
-            if (util.isFileExistsSync(filePath)) {
-                // If exists, redirect to local file
-                console.log('[API] Reading presentation logo of project[%s], redirect=[%s]: ',
-                    projectId, resource.localUrl);
-
-                return res.redirect(resource.localUrl);
-            }
-            else if (config.s3.enable) {
-                // Otherwise, redirect to S3
-                console.log('[API] Reading presentation logo of project[%s], redirect=[%s]: ',
-                    projectId, resource.s3Url);
-
-                return res.redirect(resource.s3Url);
-            }
-            else {
-                console.log('[API] Reading presentation logo of project[%s], not found=[%s]: ',
-                    projectId, filePath);
-
-                return res.render('404', {resource: 'no file'});
-            }
         });
     }
 

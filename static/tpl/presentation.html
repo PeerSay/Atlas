@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
-    <link rel="stylesheet" href="/bower_components/reveal.js/css/reveal.css">
-    <link rel="stylesheet" href="/bower_components/reveal.js/css/theme/sky.css" id="theme">
-    <link rel="stylesheet" href="/css/tpl.css">
+    <link rel="stylesheet" href="{{ server }}/bower_components/reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="{{ server }}/bower_components/reveal.js/css/theme/sky.css" id="theme">
+    <link rel="stylesheet" href="{{ server }}/css/tpl.css">
 
     <!-- Printing and PDF exports -->
     <script>
@@ -19,8 +19,8 @@
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.href = PRINT_MODE ?
-                '/bower_components/reveal.js/css/print/pdf.css' :
-                '/bower_components/reveal.js/css/print/paper.css';
+                '{{ server }}/bower_components/reveal.js/css/print/pdf.css' :
+                '{{ server }}/bower_components/reveal.js/css/print/paper.css';
         document.getElementsByTagName('head')[0].appendChild(link);
     </script>
     <style>
@@ -49,7 +49,7 @@
         <section>
             <section>
                 {% if logo.include && title.logoUrl %}
-                <img src="{{ title.logoUrl }}" class="logo">
+                <img src="{{ server }}{{ title.logoUrl }}" class="logo">
                 {% endif %}
 
                 <h1>{{ title.title }}</h1>
@@ -65,9 +65,9 @@
             <section id="themes">
                 <h2>Select theme</h2>
                 <p>
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky (default)</a> -
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/white.css'); return false;">White</a> -
-                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/black.css'); return false;">Black</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','{{ server }}/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky (default)</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','{{ server }}/bower_components/reveal.js/css/theme/white.css'); return false;">White</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','{{ server }}/bower_components/reveal.js/css/theme/black.css'); return false;">Black</a> -
                     <!--
                     <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
                     <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
@@ -282,8 +282,8 @@
         themeSlide.parentNode.removeChild(themeSlide);
     }
 </script>
-<script src="/bower_components/reveal.js/lib/js/head.min.js"></script>
-<script src="/bower_components/reveal.js/js/reveal.js"></script>
+<script src="{{ server }}/bower_components/reveal.js/lib/js/head.min.js"></script>
+<script src="{{ server }}/bower_components/reveal.js/js/reveal.js"></script>
 <script>
     // Full list of configuration options available at:
     // https://github.com/hakimel/reveal.js#configuration
@@ -295,7 +295,7 @@
         transition: 'slide', // none/fade/slide/convex/concave/zoom
         // Optional reveal.js plugins
         dependencies: [
-            {src: '/bower_components/reveal.js/plugin/zoom-js/zoom.js', async: true}
+            {src: '{{ server }}/bower_components/reveal.js/plugin/zoom-js/zoom.js', async: true}
         ]
     });
 </script>

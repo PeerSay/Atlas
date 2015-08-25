@@ -207,6 +207,7 @@ function ensureSnapshotLogo(project, snap, logo, cb) {
             });
         })
         .catch(function (err) {
+            console.log('[DB] Snapshot logo: get from S3 failed [%s]', err.toString());
             cb(err);
         });
 }

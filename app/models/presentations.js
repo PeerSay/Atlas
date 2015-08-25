@@ -185,31 +185,30 @@ function ensureSnapshotLogo(project, snap, logo, cb) {
     var snapshotLogoPath = path.join(FILES_PATH, projectId, fileName);
 
     if (util.isFileExistsSync(logoPath)) {
-        copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
+        return copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
             if (err) { return cb(err); }
             cb(null, fileName, logo.image.sizeBytes);
         });
     }
-    else {
-        // Copy back from S3 as project logs, just to turn it to snapshot logo and upload again later
-        // XXX - can be optimized!
-        var from = {
-            subDir: projectId,
-            fileName: logo.image.fileName
-        };
-        console.log('[DB] Snapshot logo: get from S3 from=%s to[%s]', JSON.stringify(from), snapshotLogoPath);
 
-        s3.getObject(from, logoPath)
-            .then(function () {
-                copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
-                    if (err) { return cb(err); }
-                    cb(null, fileName, logo.image.sizeBytes);
-                });
-            })
-            .catch(function (err) {
-                cb(err);
+    // Copy back from S3 as project logs, just to turn it to snapshot logo and upload again later
+    // TODO - can be optimized!
+    var from = {
+        subDir: projectId,
+        fileName: logo.image.fileName
+    };
+    s3.getObject(from, logoPath)
+        .then(function (res) {
+            console.log('[DB] Snapshot logo: get from S3 success, res=[%s]', JSON.stringify(res));
+
+            copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
+                if (err) { return cb(err); }
+                cb(null, fileName, logo.image.sizeBytes);
             });
-    }
+        })
+        .catch(function (err) {
+            cb(err);
+        });
 }
 
 function copySnapshotLogo(logoPath, snapshotLogoPath, cb) {

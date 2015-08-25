@@ -196,8 +196,10 @@ function getObject(from, toFilePath) {
             deferred.resolve('ok');
         })
         .on('error', function (err) {
-            deferred.reject(err);
+            deferred.reject(new Error('getObject failed: ', err.toString()));
         });
+
+    console.log("[S3] Get-object %s to[%s]", JSON.stringify(from), toFilePath);
 
     s3.getObject(params).createReadStream().pipe(file);
 

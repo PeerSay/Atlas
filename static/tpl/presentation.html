@@ -31,13 +31,13 @@
             display: block;
         }
         .reveal section img.logo {
-            max-height: 500px;
+            max-height: 300px;
             border: none;
             padding: 10px;
         }
 
         .reveal .table.compact td {
-             font-size: 40%; /*TODO - depends on table columns number?*/
+             font-size: 50%; /*TODO - depends on table columns number?*/
          }
     </style>
 </head>
@@ -54,7 +54,7 @@
 
                 <h1>{{ title.title }}</h1>
 
-                <p class="pull-left">
+                <p>
                     <small>Presented by <a href="mailto:{{ title.user.email }}">{{ title.user.name || title.user.email }}</a></small>
                     <br>
                     <small>Date: {{ title.date }}</small>

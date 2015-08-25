@@ -191,20 +191,17 @@ function getObject(from, toFilePath) {
     var s3 = new AWS.S3();
     var bucketName = S3_BUCKET + '/' + from.subDir;
     var params = {Bucket: bucketName, Key: from.fileName};
-    var file = fs.createWriteStream(toFilePath);
-
-    console.log("[S3] Get-object %s to[%s]", JSON.stringify(from), toFilePath);
-
-    s3.getObject(params)
-        .on('httpData', function(chunk) { file.write(chunk); })
-        .on('httpDone', function() { file.end(); })
-        .on('success', function () {
+    var file = fs.createWriteStream(toFilePath) // path to file must exist!
+        .on('finish', function () {
             deferred.resolve('ok');
         })
         .on('error', function (err) {
-            deferred.reject(new Error('getObject failed: ', err.message));
-        })
-        .send();
+            deferred.reject(new Error('getObject failed: ', err));
+        });
+
+    console.log("[S3] Get-object %s to[%s]", JSON.stringify(from), toFilePath);
+
+    s3.getObject(params).createReadStream().pipe(file);
 
     return deferred.promise;
 }

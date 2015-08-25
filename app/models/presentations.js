@@ -181,8 +181,9 @@ snapshotSchema.post('remove', function ensureS3delete(snap) {
 function ensureSnapshotLogo(project, snap, logo, cb) {
     var projectId = project._id;
     var fileName = snap.title + '.logo' + path.extname(logo.image.fileName);
-    var logoPath = path.join(FILES_PATH, projectId, logo.image.fileName);
-    var snapshotLogoPath = path.join(FILES_PATH, projectId, fileName);
+    var fileDir = path.join(FILES_PATH, projectId);
+    var logoPath = path.join(fileDir, logo.image.fileName);
+    var snapshotLogoPath = path.join(fileDir, fileName);
 
     if (util.isFileExistsSync(logoPath)) {
         return copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
@@ -191,25 +192,32 @@ function ensureSnapshotLogo(project, snap, logo, cb) {
         });
     }
 
-    // Copy back from S3 as project logs, just to turn it to snapshot logo and upload again later
-    // TODO - can be optimized!
-    var from = {
-        subDir: projectId,
-        fileName: logo.image.fileName
-    };
-    s3.getObject(from, logoPath)
-        .then(function (res) {
-            console.log('[DB] Snapshot logo: get from S3 success, res=[%s]', JSON.stringify(res));
+    fs.mkdirp(fileDir, function (err) {
+        if (err) {
+            console.log('[DB] Snapshot logo: failed to create dir[%s]', fileDir);
+            return cb(err);
+        }
 
-            copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
-                if (err) { return cb(err); }
-                cb(null, fileName, logo.image.sizeBytes);
+        // Copy back from S3 a project logs, just to turn it to snapshot logo and upload again later
+        // TODO - can be optimized!
+        var from = {
+            subDir: projectId,
+            fileName: logo.image.fileName
+        };
+        s3.getObject(from, logoPath)
+            .then(function (res) {
+                console.log('[DB] Snapshot logo: get from S3 success, res=[%s]', JSON.stringify(res));
+
+                copySnapshotLogo(logoPath, snapshotLogoPath, function (err) {
+                    if (err) { return cb(err); }
+                    cb(null, fileName, logo.image.sizeBytes);
+                });
+            })
+            .catch(function (err) {
+                console.log('[DB] Snapshot logo: get from S3 failed [%s]', err.toString());
+                cb(err);
             });
-        })
-        .catch(function (err) {
-            console.log('[DB] Snapshot logo: get from S3 failed [%s]', err.toString());
-            cb(err);
-        });
+    });
 }
 
 function copySnapshotLogo(logoPath, snapshotLogoPath, cb) {

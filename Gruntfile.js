@@ -43,7 +43,6 @@ module.exports = function (grunt) {
         grunt.log.writeln('Source map in ' + mapFile + ' fixed');
     });
 
-
     grunt.initConfig({
         // Config may be useful, eventually
         //cfg: grunt.file.readJSON('config.json'),
@@ -56,20 +55,28 @@ module.exports = function (grunt) {
         // Watch - monitors changes and runs tasks
         //
         watch: {
-            assets: {
+            livereload: {
                 options: {
                     livereload: 35729,
                     spawn: false
                 },
-                files: ['Gruntfile.js', 'static/**/*.*']
+                files: ['Gruntfile.js', 'static/**/*.*', '!static/css/**/*.less']
             },
             karma: {
                 files: ['static/js/**/*.js', 'static/test/**/*.js'],
                 tasks: ['karma:unit:run']
             },
-            css: {
+            less: {
                 files: ['static/css/**/*.less'],
                 tasks: ['less']
+            }
+        },
+        focus: {
+            dev: {
+                exclude: ['karma']
+            },
+            test: {
+                exclude: ['less']
             }
         },
 
@@ -94,14 +101,16 @@ module.exports = function (grunt) {
                     'bower_components/angular/angular.js',
                     'bower_components/angular-route/angular-route.js',
                     'bower_components/angular-messages/angular-messages.js',
-                    'bower_components/angular-mocks/angular-mocks.js',
                     'bower_components/angular-sanitize/angular-sanitize.js',
-                    'bower_components/ng-table/ng-table.min.js',
-                    'bower_components/ng-table-resizable-columns/ng-table-resizable-columns.src.js',
+                    'bower_components/angular-animate/angular-animate.js',
+                    'bower_components/angular-mocks/angular-mocks.js',
+                    'bower_components/ng-table/dist/ng-table.js',
                     'bower_components/angular-elastic/elastic.js',
                     'bower_components/ng-context-menu/dist/ng-context-menu.js',
                     'bower_components/fast-json-patch/dist/json-patch-duplex.min.js',
                     'bower_components/angular-ui-router/release/angular-ui-router.min.js',
+                    'bower_components/angular-ui-select/dist/select.js',
+                    'bower_components/ng-file-upload/ng-file-upload.min.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],
@@ -278,24 +287,32 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('test', [
+    // Testing
+    //
+    grunt.registerTask('test_all', [
         'jshint',
         'mochaTest',
         'karma:continuous'
     ]);
 
-    grunt.registerTask('test_e2e', ['protractor:run']);
+    grunt.registerTask('test_karma', [
+        'karma:unit:start',
+        'focus:test'
+    ]);
 
+    grunt.registerTask('test_e2e', [
+        'protractor:run'
+    ]);
+
+    // Dev
+    //
     grunt.registerTask('dev', [
         'less',
-        'watch'
+        'focus:dev'
     ]);
 
-    grunt.registerTask('karma-watch', [
-        'karma:unit:start',
-        'watch:karma'
-    ]);
-
+    // Prod
+    //
     grunt.registerTask('build', [
         'clean',
         'less',

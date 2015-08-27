@@ -226,7 +226,7 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
     }
 
     var oldTable = buildOldTable(doc);
-    var newTable = buildNewTable(doc.requirements, doc.products);
+    var newTable = buildNewTable(doc.requirements, doc.products, doc.table);
     var patches = buildPatch(oldTable, newTable);
     console.log('[DB] Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
 
@@ -259,19 +259,27 @@ function buildOldTable(doc) {
     return json.table;
 }
 
-function buildNewTable(requirements, products) {
+function buildNewTable(requirements, products, table) {
     var res = [];
 
     _.forEach(requirements, function (req) {
         if (req.selected) {
             var row = _.pick(req, 'name', 'topic', 'popularity', 'mandatory');
-            row.reqId = req._id;
+            row.reqId = req._id.toString();
             row.products = [];
+
+            var oldRow = _.findWhere(table, {reqId: row.reqId});
+            row.weight = oldRow ? oldRow.weight : 1 /*default*/;
 
             _.forEach(products, function (prod) {
                 if (prod.selected) {
                     var col = _.pick(prod, 'name', 'popularity');
-                    col.prodId = prod._id;
+                    col.prodId = prod._id.toString();
+
+                    var oldCol = _.findWhere(oldRow.products, {prodId: col.prodId});
+                    col.grade = (oldRow && oldCol) ? oldCol.grade : 10;
+                    col.input = (oldRow && oldCol) ? oldCol.input : '';
+
                     row.products.push(col);
                 }
             });
@@ -284,15 +292,7 @@ function buildNewTable(requirements, products) {
 }
 
 function buildPatch(oldTable, newTable) {
-    var patches = jsonPatch.compare({table: oldTable}, {table: newTable});
-
-    // Remove invalid ones: as far as newTable has no weight|input|grade,
-    // they appear in patches as remove op.
-    patches = _.filter(patches, function (p) {
-        return !/(\/weight|\/input|\/grade)$/.test(p.path);
-    });
-
-    return patches;
+    return jsonPatch.compare({table: oldTable}, {table: newTable});
 }
 
 function patchTable(doc, patches) {

@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectPresentationsCtrl', ProjectPresentationsCtrl);
 
-ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonpatch', 'Upload', 'Notify'];
-function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upload, Notify) {
+ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonpatch', 'Upload', 'Notify', 'Backend'];
+function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upload, Notify, Backend) {
     var m = this;
     m.projectId = $stateParams.projectId;
     m.presentation = null;
@@ -136,18 +136,19 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
             })
             .error(function (data, status, headers, config) {
                 if (status === 409 && data.error.indexOf('LIMIT_FILE_SIZE') >= 0) {
-                    // Due to multer bug we see generic 500 error instead of custom json
-                    Notify.show('error', {title: 'Logo upload error', text: '1 MB limit exceeded'});
+                    Notify.show('error', {title: 'Logo upload failed', text: '1 MB limit exceeded'});
                 }
                 else if (status === 409) {
-                    Notify.show('error', {title: 'Logo upload error', text: 'Not image format'});
+                    Notify.show('error', {title: 'Logo upload failed', text: 'Bad image format'});
                 }
                 else {
-                    Notify.show('error', {title: 'Logo upload error', text: 'Unexpected'});
+                    Notify.show('error', {title: 'Logo upload failed', text: 'Unexpected error'});
                 }
             })
             .finally(function () {
                 m.uploadProgress.show = false;
+                // To ensure logo url will be reloaded on next page visit
+                Backend.invalidateCache(['projects', m.projectId, 'presentation']);
             });
 
     }

@@ -276,7 +276,7 @@ function buildNewTable(requirements, products, table) {
                     var col = _.pick(prod, 'name', 'popularity');
                     col.prodId = prod._id.toString();
 
-                    var oldCol = _.findWhere(oldRow.products, {prodId: col.prodId});
+                    var oldCol = oldRow && _.findWhere(oldRow.products, {prodId: col.prodId});
                     col.grade = (oldRow && oldCol) ? oldCol.grade : 10;
                     col.input = (oldRow && oldCol) ? oldCol.input : '';
 

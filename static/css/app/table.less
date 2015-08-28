@@ -99,7 +99,7 @@
         .cell-input {
           width: 100%;
           background: transparent;
-          border: none;
+          border: 0;
           .box-shadow(none);
           &, &:active, &:focus {
             outline: 0;
@@ -164,4 +164,12 @@
 /*Hide pagination*/
 .ng-table-pager {
   display: none;
+}
+
+/*Override bootstrap*/
+@media (max-width: @grid-float-breakpoint) {
+  .table-responsive {
+    margin-bottom: 0;
+    border: 0;
+  }
 }

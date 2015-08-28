@@ -60,7 +60,7 @@ module.exports = function (grunt) {
                     livereload: 35729,
                     spawn: false
                 },
-                files: ['Gruntfile.js', 'static/**/*.*', '!static/css/**/*.less']
+                files: ['Gruntfile.js', 'static/**/*.*', '!static/css/**/*.less', '!static/bower_components/**']
             },
             karma: {
                 files: ['static/js/**/*.js', 'static/test/**/*.js'],

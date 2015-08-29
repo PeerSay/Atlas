@@ -113,22 +113,22 @@ function RestApi(app) {
     }
 
     function deleteProject(req, res, next) {
-        var project_id = req.params.id;
+        var projectId = req.params.id;
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Removing project[%s] for user=[%s]', project_id, email);
+        console.log('[API] Removing project[%s] for user=[%s]', projectId, email);
 
-        Project.removeByUser(project_id, user, function (err, doc) {
+        Project.removeByUser(projectId, user, function (err, doc) {
             if (err) { return next(err); }
 
             if (!doc) {
-                console.log('[API] Removing project[%s] failed - not found!', project_id);
-                return errRes.notFound(res, project_id);
+                console.log('[API] Removing project[%s] failed - not found!', projectId);
+                return errRes.notFound(res, projectId);
             }
 
-            var result = {id: project_id, removed: true};
-            console.log('[API] Removing project[%s] result: %s', project_id, JSON.stringify(result));
+            var result = {id: projectId, removed: true};
+            console.log('[API] Removing project[%s] result: %s', projectId, JSON.stringify(result));
 
             return res.json({result: result});
         });

@@ -89,6 +89,10 @@ var projectSchema = new Schema({
 
     // Table
     //
+    topicWeights: [{
+        topic: {type: String, required: true},
+        weight: {type: Number, min: 0, max: 1, default: 0.5}
+    }],
     table: [{
         reqId: {type: String, required: true},
         name: {type: String, required: true},
@@ -210,6 +214,43 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
         });
 });
 
+projectSchema.pre('save', function ensureTopicWeights(next) {
+    var doc = this;
+
+    // Skip if not add/remove/select/unselect of a req
+    if (!doc.isModified('requirements')) {
+        return next();
+    }
+
+    var oldTopicWeights = getDocJSON(doc, 'topicWeights');
+    var newTopicWeights = buildNewTopicWeights(_.filter(doc.requirements, {selected: true}));
+    var patches = jsonPatch.compare({topicWeights: oldTopicWeights}, {topicWeights: newTopicWeights});
+    console.log('[DB] topicWeights for[%s] patch: ', doc.id, JSON.stringify(patches));
+
+    if (patches.length) {
+        patchDoc(doc, patches, 'topicWeights');
+        console.log('[DB] topicWeights res=', JSON.stringify(getDocJSON(doc, 'topicWeights')));
+    }
+
+    next();
+});
+
+function buildNewTopicWeights(requirements) {
+    var topics = requirements.reduce(function (acc, req) {
+        var topicName = req.topic || 'No name'; // XXX - OK?
+        if (!acc.idx[topicName]) {
+            acc.idx[topicName] = 1;
+            acc.list.push(topicName); // Order matters!
+        }
+        return acc;
+    }, {list: [], idx: {}});
+
+    var evenWeight = 1 / topics.list.length; // Equality for all!
+
+    return _.map(topics.list, function (topic) {
+        return {topic: topic, weight: evenWeight};
+    });
+}
 
 projectSchema.pre('save', function ensureTableConsistency(next) {
     var doc = this;
@@ -225,14 +266,13 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
         return next();
     }
 
-    var oldTable = buildOldTable(doc);
+    var oldTable = getDocJSON(doc, 'table');
     var newTable = buildNewTable(doc.requirements, doc.products, doc.table);
-    var patches = buildPatch(oldTable, newTable);
+    var patches = jsonPatch.compare({table: oldTable}, {table: newTable});
     console.log('[DB] Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
 
     if (patches.length) {
-        patchTable(doc, patches);
-        console.log('[DB] Sync table for[%s] patch applied', doc.id);
+        patchDoc(doc, patches, 'sync table');
     }
 
     next();
@@ -246,8 +286,8 @@ function isEmptyTable(doc) {
     return !selectedReqs || !selectedProds;
 }
 
-function buildOldTable(doc) {
-    // doc.table is Mongoose object with many additional props,
+function getDocJSON(doc, prop) {
+    // doc is Mongoose object with many additional props,
     // we need to get pure data to generate correct patch from it
     var json = doc.toJSON({
         transform: function (doc, ret) {
@@ -256,7 +296,7 @@ function buildOldTable(doc) {
         }
     });
 
-    return json.table;
+    return json[prop];
 }
 
 function buildNewTable(requirements, products, table) {
@@ -291,17 +331,14 @@ function buildNewTable(requirements, products, table) {
     return res;
 }
 
-function buildPatch(oldTable, newTable) {
-    return jsonPatch.compare({table: oldTable}, {table: newTable});
-}
-
-function patchTable(doc, patches) {
+function patchDoc(doc, patches, tag) {
     try {
         jsonPatch.apply(doc, patches, true /*validate*/);
     }
     catch (e) {
-        console.log('[DB] Sync table: patch exception: ', e);
+        console.log('[DB] Patch %s: patch exception: ', tag, e);
     }
+    console.log('[DB] Patch %s for[%s] - patch applied OK', tag, doc.id);
 }
 
 // Presentation logo

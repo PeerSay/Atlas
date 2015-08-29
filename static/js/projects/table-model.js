@@ -33,7 +33,7 @@ function TableModel() {
         columnIdx = {};
     }
 
-    function buildModel(reqs) {
+    function buildModel(reqs, weights) {
         reset();
 
         addHeader('name', {label: 'Requirement'});
@@ -224,6 +224,7 @@ function TableModel() {
     function weightPercentComputeFn(cellModel) {
         return function () {
             var value = cellModel.value || 0;
+
             var weights = columnIdx['weight'].cells;
 
             var totalWeight = weights.reduce(function (prev, current) {
@@ -355,23 +356,25 @@ function TableModel() {
                 if (!col) {
                     col = groupColIdx[key] = {
                         cells: [],
-                        grade: function () {
-                            var groupWeight = calcGroupWeight();
-                            if (!groupWeight) { return 0; }
-
-                            var totalGrade = this.cells.reduce(function (prev, cur) {
-                                var weight = cur.req.weight;
-                                var grade = cur.grade.value;
-                                return prev + grade * weight;
-                            }, 0);
-
-                            var ave = Math.round(totalGrade / groupWeight * 10) / 10; // .1
-                            return ave;
-                        }
+                        grade: calcGrade
                     };
                     G.grades.push(col);
                 }
                 return col;
+            }
+
+            function calcGrade() {
+                var groupWeight = calcGroupWeight();
+                if (!groupWeight) { return 0; }
+
+                var totalGrade = this.cells.reduce(function (prev, cur) {
+                    var weight = cur.req.weight;
+                    var grade = cur.grade.value;
+                    return prev + grade * weight;
+                }, 0);
+
+                var ave = Math.round(totalGrade / groupWeight * 10) / 10; // .1
+                return ave;
             }
 
             function calcWeightPercents() {

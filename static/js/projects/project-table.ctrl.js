@@ -69,7 +69,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
 
     function getView(project) {
         var view = {};
-        var model = TableModel.buildModel(project.table);
+        var model = TableModel.buildModel(project.table, project.topicWeights);
         initGroups(model);
 
         view.columns = model.columns;

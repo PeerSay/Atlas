@@ -1,11 +1,16 @@
 var _ = require('lodash');
 var util = require('util');
+var swig = require('swig');
+var mailer = require(appRoot + '/app/lib/email/mailer');
+var jsonParser = require('body-parser').json();
 
 // App dependencies
+var codes = require(appRoot + '/app/web/codes');
 var Category = require(appRoot + '/app/models/categories').CategoryModel;
 var Product = require(appRoot + '/app/models/products').ProductModel;
 var Topic = require(appRoot + '/app/models/topics').TopicModel;
 var Requirement = require(appRoot + '/app/models/requirements').RequirementModel;
+var WaitingUser = require(appRoot + '/app/models/waiting-users').WaitingUserModel;
 
 
 function PublicRestApi(app) {
@@ -21,6 +26,10 @@ function PublicRestApi(app) {
         // Products & its grouping: Categories
         app.get('/api/public/categories', readCategories);
         app.get('/api/public/products', readProducts);
+
+        // Adding user (email) to waiting list
+        app.post('/api/waiting-users', jsonParser, addToWaitingUsers);
+        app.post('/api/say-hello', jsonParser, sendHelloMessage);
 
         return U;
     }
@@ -99,6 +108,75 @@ function PublicRestApi(app) {
                 res.json({result: data});
             });
     }
+
+    // Waiting users
+    //
+    function addToWaitingUsers(req, res, next) {
+        var data = req.body;
+        var email = data.email;
+
+        console.log('[API] Adding user to waiting list [%s]', email);
+
+        WaitingUser.add(email, data, function (err, user, code) {
+            if (err) { next(err); }
+
+            if (code === codes.WAITING_DUPLICATE) {
+                console.log('[API] User [%s] is already in list - updated', email);
+                return res.json({
+                    error: email + ' is already registered!',
+                    email: email
+                });
+            }
+            console.log('[API] User [%s] has been added to the waiting list', email);
+
+            var from = getFullEmail(data.email, data.name);
+            var to = 'contact@peer-say.com';
+            var locals = {
+                from: from,
+                to: to,
+                name: email,
+                inputOnProducts: data.inputOnProducts,
+                inputOnRequirements: data.inputOnRequirements
+            };
+            var tpl = 'waiting-user';
+            console.log('[API] Sending [%s] email from [%s]', tpl, from);
+            mailer.send(tpl, locals); // async!
+
+            return res.json({
+                result: true,
+                email: email
+            });
+        });
+    }
+
+    // Say Hello
+    //
+    function sendHelloMessage(req, res, next) {
+        var data = req.body;
+        var from = getFullEmail(data.email, data.name);
+        var to = 'contact@peer-say.com';
+        var locals = {
+            from: from,
+            to: to,
+            name: data.name,
+            message: data.message
+        };
+        var tpl = 'say-hello';
+        console.log('[API] Sending [%s] email from [%s]', tpl, from);
+
+        mailer.send(tpl, locals); // async!
+
+        return res.json({result: true});
+    }
+
+    function getFullEmail(email, name) {
+        var locals = {
+            name: name,
+            email: email
+        };
+        return swig.render('{{ name }} <{{ email }}>', {locals: locals});
+    }
+
 
     U.setupRoutes = setupRoutes;
     return U;

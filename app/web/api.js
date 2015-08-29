@@ -5,18 +5,14 @@ var jsonParser = require('body-parser').json();
 var multer = require('multer');
 var jsonPatch = require('json-patch');
 var jsonPointer = require('json-pointer');
-var swig = require('swig');
 var fs = require('fs-extra');
 
 // App dependencies
 var config = require(appRoot + '/app/config');
 var util = require(appRoot + '/app/lib/util');
 var errRes = require(appRoot + '/app/web/api-errors');
-var codes = require(appRoot + '/app/web/codes');
-var mailer = require(appRoot + '/app/lib/email/mailer');
 var User = require(appRoot + '/app/models/users').UserModel;
 var Project = require(appRoot + '/app/models/projects').ProjectModel;
-var WaitingUser = require(appRoot + '/app/models/waiting-users').WaitingUserModel;
 
 var FILES_PATH = path.join(appRoot, 'files');
 var UPLOAD_LIMIT = 1024 * 1024; //1MB
@@ -42,10 +38,6 @@ function RestApi(app) {
         // Logging & auth
         app.use('/api/*', logApi);
         app.use(/\/api\/user|\/api\/projects/, ensureAuthorized); // skip authorization for /api/auth/*
-
-        // Adding user (email) to waiting list
-        app.post('/api/waiting-users', jsonParser, addToWaitingUsers);
-        app.post('/api/say-hello', jsonParser, sendHelloMessage);
 
         // user
         app.get('/api/user', readUser);
@@ -278,75 +270,6 @@ function RestApi(app) {
                 });
             });
         });
-    }
-
-
-    // Waiting users
-    //
-    function addToWaitingUsers(req, res, next) {
-        var data = req.body;
-        var email = data.email;
-
-        console.log('[API] Adding user to waiting list [%s]', email);
-
-        WaitingUser.add(email, data, function (err, user, code) {
-            if (err) { next(err); }
-
-            if (code === codes.WAITING_DUPLICATE) {
-                console.log('[API] User [%s] is already in list - updated', email);
-                return res.json({
-                    error: email + ' is already registered!',
-                    email: email
-                });
-            }
-            console.log('[API] User [%s] has been added to the waiting list', email);
-
-            var from = getFullEmail(data.email, data.name);
-            var to = 'contact@peer-say.com';
-            var locals = {
-                from: from,
-                to: to,
-                name: email,
-                inputOnProducts: data.inputOnProducts,
-                inputOnRequirements: data.inputOnRequirements
-            };
-            var tpl = 'waiting-user';
-            console.log('[API] Sending [%s] email from [%s]', tpl, from);
-            mailer.send(tpl, locals); // async!
-
-            return res.json({
-                result: true,
-                email: email
-            });
-        });
-    }
-
-    // Say Hello
-    //
-    function sendHelloMessage(req, res, next) {
-        var data = req.body;
-        var from = getFullEmail(data.email, data.name);
-        var to = 'contact@peer-say.com';
-        var locals = {
-            from: from,
-            to: to,
-            name: data.name,
-            message: data.message
-        };
-        var tpl = 'say-hello';
-        console.log('[API] Sending [%s] email from [%s]', tpl, from);
-
-        mailer.send(tpl, locals); // async!
-
-        return res.json({result: true});
-    }
-
-    function getFullEmail(email, name) {
-        var locals = {
-            name: name,
-            email: email
-        };
-        return swig.render('{{ name }} <{{ email }}>', {locals: locals});
     }
 
     // User

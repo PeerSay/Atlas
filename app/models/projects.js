@@ -7,11 +7,11 @@ var psShortId = require('./lib/short-id').psShortId;
 var presentationSchema = require('./presentations').presentationSchema;
 var fs = require('fs-extra');
 
-var config = require('../../app/config');
-var util = require('../../app/util');
-var s3 = require('../../app/pdf/aws-s3');
+var config = require(appRoot + '/app/config');
+var util = require(appRoot + '/app/lib/util');
+var s3 = require(appRoot + '/app/lib/pdf/aws-s3');
 
-var FILES_PATH = path.join(__dirname, '../../files');
+var FILES_PATH = path.join(appRoot, '/files');
 
 
 // Presets

@@ -9,16 +9,16 @@ var swig = require('swig');
 var fs = require('fs-extra');
 
 // App dependencies
-var config = require('../app/config');
-var util = require('../app/util');
-var errRes = require('../app/api-errors');
-var User = require('../app/models/users').UserModel;
-var Project = require('../app/models/projects').ProjectModel;
-var WaitingUser = require('../app/models/waiting-users').WaitingUserModel;
-var mailer = require('../app/email/mailer');
-var errorcodes = require('../app/errors');
+var config = require(appRoot + '/app/config');
+var util = require(appRoot + '/app/lib/util');
+var errRes = require(appRoot + '/app/web/api-errors');
+var codes = require(appRoot + '/app/web/codes');
+var mailer = require(appRoot + '/app/lib/email/mailer');
+var User = require(appRoot + '/app/models/users').UserModel;
+var Project = require(appRoot + '/app/models/projects').ProjectModel;
+var WaitingUser = require(appRoot + '/app/models/waiting-users').WaitingUserModel;
 
-var FILES_PATH = path.join(__dirname, '..', 'files');
+var FILES_PATH = path.join(appRoot, 'files');
 var UPLOAD_LIMIT = 1024 * 1024; //1MB
 
 function RestApi(app) {
@@ -292,7 +292,7 @@ function RestApi(app) {
         WaitingUser.add(email, data, function (err, user, code) {
             if (err) { next(err); }
 
-            if (code === errorcodes.WAITING_DUPLICATE) {
+            if (code === codes.WAITING_DUPLICATE) {
                 console.log('[API] User [%s] is already in list - updated', email);
                 return res.json({
                     error: email + ' is already registered!',

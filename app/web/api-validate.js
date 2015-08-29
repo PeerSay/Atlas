@@ -1,8 +1,8 @@
 var jsonParser = require('body-parser').json();
 var Joi = require('joi');
 
-var util = require('../app/util');
-var errRes = require('../app/api-errors');
+var util = require(appRoot + '/app/lib/util');
+var errRes = require(appRoot + '/app/web/api-errors');
 
 
 function ApiValidate(app) {

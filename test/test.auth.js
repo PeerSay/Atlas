@@ -11,7 +11,7 @@ chai.use(sinonChai);
 
 
 // Dependencies
-var errors = require('../app/errors');
+var codes = require(appRoot + '/app/web/codes');
 var app = express();
 app.use(cookieParser());
 app.use(session({
@@ -33,11 +33,11 @@ process.deploy = {
     email: {enable: false, auth: {}},
     s3: {enable: false}
 };
-var config = require('../app/config');
+var config = require(appRoot + '/app/config');
 
 // Dependencies to Mock
-var util = require('../app/util');
-var mailer = require('../app/email/mailer');
+var util = require(appRoot + '/app/lib/util');
+var mailer = require(appRoot + '/app/lib/email/mailer');
 var User = require('../app/models/users').UserModel;
 
 // --> Under test
@@ -75,7 +75,7 @@ describe('Auth', function () {
             User.authenticate.restore();
             sinon.stub(User, 'authenticate')
                 .withArgs('b@b', '123123')
-                .callsArgWith(2, null, null, errors.AUTH_NOT_FOUND); //<--
+                .callsArgWith(2, null, null, codes.AUTH_NOT_FOUND); //<--
 
             request(app)
                 .post('/api/auth/login')
@@ -89,7 +89,7 @@ describe('Auth', function () {
             User.authenticate.restore();
             sinon.stub(User, 'authenticate')
                 .withArgs('b@b', '123123')
-                .callsArgWith(2, null, null, errors.AUTH_PWD_MISMATCH); //<--
+                .callsArgWith(2, null, null, codes.AUTH_PWD_MISMATCH); //<--
 
             request(app)
                 .post('/api/auth/login')
@@ -103,7 +103,7 @@ describe('Auth', function () {
             User.authenticate.restore();
             sinon.stub(User, 'authenticate')
                 .withArgs('b@b', '123123')
-                .callsArgWith(2, null, {email: 'b@b', name: {full: 'John Snow'}}, errors.AUTH_NOT_VERIFIED); //<--
+                .callsArgWith(2, null, {email: 'b@b', name: {full: 'John Snow'}}, codes.AUTH_NOT_VERIFIED); //<--
 
             // TODO - doesn't work!
             /*sinon.stub(mailer, 'send')
@@ -146,7 +146,7 @@ describe('Auth', function () {
             User.register.restore();
             userRegisterStub = sinon.stub(User, 'register')
                 .withArgs('a@a', '123123')
-                .callsArgWith(3, null, null, errors.AUTH_DUPLICATE);
+                .callsArgWith(3, null, null, codes.AUTH_DUPLICATE);
 
             request(app)
                 .post('/api/auth/signup')

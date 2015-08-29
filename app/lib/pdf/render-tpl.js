@@ -3,8 +3,10 @@ var path = require('path');
 var moment = require('moment');
 var swig = require('swig');
 
-var tableModel = require('../../static/js/projects/table-model');
-var config = require('../../app/config');
+var tableModel = require(appRoot + '/static/js/projects/table-model');
+var config = require(appRoot + '/app/config');
+var PRESENTATION_FILE = path.join(appRoot, '/static/tpl/presentation.html');
+
 
 function renderTemplate(project, logoUrl) {
     var settings = project.presentation.data;
@@ -57,7 +59,7 @@ function renderTemplate(project, logoUrl) {
     //console.log('>>>Locals:', locals);
 
     // TODO - move on top to compile & cache
-    var presentationTpl = swig.compileFile(path.join(__dirname, '../../static/tpl/presentation.html'));
+    var presentationTpl = swig.compileFile(PRESENTATION_FILE);
 
     return presentationTpl(locals);
 }

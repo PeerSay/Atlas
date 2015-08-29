@@ -6,11 +6,11 @@ var LocalStrategy = require('passport-local').Strategy;
 var LinkedInStrategy = require('passport-linkedin').Strategy;
 
 // App dependencies
-var config = require('../app/config');
-var util = require('../app/util');
-var errors = require('../app/errors');
-var mailer = require('../app/email/mailer');
-var User = require('../app/models/users').UserModel;
+var config = require(appRoot + '/app/config');
+var util = require(appRoot + '/app/lib/util');
+var codes = require(appRoot + '/app/web/codes');
+var mailer = require(appRoot + '/app/lib/email/mailer');
+var User = require(appRoot + '/app/models/users').UserModel;
 
 var constant = {
     SESS_NORMAL: 1000 * 60 * 60 * 12, // 12h
@@ -113,7 +113,7 @@ function Auth(app) {
         User.register(email, password, data, function (err, user, code) {
             if (err) return next(err); //TODO
 
-            if (code === errors.AUTH_DUPLICATE) {
+            if (code === codes.AUTH_DUPLICATE) {
                 var msg = 'duplicate ' + email;
                 console.log('AUTH] Failed local: msg=%s', msg);
 
@@ -133,7 +133,7 @@ function Auth(app) {
 
             var login = {
                 user: user,
-                isNew: (code === errors.AUTH_NEW_OK),
+                isNew: (code === codes.AUTH_NEW_OK),
                 longSession: true // don't ask on signup, long by default
             };
             loginUser(req, login, function (err) {
@@ -175,7 +175,7 @@ function Auth(app) {
             if (err) { return next(err); }
 
             if (info) {
-                if (info.code === errors.AUTH_NOT_VERIFIED) {
+                if (info.code === codes.AUTH_NOT_VERIFIED) {
                     console.log('[AUTH] Failed local: acc not verified for [%s]', data.email);
                     // Send verify email again!
                     mailVerifyAsync(user, util.baseURL(req));
@@ -210,13 +210,13 @@ function Auth(app) {
         User.authenticate(username, password, function (err, user, code) {
             if (err) { return done(err); }
 
-            if (code === errors.AUTH_NOT_FOUND) {
+            if (code === codes.AUTH_NOT_FOUND) {
                 return done(null, null, {code: code, error: 'Wrong email or password'});
             }
-            if (code === errors.AUTH_PWD_MISMATCH) {
+            if (code === codes.AUTH_PWD_MISMATCH) {
                 return done(null, null, {code: code, error: 'Wrong email or password'});
             }
-            if (code === errors.AUTH_NOT_VERIFIED) {
+            if (code === codes.AUTH_NOT_VERIFIED) {
                 return done(null, user, {code: code, error: 'Account is not verified'});
             }
             if (!user) {
@@ -318,7 +318,7 @@ function Auth(app) {
         User.register(data.email, data.password, data, function (err, user, code) {
             if (err) return done(err); //TODO
 
-            if (code === errors.AUTH_DUPLICATE) {
+            if (code === codes.AUTH_DUPLICATE) {
                 return done(null, false, {error: 'duplicate ' + email});
             }
 

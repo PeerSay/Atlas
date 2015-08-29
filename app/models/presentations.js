@@ -5,13 +5,13 @@ var Schema = mongoose.Schema;
 var moment = require('moment');
 var fs = require('fs-extra');
 
-var config = require('../../app/config');
-var util = require('../../app/util');
-var Settings = require('../../app/models/settings').SettingsModel;
-var s3 = require('../../app/pdf/aws-s3');
-var phantom = require('../../app/pdf/phantom-pdf');
-var renderer = require('../../app/pdf/render-tpl');
-var FILES_PATH = path.join(__dirname, '../../files');
+var config = require(appRoot + '/app/config');
+var util = require(appRoot + '/app/lib/util');
+var s3 = require(appRoot + '/app/lib/pdf/aws-s3');
+var phantom = require(appRoot + '/app/lib/pdf/phantom-pdf');
+var renderer = require(appRoot + '/app/lib/pdf/render-tpl');
+var Settings = require(appRoot + '/app/models/settings').SettingsModel;
+var FILES_PATH = path.join(appRoot, '/files');
 
 
 var resourceJSON = function (def) {

@@ -1,8 +1,9 @@
 var nodemailer = require('nodemailer');
-var config = require('../../app/config');
-var templates = require('../../app/email/templates/templates.js');
-
 var sgTransport = require('nodemailer-sendgrid-transport');
+
+var config = require(appRoot + '/app/config');
+var templates = require(__dirname + '/templates/templates.js');
+
 var client = nodemailer.createTransport(sgTransport(config.email), {debug: true});
 var enabled = config.email.enable;
 

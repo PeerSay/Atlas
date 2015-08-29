@@ -2,10 +2,10 @@ var _ = require('lodash');
 var util = require('util');
 
 // App dependencies
-var Category = require('../app/models/categories').CategoryModel;
-var Product = require('../app/models/products').ProductModel;
-var Topic = require('../app/models/topics').TopicModel;
-var Requirement = require('../app/models/requirements').RequirementModel;
+var Category = require(appRoot + '/app/models/categories').CategoryModel;
+var Product = require(appRoot + '/app/models/products').ProductModel;
+var Topic = require(appRoot + '/app/models/topics').TopicModel;
+var Requirement = require(appRoot + '/app/models/requirements').RequirementModel;
 
 
 function PublicRestApi(app) {

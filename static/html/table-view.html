@@ -1,37 +1,60 @@
-<div ng-form="form" class="table-responsive">
-    <table class="table" id="decision-table"
-            ng-table="view.tableParams"
-            >
+<div ng-form="form" class="table-responsive"
+        ng-init="view = table.tableView">
+
+    <!--Weights: {{ view.topicWeights | json }}-->
+
+    <table class="table ps-table" id="decision-table">
         <!--Header-->
-        <thead ng-if="view.rows.length">
+        <thead>
         <tr>
             <th ng-repeat="col in view.columns" ng-class=":: col.header.class">
                 <div>{{:: col.header.label }}</div>
             </th>
         </tr>
         </thead>
-        <tbody ng-repeat="group in $groups"
-                ng-init="groupObj = view.groups.get(group.value)">
+        <!--Groups-->
+        <tbody ng-repeat="group in view.groups" ng-init="groupIdx = $index">
         <!--Group row-->
-        <tr class="ng-table-group"
-                ng-show="group.value"
-                ng-click="groupObj.expanded.toggle(); $event.stopPropagation()">
-            <td colspan="{{ !groupObj.expanded.on && 2 || view.columns.length }}">
-                <a href tabindex="-1">
-                    <span class="fa fa-fw" ng-class="{ 'fa-caret-right': !groupObj.expanded.on, 'fa-caret-down': groupObj.expanded.on }"></span>
-                    {{:: group.value }}
-                </a>
+        <tr class="table-group"
+                ng-click="group.expanded.toggle();">
+            <td colspan="2">
+                <a href>
+                    <span class="fa fa-chevron-right caret-icon"></span>
+                    {{:: group.name }}</a>
             </td>
-            <!--Group weight-->
-            <td class="strong center" ng-if="!groupObj.expanded.on">{{ groupObj.weight() }}%</td>
+            <td class="strong center"
+                    ng-click="$event.stopPropagation()">
+                <div ps-slider-popover container="td" uid="slider-{{:: groupIdx }}"
+                        showIf="group">
+                    <a href tabindex="-1"
+                            data-toggle="popover"
+                            data-placement="right"
+                            title="Adjust topic weights">
+                        {{ view.topicWeights[groupIdx].w * 100 | number:0 }}%
+                    </a>
+
+                    <form class="slider-content page-spacer" ng-cloak>
+                        <slider class="no-select">
+                            <slider-range model="val.w" ng-repeat="val in view.topicWeights"
+                                    ng-class="{'current-range': groupIdx === $index}">
+                                <div class="slider-handle">&nbsp;&nbsp;</div>
+                                <div class="slider-label">{{ val.w * 100 | number:0 }}%</div>
+                            </slider-range>
+                        </slider>
+                        <!--<p>
+                            DBG: {{groupIdx | json}}
+                        </p>-->
+                    </form>
+                </div>
+            </td>
             <!--Group grades-->
-            <td ng-if="!groupObj.expanded.on" ng-repeat-start="groupCol in groupObj.grades"></td>
-            <td ng-if="!groupObj.expanded.on" ng-repeat-end class="strong grade">
+            <td ng-repeat-start="groupCol in group.grades"></td>
+            <td ng-repeat-end class="strong grade">
                 {{ groupCol.grade() }}
             </td>
         </tr>
         <!--Rows & cells-->
-        <tr ng-show="groupObj.expanded.on" ng-repeat="row in group.data">
+        <tr ng-show="group.expanded.on" ng-repeat="row in group.rows">
             <td class="cell" ng-repeat="cell in row.cells"
                     ng-class="[cell.type, cell.class].concat(cell.model.max() && 'winner' || '')"
                     ng-click="focusInputEl(cell)">
@@ -85,6 +108,7 @@
             <td colspan="6" class="text-center">
                 <span class="fa fa-info-circle"></span>
                 <h4>Bummer, there's nothing to compare yet.</h4>
+
                 <h3>
                     Please add
                     <a ui-sref="^.requirements">Requirements</a> and

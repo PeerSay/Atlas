@@ -104,7 +104,6 @@ module.exports = function (grunt) {
                     'bower_components/angular-sanitize/angular-sanitize.js',
                     'bower_components/angular-animate/angular-animate.js',
                     'bower_components/angular-mocks/angular-mocks.js',
-                    'bower_components/ng-table/dist/ng-table.js',
                     'bower_components/angular-elastic/elastic.js',
                     'bower_components/ng-context-menu/dist/ng-context-menu.js',
                     'bower_components/fast-json-patch/dist/json-patch-duplex.min.js',

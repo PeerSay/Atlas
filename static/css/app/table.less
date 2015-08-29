@@ -15,15 +15,15 @@
 
 .table-border {
   border: 1px solid @border-vert-color;
-  border-top: 0;
   border-radius: 4px;
 }
 
-.ng-table {
+.ps-table {
   margin-bottom: 0;
 
   /*Header/footer*/
   thead th {
+    text-align: center;
     &.grade {
       width: 1%;
       padding: 3px;
@@ -56,7 +56,7 @@
     }
 
     /*Group row*/
-    &.ng-table-group td {
+    &.table-group td {
       padding: 8px;
       background: @header-bg;
       cursor: pointer;
@@ -108,7 +108,7 @@
       }
 
       &.static {
-        padding: 2px 5px;
+        padding: 5px;
       }
       &.number {
         width: 1%;
@@ -160,10 +160,6 @@
     color: @winner-cup-color;
     font-size: 13px;
   }
-}
-/*Hide pagination*/
-.ng-table-pager {
-  display: none;
 }
 
 /*Override bootstrap*/

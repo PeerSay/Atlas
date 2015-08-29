@@ -53,7 +53,7 @@ function TableModel() {
             addCell('mandatory', rowIdx, req, {
                 label: req.mandatory ? 'fa-check' : '',
                 type: 'icon',
-                'class': 'center'
+                'class': 'center static'
             });
             addCell('weight', rowIdx, req, {
                 model: CellModel(req, 'weight', {
@@ -295,6 +295,7 @@ function TableModel() {
         var G = {};
         G.add = add;
         G.get = get;
+        G.list = [];
         var cache = {};
 
         function get(key) {
@@ -303,14 +304,19 @@ function TableModel() {
 
         function add(row, expandedState) {
             var key = row.req.topic || '(no name)';
-            var group = cache[key] = cache[key] || Group(expandedState);
+            var group = cache[key];
+            if (!group) {
+                group = cache[key] = Group(key, expandedState);
+                G.list.push(group);
+            }
             group.addRow(row);
 
             return key;
         }
 
-        function Group(expandedState) {
+        function Group(name, expandedState) {
             var G = {};
+            G.name = name;
             G.addRow = addRow;
             G.weight = calcWeightPercents;
             G.grades = [];

@@ -1,19 +1,18 @@
-<div ng-form="form" class="table-responsive"
-        ng-init="view = table.tableView">
+<div ng-form="form" class="table-responsive">
 
-    <!--Weights: {{ view.topicWeights | json }}-->
+    <!--Weights: {{ table.view.topicWeights | json }}-->
 
     <table class="table ps-table" id="decision-table">
         <!--Header-->
         <thead>
         <tr>
-            <th ng-repeat="col in view.columns" ng-class=":: col.header.class">
+            <th ng-repeat="col in table.view.columns" ng-class=":: col.header.class">
                 <div>{{:: col.header.label }}</div>
             </th>
         </tr>
         </thead>
         <!--Groups-->
-        <tbody ng-repeat="group in view.groups" ng-init="groupIdx = $index">
+        <tbody ng-repeat="group in table.view.groups" ng-init="groupIdx = $index">
         <!--Group row-->
         <tr class="table-group"
                 ng-click="group.expanded.toggle();">
@@ -30,15 +29,15 @@
                             data-toggle="popover"
                             data-placement="right"
                             title="Adjust topic weights">
-                        {{ view.topicWeights[groupIdx].w * 100 | number:0 }}%
+                        {{ table.view.topicWeights[groupIdx].weight * 100 | number:0 }}%
                     </a>
 
                     <form class="slider-content page-spacer" ng-cloak>
                         <slider class="no-select">
-                            <slider-range model="val.w" ng-repeat="val in view.topicWeights"
+                            <slider-range model="val.weight" ng-repeat="val in table.view.topicWeights track by val.id"
                                     ng-class="{'current-range': groupIdx === $index}">
                                 <div class="slider-handle">&nbsp;&nbsp;</div>
-                                <div class="slider-label">{{ val.w * 100 | number:0 }}%</div>
+                                <div class="slider-label">{{ val.weight * 100 | number:0 }}%</div>
                             </slider-range>
                         </slider>
                         <!--<p>
@@ -64,7 +63,7 @@
                 <div ng-if=":: cell.type === 'text' ">
                     <textarea class="cell-input noresize"
                             ng-model="cell.model.value"
-                            ps-ctrl="view.ctrl"
+                            ps-ctrl="table"
                             ps-table-input="cell"
                             msd-elastic></textarea>
                 </div>
@@ -73,7 +72,7 @@
                     <input type="number" class="cell-input center"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
-                            ps-ctrl="view.ctrl"
+                            ps-ctrl="table"
                             ps-table-input="cell"
                             ps-input-number
                             ps-tooltip="cell.model.tooltip()"
@@ -89,8 +88,8 @@
         </tbody>
         <!--Footer-->
         <tfoot>
-        <tr ng-if="view.rows.length">
-            <th class="abs-container {{:: col.footer.class }}" ng-repeat="col in view.columns"
+        <tr ng-if="table.view.rows.length">
+            <th class="abs-container {{:: col.footer.class }}" ng-repeat="col in table.view.columns"
                     ng-class="{'winner' : col.footer.model.max()}">
                 <!--Label cell-->
                 <div ng-if=":: col.footer.type === 'static' ">{{:: col.footer.label }}</div>
@@ -104,7 +103,7 @@
         </tr>
         <!--Empty table row -->
         <tr class="empty-table-content"
-                ng-if="!view.ctrl.loading && !view.rows.length">
+                ng-if="!table.loading && !table.view.rows.length">
             <td colspan="6" class="text-center">
                 <span class="fa fa-info-circle"></span>
                 <h4>Bummer, there's nothing to compare yet.</h4>

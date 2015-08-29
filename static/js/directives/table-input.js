@@ -24,14 +24,6 @@ function psTableInput() {
             var cell = scope.$eval(attrs.psTableInput);
             var model = cell.model;
 
-            // This fixes table cell's save logic for type=number inputs in Firefox.
-            // Firefox (unlike Chrome) does not focus input when spinner buttons are clicked, thus it breaks
-            // save logic based on assumption that edited element is focused and blur triggers update.
-            $el.on('input', function () {
-                // 'input' event is triggered on clicking spinner button
-                $(this).focus();
-            });
-
             // Make active on clicking cell outside input (if cell is larger)
             $td.click(function () {
                 $el.focus();

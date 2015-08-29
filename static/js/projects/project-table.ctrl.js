@@ -6,12 +6,13 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
     var m = this;
 
     m.projectId = $stateParams.projectId;
-    m.shared = Projects.current; // for title
+    m.project = null;
     m.patchObserver = null;
     m.patchProject = patchProject;
     m.loading = true;
     // Table model/view
-    m.tableView = null;
+    m.view = null;
+    m.topicWeights = [];
     m.getCsv = TableModel.getCsv.bind(TableModel);
 
 
@@ -20,9 +21,15 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
     function activate() {
         return Projects.readProject(m.projectId)
             .then(function (res) {
-                observe({table: res.table});
+                m.project = res;
+                observe({table: res.table, topicWeights: res.topicWeights});
 
-                m.tableView = getView(res);
+                m.topicWeights = res.topicWeights.reduce(function (acc, it) {
+                    return [].concat(acc, {id: it._id, weight: it.weight});
+                }, []);
+                watch(m.topicWeights);
+
+                m.view = getView(res);
                 return res;
             }).finally(function () {
                 m.loading = false;
@@ -34,6 +41,23 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
         $scope.$on('$destroy', function () {
             jsonpatch.unobserve(project, m.patchObserver);
         });
+    }
+
+    function watch(weights) {
+        var debouncedPatch = _.debounce(function (newWeights) {
+            _.forEach(newWeights, function (it, i) {
+                m.project.topicWeights[i].weight = _.round(it.weight, 4);
+            });
+            patchProject();
+        }, 1000);
+
+        $scope.$watch(function () {
+            return weights;
+        }, function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+                debouncedPatch(newVal);
+            }
+        }, true);
     }
 
     function patchProject() {
@@ -48,13 +72,10 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
         var model = TableModel.buildModel(project.table);
         initGroups(model);
 
-        view.ctrl = m;
         view.columns = model.columns;
         view.rows = model.rows;
         view.groups = TableModel.groups.list;
-        view.topicWeights = project.topicWeights.reduce(function (acc, it) {
-            return [].concat(acc, {name: it.topic.slice(0, 3), w: it.weight});
-        }, []);
+        view.topicWeights = m.topicWeights;
         return view;
     }
 

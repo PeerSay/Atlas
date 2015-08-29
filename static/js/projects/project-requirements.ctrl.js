@@ -34,7 +34,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            observe(m.project);
+            observe({requirements: res.requirements});
         });
 
         populateSelectionList();

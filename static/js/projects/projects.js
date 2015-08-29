@@ -19,12 +19,10 @@ function Projects(Backend, User, _) {
     P.removeProject = removeProject;
     // Details
     P.current = {
-        project: {},
-        table: []
+        project: {}
     };
     // Read
     P.readProject = readProject;
-    P.readProjectTable = readProjectTable;
     P.readPublicCategories = readPublicCategories;
     P.readPublicProducts = readPublicProducts;
     P.readPublicRequirements = readPublicRequirements;
@@ -33,8 +31,6 @@ function Projects(Backend, User, _) {
     P.patcher = Patcher();
     P.patchProject = patchProject;
     // Presentations
-    P.readPresentation = readPresentation;
-    P.patchPresentation = patchPresentation;
     P.createPresentationSnapshot = createPresentationSnapshot;
     P.deletePresentationSnapshot = deletePresentationSnapshot;
 
@@ -107,29 +103,6 @@ function Projects(Backend, User, _) {
         });
     }
 
-    // Table
-    //
-    //@formatter:off
-    /* Format: [{
-        "reqId": "",
-        "name": "",
-        "weight": 1,
-        "popularity": 0,
-        "products": [{
-            "prodId": "",
-            "name": "",
-            "input": "",
-            "grade": 0,
-            "popularity": 0
-        }]
-    }]*/
-    //@formatter:on
-    function readProjectTable(id) {
-        return Backend.read(['projects', id, 'table']).then(function (data) {
-            return (P.current.table = data.result);
-        });
-    }
-
     //Requirements / Topics
     //
     function readPublicTopics() {
@@ -184,11 +157,6 @@ function Projects(Backend, User, _) {
                 Backend.invalidateCache(['user']);
             }
 
-            var tableChanged = /\/products|\/requirements/.test(patches[0].path); // always single patch?
-            if (tableChanged) {
-                Backend.invalidateCache(['projects', id, 'table']);
-            }
-
             Backend.invalidateCache(['projects', id]);
         }
 
@@ -197,17 +165,6 @@ function Projects(Backend, User, _) {
 
     // Presentations
     //
-    function readPresentation(projectId) {
-        return Backend.read(['projects', projectId, 'presentation']).then(function (data) {
-            return data.result;
-        });
-    }
-
-    function patchPresentation(projectId, data) {
-        Backend.invalidateCache(['projects', projectId, 'presentation']);
-        return Backend.patch(['projects', projectId, 'presentation'], data);
-    }
-
     function createPresentationSnapshot(projectId, data) {
         Backend.invalidateCache(['projects', projectId, 'presentation']);
         return Backend.create(['projects', projectId, 'presentation', 'snapshots'], data).then(function (data) {

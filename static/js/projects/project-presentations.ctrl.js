@@ -11,7 +11,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
     m.data = {};
     m.snapshots = [];
     m.patchObserver = null;
-    m.patchPresentation = patchPresentation;
+    m.patchProject = patchProject;
     m.creating = false;
     m.createSnapshot = createSnapshot;
     m.deleteSnapshot = deleteSnapshot;
@@ -31,23 +31,19 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
     activate();
 
     function activate() {
-        readPresentation();
+        Projects.readProject(m.projectId).then(function (res) {
+            m.presentation = res.presentation;
+            observe({presentation: m.presentation});
+
+            m.data = res.presentation.data;
+            m.snapshots = res.presentation.snapshots;
+            m.logoUrl = m.data.logo.image.url || m.logoUrl;
+        });
 
         $scope.$watch('pr.logoFile', function (newVal, oldVal) {
             if (newVal !== oldVal) {
                 uploadLogo(m.logoFile);
             }
-        });
-    }
-
-    function readPresentation() {
-        Projects.readPresentation(m.projectId).then(function (res) {
-            m.presentation = res.presentation;
-            observe(m.presentation);
-
-            m.data = res.presentation.data;
-            m.snapshots = res.presentation.snapshots;
-            m.logoUrl = m.data.logo.image.url || m.logoUrl;
         });
     }
 
@@ -59,11 +55,11 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
         });
     }
 
-    function patchPresentation() {
+    function patchProject() {
         var patch = jsonpatch.generate(m.patchObserver);
         if (!patch.length) { return; }
 
-        return Projects.patchPresentation(m.projectId, patch);
+        return Projects.patchProject(m.projectId, patch);
     }
 
     // Snapshots
@@ -93,10 +89,10 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
         var idx = m.snapshots.indexOf(snap); // XXX - subject to index-based patch issues!
         var patch = {
             op: 'replace',
-            path: ['/snapshots', idx, 'visited'].join('/'),
+            path: ['/presentation/snapshots', idx, 'visited'].join('/'),
             value: true
         };
-        return Projects.patchPresentation(m.projectId, [patch]).then(function () {
+        return Projects.patchProject(m.projectId, [patch]).then(function () {
             snap.visited = true;
         });
     }
@@ -105,7 +101,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
     //
     function onFileSelectClick() {
         m.data.logo.include = true;
-        patchPresentation();
+        patchProject();
         Notify.hide();
         m.uploadProgress.success = false;
     }

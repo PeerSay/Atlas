@@ -7,7 +7,6 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
 
     m.projectId = $stateParams.projectId;
     m.shared = Projects.current; // for title
-    m.project = null;
     m.patchObserver = null;
     m.patchProject = patchProject;
     m.loading = true;
@@ -17,12 +16,28 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, TableMo
     m.tableView = table.getView();
     m.getCsv = TableModel.getCsv.bind(TableModel);
 
+    // Table data format:
+    //
+    //@formatter:off
+    /* [{
+        "reqId": "",
+        "name": "",
+        "weight": 1,
+        "popularity": 0,
+        "products": [{
+            "prodId": "",
+            "name": "",
+            "input": "",
+            "grade": 0,
+            "popularity": 0
+        }]
+    }]*/
+    //@formatter:on
 
     // Called by Table
     function activate() {
-        return Projects.readProjectTable(m.projectId).then(function (res) {
-            m.project = {table: res.table};
-            observe(m.project);
+        return Projects.readProject(m.projectId).then(function (res) {
+            observe({table: res.table});
 
             m.loading = false;
             return res.table;

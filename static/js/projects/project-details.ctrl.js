@@ -36,10 +36,8 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, StorageR
             m.project = res;
             m.requirements = res.requirements;
             m.products = res.products;
-            return res;
-        });
-        Projects.readPresentation(m.projectId).then(function (res) {
             m.snapshots = res.presentation.snapshots;
+            return res;
         });
     }
 }

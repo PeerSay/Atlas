@@ -32,13 +32,11 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
             initFields(res);
 
             return (m.project = res);
-        }).then(function () {
+        }).then(function (project) {
             var tableOk = m.decisions.initialized = (m.products.initialized && m.requirements.initialized);
             if (!tableOk) { return; }
 
-            Projects.readProjectTable(m.projectId).then(function (res) {
-                m.decisions.data = findWinners(res.table);
-            });
+            m.decisions.data = findWinners(project.table);
         }).finally(function () {
             m.loading = false;
         });

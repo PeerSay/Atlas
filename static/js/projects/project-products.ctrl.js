@@ -49,7 +49,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            observe(m.project);
+            observe({products: res.products});
 
             // Products
             addProductsToList(res.products, true);

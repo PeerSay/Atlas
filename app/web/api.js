@@ -44,86 +44,134 @@ function RestApi(app) {
 
         // projects
         app.post('/api/projects', jsonParser, createProject);
-        app.get('/api/projects/:id', readProject);
         app.delete('/api/projects/:id', deleteProject);
-        app.patch('/api/projects/:id', jsonParser, patchProject);
-
-        // project's table
-        app.get('/api/projects/:id/table', readProjectTable);
-        app.patch('/api/projects/:id/table', jsonParser, patchProjectTable);
+        app.get('/api/projects/:id', ensureProject, readProject);
+        app.patch('/api/projects/:id', jsonParser, ensureProject, patchProject);
 
         // project's presentation
-        app.get('/api/projects/:id/presentation', readPresentation);
-        app.patch('/api/projects/:id/presentation', patchPresentation);
         app.post('/api/projects/:id/presentation/snapshots', createPresentationSnapshot);
-        app.delete('/api/projects/:id/presentation/snapshots/:snapId', deletePresentationSnapshot);
+        app.delete('/api/projects/:id/presentation/snapshots/:snapId', ensureProject, deletePresentationSnapshot);
         // logo upload
-        app.post('/api/projects/:id/presentation/upload/logo', uploadLogoFile);
+        app.post('/api/projects/:id/presentation/upload/logo', ensureProject, uploadLogoFile);
 
         // NOT API - return html/pdf/image content!
-        app.get('/files/:projectId/:fileName', readProjectFile);
+        app.get('/files/:id/:fileName', ensureProject, readProjectFile);
 
         return U;
     }
 
-    // Presentations
-    //
-    function readPresentation(req, res, next) {
+    function ensureProject(req, res, next) {
         var projectId = req.params.id;
         var email = req.user.email;
 
-        console.log('[API] Reading presentation of project[%s] for user=[%s]', projectId, email);
+        console.log('[API] Resolving project[%s] for user=[%s]', projectId, email);
 
-        Project.findById(projectId, 'presentation', function (err, prj) {
+        Project.findById(projectId, function (err, prj) {
             if (err) { return next(err); }
+
+            //TODO - check content type & send
+
             if (!prj) {
+                console.log('[API] Resolving project[%s] error - not found!', projectId);
                 return errRes.notFound(res, 'project:' + projectId);
             }
 
-            var result = prj.toJSON({getters: true, virtuals: false});
-            console.log('[API] Reading presentation of project[%s] result: %s', projectId, JSON.stringify(result));
+            req.project = prj;
+            next();
+        });
+    }
+
+    // User
+    //
+    function readUser(req, res, next) {
+        var user = req.user;
+        var email = user.email;
+
+        var result = user.toJSON({transform: xformUser, virtuals: true}); // need virtuals for name.full
+        console.log('[API] Reading user[%s] result: %s', email, JSON.stringify(result));
+
+        return res.json({result: result});
+    }
+
+    // Projects
+    //
+    function createProject(req, res, next) {
+        var data = req.body;
+        var user = req.user;
+        var email = user.email;
+
+        console.log('[API] Creating project for user=[%s]', email);
+
+        Project.createByUser(data, user, function (err, stubPrj) {
+            if (err) { return next(err); }
+
+            var result = stubPrj.toJSON({transform: xformStubPrj}); // stub is enough for create
+            console.log('[API] Creating project result: %s', JSON.stringify(result));
 
             return res.json({result: result});
         });
     }
 
-    function patchPresentation(req, res, next) {
-        var projectId = req.params.id;
-        var patches = req.body;
+    function deleteProject(req, res, next) {
+        var project_id = req.params.id;
         var user = req.user;
         var email = user.email;
 
-        console.log('[API] Patching presentation of project[%s] for user=[%s] with %s', projectId, email, JSON.stringify(patches));
+        console.log('[API] Removing project[%s] for user=[%s]', project_id, email);
 
-        Project.findById(projectId, 'presentation', function (err, prj) {
+        Project.removeByUser(project_id, user, function (err, doc) {
             if (err) { return next(err); }
-            if (!prj) {
-                return errRes.notFound(res, 'project' + projectId);
+
+            if (!doc) {
+                console.log('[API] Removing project[%s] failed - not found!', project_id);
+                return errRes.notFound(res, project_id);
             }
 
-            // Patch
-            applyPatch(prj.presentation, patches, function (err, patchRes) {
-                if (err) { return modelError(res, err); }
+            var result = {id: project_id, removed: true};
+            console.log('[API] Removing project[%s] result: %s', project_id, JSON.stringify(result));
 
-                console.log('[API] Patched presentation of project[%s] result:', projectId, patchRes);
+            return res.json({result: result});
+        });
+    }
 
-                return res.json({result: patchRes});
-            });
+    function readProject(req, res, next) {
+        var project = req.project;
+
+        var result = project.toJSON({transform: xformDeleteProps('__v'), getters: true}); // need getters for snapshot urls
+        console.log('[API] Reading project[%s] result: %s', project.id, JSON.stringify(result));
+
+        return res.json({result: result});
+    }
+
+    function patchProject(req, res, next) {
+        var data = req.body;
+        var email = req.user.email;
+        var project = req.project;
+        var projectId = project.id;
+
+        console.log('[API] Patching project[%s] for user=[%s] with %s', projectId, email, JSON.stringify(data));
+
+        applyPatch(project, data, function (err, patchRes) {
+            if (err) { return modelError(res, err); }
+
+            console.log('[API] Patched project[%s] result:', projectId, patchRes);
+
+            return res.json({result: patchRes});
         });
     }
 
     // Presentation Snapshots
     //
     function createPresentationSnapshot(req, res, next) {
-        var projectId = req.params.id;
         var data = req.body;
         var email = req.user.email;
+        var projectId = req.params.id;
 
         console.log('[API] Creating presentation snapshot of project[%s] for user=[%s] with: %s',
             projectId, email, JSON.stringify(data));
 
-        Project.findById(projectId)
-            .populate('collaborators') // need user in presentation
+        Project.findById(projectId) // Cannot reuse req.project here - model error is raised
+            .populate('collaborators') // need user email in presentation
             .exec(function (err, prj) {
                 if (err) { return next(err); }
                 if (!prj) {
@@ -146,42 +194,35 @@ function RestApi(app) {
     }
 
     function deletePresentationSnapshot(req, res, next) {
-        var projectId = req.params.id;
-        var snapId = req.params.snapId;
         var email = req.user.email;
-
-        // TODO - remove files
+        var project = req.project;
+        var projectId = project.id;
+        var snapId = req.params.snapId;
 
         console.log('[API] Removing presentation snapshot[%s] of project[%s] for user=[%s]', snapId, projectId, email);
 
-        Project.findById(projectId, 'presentation.snapshots', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return errRes.notFound(res, 'project:' + projectId);
-            }
+        var snapshots = project.presentation.snapshots;
+        var obj = _.find(snapshots, {id: Number(snapId)});
+        var snap = obj && snapshots.id(obj._id);
+        if (!snap) {
+            console.log('[API] Removing presentation snapshot[%s] of project[%s] failed - not found', snapId, projectId);
+            return errRes.notFound(res, 'snap:' + snapId);
+        }
 
-            var snapshots = prj.presentation.snapshots;
-            var obj = _.find(snapshots, {id: Number(snapId)});
-            var snap = obj && snapshots.id(obj._id);
-            if (!snap) {
-                console.log('[API] Removing presentation snapshot[%s] of project[%s] failed - not found', snapId, projectId);
-                return errRes.notFound(res, 'snap:' + snapId);
-            }
+        snap.remove(); // <-
 
-            snap.remove();
-            prj.save(function (err) {
-                if (err) { return modelError(res, err); }
+        project.save(function (err) {
+            if (err) { return modelError(res, err); }
 
-                var result = true;
-                console.log('[API] Removing presentation snapshot[%s] of project[%s] result: %s', snapId, projectId, JSON.stringify(result));
+            var result = true;
+            console.log('[API] Removing presentation snapshot[%s] of project[%s] result: %s', snapId, projectId, JSON.stringify(result));
 
-                return res.json({result: result});
-            });
+            return res.json({result: result});
         });
     }
 
     function readProjectFile(req, res, next) {
-        var projectId = req.params.projectId;
+        var projectId = req.project.id;
         var fileName = req.params.fileName;
         var safeFileName = util.encodeURIComponentExt(fileName);
         var s3Url = [req.protocol + '://s3.amazonaws.com', config.s3.bucket_name, projectId, safeFileName].join('/');
@@ -207,7 +248,7 @@ function RestApi(app) {
     // Logo upload / read
     //
     function logoUploadDir(req, file, cb) {
-        var projectId = req.params.id;
+        var projectId = req.project.id;
         var fileDir = path.join(FILES_PATH, projectId);
 
         // Directory must exist as required by multer
@@ -232,246 +273,40 @@ function RestApi(app) {
     }
 
     function uploadLogoFile(req, res, next) {
-        var projectId = req.params.id;
         var email = req.user.email;
+        var project = req.project;
+        var projectId = project.id;
 
         console.log('[API] Upload presentation logo of project[%s] for user=[%s]',
             projectId, email);
 
-        Project.findById(projectId, 'presentation', function (err, prj) {
-            if (err) { return next(err); }
-            if (!prj) {
-                return errRes.notFound(res, 'project:' + projectId);
+        upload(req, null, function (err) {
+            if (err) {
+                console.log('[API] Upload presentation logo of project[%s] error: ', projectId, err.toString());
+                return errRes.notValid(res, err.code);
             }
 
-            upload(req, null, function (err) {
-                if (err) {
-                    console.log('[API] Upload presentation logo of project[%s] error: ', projectId, err.toString());
-                    return errRes.notValid(res, err.code);
-                }
-
-                if (!req.file) {
-                    console.log('[API] Upload presentation logo of project[%s] error: no file');
-                    return errRes.notValid(res, 'bad file');
-                }
-
-                // Update model
-                var resource = prj.presentation.data.logo.image;
-                resource.fileName = req.file.filename;
-                resource.sizeBytes = req.file.size;
-
-                prj.save(function (err) {
-                    if (err) { return modelError(res, err); }
-
-                    var result = true;
-                    console.log('[API] Upload presentation logo of project[%s] result: %s', projectId, resource.fileName);
-
-                    return res.json({result: result});
-                });
-            });
-        });
-    }
-
-    // User
-    //
-    function readUser(req, res, next) {
-        var email = req.user.email;
-
-        console.log('[API] Reading user[%s]', email);
-
-        User.findOne({email: email}, 'id -_id email name projects', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
+            if (!req.file) {
+                console.log('[API] Upload presentation logo of project[%s] error: no file');
+                return errRes.notValid(res, 'bad file');
             }
 
-            var result = user.toJSON({transform: xformUser, virtuals: true}); // need virtuals for name.full
-            console.log('[API] Reading user[%s] result: %s', email, JSON.stringify(result));
+            // Update model
+            var resource = project.presentation.data.logo.image;
+            resource.fileName = req.file.filename;
+            resource.sizeBytes = req.file.size;
 
-            return res.json({result: result});
-        });
-    }
+            project.save(function (err) {
+                if (err) { return modelError(res, err); }
 
-    // Projects
-    //
-    function createProject(req, res, next) {
-        var data = req.body;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Creating project for user=[%s]', email);
-
-        User.findOne({email: email}, 'projects', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.createByUser(data, user, function (err, stubPrj) {
-                if (err) { return next(err); }
-
-                var result = stubPrj.toJSON({transform: xformStubPrj}); // stub is enough for create
-                console.log('[API] Creating project result: %s', JSON.stringify(result));
+                var result = true;
+                console.log('[API] Upload presentation logo of project[%s] result: %s', projectId, resource.fileName);
 
                 return res.json({result: result});
             });
         });
     }
 
-    function deleteProject(req, res, next) {
-        var project_id = req.params.id;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Removing project[%s] for user=[%s]', project_id, email);
-
-        User.findOne({email: email}, 'projects', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.removeByUser(project_id, user, function (err, doc) {
-                if (err) { return next(err); }
-
-                if (!doc) {
-                    console.log('[API] Removing project[%s] failed - not found!', project_id);
-                    return errRes.notFound(res, project_id);
-                }
-
-                var result = {id: project_id, removed: true};
-                console.log('[API] Removing project[%s] result: %s', project_id, JSON.stringify(result));
-
-                return res.json({result: result});
-            });
-        });
-    }
-
-    function readProject(req, res, next) {
-        var project_id = req.params.id;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Reading project[%s] for user=[%s]', project_id, email);
-
-        User.findOne({email: email}, function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.findById(project_id, '-_id -id -__v -collaborators -categories._id -table -presentation', function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                var result = prj.toJSON({transform: xformDeleteProp('id')});
-                console.log('[API] Reading project[%s] result: %s', project_id, JSON.stringify(result));
-
-                return res.json({result: result});
-            });
-        });
-    }
-
-    function patchProject(req, res, next) {
-        var project_id = req.params.id;
-        var data = req.body;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Patching project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
-
-        User.findOne({email: email}, function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.findById(project_id, function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                // Patch
-                applyPatch(prj, data, function (err, patchRes) {
-                    if (err) { return modelError(res, err); }
-
-                    console.log('[API] Patched project[%s] result:', project_id, patchRes);
-
-                    return res.json({result: patchRes});
-                });
-            });
-        });
-    }
-
-    // Decision Table
-
-    function readProjectTable(req, res, next) {
-        var project_id = req.params.id;
-        var user = req.user;
-        var email = user.email;
-        var minTable = [1, 2]; // TODO - return empty table until 1x2
-
-        console.log('[API] Reading table of project[%s] for user=[%s]', project_id, email);
-
-        User.findOne({email: email}, function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.findById(project_id, 'table', function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                var result = prj.toJSON({transform: xformDeleteProp('_id')});
-                console.log('[API] Reading table of project[%s] result: %s', project_id, JSON.stringify(result));
-
-                return res.json({result: result});
-            });
-        });
-    }
-
-    function patchProjectTable(req, res, next) {
-        var project_id = req.params.id;
-        var data = req.body;
-        var user = req.user;
-        var email = user.email;
-
-        console.log('[API] Patching table of project[%s] for user=[%s] with %s', project_id, email, JSON.stringify(data));
-
-        User.findOne({email: email}, 'projects.criteria', function (err, user) {
-            if (err) { return next(err); }
-            if (!user) {
-                return errRes.notFound(res, email);
-            }
-
-            Project.findById(project_id, 'criteria', function (err, prj) {
-                if (err) { return next(err); }
-                if (!prj) {
-                    return errRes.notFound(res, project_id);
-                }
-
-                // Patch
-                applyPatch(prj, data, function (err) {
-                    if (err) { return modelError(res, err); }
-
-                    prj.save(function (err) {
-                        if (err) { return modelError(res, err); }
-
-                        var result = true; // no need to send data back
-                        console.log('[API] Patched table of project[%s] result:', project_id, result);
-
-                        return res.json({result: result});
-                    });
-                });
-            });
-        });
-    }
 
     /**
      * Patch format (see rfc6902):
@@ -523,6 +358,8 @@ function RestApi(app) {
     }
 
     function xformUser(doc, ret) {
+        delete ret._id;
+
         if (ret.name) {
             if (ret.name.full) {
                 ret.name = ret.name.full;
@@ -537,9 +374,13 @@ function RestApi(app) {
         return ret;
     }
 
-    function xformDeleteProp(prop) {
+    function xformDeleteProps(prop) {
+        var props = [].slice.call(arguments);
+
         return function (doc, ret) {
-            delete ret[prop];
+            props.forEach(function (prop) {
+                delete ret[prop];
+            });
             return ret;
         };
     }

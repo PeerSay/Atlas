@@ -1,6 +1,13 @@
 angular.module("at.multirange-slider", []);
 
-angular.module("at.multirange-slider").directive("slider", function($parse, $compile) {
+angular.module("at.multirange-slider")
+    .directive("slider", sliderDirective)
+    .directive("sliderRange", sliderRangeDirective)
+    .directive('sliderHandle', sliderHandleDirective);
+
+
+sliderDirective.$inject = ['$parse', '$compile'];
+function sliderDirective($parse, $compile) {
   return {
     restrict: "E",
     replace: true,
@@ -9,7 +16,7 @@ angular.module("at.multirange-slider").directive("slider", function($parse, $com
     link: function(scope, element, attrs, ctrl) {
       return element.children().css('position', 'relative');
     },
-    controller: function($scope, $element, $attrs) {
+    controller: ['$scope', '$element', '$attrs', function($scope, $element, $attrs) {
       var get;
       this.ranges = [];
       this.handles = [];
@@ -45,21 +52,25 @@ angular.module("at.multirange-slider").directive("slider", function($parse, $com
       };
       return this.elementWidth = function() {
         return this._width - this.handles.reduce(function(sum, handle) {
-          return sum + handle.width();
-        }, 0);
+              return sum + handle.width();
+            }, 0);
       };
-    }
+    }]
   };
-}).directive("sliderRange", function($parse) {
+}
+
+
+sliderRangeDirective.$inject = ['$parse'];
+function sliderRangeDirective($parse) {
   return {
     template: "<div class=\"slider-range\" ng-transclude>\n</div>",
     require: ['^slider', 'sliderRange'],
     restrict: 'E',
     replace: true,
     transclude: true,
-    controller: function($scope) {
+    controller: ['$scope', function($scope) {
       return {};
-    },
+    }],
     compile: function() {
       return {
         pre: function(scope, element, attrs, _arg) {
@@ -108,7 +119,10 @@ angular.module("at.multirange-slider").directive("slider", function($parse, $com
       };
     }
   };
-}).directive('sliderHandle', function($document) {
+}
+
+sliderHandleDirective.$inject = ['$document'];
+function sliderHandleDirective($document) {
   return {
     replace: false,
     restrict: 'AC',
@@ -168,4 +182,4 @@ angular.module("at.multirange-slider").directive("slider", function($parse, $com
       });
     }
   };
-});
+}

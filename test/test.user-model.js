@@ -3,12 +3,12 @@ var mongoose = require('mongoose');
 
 // Mock config
 process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
-var config = require('../app/config');
+var config = require(appRoot + '/app/config');
 
 // Dependencies to Mock
 var codes = require(appRoot + '/app/web/codes');
-var User = require('../app/models/users').UserModel;
-var Settings = require('../app/models/settings').SettingsModel;
+var User = require(appRoot + '/app/models/users').UserModel;
+var Settings = require(appRoot + '/app/models/settings').SettingsModel;
 
 // --> Connect to test DB
 var DB_URL = 'mongodb://localhost/peersay_test';

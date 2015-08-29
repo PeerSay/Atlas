@@ -2,11 +2,13 @@
 var _ = require('lodash');
 var express = require('express');
 var request = require('supertest');
+var path = require('path');
 
+global.appRoot = path.resolve(__dirname + '/..'); // it is loaded first so this is side-effect for all tests
 var app = express();
 
 // --> Under test
-require('../app/api-validate')(app).setupRoutes();
+require(appRoot + '/app/web/api-validate')(app).setupRoutes();
 
 
 describe('REST API - Validation', function () {

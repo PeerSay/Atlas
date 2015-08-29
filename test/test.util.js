@@ -1,5 +1,5 @@
 var should = require('chai').should();
-var util = require('../app/util');
+var util = require(appRoot + '/app/lib/util');
 
 describe('Util', function () {
     describe('crypto', function () {

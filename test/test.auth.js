@@ -38,10 +38,10 @@ var config = require(appRoot + '/app/config');
 // Dependencies to Mock
 var util = require(appRoot + '/app/lib/util');
 var mailer = require(appRoot + '/app/lib/email/mailer');
-var User = require('../app/models/users').UserModel;
+var User = require(appRoot + '/app/models/users').UserModel;
 
 // --> Under test
-var Auth = require('../app/auth');
+var Auth = require(appRoot + '/app/web/auth');
 var auth = Auth(app).setupRoutes();
 
 

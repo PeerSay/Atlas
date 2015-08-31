@@ -149,6 +149,20 @@
           }
         }
       }
+
+      &.null {
+        cursor: pointer;
+        &:before {
+          content: "?";
+          color: @gray-light;
+        }
+        &:hover:before {
+          color: @text-color;
+        }
+        input {
+          visibility: hidden;
+        }
+      }
     }
   }
 

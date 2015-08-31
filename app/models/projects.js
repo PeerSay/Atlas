@@ -104,7 +104,7 @@ var projectSchema = new Schema({
             prodId: {type: String, required: true},
             name: {type: String, required: true},
             input: {type: String, default: ''},
-            grade: {type: Number, min: 0, max: 10, default: 10},
+            grade: {type: Number, min: 0, max: 10},
             popularity: {type: Number, min: 0, max: 100, default: 0}
         }]
     }],
@@ -317,7 +317,7 @@ function buildNewTable(requirements, products, table) {
                     col.prodId = prod._id.toString();
 
                     var oldCol = oldRow && _.findWhere(oldRow.products, {prodId: col.prodId});
-                    col.grade = (oldRow && oldCol) ? oldCol.grade : 10;
+                    col.grade = (oldRow && oldCol) ? oldCol.grade : null;
                     col.input = (oldRow && oldCol) ? oldCol.input : '';
 
                     row.products.push(col);

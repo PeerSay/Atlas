@@ -4,7 +4,7 @@
 
     <table class="table ps-table" id="decision-table">
         <!--Header-->
-        <thead>
+        <thead ng-if="table.view.rows.length">
         <tr>
             <th ng-repeat="col in table.view.columns" ng-class=":: col.header.class">
                 <div>{{:: col.header.label }}</div>
@@ -64,8 +64,7 @@
                 <div ng-if=":: cell.type === 'text' ">
                     <textarea class="cell-input noresize"
                             ng-model="cell.model.value"
-                            ps-ctrl="table"
-                            ps-table-input="cell"
+                            ps-table-input="cell" ctrl="table"
                             msd-elastic></textarea>
                 </div>
                 <!--Number cell-->
@@ -73,9 +72,9 @@
                     <input type="number" class="cell-input center"
                             min="0" max="{{:: cell.max }}"
                             ng-model="cell.model.value"
-                            ps-ctrl="table"
-                            ps-table-input="cell"
+                            ps-table-input="cell" ctrl="table"
                             ps-input-number
+                            ps-input-nullable
                             ps-tooltip="cell.model.tooltip()"
                             required
                             >

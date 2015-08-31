@@ -5,10 +5,8 @@ angular
 function psTableInput() {
     return {
         restrict: 'A',
-        require: '?ngModel',
+        require: 'ngModel',
         link: function (scope, element, attrs, ngModel) {
-            if (!ngModel) { return; }
-
             var $el = $(element);
             var $td = $el.parents('td');
             var $tr = $td.parent();
@@ -20,7 +18,7 @@ function psTableInput() {
                 return $inputCol.add($gradeCol);
             };
 
-            var ctrl = scope.$eval(attrs.psCtrl);
+            var ctrl = scope.$eval(attrs.ctrl);
             var cell = scope.$eval(attrs.psTableInput);
             var model = cell.model;
 

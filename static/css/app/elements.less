@@ -11,6 +11,12 @@ ul {
   padding: 0;
 }
 
+a {
+  &.no-outline {
+    outline: none;
+  }
+}
+
 .modal-dialog {
   /*It's better to cover full page on mobile*/
   margin-top: 10px;
@@ -191,5 +197,21 @@ textarea {
   }
   :first-child {
     line-height: 32px;
+  }
+}
+
+
+// Grouped lists icon
+.caret-icon {
+  position: absolute;
+  top: 50%; left: 15px;
+  margin-top: -10px;
+  line-height: 20px;
+  font-size: 12px;
+  color: @brand-primary;
+  transition: transform .1s ease;
+
+  .expanded & {
+    transform: rotate(90deg);
   }
 }

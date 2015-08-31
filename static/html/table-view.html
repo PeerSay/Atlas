@@ -15,9 +15,10 @@
         <tbody ng-repeat="group in table.view.groups" ng-init="groupIdx = $index">
         <!--Group row-->
         <tr class="table-group"
+                ng-class="{expanded: group.expanded.on}"
                 ng-click="group.expanded.toggle();">
-            <td colspan="2">
-                <a href>
+            <td colspan="2" class="abs-container">
+                <a href class="group-name no-outline">
                     <span class="fa fa-chevron-right caret-icon"></span>
                     {{:: group.name }}</a>
             </td>
@@ -25,7 +26,7 @@
                     ng-click="$event.stopPropagation()">
                 <div ps-slider-popover container="td" uid="slider-{{:: groupIdx }}"
                         showIf="group">
-                    <a href tabindex="-1"
+                    <a href tabindex="-1" class="no-outline"
                             data-toggle="popover"
                             data-placement="right"
                             title="Adjust topic weights">

@@ -3,7 +3,7 @@
     <!--Topic list-->
     <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
             ng-if="group.q.visible()"
-            ng-class="{visible: group.open, 'no-details': !group.data.description}">
+            ng-class="{expanded: group.open, 'no-details': !group.data.description}">
         <!--Topic-->
         <div class="panel-heading topic-widget clearfix" role="tab"
                 id="heading-{{:: group.id }}"

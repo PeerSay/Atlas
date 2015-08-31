@@ -185,7 +185,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
         var inProject = (localIdx >= 0);
 
         if (prod.selected) {
-            if (inProject && prod.custom) {
+            if (inProject) {
                 localProd.selected = true;
             } else if (!prod.custom){
                 localProds.push(angular.copy(prod)); // copy!
@@ -195,7 +195,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
         }
 
         if (!prod.selected && inProject) {
-            if (!prod.custom || forceRemove) {
+            if (prod.custom && forceRemove) {
                 localProds.splice(localIdx, 1);
             }
             else {

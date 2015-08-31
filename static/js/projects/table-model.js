@@ -45,7 +45,11 @@ function TableModel() {
         addHeader('weight', {label: 'Weight', 'class': 'min'});
         addFooter('weight', {label: '100%', type: 'static', 'class': 'center'});
 
-        reqs.forEach(function (req, rowIdx) {
+        var rowIdx = -1;
+        reqs.forEach(function (req) {
+            if (!req.selected) { return; }
+            rowIdx++;
+
             addCell('name', rowIdx, req, {
                 label: req.name,
                 type: 'static'
@@ -65,6 +69,8 @@ function TableModel() {
             });
 
             req.products.forEach(function (prod) {
+                if (!prod.selected) { return; }
+
                 // Input
                 var colInputKey = 'prod-input-' + prod.prodId;
                 addHeader(colInputKey, {label: prod.name, 'class': 'text-input'});

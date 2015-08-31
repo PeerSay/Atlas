@@ -62,7 +62,7 @@ var projectSchema = new Schema({
         description: {type: String},
         topic: {type: String},
         popularity: {type: Number, min: 0, max: 100, default: 0},
-        selected: {type: Boolean}, // default?
+        selected: {type: Boolean, default: true},
         custom: {type: Boolean, default: false},
         mandatory: {type: Boolean, default: false}
     }],
@@ -74,7 +74,7 @@ var projectSchema = new Schema({
         description: {type: String},
         category: {type: String},
         popularity: {type: Number, min: 0, max: 100, default: 0},
-        selected: {type: Boolean},
+        selected: {type: Boolean, default: true},
         custom: {type: Boolean, default: false}
     }],
 
@@ -100,12 +100,14 @@ var projectSchema = new Schema({
         weight: {type: Number, min: 0, max: 100, default: 1},
         popularity: {type: Number, min: 0, max: 100, default: 0},
         mandatory: {type: Boolean, default: false},
+        selected: {type: Boolean},
         products: [{
             prodId: {type: String, required: true},
             name: {type: String, required: true},
             input: {type: String, default: ''},
             grade: {type: Number, min: 0, max: 10},
-            popularity: {type: Number, min: 0, max: 100, default: 0}
+            popularity: {type: Number, min: 0, max: 100, default: 0},
+            selected: {type: Boolean}
         }]
     }],
 
@@ -261,7 +263,6 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
     }
 
     if (isEmptyTable(doc)) {
-        doc.table = [];
         console.log('[DB] Sync table for[%s] skipped - empty', doc.id);
         return next();
     }
@@ -303,29 +304,25 @@ function buildNewTable(requirements, products, table) {
     var res = [];
 
     _.forEach(requirements, function (req) {
-        if (req.selected) {
-            var row = _.pick(req, 'name', 'topic', 'popularity', 'mandatory');
-            row.reqId = req._id.toString();
-            row.products = [];
+        var row = _.pick(req, 'name', 'topic', 'popularity', 'mandatory', 'selected');
+        row.reqId = req._id.toString();
+        row.products = [];
 
-            var oldRow = _.findWhere(table, {reqId: row.reqId});
-            row.weight = oldRow ? oldRow.weight : 1 /*default*/;
+        var oldRow = _.findWhere(table, {reqId: row.reqId});
+        row.weight = oldRow ? oldRow.weight : 1 /*default*/;
 
-            _.forEach(products, function (prod) {
-                if (prod.selected) {
-                    var col = _.pick(prod, 'name', 'popularity');
-                    col.prodId = prod._id.toString();
+        _.forEach(products, function (prod) {
+            var col = _.pick(prod, 'name', 'popularity', 'selected');
+            col.prodId = prod._id.toString();
 
-                    var oldCol = oldRow && _.findWhere(oldRow.products, {prodId: col.prodId});
-                    col.grade = (oldRow && oldCol) ? oldCol.grade : null;
-                    col.input = (oldRow && oldCol) ? oldCol.input : '';
+            var oldCol = oldRow && _.findWhere(oldRow.products, {prodId: col.prodId});
+            col.grade = (oldRow && oldCol) ? oldCol.grade : null;
+            col.input = (oldRow && oldCol) ? oldCol.input : '';
 
-                    row.products.push(col);
-                }
-            });
+            row.products.push(col);
+        });
 
-            res.push(row);
-        }
+        res.push(row);
     });
 
     return res;

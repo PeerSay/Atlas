@@ -74,6 +74,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
 
         view.columns = model.columns;
         view.rows = model.rows;
+
         view.groups = TableModel.groups.list;
         view.topicWeights = m.topicWeights;
         return view;

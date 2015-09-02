@@ -449,7 +449,11 @@
 * Side-bar menu
 */
 .sidebar-container {
-  background-color: @app-body-bg;
+  color: @menu-color;
+  a {color: @menu-color;}
+  background-color: @menu-bg;
+
+  // Drop shadow on mobile
   @media (max-width: @grid-float-breakpoint) {
     box-shadow: 1px 0 10px -2px rgba(0,0,0,.4);
     .no-menu & {
@@ -459,14 +463,13 @@
 
   .sidebar-toggler {
     button {
-      padding: 3px 4px;
-      border: 1px solid lighten(@hr-border, 7%);
+      padding: 5px;
+      border: 0;
       outline: none;
-      background-color: @app-body-bg;
-      transition: background-color .3s;
-
+      background-color: @menu-bg;
+      transition: background-color .2s;
       &:hover {
-        background-color: darken(@app-body-bg, 10%);
+        background-color: darken(@menu-bg, 10%);
       }
 
       .no-menu & {
@@ -491,9 +494,6 @@
   }
 
   .sidebar-menu {
-    @menu-border-width: 3px;
-    @menu-active-bg: #dcdcdc;
-    @menu-hover-bg: #e5e5e5;
     .menu-item {
       position: relative;
       a {
@@ -504,10 +504,8 @@
       &.active {
         margin-left: -15px;
         padding-left: 15px - @menu-border-width;
-        border-left: @menu-border-width solid @brand-primary;
+        border-left: @menu-border-width solid @menu-active-border-bg;
         background-color: @menu-active-bg;
-        //box-shadow: 0 1px 0 0 #F0F0F0, 0 -1px 0 0 #BFBFBF;
-        font-weight: bold;
       }
       &:hover:not(.active) {
         margin-left: -15px;
@@ -517,7 +515,15 @@
       .label {
         position: absolute;
         right: 5px; top: 5px;
-        padding: 0.2em 0.4em;
+        padding: 0.2em 0.5em;
+        line-height: 16px;
+        border-radius: 12px;
+      }
+      &:not(.active) {
+        .label {
+          color: @menu-bg;
+          background-color: @menu-color;
+        }
       }
     }
     h3.menu-item {
@@ -526,6 +532,10 @@
     .list-item {
       line-height: 16px;
       margin-bottom: 10px;
+    }
+    .menu-div {
+      margin-left: -15px;
+      border-top: 1px solid @menu-div-border;
     }
   }
 }
@@ -537,14 +547,13 @@
   display: none;
   position: absolute;
   top: 0; right: -10px;
-  background: #ccc;
+  background: @app-body-bg;
   height: ~"calc(100% - 20px)";
   width: 40px;
   border-radius: 0 3px 3px 0;
   cursor: pointer;
-  opacity: .4;
   &:hover {
-    opacity: .8;
+    background: darken(@app-body-bg, 3%);
   }
 
   .fa {
@@ -553,7 +562,7 @@
     font-size: 24px;
     width: 24px;
     .center-square(24px);
-    color: #fff;
+    color: @brand-primary;
   }
 
   .full-screen & {

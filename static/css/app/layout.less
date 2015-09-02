@@ -94,8 +94,9 @@ body {
   z-index: 1;
 
   // Hidden state
-  transition: left .3s ease;
+  transition: left .3s, background-color .3s;
   .no-menu & {
+    background-color: @app-body-bg;
     left: ~"calc(-25% + 15px)";
     @media (min-width: @screen-lg-min) {
       left: ~"calc(-16.6667% + 15px)";

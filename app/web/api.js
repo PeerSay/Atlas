@@ -67,7 +67,7 @@ function RestApi(app) {
         console.log('[API] Resolving project[%s] for user=[%s]', projectId, email);
 
         Project.findById(projectId, function (err, prj) {
-            if (err) { return next(err); }
+            if (err) { return modelError(err); }
 
             //TODO - check content type & send
 
@@ -83,7 +83,7 @@ function RestApi(app) {
 
     // User
     //
-    function readUser(req, res, next) {
+    function readUser(req, res) {
         var user = req.user;
         var email = user.email;
 
@@ -95,7 +95,7 @@ function RestApi(app) {
 
     // Projects
     //
-    function createProject(req, res, next) {
+    function createProject(req, res) {
         var data = req.body;
         var user = req.user;
         var email = user.email;
@@ -103,7 +103,7 @@ function RestApi(app) {
         console.log('[API] Creating project for user=[%s]', email);
 
         Project.createByUser(data, user, function (err, stubPrj) {
-            if (err) { return next(err); }
+            if (err) { return modelError(err); }
 
             var result = stubPrj.toJSON({transform: xformStubPrj}); // stub is enough for create
             console.log('[API] Creating project result: %s', JSON.stringify(result));
@@ -112,7 +112,7 @@ function RestApi(app) {
         });
     }
 
-    function deleteProject(req, res, next) {
+    function deleteProject(req, res) {
         var projectId = req.params.id;
         var user = req.user;
         var email = user.email;
@@ -120,7 +120,7 @@ function RestApi(app) {
         console.log('[API] Removing project[%s] for user=[%s]', projectId, email);
 
         Project.removeByUser(projectId, user, function (err, doc) {
-            if (err) { return next(err); }
+            if (err) { return modelError(err); }
 
             if (!doc) {
                 console.log('[API] Removing project[%s] failed - not found!', projectId);
@@ -134,7 +134,7 @@ function RestApi(app) {
         });
     }
 
-    function readProject(req, res, next) {
+    function readProject(req, res) {
         var project = req.project;
 
         var result = project.toJSON({transform: xformDeleteProps('__v'), getters: true}); // need getters for snapshot urls
@@ -143,7 +143,7 @@ function RestApi(app) {
         return res.json({result: result});
     }
 
-    function patchProject(req, res, next) {
+    function patchProject(req, res) {
         var data = req.body;
         var email = req.user.email;
         var project = req.project;
@@ -162,7 +162,7 @@ function RestApi(app) {
 
     // Presentation Snapshots
     //
-    function createPresentationSnapshot(req, res, next) {
+    function createPresentationSnapshot(req, res) {
         var data = req.body;
         var email = req.user.email;
         var projectId = req.params.id;
@@ -173,7 +173,7 @@ function RestApi(app) {
         Project.findById(projectId) // Cannot reuse req.project here - model error is raised
             .populate('collaborators') // need user email in presentation
             .exec(function (err, prj) {
-                if (err) { return next(err); }
+                if (err) { return modelError(err); }
                 if (!prj) {
                     return errRes.notFound(res, 'project:' + projectId);
                 }
@@ -193,7 +193,7 @@ function RestApi(app) {
             });
     }
 
-    function deletePresentationSnapshot(req, res, next) {
+    function deletePresentationSnapshot(req, res) {
         var email = req.user.email;
         var project = req.project;
         var projectId = project.id;
@@ -221,7 +221,7 @@ function RestApi(app) {
         });
     }
 
-    function readProjectFile(req, res, next) {
+    function readProjectFile(req, res) {
         var projectId = req.project.id;
         var fileName = req.params.fileName;
         var safeFileName = util.encodeURIComponentExt(fileName);
@@ -272,7 +272,7 @@ function RestApi(app) {
         cb(null, IMAGE_RE.test(file.mimetype));
     }
 
-    function uploadLogoFile(req, res, next) {
+    function uploadLogoFile(req, res) {
         var email = req.user.email;
         var project = req.project;
         var projectId = project.id;

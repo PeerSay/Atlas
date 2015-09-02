@@ -1,15 +1,14 @@
 angular.module('PeerSay')
     .controller('ProjectProductsCtrl', ProjectProductsCtrl);
 
-ProjectProductsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'Util', 'jsonpatch'];
-function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
-    var m = this;
+
+ProjectProductsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'Util', 'ProjectPatcherMixin'];
+function ProjectProductsCtrl($scope, $stateParams, Projects, _, ProjectPatcherMixin) {
+    var m = ProjectPatcherMixin(this, $scope);
 
     m.projectId = $stateParams.projectId;
     // Data / Edit
     m.project = {};
-    m.patchObserver = null;
-    m.patchProject = patchProject;
     m.loadingMore = true;
     // Products / Selection
     m.product = {}; // ui-select model
@@ -49,28 +48,13 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            observe({products: res.products});
+            m.observe({products: res.products});
 
             // Products
             addProductsToList(res.products, true);
             loadPublicProducts({q: res.selectedCategory});
         });
 
-    }
-
-    function observe(project) {
-        m.patchObserver = jsonpatch.observe(project);
-
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(project, m.patchObserver);
-        });
-    }
-
-    function patchProject() {
-        var patch = jsonpatch.generate(m.patchObserver);
-        if (!patch.length) { return; } //XXX - return promise!
-
-        return Projects.patchProject(m.projectId, patch);
     }
 
     var productIdx = {};
@@ -125,7 +109,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
         product.selected = product.focus = val; // set focus on selected
 
         addRemoveToProject(product);
-        patchProject();
+        m.patchProject();
     }
 
     // Select / Add new
@@ -162,7 +146,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
         var product = angular.extend({}, emptyNew, m.addNew.model, {category: categoryName});
 
         addRemoveToProject(product);
-        patchProject().then(function (res) {
+        m.patchProject().then(function (res) {
             // XXX - patch may return non-promise
             product._id = res._id; //get id from server response
             addProductsToList([product]);
@@ -175,7 +159,7 @@ function ProjectProductsCtrl($scope, $stateParams, Projects, _, jsonpatch) {
         product.selected = false;
         product.removed = true;
         addRemoveToProject(product, true);
-        patchProject();
+        m.patchProject();
     }
 
     function addRemoveToProject(prod, forceRemove) {

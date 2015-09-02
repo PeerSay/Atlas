@@ -2,14 +2,15 @@ angular.module('PeerSay')
     .controller('ProjectCategoryCtrl', ProjectCategoryCtrl);
 
 
-ProjectCategoryCtrl.$inject = ['$scope', 'CategorySelect', 'Projects', 'Util'];
-function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
-    var m = this;
+ProjectCategoryCtrl.$inject = ['$scope', 'CategorySelect', 'Projects', 'Util', 'ProjectPatcherMixin'];
+function ProjectCategoryCtrl($scope, CategorySelect, Projects, _, ProjectPatcherMixin) {
+    var m = ProjectPatcherMixin(this, $scope);
     m.categories = CategorySelect.vm;
 
-    var parent = $scope.$parent.cm;
-    var projectId = parent.projectId;
+    var parent = $scope.$parent.cm; // access via scope hierarchy
     var project = null; // delayed
+    var model = null;
+
     var offSelect = CategorySelect.on(function (evt, type) {
         var dispatch = {
             select: selectCategory,
@@ -28,8 +29,10 @@ function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
             CategorySelect.load(res.categories);
         });
 
-        Projects.readProject(projectId).then(function (res) {
-            project = parent.project;
+        Projects.readProject(parent.projectId).then(function (res) {
+            project = res;
+            model = {selectedCategory: res.selectedCategory};
+            m.observe(model);
 
             CategorySelect.load(res.categories, {top: true}); // custom
 
@@ -45,14 +48,15 @@ function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
     }
 
     function selectCategory(name) {
-        project.selectedCategory = name;
-        parent.patchProject();
+        model.selectedCategory = name; // observed
+        project.selectedCategory = name; // not observed
+        m.patchProject();
         parent.onCategoryChange(name);
     }
 
     function addCategory(item) {
         project.categories.unshift(item); // custom
-        parent.patchProject();
+        m.patchProject();
     }
 
     function removeCategory(name, isSelected) {
@@ -60,9 +64,10 @@ function ProjectCategoryCtrl($scope, CategorySelect, Projects, _) {
         _.removeItem(project.categories, projectItem);
 
         if (isSelected) {
+            model.selectedCategory = null;
             project.selectedCategory = null;
             parent.onCategoryChange(null);
         }
-        parent.patchProject();
+        m.patchProject();
     }
 }

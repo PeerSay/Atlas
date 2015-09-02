@@ -1,14 +1,12 @@
 angular.module('PeerSay')
     .controller('ProjectTableCtrl', ProjectTableCtrl);
 
-ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'TableModel', 'jsonpatch', 'StorageRecord', 'Util'];
-function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch, StorageRecord, _) {
-    var m = this;
+ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'TableModel', 'StorageRecord', 'Util', 'ProjectPatcherMixin'];
+function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRecord, _,ProjectPatcherMixin) {
+    var m = ProjectPatcherMixin(this, $scope);
 
     m.projectId = $stateParams.projectId;
     m.project = null;
-    m.patchObserver = null;
-    m.patchProject = patchProject;
     m.loading = true;
     // Table model/view
     m.view = null;
@@ -22,7 +20,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
         return Projects.readProject(m.projectId)
             .then(function (res) {
                 m.project = res;
-                observe({table: res.table, topicWeights: res.topicWeights});
+                m.observe({table: res.table, topicWeights: res.topicWeights});
 
                 m.topicWeights = res.topicWeights.reduce(function (acc, it) {
                     return [].concat(acc, {id: it._id, weight: it.weight});
@@ -36,19 +34,12 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
             });
     }
 
-    function observe(project) {
-        m.patchObserver = jsonpatch.observe(project);
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(project, m.patchObserver);
-        });
-    }
-
     function watch(weights) {
         var debouncedPatch = _.debounce(function (newWeights) {
             _.forEach(newWeights, function (it, i) {
                 m.project.topicWeights[i].weight = _.round(it.weight, 4);
             });
-            patchProject();
+            m.patchProject();
         }, 1000);
 
         $scope.$watch(function () {
@@ -58,13 +49,6 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, jsonpatch,
                 debouncedPatch(newVal);
             }
         }, true);
-    }
-
-    function patchProject() {
-        var patch = jsonpatch.generate(m.patchObserver);
-        if (!patch.length) { return; }
-
-        Projects.patchProject(m.projectId, patch);
     }
 
     function getView(project) {

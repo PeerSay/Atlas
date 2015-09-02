@@ -1,15 +1,13 @@
 angular.module('PeerSay')
     .controller('ProjectRequirementsCtrl', ProjectRequirementsCtrl);
 
-ProjectRequirementsCtrl.$inject = ['$q', '$scope', '$stateParams', '$timeout', 'Projects', 'filterFilter', 'jsonpatch', 'Util'];
-function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, filterFilter, jsonpatch, _) {
-    var m = this;
+ProjectRequirementsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'filterFilter', 'Util', '$q', 'ProjectPatcherMixin'];
+function ProjectRequirementsCtrl($scope, $stateParams, Projects, filterFilter, _, $q, ProjectPatcherMixin) {
+    var m = ProjectPatcherMixin(this, $scope);
 
     m.projectId = $stateParams.projectId;
     // Data / Edit
     m.project = null; // ref to shared
-    m.patchObserver = null;
-    m.patchProject = patchProject;
     m.loadingMore = true;
     // Table selection/removal
     m.groups = GroupBy('topic');
@@ -34,18 +32,10 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.project = res;
-            observe({requirements: res.requirements});
+            m.observe({requirements: res.requirements});
         });
 
         populateSelectionList();
-    }
-
-    function observe(project) {
-        m.patchObserver = jsonpatch.observe(project);
-
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(project, m.patchObserver);
-        });
     }
 
     function populateSelectionList() {
@@ -87,28 +77,6 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         });
     }
 
-    function patchProject() {
-        var nullPromise = $timeout(function () {
-        });
-        var patch = jsonpatch.generate(m.patchObserver);
-        patch = fixPatch(patch);
-        if (!patch.length) { return nullPromise; }
-
-        return Projects.patchProject(m.projectId, patch);
-    }
-
-    function fixPatch(arr) {
-        // XXX - workaround for wrong patches generated on unselecting group
-        // Not clear why this happens, but it depends on the order items were added.
-        // TODO - debug further.
-        return _.map(arr, function (it) {
-            if (it.op === 'replace' && !angular.isDefined(it.value)) {
-                return null;
-            }
-            return it;
-        });
-    }
-
     // Selection
     //
     function toggleReq(req, invert) {
@@ -124,7 +92,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         } else {
             removeFromProject(tableReq);
         }
-        patchProject();
+        m.patchProject();
     }
 
     function removeReq(tableReq) {
@@ -132,7 +100,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
         tableReq.removed = true; // trick: hide with filter
 
         removeFromProject(tableReq, true/*force*/);
-        patchProject();
+        m.patchProject();
     }
 
     function addToProject(req, shared) {
@@ -336,7 +304,7 @@ function ProjectRequirementsCtrl($q, $scope, $stateParams, $timeout, Projects, f
                     angular.extend(savedReq, E.model);
                 }
 
-                patchProject().then(function (res) {
+                m.patchProject().then(function (res) {
                     if (isNew && res) {
                         savedReq._id = res._id; //get id from server response
                         m.groups.addItems([savedReq], true); // add to table

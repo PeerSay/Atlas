@@ -3,15 +3,14 @@
 angular.module('PeerSay')
     .controller('ProjectPresentationsCtrl', ProjectPresentationsCtrl);
 
-ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'jsonpatch', 'Upload', 'Notify', 'Backend'];
-function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upload, Notify, Backend) {
-    var m = this;
+ProjectPresentationsCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'Upload', 'Notify', 'Backend', 'ProjectPatcherMixin'];
+function ProjectPresentationsCtrl($scope, $stateParams, Projects, Upload, Notify, Backend, ProjectPatcherMixin) {
+    var m = ProjectPatcherMixin(this, $scope);
+
     m.projectId = $stateParams.projectId;
     m.presentation = null;
     m.data = {};
     m.snapshots = [];
-    m.patchObserver = null;
-    m.patchProject = patchProject;
     m.creating = false;
     m.createSnapshot = createSnapshot;
     m.deleteSnapshot = deleteSnapshot;
@@ -33,7 +32,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.presentation = res.presentation;
-            observe({presentation: m.presentation});
+            m.observe({presentation: m.presentation});
 
             m.data = res.presentation.data;
             m.snapshots = res.presentation.snapshots;
@@ -45,21 +44,6 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
                 uploadLogo(m.logoFile);
             }
         });
-    }
-
-    function observe(pres) {
-        m.patchObserver = jsonpatch.observe(pres);
-
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(pres, m.patchObserver);
-        });
-    }
-
-    function patchProject() {
-        var patch = jsonpatch.generate(m.patchObserver);
-        if (!patch.length) { return; }
-
-        return Projects.patchProject(m.projectId, patch);
     }
 
     // Snapshots
@@ -101,7 +85,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, jsonpatch, Upl
     //
     function onFileSelectClick() {
         m.data.logo.include = true;
-        patchProject();
+        m.patchProject();
         Notify.hide();
         m.uploadProgress.success = false;
     }

@@ -216,8 +216,8 @@
                 <table class="table compact">
                     <thead>
                     <tr>
-                        {% for i, head in table.superTopic.headers %}
-                        <td>{{ head }}</td>
+                        {% for i, head in table.superTopic.header %}
+                        <td class="{{ head().class }}">{{ head().label }}</td>
                         {% endfor %}
                     </tr>
                     </thead>
@@ -226,11 +226,13 @@
                     <tbody>
                     {% for i, group in table.superTopic.groups %}
                     <tr>
-                        <td colspan="2">{{ group.name }}</td>
-                        <td>{{ group.weight }}%</td>
-                        {% for j, grade in group.grades %}
-                        <td></td>
-                        <td>{{ grade }}</td>
+                        <td>{{ group('name')().label }}</td>
+                        <td class="center">{{ group('weight')().value | percent }}%</td>
+
+                        {% for j, grade in group | skip_group %}
+                        <td class="center {% if grade().max %} winner {% endif %}">
+                            {{ grade().value() }}
+                        </td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
@@ -240,8 +242,10 @@
                     <tbody>
                     {% for i, row in table.superTopic.rows %}
                     <tr>
-                        {% for j, cell in row %}
-                        <td>{{ cell }}</td>
+                        {% for k, cell in row().list %}
+                        <td class="{% if k %} center {% endif %} {% if cell().maxInRow() %} winner {% endif %}">
+                            {{ cell().value }}
+                        </td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
@@ -249,8 +253,10 @@
 
                     <tfoot>
                     <tr>
-                        {% for i, foot in table.superTopic.footers %}
-                        <td>{{ foot }}</td>
+                        {% for i, foot in table.superTopic.footer %}
+                        <td class="{{ foot().class }} {% if foot().maxTotal() %} winner {% endif %}">
+                            {{ foot().label || foot().value() }}
+                        </td>
                         {% endfor %}
                     </tr>
                     </tfoot>

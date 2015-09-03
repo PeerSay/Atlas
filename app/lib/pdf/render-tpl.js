@@ -54,8 +54,11 @@ function renderTemplate(project, logoUrl) {
         prods.list = getProductsTable(project.products, project.table);
     }
     if (table.include && project.table.length) {
-        table.topics = getTopicsTable(_.filter(project.table, {selected: true}), project.topicWeights);
-        //table.superTopic = getSuperTopicTable(model);
+        var model = buildModel(_.filter(project.table, {selected: true}), project.topicWeights);
+        var superTopic = findSuperTopic(project.topicWeights);
+
+        table.topics = getTopicsTable(model);
+        table.superTopic = getSingleTopicTable(model, superTopic);
     }
 
     var locals = _.extend({}, settings, {
@@ -104,9 +107,8 @@ function getProductsTable(products, table) {
     return [res];
 }
 
-function getTopicsTable(reqs, topicWeights) {
-    var res = {};
-    var model = tableModel.build(function (T) {
+function buildModel(reqs, topicWeights) {
+    return tableModel.build(function (T) {
         T.header()
             .push('name', {label: '', 'class': 'name center'})
             .push('weight', {label: 'Weight', 'class': 'min center'});
@@ -118,12 +120,16 @@ function getTopicsTable(reqs, topicWeights) {
             // Predefine ranges
             var groupsRange = T.range('groups', {multi: true});
             var groupRange = groupsRange(req.topic);
+            var rowRange = T.rows(i, {topic: req.topic});
+            var rowMaxRange = T.range('row-max-' + i)
+                .aggregate({
+                    max: T._max()
+                });
             var rowWeightRange = T.range('req-weights', {multi: true})(req.topic)
                 .aggregate({
                     total: T._sum(),
                     weight: reqWeightFn()
                 });
-            rowWeightRange.push('', {value: req.weight});
 
             // Group row
             var groupWeight = _.findWhere(topicWeights, {topic: req.topic}).weight;
@@ -131,21 +137,38 @@ function getTopicsTable(reqs, topicWeights) {
                 .push('name', {label: req.topic})
                 .push('weight', {value: groupWeight});
 
+            // Req row
+            rowRange
+                .push('name', {value: req.name})
+                .push('weight', {value: req.weight});
+            rowWeightRange.push('', {value: req.weight});
+
+
             req.products.forEach(function (prod, j) { // TODO - sorted + top 3
                 if (!prod.selected) { return; }
 
                 var prodGradeKey = 'prod-grade-' + j;
-                var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
-                    .push('', {value: prod.grade});
 
                 T.header()
                     .push(prodGradeKey, {label: prod.name, 'class': 'center grade'});
 
+                // Prod grades
+                var prodGradeValue = {value: prod.grade};
+                var gradeStr = (prod.grade == null) ? '?' : prod.grade; // '?' for not-init
+                rowMaxRange.push('', prodGradeValue);
+                rowRange
+                    .push(prodGradeKey, {
+                        value: gradeStr,
+                        maxInRow: maxInRowFn(rowMaxRange, prodGradeValue)
+                    });
+
                 // Group grade
+                var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
+                    .push('', prodGradeValue);
                 groupRange
                     .push(prodGradeKey, {
                         value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange),
-                        max: i % 2
+                        max: false // TODO - group's max-in-row
                     });
 
                 // Footer - totals
@@ -170,16 +193,18 @@ function getTopicsTable(reqs, topicWeights) {
             });
         });
     });
-
-    res.header = model.header().list;
-    res.footer = model.footer().list;
-    res.groups = model.groups && model.groups().list;
-
-    return res;
 }
 
 //Functions
 //
+function maxInRowFn(rowMaxRange, cell) {
+    return function () {
+        var val = cell.value;
+        var max = rowMaxRange.max(); // aggregated
+        return (max === val);
+    };
+}
+
 function reqWeightFn() {
     return function (range) {
         return function (val) {
@@ -228,67 +253,45 @@ function maxTotalFn(maxTotalsRange, prodKey) {
 }
 
 
+// Getters
+//
+function getTopicsTable(model) {
+    var res = {};
+    res.header = model.header().list;
+    res.footer = model.footer().list;
+    res.groups = model.groups && model.groups().list;
 
-
-function getSuperTopicTable(model) {
-    var headers = _.map(model.columns, function (col) {
-        return col.header.label;
-    });
-
-    var groups = buildGroups(model.groups);
-    var superTopic = findSuperTopic(model, groups);
-    var groupObj = tableModel.groups.get(superTopic.name);
-
-    var rows = [];
-    _.forEach(groupObj.rows, function (row) {
-        var cells = _.map(row.cells, function (cell) {
-            return (cell.type === 'static') ? cell.label :
-                (cell.type === 'icon') ? !!cell.label : cell.model.toString();
-        });
-        rows.push(cells);
-    });
-    //console.log('>> rows', rows);
-
-    var footers = _.map(model.columns, function (col) {
-        var foot = col.footer;
-        var label = (foot.type === 'static') ? foot.label :
-            (foot.type === 'func') ? foot.model && foot.model.value() : '';
-        return label;
-    });
-
-    return {
-        headers: headers,
-        groups: [superTopic],
-        rows: rows,
-        footers: footers
-    }
+    return res;
 }
 
 
+function getSingleTopicTable(model, topic) {
+    var res = {};
+    res.header = model.header().list;
+    res.footer = model.footer().list;
 
-function findSuperTopic(model, groups) {
-    var winnerCols = _.filter(model.columns, function (col) {
-        var foot = col.footer;
-        return (foot.type === 'func') && foot.model.max();
+    var topicGroup = _.find(model.groups().list, function (group) {
+            return (group('name')().label == topic);
     });
-    var winnerGradeIdxs = _.map(winnerCols, function (col) {
-        var colIdx = model.columns.indexOf(col);
-        return (colIdx - 4) / 2; // grade idx = 2i + 4
-    });
-
-    _.forEach(groups, function (group) {
-        group.score = 0;
-        _.forEach(winnerGradeIdxs, function (idx) {
-            group.score += group.grades[idx] * group.weight;
-        });
+    res.groups = [topicGroup];
+    res.rows = model.rows().list.filter(function (row) {
+        console.warn('>>filter', row().topic);
+        return (row().topic === topic);
     });
 
-    var winner = groups.reduce(function (acc, cur) {
-        return (acc.score < cur.score) ? cur : acc;
-    }, groups[0]);
+    console.warn('>> rows', res.rows);
 
-    return winner;
+    return res;
 }
+
+function findSuperTopic(topicWeights) {
+    var res = topicWeights.reduce(function (acc, it) {
+        return it.weight > acc.weight ? it : acc;
+    }, {weight: 0});
+
+    return res.topic;
+}
+
 
 module.exports = {
     renderTemplate: renderTemplate

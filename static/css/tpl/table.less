@@ -18,6 +18,18 @@
   td {
     border: @table-border;
     color: @td-color;
+    &.min {
+      width: 1%;
+    }
+    &.center {
+      text-align: center;
+    }
+    &.grade {
+      width: 20%;
+    }
+    &.name {
+      width: 40%
+    }
   }
   thead tr:last-child td {
     border-bottom: @th-border-bottom; // override reveal

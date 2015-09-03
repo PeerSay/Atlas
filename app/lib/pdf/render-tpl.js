@@ -108,11 +108,11 @@ function getTopicsTable(reqs, topicWeights) {
     var res = {};
     var model = tableModel.build(function (T) {
         T.header()
-            .push('name', {label: ''})
-            .push('weight', {label: 'Weight'});
+            .push('name', {label: '', 'class': 'name center'})
+            .push('weight', {label: 'Weight', 'class': 'min center'});
         T.footer()
             .push('name', {label: 'Overall Grade'})
-            .push('weight', {label: '100%'});
+            .push('weight', {label: '100%', 'class': 'center'});
 
         reqs.forEach(function (req, i) {
             // Predefine ranges
@@ -123,6 +123,7 @@ function getTopicsTable(reqs, topicWeights) {
                     total: T._sum(),
                     weight: reqWeightFn()
                 });
+            rowWeightRange.push('', {value: req.weight});
 
             // Group row
             var groupWeight = _.findWhere(topicWeights, {topic: req.topic}).weight;
@@ -138,10 +139,9 @@ function getTopicsTable(reqs, topicWeights) {
                     .push('', {value: prod.grade});
 
                 T.header()
-                    .push(prodGradeKey, {label: prod.name});
+                    .push(prodGradeKey, {label: prod.name, 'class': 'center grade'});
 
                 // Group grade
-                rowWeightRange.push('', {value: req.weight});
                 groupRange
                     .push(prodGradeKey, {
                         value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange),
@@ -164,7 +164,8 @@ function getTopicsTable(reqs, topicWeights) {
                 T.footer()
                     .push(prodGradeKey, {
                         value: totalGradeGetFn(maxTotalsRange, prodGradeKey),
-                        maxTotal: maxTotalFn(maxTotalsRange, prodGradeKey)
+                        maxTotal: maxTotalFn(maxTotalsRange, prodGradeKey),
+                        'class': 'center'
                     });
             });
         });
@@ -192,11 +193,7 @@ function groupGradeFn(rowWeightRange, prodsGradesInGroupRange) {
     return function () {
         var groupGrade = prodsGradesInGroupRange.list.reduce(function (acc, item, i) {
             var grade = item().value || 0; // null if grade is not init
-
-            console.warn('>>grade[%s]', grade, rowWeightRange.access(i));
-
             var weightModel = rowWeightRange.access(i)();
-
             var weight = rowWeightRange.weight(weightModel.value); // aggregated
             return acc + grade * weight;
         }, 0);
@@ -215,9 +212,6 @@ function totalGradeFn(groupsRange, topicWeights, prodKey) {
     return function () {
         var totalGrade = topicWeights.reduce(function (acc, cur) {
             var weight = cur.weight;
-            console.warn('>>> cur', cur);
-
-
             var grade = groupsRange(cur.topic).access(prodKey)().value();
             return acc + grade * weight;
         }, 0);

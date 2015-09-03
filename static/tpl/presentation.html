@@ -173,7 +173,7 @@
                     <thead>
                     <tr>
                         {% for i, head in table.topics.header %}
-                        <td>{{ head().label }}</td>
+                        <td class="{{ head().class }}">{{ head().label }}</td>
                         {% endfor %}
                     </tr>
                     </thead>
@@ -181,10 +181,10 @@
                         {% for i, group in table.topics.groups %}
                         <tr>
                             <td>{{ group('name')().label }}</td>
-                            <td>{{ group('weight')().value | percent }}%</td>
+                            <td class="center">{{ group('weight')().value | percent }}%</td>
 
                             {% for j, grade in group | skip_group %}
-                            <td class="{% if grade().max %} winner {% endif %}">
+                            <td class="center {% if grade().max %} winner {% endif %}">
                                 {{ grade().value() }}
                             </td>
                             {% endfor %}
@@ -194,7 +194,7 @@
                     <tfoot>
                     <tr>
                         {% for i, foot in table.topics.footer %}
-                        <td class="{% if foot().maxTotal() %} winner {% endif %}">
+                        <td class="{{ foot().class }} {% if foot().maxTotal() %} winner {% endif %}">
                             {{ foot().label || foot().value() }}
                         </td>
                         {% endfor %}

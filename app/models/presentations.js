@@ -244,7 +244,7 @@ function renderSnapshotHTML(project, snap, cb) {
     console.log('[DB] Rendering HTML to [%s]', filePath);
 
     // Rendering with Swig
-    var html = renderer.renderTemplate(project, logoUrl);
+    var html = renderer.renderTemplate(project.toJSON(), logoUrl);
 
     fs.mkdirp(fileDir, function (err) {
         if (err) {

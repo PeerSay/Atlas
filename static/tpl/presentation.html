@@ -37,7 +37,7 @@
         }
 
         .reveal .table.compact td {
-             font-size: 50%; /*TODO - depends on table columns number?*/
+             font-size: 70%; /*TODO - depends on table columns number?*/
          }
     </style>
 </head>
@@ -134,7 +134,7 @@
             <section>
                 <h2>Candidate products {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
                 {% if bucket.length > 0 %}
-                <table class="table compact">
+                <table class="table">
                     <thead>
                     <tr>
                         <td>Product</td>
@@ -143,10 +143,9 @@
                     </thead>
                     <tbody>
                     {% for j, prod in bucket %}
-                    <tr class="{{ prod.class }}">
+                    <tr class="{% if prod.warning %} warning {% endif %}">
                         <td>{{ prod.name }}</td>
-                        {% if prod.warning %}<td>{{ prod.warning }}</td>
-                        {% else %}<td>{{ prod.description }}</td>{% endif %}
+                        <td>{{ prod.description }}</td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -166,33 +165,38 @@
         <!--Table-->
         {% if table.include %}
         <section>
+            <!--Topics table-->
             <section>
                 <h2>Decision table</h2>
                 {% if table.topics %}
                 <table class="table compact">
                     <thead>
                     <tr>
-                        {% for i, head in table.topics.headers %}
-                        <td>{{ head }}</td>
+                        {% for i, head in table.topics.header %}
+                        <td>{{ head().label }}</td>
                         {% endfor %}
                     </tr>
                     </thead>
                     <tbody>
                         {% for i, group in table.topics.groups %}
                         <tr>
-                            <td colspan="2">{{ group.name }}</td>
-                            <td>{{ group.weight }}%</td>
-                            {% for j, grade in group.grades %}
-                            <td></td>
-                            <td>{{ grade }}</td>
+                            <td>{{ group('name')().label }}</td>
+                            <td>{{ group('weight')().value | percent }}%</td>
+
+                            {% for j, grade in group | skip_group %}
+                            <td class="{% if grade().max %} winner {% endif %}">
+                                {{ grade().value() }}
+                            </td>
                             {% endfor %}
                         </tr>
                         {% endfor %}
                     </tbody>
                     <tfoot>
                     <tr>
-                        {% for i, foot in table.topics.footers %}
-                        <td>{{ foot }}</td>
+                        {% for i, foot in table.topics.footer %}
+                        <td class="{% if foot().maxTotal() %} winner {% endif %}">
+                            {{ foot().label || foot().value() }}
+                        </td>
                         {% endfor %}
                     </tr>
                     </tfoot>
@@ -205,6 +209,7 @@
                 {% endif %}
             </section>
 
+            <!--SuperTopic table-->
             {% if table.superTopic %}
             <section>
                 <h2>Decision table (2)</h2>

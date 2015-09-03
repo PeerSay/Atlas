@@ -19,8 +19,11 @@
     border: @table-border;
     color: @td-color;
   }
+  thead tr:last-child td {
+    border-bottom: @th-border-bottom; // override reveal
+  }
   tr:last-child td {
-    border-bottom: @table-border; // override reveal
+    border: @table-border;
   }
 
   tbody {

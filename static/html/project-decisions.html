@@ -8,7 +8,7 @@
                 download="{{ table.project.title }}.csv"
                 ps-export-csv="csv"
                 data-get-csv="table.getCsv()"
-                ng-disabled="!table.view.rows.length">
+                ng-disabled="table.view.empty">
             <span class="fa fa-file-excel-o"></span>
             Export
         </a>

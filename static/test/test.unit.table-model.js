@@ -1,612 +1,261 @@
 /*global describe:true, it:true, inject:true */
 
+var expect = chai.expect;
+
 // PhantomJS doesn't support bind yet
 Function.prototype.bind = Function.prototype.bind || function (thisp) {
-    var fn = this;
-    return function () {
-        return fn.apply(thisp, arguments);
+        var fn = this;
+        return function () {
+            return fn.apply(thisp, arguments);
+        };
     };
-};
 
 describe('TableModel', function () {
     var TableModel;
     beforeEach(function () {
         module('PeerSay');
-
         inject(function (_TableModel_) {
             TableModel = _TableModel_;
         });
     });
 
-    describe('Build', function () {
-        it('should build model on empty criteria data', function () {
-            var data = [];
-            var model = TableModel.buildModel(data);
 
-            model.rows.should.have.length(0);
-            Object.keys(model.columns).should.have.length(5);
-            model.columns['name'].should.have.property('field').equal('name');
-            model.columns['name'].should.have.property('value').equal('Criteria');
+    describe('Build/traverse 1d ranges', function () {
+        it('should push to named range w/ or w/empty key', function () {
+            var model = TableModel.build(function (T) {
+                T.range('headers')
+                    .push('', {a: 1})
+                    .push('weight', {w: 2});
+            });
+
+            expect(model.headers, 'pushing data to named Range exposes a co-named range func on model').to.be.a('function');
+            expect(model.headers().list, 'calling a range func without params returns a Range object, which has .list prop, among others').to.be.a('array');
+            expect(model.headers().list, 'a .list prop is array of all items pushed to range so far').to.have.length(2);
+            expect(model.headers().size(), 'a .size method can be used to get .list length too').to.equal(2);
+
+            expect(model.headers(0)(), 'calling a range func with Number param returns a data access func of given index; this func returns data back').to.deep.equal({a: 1});
+            expect(model.headers(0).data, 'data access function (being a JS object) also has a data prop to access same data w/out call').to.deep.equal({a: 1});
+
+            expect(model.headers('weight')(), 'calling a range func with String param returns a data access function too').to.deep.equal({w: 2});
+            expect(model.headers('weight').data).to.deep.equal({w: 2});
+            expect(model.headers().list[1](), 'items in .list array are access functions too').to.deep.equal({w: 2});
         });
 
-        it('should build vendor column', function () {
-            var data = mockSingleVendor();
-            var model = TableModel.buildModel(data);
+        it('should have default ranges', function () {
+            var model = TableModel.build(function (T) {
+                T.header().push('name', 'h1').push('weight', 'h2');
+                T.footer().push('name', 'f1').push('weight', 'f2');
+                T.rows(0).push('name', {value: 1}).push('weight', {value: 2});
+            });
 
-            Object.keys(model.columns).should.have.length(7);
-            model.columns['vendors\0IBM\0input'].should.have.property('value').equal('IBM');
-            model.columns['vendors\0IBM\0input'].should.have.property('field').equal('IBM');
-            model.columns['vendors\0IBM\0score'].should.have.property('value').equal('IBM');
-            model.columns['vendors\0IBM\0score'].should.have.property('field').equal('IBM');
+            expect(model.header().size()).to.equal(2);
+            expect(model.footer().size()).to.equal(2);
+            //expect(model.rows(0).size()).to.equal(2);
+            expect(model.rows().size()).to.equal(1);
+
+            expect(model.header('name')()).to.equal('h1');
+            expect(model.footer('name')()).to.equal('f1');
+            expect(model.rows(0)('name').data).to.deep.equal({value: 1});
+            expect(model.rows(0)('weight').data).to.deep.equal({value: 2});
         });
 
-        it('should build single vendor column from 2 criteria', function () {
-            var data = mock2Rows2Vendors();
-            var model = TableModel.buildModel(data);
+        it('should support traversing with skip()', function () {
+            var model = TableModel.build(function (T) {
+                T.range('groups', {multi: true})(0)
+                    .push('name', 1)
+                    .push('weight', 2)
+                    .push('', 3)
+                    .push('', 4);
+            });
 
-            Object.keys(model.columns).should.have.length(7);
-            model.columns['vendors\0IBM\0input'].should.have.property('value').equal('IBM');
+            expect(model.groups(0)().skip(2)[0]()).to.deep.equal(3);
+            expect(model.groups(0)().skip(2)[1]()).to.deep.equal(4);
         });
 
-        it('should build rows', function () {
-            var data = mock2Rows1Vendor();
-            var model = TableModel.buildModel(data);
+        it('should support group params', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group', {param: 123})
+                    .push('', 1);
+            });
 
-            Object.keys(model.rows).should.have.length(data.length);
-            // 1st row - existing vendor
-            model.rows[0]['name'].should.have.property('value').equal('xyz');
-            model.rows[0]['vendors\0IBM\0input'].should.have.property('value').equal('str');
-            model.rows[0]['vendors\0IBM\0score'].should.have.property('value').equal(1);
-            // 2nd row - non-existing vendor
-            model.rows[1]['name'].should.have.property('value').equal('abc');
-            model.rows[1]['vendors\0IBM\0input'].should.have.property('value').equal(null);
-            model.rows[1]['vendors\0IBM\0score'].should.have.property('value').equal(null);
+            expect(model.group().param).to.deep.equal(123);
         });
     });
 
-    describe('Select', function () {
-        it('should select single column with single selector', function () {
-            var data = mock1Row0Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'name'
-                }];
+    describe('2d ranges', function () {
+        it('should push to 2d range', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group', {multi: true})(0)
+                    .push('name', 1)
+                    .push('weight', 2);
+
+                T.range('group', {multi: true})(1)
+                    .push('name', 3)
+                    .push('weight', 4);
             });
 
-            sel.columns.should.have.length(1);
-            sel.columns[0].model.should.have.property('field').equal('name');
-
-            sel.rows.should.have.length(1);
-            sel.rows[0].should.have.length(1);
-            sel.rows[0][0].model.should.have.property('value').equal('abc');
+            expect(model.group().size()).to.equal(2);
+            expect(model.group(0)('name')()).to.equal(1);
+            expect(model.group(0)().list[0]()).to.equal(1);
+            expect(model.group(1)().list[1]()).to.equal(4);
         });
 
-        it('should select multiple columns with array selector, coming in order', function () {
-            var data = mock1Row0Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: ['name', 'priority']
-                }];
+        it('should support group params on 2d', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group', {multi: true})(0, {param: 123})
+                    .push('', 1);
             });
 
-            sel.columns.should.have.length(2);
-            sel.columns[1].model.should.have.property('field').equal('priority');
-
-            sel.rows.should.have.length(1);
-            sel.rows[0].should.have.length(2);
-            sel.rows[0][1].model.should.have.property('value').equal('optional');
-        });
-
-        it('should select vendor columns with re selector', function () {
-            var data = mock1Row2Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'vendors/.*?/input'
-                }];
-            });
-
-            sel.columns.should.have.length(2); // 2 cols
-            sel.columns[0].model.should.have.property('field').equal('IBM');
-
-            sel.rows.should.have.length(1);
-            sel.rows[0].should.have.length(2); // 2 cols
-            sel.rows[0][1].model.should.have.property('value').equal('xp');
-        });
-
-        it('should select vendor columns with re selector and limit', function () {
-            var data = mock1Row2Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'vendors/.*?/score',
-                    limit: 1
-                }];
-            });
-
-            sel.columns.should.have.length(1); // 1 col
-            sel.columns[0].model.should.have.property('field').equal('IBM');
-
-            sel.rows.should.have.length(1);
-            sel.rows[0].should.have.length(1); // 1 col
-            sel.rows[0][0].model.should.have.property('value').equal(1);
-        });
-
-        it('should add columns properties from spec', function () {
-            var data = mock1Row2Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'name',
-                    column: {
-                        editable: true,
-                        sortable: true
-                    }
-                }];
-            });
-
-            sel.columns.should.have.length(1); // 1 col
-            sel.columns[0].should.have.property('id'); // added by default
-            sel.columns[0].should.have.property('visible').equal(true); // added by default
-            sel.columns[0].should.have.property('editable').equal(true);
-            sel.columns[0].should.have.property('sortable').equal(true);
-        });
-
-        it('should add cell properties from spec', function () {
-            var data = mock1Row2Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'name',
-                    cell: {
-                        editable: true,
-                        type: 'multiline'
-                    }
-                }];
-            });
-
-            sel.rows.should.have.length(1); // 1 row
-            sel.rows[0][0].should.have.property('id'); // added by default
-            sel.rows[0][0].should.have.property('visible').equal(true); // added by default
-            sel.rows[0][0].should.have.property('editable').equal(true);
-            sel.rows[0][0].should.have.property('type').equal('multiline');
-        });
-
-        it('should add virtual column with specified model', function () {
-            var data = mockSingleVendor();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: null,
-                    columnModel: {
-                        value: 'x',
-                        field: 'some'
-                    }
-                }];
-            });
-
-            sel.columns.should.have.length(1); // 1 col
-            sel.columns[0].model.should.have.property('value').equal('x');
-        });
-
-        it('should add virtual cells with specified models', function () {
-            var data = mockSingleVendor();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: null,
-                    cellModels: ['topic', 'priority']
-                }];
-            });
-
-            sel.columns.should.have.length(1); // 1 col
-            sel.rows[0].should.have.length(1); // 1 cell
-            sel.rows[0][0].models.should.have.property('topic');
-            sel.rows[0][0].models.should.have.property('priority');
+            expect(model.group(0)().param).to.deep.equal(123);
         });
     });
 
-    describe('Group & sort', function () {
-        it('should return groupBy value', function () {
-            var data = mock3RowsForSorting();
-            TableModel.buildModel(data);
-            var rows = TableModel.viewModel.rows;
-
-            // by topic
-            TableModel.getGroupByValue(rows[0], 'topic').should.equal('AAA');
-            should.not.exist(TableModel.getGroupByValue(rows[1], 'topic'));
-            // by priority
-            TableModel.getGroupByValue(rows[0], 'priority').should.equal('required');
-            TableModel.getGroupByValue(rows[1], 'priority').should.equal('optional');
-            // not grouped
-            should.not.exist(TableModel.getGroupByValue(rows[1], null));
-            should.not.exist(TableModel.getGroupByValue(rows[2], null));
-        });
-
-        it('should sort on simple column keys', function () {
-            var data = mock2Rows1Vendor();
-            TableModel.buildModel(data);
-
-            var rows = TableModel.sortViewModel({'name': 'asc'}, null);
-            rows[0][0].model.value.should.equal('abc'); //'abc' < 'xyz
-            rows[1][0].model.value.should.equal('xyz');
-        });
-
-        it('should sort on complex column keys', function () {
-            var data = mock2Rows1Vendor();
-            TableModel.buildModel(data);
-
-            TableModel.sortViewModel({'vendors\0IBM\0score': 'desc'}, null);
-            var sel = TableModel.selectViewModel(function () {
-                return [{ selector: 'vendors/IBM/score' }];
+    describe('Aggregates', function () {
+        it('should aggregate _sum', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group')
+                    .aggregate({total: T._sum()})
+                    .push('', {value: 1})
+                    .push('', {value: 2})
+                    .push('', {value: 3});
             });
-            sel.rows[0][0].model.should.have.property('value').equal(null);
-            sel.rows[1][0].model.value.should.equal(1); // row with vendor defined moved to 2nd pos
+
+            expect(model.group().total()).to.equal(6);
         });
 
-        it('should sort by group first', function () {
-            var data = mock3RowsForSorting();
-            TableModel.buildModel(data);
+        it('should aggregate _sum w/ getter', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group')
+                    .aggregate({total: T._sum(T._val('a'))})
+                    .push('', {a: 1})
+                    .push('', {a: 2})
+                    .push('', {a: 3});
+            });
 
-            var rows = TableModel.sortViewModel({'name': 'asc'}, 'topic');
-            rows[0][0].model.value.should.equal('b'); //b > a, but it's group is null, so it's on top
-            rows[1][0].model.value.should.equal('a');
-            rows[2][0].model.value.should.equal('c');
+            expect(model.group().total()).to.equal(6);
+        });
+
+        it('should aggregate _max', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group')
+                    .aggregate({winner: T._max()})
+                    .push('', {value: 1})
+                    .push('', {value: 2})
+                    .push('', {value: 3});
+            });
+
+            expect(model.group().winner()).to.equal(3);
+        });
+
+        it('should let use aggregates in items (simplest formula - ref own range)', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group')
+                    .aggregate({winner: T._max(), total: T._sum()})
+                    .push('', {value: 1})
+                    .push('', {value: 2})
+                    .push('max', {value: 0}, {max: '=winner'})
+                    .push('sum', {value: 0}, {sum: '=total'});
+            });
+
+            expect(model.group('max')().max()).to.equal(2);
+            expect(model.group('sum')().sum()).to.equal(3);
         });
     });
 
-    describe('Topics', function () {
-
-    });
-
-    describe('Traversing', function () {
-
-        it('should traverse rows via cell obj', function () {
-            var data = mock3RowsForSorting();
-            TableModel.buildModel(data);
-            var rows = TableModel.viewModel.rows;
-            var row0 = rows[0];
-            var row1 = rows[1];
-            var row2 = rows[2];
-
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'name'
-                }];
-            });
-            var cell00 = sel.rows[0][0];
-            var cell10 = sel.rows[1][0];
-            var cell20 = sel.rows[2][0];
-
-            var next1 = TableModel.nextRowLike(cell00);
-            var next2 = TableModel.nextRowLike(cell10);
-            var next3 = TableModel.nextRowLike(cell20);
-
-            next1.should.equal(row1);
-            next2.should.equal(row2);
-            should.not.exist(next3);
-        });
-
-        it('should traverse sorted rows with predicate', function () {
-            var data = mock3RowsForSorting();
-            TableModel.buildModel(data);
-            TableModel.sortViewModel({'priority': 'desc'}, null);
-            var rows = TableModel.viewModel.rows;
-            var row0 = rows[0];
-            var row1 = rows[1];
-            var row2 = rows[2];
-
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'name'
-                }];
-            });
-            var cell00 = sel.rows[0][0];
-            var cell10 = sel.rows[1][0];
-            var cell20 = sel.rows[2][0];
-            var predicate = {key: 'priority', value: 'required'};
-
-            var next1 = TableModel.nextRowLike(cell00, predicate);
-            next1.should.equal(row1);
-
-            var next2 = TableModel.nextRowLike(cell10, predicate);
-            should.not.exist(next2); // oob
-        });
-    });
-
-    describe('Edit - save cell', function () {
-        it('should generate non-vendor patch', function () {
-            var data = mock1Row0Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'name'
-                }];
-            });
-            var cell = sel.rows[0][0];
-
-            //modify
-            cell.model.value = '123';
-            var patch = TableModel.saveCell(cell.model);
-
-            patch[0].should.have.property('op').equal('replace');
-            patch[0].should.have.property('path').equal('/criteria/0/name');
-            patch[0].should.have.property('value').equal('123');
-        });
-
-        it('should generate existing vendor patch', function () {
-            var data = mock2Rows1Vendor();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'vendors/.*?/input'
-                }];
-            });
-            var cell = sel.rows[0][0];
-
-            //modify
-            cell.model.value = '123';
-            var patch = TableModel.saveCell(cell.model);
-
-            patch[0].should.have.property('op').equal('replace');
-            patch[0].should.have.property('path').equal('/criteria/0/vendors/0/input');
-            patch[0].should.have.property('value').equal('123');
-        });
-
-        it('should generate non-existing vendor patch', function () {
-            var data = mock2Rows1Vendor();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'vendors/.*?/input'
-                }];
-            });
-            var cell = sel.rows[1][0]; // no vendors here
-
-            //modify
-            cell.model.value = '123';
-            var patch = TableModel.saveCell(cell.model);
-
-            patch[0].should.have.property('op').equal('add');
-            patch[0].should.have.property('path').equal('/criteria/1/vendors/0');
-            patch[0].value.should.have.property('input').equal('123');
-            patch[0].value.should.have.property('title').equal('IBM');
-            patch[0].value.should.have.property('score').equal(0);
-        });
-    });
-
-    describe('Edit - add & remove row', function () {
-        it('should add row to empty table', function () {
-            var data = [];
-            TableModel.buildModel(data);
-            var patch = TableModel.addRowLike(null);
-
-            patch[0].op.should.equal('add');
-            patch[0].path.should.equal('/criteria/0');
-            patch[0].value.should.have.property('name').equal('');
-            patch[0].value.should.have.property('priority').equal('required');
-
-            var cell00 = TableModel.viewModel.rows[0][0];
-            cell00.model.should.have.property('key').equal('name');
-        });
-
-        it('should add row to non-empty table', function () {
-            var data = mock1Row0Vendors();
-            var model = TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: ['name','priority']
-                }];
-            });
-            var cell00 = sel.rows[0][0];
-
-            var patch = TableModel.addRowLike(cell00);
-
-            patch[0].op.should.equal('add');
-            patch[0].path.should.equal('/criteria/1');
-            patch[0].value.should.have.property('name').equal('');
-            patch[0].value.should.have.property('priority').equal('optional');
-
-            var cell10 = TableModel.viewModel.rows[1][0];
-            cell10.model.should.have.property('key').equal('name');
-        });
-
-        it('newly added row should have justAdded prop', function () {
-            var data = mock1Row0Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: ['name','priority']
-                }];
-            });
-            var cell00 = sel.rows[0][0];
-
-            var patch = TableModel.addRowLike(cell00);
-
-            var cell10 = TableModel.viewModel.rows[1][0];
-            cell10.should.have.property('justAdded').equal(true);
-        });
-
-        it.skip('should remove row', function () {
-            var data = mock2Rows1Vendor();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: ['name','priority']
-                }];
-            });
-            var cell00 = sel.rows[0][0];
-
-            var patch = TableModel.removeRow(cell00);
-
-            //bad patch, see issue I opened:
-            // https://github.com/Starcounter-Jack/JSON-Patch/issues/65
-            console.log('>>Bad patch: ', patch);
-
-            patch.should.have.length(1);
-            patch[0].op.should.equal('remove');
-            patch[0].path.should.equal('/criteria/0');
-        });
-
-        it('should remove last row', function () {
-            var data = mockSingleVendor();
-            var model = TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: ['name','priority']
-                }];
-            });
-            var cell00 = sel.rows[0][0];
-
-            var patch = TableModel.removeRow(cell00);
-
-            patch.should.have.length(1);
-            patch[0].op.should.equal('remove');
-            patch[0].path.should.equal('/criteria/0');
-
-            // model updated
-            model.rows.should.have.length(0);
-            var sel2 = TableModel.selectViewModel(function () {
-                return [{
-                    selector: ['name','priority']
-                }];
-            });
-            sel2.rows.should.have.length(0);
-        });
-    });
-
-    describe('Edit - save, add & remove column', function () {
-        it('should verify the vendor name is unique', function () {
-            var data = mock1Row2Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'vendors/.*?/input'
-                }];
-            });
-            var col0 = sel.columns[0];
-
-            TableModel.isUniqueColumn(col0.model, 'IBM').should.equal(true); // ok on itself
-            TableModel.isUniqueColumn(col0.model, 'XP').should.equal(false);// conflict
-            TableModel.isUniqueColumn(col0.model, 'XP2').should.equal(true); // ok
-        });
-
-        it('should save existing column title', function () {
-            var data = mock2Rows2Vendors();
-            TableModel.buildModel(data);
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: 'vendors/.*?/input'
-                }];
-            });
-            var col0 = sel.columns[0];
-
-            col0.model.value = 'XP';
-            var patch = TableModel.saveColumn(col0.model);
-
-            patch.should.have.length(2);
-            patch[0].should.have.property('op').equal('replace');
-
-            // fast-json-patch lib generates different patches on PhantomJS and Chrome:
-            // in Chrome they are in natural order, but in Phantom -- in reverse.
-            // This is not important for the correctness of the path though, so
-            // the test accepts any order.
-            patch[0].should.have.property('path').match(/\/criteria\/[0|1]\/vendors\/0\/title/);
-            patch[0].should.have.property('value').equal('XP');
-
-            patch[1].should.have.property('op').equal('replace');
-            patch[1].should.have.property('path').match(/\/criteria\/[0|1]\/vendors\/0\/title/);
-            patch[1].should.have.property('value').equal('XP');
-        });
-
-        it('should add new column', function () {
-            var data = mock2Rows1Vendor();
-            TableModel.buildModel(data);
-            var model = { field: '...', value: ''};
-            var sel = TableModel.selectViewModel(function () {
-                return [{
-                    selector: null, // virtual
-                    columnModel: model
-                }];
+    describe('Formulas', function () {
+        it.skip('should turn aggregate into formula (isMax case)', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group')
+                    .aggregate({winner: T._max()})
+                    .push('', {value: 1}, {isMax: T.ref('=winner', T._eq())})
+                    .push('', {value: 2})
+                    .push('', {value: 3}, {max: '=winner'})
             });
 
-            model.value = 'XP';
-            var patch = TableModel.addColumn(model.value);
-
-            patch.should.have.length(2);
-            patch[0].should.have.property('op').equal('add');
-            // Any order -- see prev test
-            patch[0].should.have.property('path').match(/\/criteria\/[0|1]\/vendors\/[0|1]/);
-            patch[0].value.should.have.property('title').equal('XP');
-
-            patch[1].should.have.property('op').equal('add');
-            patch[1].should.have.property('path').match(/\/criteria\/[0|1]\/vendors\/[0|1]/);
-            patch[0].value.should.have.property('title').equal('XP');
+            expect(model.group('max')().max()).to.equal(2);
+            expect(model.group('sum')().sum()).to.equal(3);
         });
 
-        it('should remove column', function () {
-            //TODO -  (also bad patch due to fast-json-patch bug)
+        it.skip('should use formula involving ranges', function () {
+            var model = TableModel.build(function (T) {
+                T.range('rangeX')
+                    .push('', 1)
+                    .push('', 2)
+                    .push('', 3);
+                T.range('rangeY')
+                    .push('', null)
+                    .push('', {}, {'ref': 1})
+                    .push('', 3);
+            });
+
+            expect(model.groups(0)().skip(2)[0]()).to.deep.equal(3);
+            expect(model.groups(0)().skip(2)[1]()).to.deep.equal(4);
+        });
+
+
+        it('should aggregate _div', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group')
+                    .aggregate({
+                        total: T._sum(T._val('a')),
+                        weight: T._div(T._get(T._val('a')), T._val('total'))
+                    })
+                    .push('', {a: 1})
+                    .push('', {a: 1})
+                    .push('', {a: 2})
+                    .push('', {a: 4});
+            });
+
+            expect(model.group().total()).to.be.equal(8);
+            expect(model.group().weight(2)).to.be.equal(0.25);
+        });
+
+        it.skip('should reference the aggregate of other range', function () {
+            var model = TableModel.build(function (T) {
+                // Create a special range to hold a result of aggregation
+                T.range('wPercent')
+                    .aggregate({
+                        total: T._sum(),
+                        weight: T._div(T._get(), T._val('total'))
+                    })
+                    .push('', {value: 1})
+                    .push('', {value: 3});
+
+                T.rows(0)
+                    .push('weight', {value: 1})
+                    .push('percent', {}, {tooltip: 'wPercent.weight'});
+                T.rows(1)
+                    .push('weight', {value: 3})
+                    .push('percent', {}, {tooltip: 'wPercent.weight'});
+            });
+
+            expect(model.wPercent().total()).to.equal(4);
+            expect(model.wPercent().weight(0)).to.equal(1/4);
+            expect(model.wPercent().weight(1)).to.equal(3/4);
+
+            expect(model.rows(0)('percent')().tooltip(0)).to.equal(1/4);
+            expect(model.rows(1)('percent')().tooltip(1)).to.equal(3/4);
+        });
+
+        it.skip('should aggregate 2d/multi range', function () {
+            var model = TableModel.build(function (T) {
+                T.range('group', {multi: true})(0)
+                    .push('group-weight', {model: 1})
+                    .push('group-grade1', {}, {'=total': 'grade1'}) // grade1
+                    .push('group-grade2', {});
+
+                T.rows(0)
+                    .push('weight', {value: 2})
+                    .push('grade1', {value: 2})
+                    .push('grade2', {value: 2});
+
+                T.rows(1)
+                    .push('weight', {value: 3})
+                    .push('grade1', {value: 3})
+                    .push('grade2', {value: 3});
+            });
+
+            //expect(model.group(0).weight).to.be.a('function');
         });
     });
 });
-
-
-function mockSingleVendor() {
-    return [
-        { name: 'abc', description: '', topic: null, priority: 'required', vendors: [
-            { title: 'IBM', input: 'str', score: 1 }
-        ] }
-    ];
-}
-
-function mock1Row0Vendors() {
-    return [
-        { name: 'abc', description: '', topic: null, priority: 'optional', vendors: [] }
-    ];
-}
-
-function mock2Rows1Vendor() {
-    return [
-        { name: 'xyz', description: '', topic: 'AAA', priority: 'required', vendors: [
-            { title: 'IBM', input: 'str', score: 1 }
-        ] },
-        { name: 'abc', description: '', topic: null, priority: 'required', vendors: [] }
-    ];
-}
-
-function mock2Rows2Vendors() {
-    return [
-        { name: '', description: '', topic: null, priority: 'required',
-            vendors: [
-                { title: 'IBM', input: 'str', score: 1 }
-            ]
-        },
-        { name: '', description: '', topic: null, priority: 'required',
-            vendors: [
-                { title: 'IBM', input: 'str2', score: 2 }
-            ]
-        }
-    ];
-}
-
-
-function mock1Row2Vendors() {
-    return [
-        { name: '', description: '', topic: null, priority: 'required',
-            vendors: [
-                { title: 'IBM', input: 'ibm', score: 1 }, { title: 'XP', input: 'xp', score: 2 }
-            ]
-        }
-    ];
-}
-
-function mock3RowsForSorting() {
-    return [
-        { name: 'a', description: '', topic: 'AAA', priority: 'required', vendors: [] },
-        { name: 'b', description: '', topic: null, priority: 'optional', vendors: [] },
-        { name: 'c', description: '', topic: 'AAA', priority: 'required', vendors: [] }
-    ];
-}
-

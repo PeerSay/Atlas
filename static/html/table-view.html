@@ -1,13 +1,10 @@
 <div ng-form="form" class="table-responsive">
-
-    <!--Weights: {{ table.view.topicWeights | json }}-->
-
     <table class="table ps-table" id="decision-table">
         <!--Header-->
-        <thead ng-if="table.view.rows.length">
+        <thead ng-if="!table.view.empty">
         <tr>
-            <th ng-repeat="col in table.view.columns" ng-class=":: col.header.class">
-                <div>{{:: col.header.label }}</div>
+            <th ng-repeat="th in table.view.header" ng-class=":: th().class">
+                <div>{{:: th().label }}</div>
             </th>
         </tr>
         </thead>
@@ -15,12 +12,12 @@
         <tbody ng-repeat="group in table.view.groups" ng-init="groupIdx = $index">
         <!--Group row-->
         <tr class="table-group"
-                ng-class="{expanded: group.expanded.on}"
-                ng-click="group.expanded.toggle();">
+                ng-class="{expanded: group().expanded.on}"
+                ng-click="group().expanded.toggle();">
             <td colspan="2" class="abs-container">
                 <a href class="group-name no-outline">
                     <span class="fa fa-chevron-right caret-icon"></span>
-                    {{:: group.name }}</a>
+                    {{:: group('name')().label }}</a>
             </td>
             <td class="strong center"
                     ng-click="$event.stopPropagation()">
@@ -41,69 +38,68 @@
                                 <div class="slider-label">{{ val.weight * 100 | number:0 }}%</div>
                             </slider-range>
                         </slider>
-                        <!--<p>
-                            DBG: {{groupIdx | json}}
-                        </p>-->
                     </form>
                 </div>
             </td>
             <!--Group grades-->
-            <td ng-repeat-start="groupCol in group.grades"></td>
+            <td ng-repeat-start="groupGrade in group().skip(1)"></td>
             <td ng-repeat-end class="strong grade">
-                {{ groupCol.grade() }}
+                {{ groupGrade().value() }}
             </td>
         </tr>
         <!--Rows & cells-->
-        <tr ng-show="group.expanded.on" ng-repeat="row in group.rows">
-            <td class="cell" ng-repeat="cell in row.cells"
-                    ng-class="[cell.type, cell.class].concat(cell.model.max() && 'winner' || '')"
+        <tr ng-show="group().expanded.on"
+                ng-repeat="row in table.view.rows | filter : table.view.filerGroupRowsFn(group('name')().label)">
+            <td class="cell" ng-repeat="cell in row().list"
+                    ng-class="[cell().type, cell().class].concat(cell().maxInRow() && 'winner' || '')"
                     ng-click="focusInputEl(cell)">
+
                 <!--Label cell-->
-                <div ng-if=":: cell.type === 'static' ">{{:: cell.label }}</div>
+                <div ng-if=":: cell().type === 'static' ">{{:: cell().label }}</div>
+                <!--Icon cell (mandatory chevron)-->
+                <div ng-if=":: cell().type === 'icon' ">
+                    <span class="fa {{:: cell().label }}"></span>
+                </div>
                 <!--Text cell-->
-                <div ng-if=":: cell.type === 'text' ">
+                <div ng-if=":: cell().type === 'text' ">
                     <textarea class="cell-input noresize"
-                            ng-model="cell.model.value"
-                            ps-table-input="cell" ctrl="table"
+                            ng-model="cell().model.value"
+                            ps-table-input="cell()" ctrl="table"
                             msd-elastic></textarea>
                 </div>
                 <!--Number cell-->
-                <div ng-if=":: cell.type === 'number' ">
+                <div ng-if=":: cell().type === 'number' ">
                     <input type="number" class="cell-input center"
-                            min="0" max="{{:: cell.max }}"
-                            ng-model="cell.model.value"
-                            ps-table-input="cell" ctrl="table"
+                            min="0" max="{{:: cell().max }}"
+                            ng-model="cell().model.value"
+                            ps-table-input="cell()" ctrl="table"
                             ps-input-number
                             ps-input-nullable
-                            ps-tooltip="cell.model.tooltip()"
+                            ps-tooltip="cell().tooltip()"
                             required
                             >
-                </div>
-                <!--Mandatory icon cell-->
-                <div ng-if=":: cell.type === 'icon' ">
-                    <span class="fa {{:: cell.label }}"></span>
                 </div>
             </td>
         </tr>
         </tbody>
         <!--Footer-->
         <tfoot>
-        <tr ng-if="table.view.rows.length">
-            <th class="abs-container {{:: col.footer.class }}" ng-repeat="col in table.view.columns"
-                    ng-class="{'winner' : col.footer.model.max()}">
+        <tr ng-if="!table.view.empty">
+            <th class="abs-container {{:: th().class }}" ng-repeat="th in table.view.footer"
+                    ng-class="{'winner': th().maxTotal()}">
                 <!--Label cell-->
-                <div ng-if=":: col.footer.type === 'static' ">{{:: col.footer.label }}</div>
+                <div ng-if=":: th().type === 'static' ">{{:: th().label }}</div>
                 <!--Func cell-->
-                <div ng-if=":: col.footer.type === 'func' ">
-                    {{ col.footer.model.value() }}
+                <div ng-if=":: th().type === 'func' ">
+                    {{ th().value() }}
                 </div>
                 <!--Winner cup-->
-                <span class="fa fa-trophy winner-icon" ng-if="col.footer.model.max()"></span>
+                <span class="fa fa-trophy winner-icon" ng-if="th().maxTotal()"></span>
             </th>
         </tr>
         <!--Empty table row -->
         <tr class="empty-table-content"
-                ng-if="!table.loading && !table.view.rows.length">
+                ng-if="!table.loading && table.view.empty">
             <td colspan="6" class="text-center">
                 <span class="fa fa-info-circle"></span>
                 <h4>Bummer, there's nothing to compare yet.</h4>

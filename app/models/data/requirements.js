@@ -45,7 +45,7 @@ requirements = [
     },
     {
         _id: '55974b343dc107cb75453821',
-        name: 'Level of expertise on the product',
+        name: 'Integrator/Reseller Level of expertise on the product',
         description: 'The experience and exprtise level of the reseller or integrator',
         topic: 'Vendor, Reseller & Integrator',
         popularity: 90
@@ -71,12 +71,48 @@ requirements = [
         topic: 'Vendor, Reseller & Integrator',
         popularity: 55
     },
+
+    {
+        _id: '55e5844fd7f1b9ff0667b0ea',
+        name: 'Overall Support rating',
+        description: 'Use this requirement if you want one general rating for support.',
+        topic: 'Support & Service',
+        popularity: 95
+    },
     {
         _id: '55974b373dc107cb75453825',
         name: 'Support Service Level Agreement (SLA)',
         description: 'What is the SLA that this vendor / reseller / integrator offers?',
-        topic: 'Vendor, Reseller & Integrator',
+        topic: 'Support & Service',
         popularity: 60
+    },
+    {
+        _id: '55e58460d7f1b9ff0667b0eb',
+        name: 'Support availability',
+        description: '24x7, only work-hours, etc.',
+        topic: 'Support & Service',
+        popularity: 90
+    },
+    {
+        _id: '55e58480d7f1b9ff0667b0ec',
+        name: 'Support contact options',
+        description: 'What contact methods are available? Email, phone, online chat, etc.',
+        topic: 'Support & Service',
+        popularity: 90
+    },
+    {
+        _id: '55e58495d7f1b9ff0667b0ed',
+        name: 'Local Support partners',
+        description: 'Does the vendor have local Support partners for faster response and on-site support?',
+        topic: 'Support & Service',
+        popularity: 80
+    },
+    {
+        _id: '55e584a6d7f1b9ff0667b0ee',
+        name: 'Dedicated account manager',
+        description: 'Can you get a dedicated person as a direct point of contact for Support issues?',
+        topic: 'Support & Service',
+        popularity: 40
     },
 
     {
@@ -211,7 +247,7 @@ requirements = [
     {
         _id: '559cf8fcd21e2f6d44eb640f',
         name: 'Price',
-        description: 'How much this solution cost. Monthly / Annually / or one time payment.',
+        description: 'How much does this solution cost?',
         topic: 'Cost',
         popularity: 99
     },
@@ -225,7 +261,7 @@ requirements = [
     {
         _id: '559cf90fd21e2f6d44eb6411',
         name: 'Return on Investment',
-        description: 'Measuring if the solution will return its cost, how and when.',
+        description: 'Measuring if the solution will save money beyond its cost, how and when.',
         topic: 'Cost',
         popularity: 90
     },
@@ -235,6 +271,22 @@ requirements = [
         description: 'One time or recurrent. Product vs. service. Vendor vs. Integrator, etc.',
         topic: 'Cost',
         popularity: 90
+    },
+    {
+        _id: '55e57da8d7f1b9ff0667b0e1',
+        name: 'Chargeback Fees',
+        description: 'What is the cost of a user performing a chargeback (cancelling a transaction)?',
+        topic: 'Cost',
+        popularity: 80,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e430f077549eee97a6b097',
+        name: 'Additional Fees',
+        description: 'Additional fees that are associated with the solution such as a setup fee, minimal fee, cancellation fee, etc.',
+        topic: 'Cost',
+        popularity: 70,
+        category: 'Payment Solution'
     },
 
     {
@@ -518,6 +570,208 @@ requirements = [
         topic: 'Dealflow Management Functionality',
         popularity: 60,
         category: 'Dealflow Management'
+    },
+
+    {
+        _id: '55cafb2c628e2c1b9abb127c',
+        name: 'Inventory Management',
+        description: 'Manage all assets - software, hardware, licenses, etc.',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb3d628e2c1b9abb127d',
+        name: 'Asset Discovery',
+        description: 'Is discovery supported and in what method (agent, agent-less, external, etc.',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb50628e2c1b9abb127e',
+        name: 'Data Integration',
+        description: 'Integrate with 3rd party inventory tools and other complementing solutions',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb62628e2c1b9abb127f',
+        name: 'Software Metering',
+        description: 'Measuring and monitoring usage and behavior of software assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb79628e2c1b9abb1280',
+        name: 'Software Utilization Analysis',
+        description: 'Analysis of software usage patterns and its implications',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb8e628e2c1b9abb1281',
+        name: 'Hardware Asset Discovery',
+        description: 'Automatiaclly detecting harware assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafb9e628e2c1b9abb1282',
+        name: 'Datacenter & Server Management',
+        description: 'Managing servers and other datacenter assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbb4628e2c1b9abb1283',
+        name: 'Virtual Environments Management',
+        description: 'Ability to manage virtual assets (e.g. VMWare, Citrix, etc.)',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbc7628e2c1b9abb1284',
+        name: 'Web Application Metering',
+        description: 'Ability to monitor and measure web application usage',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbde628e2c1b9abb1285',
+        name: 'Cloud Application Metering',
+        description: 'Ability to monitor and measure cloud application usage',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafbee628e2c1b9abb1286',
+        name: 'Mobile Application Management',
+        description: 'Manage mobile apps',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc04628e2c1b9abb1287',
+        name: 'Hardware Asset Management',
+        description: 'Ability to manage hardware assets',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc15628e2c1b9abb1288',
+        name: 'Contracts Management',
+        description: 'Manage contracts related to managed assets to control coverage, renewals, etc.',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc27628e2c1b9abb1289',
+        name: 'Intelligent Software Reconciliation',
+        description: 'Compare purchased licenses and entitlement with actual usage',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+    {
+        _id: '55cafc37628e2c1b9abb128a',
+        name: 'Advanced License Management',
+        description: 'Ability to manage specific licenses and idenitfy overlaps, gaps and optimizations',
+        topic: 'Software Asset Management Functionality',
+        popularity: 50,
+        category: 'Software Asset Management'
+    },
+
+    {
+        _id: '55e433cb77549eee97a6b099',
+        name: 'Transaction completion time',
+        description: 'The time until the tranaction settlment is complete and you get the money into your merchant account',
+        topic: 'Payment Solution Functionality',
+        popularity: 60,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e433e077549eee97a6b09a',
+        name: 'Recurring payment support',
+        description: 'Does the solution support a built-in capability for recurring charges. This can save you the need to store credit card details of users.',
+        topic: 'Payment Solution Functionality',
+        popularity: 90,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e433f177549eee97a6b09b',
+        name: 'Merchant Account options',
+        description: 'Can you get an account from the provider, do you need to open a dedicated account with your bank or another processor, etc.',
+        topic: 'Payment Solution Functionality',
+        popularity: 80,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57df0d7f1b9ff0667b0e2',
+        name: 'Support for \"Doing Business As...\"',
+        description: 'Enables controlling the name that will appear on transaction reports to help users identify charges more easily',
+        topic: 'Payment Solution Functionality',
+        popularity: 60,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57e05d7f1b9ff0667b0e3',
+        name: 'Provider familiarity with target market',
+        description: 'A vendor familiar with the user profiles and behavior in a certain region is less likely to reject legitimate transactions as suspicious',
+        topic: 'Payment Solution Functionality',
+        popularity: 90,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57e29d7f1b9ff0667b0e4',
+        name: 'Smart payment routing',
+        description: 'Support for using multiple payment processors and choosing the most suitable per transaction',
+        topic: 'Payment Solution Functionality',
+        popularity: 80,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57e3fd7f1b9ff0667b0e5',
+        name: 'PCI certifiation',
+        description: 'Does the solution have a PCI (Payment Card Industry) certification',
+        topic: 'Payment Solution Functionality',
+        popularity: 90,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57e57d7f1b9ff0667b0e6',
+        name: 'Application Interface',
+        description: 'How the solution integrates into your application or web site (embedded in the page, redirect to the provider page etc.)',
+        topic: 'Payment Solution Functionality',
+        popularity: 90,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57e6cd7f1b9ff0667b0e7',
+        name: 'Data Portability',
+        description: 'The ability to export past transactions and recurring payments in case you wanty to transfer to a different provider',
+        topic: 'Payment Solution Functionality',
+        popularity: 50,
+        category: 'Payment Solution'
+    },
+    {
+        _id: '55e57e86d7f1b9ff0667b0e8',
+        name: 'Escalation & Dispute Process',
+        description: 'How are rejected transactions disputed: Can you argue against unjust chargebacks? What information will you need to disclose about customers? etc.',
+        topic: 'Payment Solution Functionality',
+        popularity: 60,
+        category: 'Payment Solution'
     }
 ];
 

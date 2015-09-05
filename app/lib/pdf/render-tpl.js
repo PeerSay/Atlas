@@ -22,7 +22,9 @@ var PRESENTATION_FILE = path.join(appRoot, '/static/tpl/presentation.html');
 
 function renderTemplate(project, logoUrl) {
     var settings = project.presentation.data;
-    var user = project.collaborators[0]; // requires .populate()
+    var user = project.collaborators[0].toJSON({virtuals: true});
+    project = project.toJSON(); // need plain data but only after we extracted user
+
     var userName = (user.name || {}).full || '';
     var titlePage = {
         title: project.title,

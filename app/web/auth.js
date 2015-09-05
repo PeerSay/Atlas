@@ -69,7 +69,7 @@ function Auth(app) {
 
     passport.deserializeUser(function (email, done) {
         // Get minimal fields only; additional requests are required to perform API operations
-        User.findOne({email: email}, 'id email projects', function (err, user) {
+        User.findOne({email: email}, 'id email name projects', function (err, user) {
             done(err, user);
         });
     });

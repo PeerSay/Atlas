@@ -46,7 +46,7 @@ function renderTemplate(project, logoUrl) {
     var table = {
         include: settings.table.include,
         topics: null,
-        superTopic: null
+        superTopics: []
     };
 
     if (reqs.include) {
@@ -60,7 +60,10 @@ function renderTemplate(project, logoUrl) {
         var superTopic = findSuperTopic(project.topicWeights);
 
         table.topics = getTopicsTable(model);
-        table.superTopic = getSingleTopicTable(model, superTopic);
+        table.superTopics.push(getSingleTopicTable(model, superTopic));
+        if (superTopic !== 'Cost' && _.findWhere(project.topicWeights, {topic: 'Cost'})) {
+            table.superTopics.push(getSingleTopicTable(model, 'Cost'));
+        }
     }
 
     var locals = _.extend({}, settings, {

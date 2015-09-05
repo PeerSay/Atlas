@@ -9,7 +9,7 @@
         </tr>
         </thead>
         <!--Groups-->
-        <tbody ng-repeat="group in table.view.groups" ng-init="groupIdx = $index">
+        <tbody ng-if="!table.view.empty" ng-repeat="group in table.view.groups" ng-init="groupIdx = $index">
         <!--Group row-->
         <tr class="table-group"
                 ng-class="{expanded: group().expanded.on}"

@@ -173,11 +173,11 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
             });
         });
 
+        view.empty = !project.table.length;
         view.header = model.header().list;
         view.footer = model.footer().list;
         view.groups = model.groups && model.groups().list;
         view.rows = model.rows && model.rows().list;
-        view.empty = !model.rows || !model.rows().size();
         view.filerGroupRowsFn = function (topic) { // TODO - move to model as filter()?
             return function (row) {
                 return (row().topic === topic);

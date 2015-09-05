@@ -18,9 +18,6 @@ function TableModel() {
     T.model = {};
     T.build = build;
     T.range = range;
-    T.header = range('header').access;
-    T.footer = range('footer').access;
-    T.rows = range('rows', {multi: true});
     // Functional
     T._get = _get;
     T._val = _val;
@@ -28,10 +25,19 @@ function TableModel() {
     T._div = _div;
     T._max = _max;
 
+    reset();
 
     function build(fn) {
+        reset();
         fn(T);
         return T.model;
+    }
+
+    function reset() {
+        ranges.reset();
+        T.header = range('header').access;
+        T.footer = range('footer').access;
+        T.rows = range('rows', {multi: true});
     }
 
     function range(name, params) {
@@ -52,10 +58,15 @@ function TableModel() {
     function Ranges() {
         var S = {};
         S.get = get;
+        S.reset = reset;
         var cache = {};
 
         function get(name) {
             return cache[name] = cache[name] || Range(name)
+        }
+
+        function reset() {
+            cache = {};
         }
 
         function Range(name) {

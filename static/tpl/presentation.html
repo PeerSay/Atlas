@@ -183,8 +183,8 @@
                             <td>{{ group('name')().label }}</td>
                             <td class="center">{{ group('weight')().value | percent }}%</td>
 
-                            {% for j, grade in group | skip_group %}
-                            <td class="center {% if grade().max %} winner {% endif %}">
+                            {% for j, grade in group | skip_group(2) %}
+                            <td class="center {% if grade().max() %} winner {% endif %}">
                                 {{ grade().value() }}
                             </td>
                             {% endfor %}
@@ -212,7 +212,7 @@
             <!--SuperTopic table-->
             {% if table.superTopic %}
             <section>
-                <h2>Decision table (2)</h2>
+                <h2>Decision table - {{ table.superTopic.group().topic }}</h2>
                 <table class="table compact">
                     <thead>
                     <tr>
@@ -224,16 +224,11 @@
 
                     <!--Group row: always one! -->
                     <tbody>
-                    {% for i, group in table.superTopic.groups %}
+                    {% for i, group in table.superTopic.group %}
                     <tr>
-                        <td>{{ group('name')().label }}</td>
-                        <td class="center">{{ group('weight')().value | percent }}%</td>
-
-                        {% for j, grade in group | skip_group %}
-                        <td class="center {% if grade().max %} winner {% endif %}">
-                            {{ grade().value() }}
+                        <td colspan="{{ table.superTopic.group().size() }}">
+                            {{ table.superTopic.group('name')().label }}
                         </td>
-                        {% endfor %}
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -244,7 +239,8 @@
                     <tr>
                         {% for k, cell in row().list %}
                         <td class="{% if k %} center {% endif %} {% if cell().maxInRow() %} winner {% endif %}">
-                            {{ cell().value }}
+                            {%if cell().type === 'func' %} {{ cell().value() }} {% else %}
+                            {{ cell().value }} {% endif %}
                         </td>
                         {% endfor %}
                     </tr>
@@ -253,9 +249,11 @@
 
                     <tfoot>
                     <tr>
-                        {% for i, foot in table.superTopic.footer %}
-                        <td class="{{ foot().class }} {% if foot().maxTotal() %} winner {% endif %}">
-                            {{ foot().label || foot().value() }}
+                        <td>Overall Grade</td>
+                        <td class="center">{{ table.superTopic.group('weight')().value | percent }}%</td>
+                        {% for i, grade in table.superTopic.group | skip_group(2) %}
+                        <td class="center {% if grade().max() %} winner {% endif %}">
+                            {{ grade().value() }}
                         </td>
                         {% endfor %}
                     </tr>

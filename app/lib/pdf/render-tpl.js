@@ -9,10 +9,10 @@ swig.setFilter('percent', function (input) {
     return Math.round(input * 100);
 });
 
-swig.setFilter('skip_group', function (input) {
+swig.setFilter('skip_group', function (input, num) {
     // Used to prevent exception in swig on parsing the following expression in tpl,
     // which is apparently a bug in swig
-    return input().skip(2);
+    return input().skip(Number(num));
 });
 
 var tableModel = require(appRoot + '/static/js/projects/table-model');
@@ -119,7 +119,13 @@ function buildModel(reqs, topicWeights) {
         reqs.forEach(function (req, i) {
             // Predefine ranges
             var groupsRange = T.range('groups', {multi: true});
-            var groupRange = groupsRange(req.topic);
+            var groupRange = groupsRange(req.topic, {topic: req.topic});
+            var groupMaxRange = T.range('group-max-' + req.topic)
+                .aggregate({
+                    max: T._max(function (obj) {
+                        return obj.value(); // default (T._val) assumes .value is not func
+                    })
+                });
             var rowRange = T.rows(i, {topic: req.topic});
             var rowMaxRange = T.range('row-max-' + i)
                 .aggregate({
@@ -130,6 +136,13 @@ function buildModel(reqs, topicWeights) {
                     total: T._sum(),
                     weight: reqWeightFn()
                 });
+            var maxTotalsRange = T.range('total-max')
+                .aggregate({
+                    max: T._max(function (obj) {
+                        return obj.value(); // default (T._val) assumes .value is not func
+                    })
+                });
+
 
             // Group row
             var groupWeight = _.findWhere(topicWeights, {topic: req.topic}).weight;
@@ -138,10 +151,14 @@ function buildModel(reqs, topicWeights) {
                 .push('weight', {value: groupWeight});
 
             // Req row
+            var weightValue = {value: req.weight};
+            rowWeightRange.push('', weightValue);
             rowRange
                 .push('name', {value: req.name})
-                .push('weight', {value: req.weight});
-            rowWeightRange.push('', {value: req.weight});
+                .push('weight', {
+                    value: reqWeightPercentFn(rowWeightRange, weightValue),
+                    type: 'func'
+                });
 
 
             req.products.forEach(function (prod, j) { // TODO - sorted + top 3
@@ -159,25 +176,21 @@ function buildModel(reqs, topicWeights) {
                 rowRange
                     .push(prodGradeKey, {
                         value: gradeStr,
-                        maxInRow: maxInRowFn(rowMaxRange, prodGradeValue)
+                        maxInRow: maxInRangeFn(rowMaxRange, prodGradeValue)
                     });
 
-                // Group grade
+                // Group grades
                 var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
                     .push('', prodGradeValue);
+                var groupGradeValue = {
+                    value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange)
+                };
+                groupMaxRange.push('', groupGradeValue);
+                groupGradeValue.max = maxInRangeFn(groupMaxRange, groupGradeValue);
                 groupRange
-                    .push(prodGradeKey, {
-                        value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange),
-                        max: false // TODO - group's max-in-row
-                    });
+                    .push(prodGradeKey, groupGradeValue);
 
                 // Footer - totals
-                var maxTotalsRange = T.range('total-max')
-                    .aggregate({
-                        max: T._max(function (obj) {
-                            return obj.value(); // default (T._val) assumes .value is not func
-                        })
-                    });
                 if (i === 0) { // during first run only!
                     maxTotalsRange.push(prodGradeKey, {
                         value: totalGradeFn(groupsRange, topicWeights, prodGradeKey)
@@ -197,10 +210,10 @@ function buildModel(reqs, topicWeights) {
 
 //Functions
 //
-function maxInRowFn(rowMaxRange, cell) {
+function maxInRangeFn(range, cell) {
     return function () {
-        var val = cell.value;
-        var max = rowMaxRange.max(); // aggregated
+        var val = (typeof cell.value === 'function') ? cell.value() : cell.value;
+        var max = range.max(); // aggregated
         return (max === val);
     };
 }
@@ -211,6 +224,15 @@ function reqWeightFn() {
             var total = range.total(); // aggregated
             return total ? val / total : 0;
         };
+    };
+}
+
+function reqWeightPercentFn(range, cell) {
+    return function () {
+        var val = cell.value;
+        var weight = range.weight(val); // aggregated
+        var percent = Math.round(weight * 100) + '%';
+        return percent;
     };
 }
 
@@ -268,18 +290,14 @@ function getTopicsTable(model) {
 function getSingleTopicTable(model, topic) {
     var res = {};
     res.header = model.header().list;
-    res.footer = model.footer().list;
 
     var topicGroup = _.find(model.groups().list, function (group) {
-            return (group('name')().label == topic);
+            return (group().topic === topic);
     });
-    res.groups = [topicGroup];
+    res.group = topicGroup;
     res.rows = model.rows().list.filter(function (row) {
-        console.warn('>>filter', row().topic);
         return (row().topic === topic);
     });
-
-    console.warn('>> rows', res.rows);
 
     return res;
 }

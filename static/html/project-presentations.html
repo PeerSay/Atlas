@@ -1,0 +1,152 @@
+<!--Panel-->
+<div class="panel panel-default tile has-fullscreen-toggle" ng-controller="ProjectPresentationsCtrl as pr">
+    <div class="panel-heading">
+        <h2 class="text-center">
+            <span class="fa fa-file-pdf-o"></span>
+            Presentations
+        </h2>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <!--Snapshots-->
+            <div class="right-sidebar-col">
+                <h4>Presentations</h4>
+                <table class="table table-condensed snapshot-table">
+                    <tbody>
+                    <tr ng-repeat="snap in pr.snapshots | orderBy:'-id' track by snap.id">
+                        <td>
+                            <a href="{{:: snap.html.url }}" target="_blank"
+                                    ng-class="{'not-visited': !snap.visited}"
+                                    ng-click="pr.visitSnapshot(snap)">{{:: snap.title }}</a>
+                        </td>
+                        <td class="icon-cell">
+                            <a ng-href="{{ snap.pdf.url }}" target="_blank"
+                                    ng-click="pr.visitSnapshot(snap)">
+                                <span class="fa fa-file-pdf-o icon pdf" ps-tooltip="'View PDF'"></span>
+                            </a>
+                        </td>
+                        <td class="icon-cell">
+                            <a href ng-click="pr.deleteSnapshot(snap)"
+                                    ps-tooltip="'Delete'">
+                                <span class="fa fa-trash icon danger"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!--Outline-->
+            <div class="content-right-sidebar-col">
+                <button type="button" class="btn btn-primary pull-right"
+                        ng-click="pr.createSnapshot()"
+                        ng-disabled="pr.creating">
+                    <span ng-if="!pr.creating">Generate</span>
+                    <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>
+                </button>
+
+                <h4>Presentation Outline</h4>
+
+                <form class="present-form">
+                    <!--Overview-->
+                    <div class="form-group present-item" ng-class="{include: pr.data.overview.include}">
+                        <label class="checkbox-label">
+                            <input type="checkbox" ng-model="pr.data.overview.include"
+                                    ng-change="pr.patchProject()">
+                            <span class="underlined">Overview</span>
+                        </label>
+                        <textarea id="pres-overview" class="form-control resize-vert" rows="3"
+                                ng-model="pr.data.overview.overviewText"
+                                ps-focus-on="pr.data.overview.include"
+                                ng-blur="pr.patchProject()"></textarea>
+                    </div>
+                    <!--Requirements-->
+                    <div class="form-group present-item" ng-class="{include: pr.data.requirements.include}">
+                        <label class="checkbox-label">
+                            <input type="checkbox" ng-model="pr.data.requirements.include"
+                                    ng-change="pr.patchProject()">
+                            <span class="underlined">Mandatory requirements</span>
+                        </label>
+
+                        <p class="hint-text text-sm">Mandatory Requirements, taken from the Requirements section.</p>
+                    </div>
+                    <!--Products-->
+                    <div class="form-group present-item" ng-class="{include: pr.data.products.include}">
+                        <label class="checkbox-label">
+                            <input type="checkbox" ng-model="pr.data.products.include"
+                                    ng-change="pr.patchProject()">
+                            <span class="underlined">Products</span>
+                        </label>
+
+                        <p class="hint-text text-sm">Products under evaluation, taken from the Products section.</p>
+                    </div>
+                    <!--Table-->
+                    <div class="form-group present-item" ng-class="{include: pr.data.table.include}">
+                        <label class="checkbox-label">
+                            <input type="checkbox" ng-model="pr.data.table.include"
+                                    ng-change="pr.patchProject()">
+                            <span class="underlined">Decision Table</span>
+                        </label>
+
+                        <p class="hint-text text-sm">Several slides presenting how the products compared on different topics and overall decision.</p>
+                    </div>
+                    <!--Summary-->
+                    <div class="form-group present-item" ng-class="{include: pr.data.notes.include}">
+                        <label class="checkbox-label">
+                            <input type="checkbox" ng-model="pr.data.notes.include"
+                                    ng-change="pr.patchProject()">
+                            <span class="underlined">Summary and Recommendations</span>
+                        </label>
+
+                        <label for="pres-summary" class="hint-label text-sm">Summary</label>
+                        <textarea id="pres-summary" class="form-control resize-vert" rows="3"
+                                ng-model="pr.data.notes.summaryText"
+                                ng-blur="pr.patchProject()"></textarea>
+
+                        <label for="pres-recommend" class="hint-label text-sm">Recommendations</label>
+                        <textarea id="pres-recommend" class="form-control resize-vert" rows="3"
+                                ng-model="pr.data.notes.recommendationText"
+                                ng-blur="pr.patchProject()"></textarea>
+                    </div>
+                    <!--Logo-->
+                    <div class="form-group present-item clearfix" ng-class="{include: pr.data.logo.include}">
+                        <label class="checkbox-label">
+                            <input type="checkbox" ng-model="pr.data.logo.include"
+                                    ng-change="pr.patchProject()">
+                            <span class="underlined">Logo</span>
+                        </label>
+
+                        <span class="fa fa-check upload-ok pull-right"
+                                ng-if="pr.uploadProgress.success"></span>
+
+                        <img width="48"
+                                src="{{ pr.logoUrl }}"
+                                ngf-src="pr.logoFile"
+                                ngf-default-src="'//placehold.it/48x48'"
+                                ngf-accept="'image/*'">
+
+                        <input type="file" accept="image/*" id="pres-logo"
+                                ngf-select
+                                ngf-multiple="false"
+                                ngf-reset-on-click="false"
+                                ng-model="pr.logoFile"
+                                ng-click="pr.onFileSelectClick()">
+
+                        <ps-progress class="upload-progress"
+                                value="pr.uploadProgress.value"
+                                ng-show="pr.uploadProgress.show"></ps-progress>
+                    </div>
+
+                    <button type="button" class="btn btn-primary pull-right"
+                            ng-click="pr.createSnapshot()"
+                            ng-disabled="pr.creating">
+                        <span ng-if="!pr.creating">Generate</span>
+                        <span ng-if="pr.creating"><span class="fa fa-spinner fa-spin"></span> Generating</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!--Done link-->
+        <!--<a class="btn btn-primary pull-right" ui-sref="^.decisions">Done</a>-->
+    </div>
+</div>

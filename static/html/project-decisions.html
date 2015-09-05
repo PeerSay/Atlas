@@ -5,23 +5,23 @@
         <a class="btn btn-default export header-btn"
                 ng-mousedown="csv.generate()"
                 ng-href="{{ csv.link() }}"
-                download="export.csv"
+                download="{{ table.project.title }}.csv"
                 ps-export-csv="csv"
                 data-get-csv="table.getCsv()"
-                ng-disabled="!view.rows.length">
+                ng-disabled="table.view.empty">
             <span class="fa fa-file-excel-o"></span>
             Export
         </a>
         <!--Title-->
-        <h3 class="text-center">
+        <h2 class="text-center">
             <span class="fa fa-graduation-cap"></span>
             Decision Table
-        </h3>
+        </h2>
     </div>
     <div class="panel-body">
         <!--Load indicator-->
         <div class="row text-center" ng-if="table.loading">
-            <button type="button" class="btn btn-xxs btn-default load-more loading" disabled>
+            <button type="button" class="btn btn-xxs btn-default" disabled>
                 <span class="fa fa-refresh fa-spin"></span>
             </button>
         </div>
@@ -29,13 +29,8 @@
         <!--MainTable-->
         <div class="row">
             <div class="col-xs-12 page-spacer">
-                <div class="table-border" ng-include="'/html/table-view.html'"
-                        ng-init="view = table.tableView"></div>
+                <div class="table-border" ng-include="'/html/table-view.html'"></div>
             </div>
         </div>
-
-        <!--Done link - not needed in the Table-->
-        <!--a class="btn btn-primary pull-right" ui-sref="^.dashboard"
-                ng-if="!table.loading">Take me to the Dashboard</a-->
     </div>
 </div>

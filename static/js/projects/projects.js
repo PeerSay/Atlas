@@ -3,15 +3,15 @@
 angular.module('PeerSay')
     .factory('Projects', Projects);
 
-Projects.$inject = ['Backend', 'User', 'Util', '$q', 'Storage', '$timeout'];
-function Projects(Backend, User, _, $q, Storage, $timeout) {
+Projects.$inject = ['Backend', 'User', 'Util'];
+function Projects(Backend, User, _) {
     var P = {};
 
     // List
     P.projects = [];
     P.create = {
         showDlg: false,
-        title: ''
+        progress: false
     };
     P.toggleCreateDlg = toggleCreateDlg;
     P.getProjectStubs = getProjectStubs;
@@ -19,14 +19,10 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     P.removeProject = removeProject;
     // Details
     P.current = {
-        project: {
-            title: ''
-        },
-        table: []
+        project: {}
     };
     // Read
     P.readProject = readProject;
-    P.readProjectTable = readProjectTable;
     P.readPublicCategories = readPublicCategories;
     P.readPublicProducts = readPublicProducts;
     P.readPublicRequirements = readPublicRequirements;
@@ -34,7 +30,9 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     // Patch
     P.patcher = Patcher();
     P.patchProject = patchProject;
-
+    // Presentations
+    P.createPresentationSnapshot = createPresentationSnapshot;
+    P.deletePresentationSnapshot = deletePresentationSnapshot;
 
     // Project list
     //
@@ -48,15 +46,16 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         });
     }
 
-    function createProject() {
-        return Backend.create(['projects'], {title: P.create.title})
+    function createProject(data) {
+        P.create.progress = true;
+        return Backend.create(['projects'], data)
             .then(function (data) {
                 P.projects.push(data.result);
                 return data.result;
             })
             .finally(function () {
                 P.create.showDlg = false;
-                P.create.title = '';
+                P.create.progress = false;
             });
     }
 
@@ -104,29 +103,6 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         });
     }
 
-    // Table
-    //
-    //@formatter:off
-    /* Format: [{
-        "reqId": "",
-        "name": "",
-        "weight": 1,
-        "popularity": 0,
-        "products": [{
-            "prodId": "",
-            "name": "",
-            "input": "",
-            "grade": 0,
-            "popularity": 0
-        }]
-    }]*/
-    //@formatter:on
-    function readProjectTable(id) {
-        return Backend.read(['projects', id, 'table']).then(function (data) {
-            return (P.current.table = data.result);
-        });
-    }
-
     //Requirements / Topics
     //
     function readPublicTopics() {
@@ -138,7 +114,7 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
     function readPublicRequirements(params) {
         return Backend.read(['public', 'requirements'], null, params).then(function (data) {
             return {requirements: data.result};
-        })
+        });
     }
 
     // Products / Categories
@@ -174,16 +150,11 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
             return Backend.patch(['projects', id], data);
         }
 
-        function invalidateCache(id, data) {
-            var patch = data[0]; // XXX - only first!
-
-            if (patch.path === '/title') {
-                // Project title is changed => invalidate Project stubs to get new titles
+        function invalidateCache(id, patches) {
+            var categoryChanged = _.findWhere(patches, {path: '/selectedCategory'});
+            if (categoryChanged) {
+                // Project category/title is changed => invalidate Project stubs to get new titles
                 Backend.invalidateCache(['user']);
-            }
-
-            if (/\/products|\/requirements/.test(patch.path)) {
-                Backend.invalidateCache(['projects', id, 'table']);
             }
 
             Backend.invalidateCache(['projects', id]);
@@ -192,6 +163,23 @@ function Projects(Backend, User, _, $q, Storage, $timeout) {
         return P;
     }
 
+    // Presentations
+    //
+    function createPresentationSnapshot(projectId, data) {
+        Backend.invalidateCache(['projects', projectId, 'presentation']);
+        return Backend.create(['projects', projectId, 'presentation', 'snapshots'], data).then(function (data) {
+            return data.result;
+        });
+    }
+
+    function deletePresentationSnapshot(projectId, snapId) {
+        Backend.invalidateCache(['projects', projectId, 'presentation']);
+        return Backend.remove(['projects', projectId, 'presentation', 'snapshots', snapId]).then(function (data) {
+            return data.result;
+        });
+    }
+
+    // Misc
     function getIdxById(id) {
         var prj = _.findWhere(P.projects, {id: id});
         var idx = P.projects.indexOf(prj);

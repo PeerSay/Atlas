@@ -2,11 +2,13 @@
 var _ = require('lodash');
 var express = require('express');
 var request = require('supertest');
+var path = require('path');
 
+global.appRoot = path.resolve(__dirname + '/..'); // it is loaded first so this is side-effect for all tests
 var app = express();
 
 // --> Under test
-require('../app/api-validate')(app).setupRoutes();
+require(appRoot + '/app/web/api-validate')(app).setupRoutes();
 
 
 describe('REST API - Validation', function () {
@@ -35,7 +37,7 @@ describe('REST API - Validation', function () {
                 // <-- no send
                 .set('Accept', 'application/json')
                 .expect(400)
-                .expect({error: 'Bad request: not JSON'}, done);
+                .expect({error: 'Bad request: not JSON body'}, done);
         });
 
         it('should return 400 on PUT without body', function (done) {
@@ -44,7 +46,7 @@ describe('REST API - Validation', function () {
                 // <-- no send
                 .set('Accept', 'application/json')
                 .expect(400)
-                .expect({error: 'Bad request: not JSON'}, done);
+                .expect({error: 'Bad request: not JSON body'}, done);
         });
 
         it('should return 400 on POST with non-json body', function (done) {
@@ -53,7 +55,7 @@ describe('REST API - Validation', function () {
                 .send('test-str') // <--
                 .set('Accept', 'application/json')
                 .expect(400)
-                .expect({error: 'Bad request: not JSON'}, done);
+                .expect({error: 'Bad request: not JSON body'}, done);
         });
 
         it('should return 400 on PUT with non-json body', function (done) {
@@ -62,7 +64,7 @@ describe('REST API - Validation', function () {
                 .send('test-str') // <--
                 .set('Accept', 'application/json')
                 .expect(400)
-                .expect({error: 'Bad request: not JSON'}, done);
+                .expect({error: 'Bad request: not JSON body'}, done);
         });
 
         it('should return 400 on PATCH with non-json body', function (done) {
@@ -71,7 +73,7 @@ describe('REST API - Validation', function () {
                 .send('test-str') // <--
                 .set('Accept', 'application/json')
                 .expect(400)
-                .expect({error: 'Bad request: not JSON'}, done);
+                .expect({error: 'Bad request: not JSON body'}, done);
         });
 
         it('should return 404 on wrong api path', function (done) {

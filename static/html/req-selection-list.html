@@ -2,28 +2,29 @@
 <div class="panel-group selection-list" id="accordion" role="tablist">
     <!--Topic list-->
     <div class="panel panel-default" ng-repeat="group in cm.groups.list | orderBy:'-popularity'"
-            ng-if="cm.groups.isVisible(group)"
-            ng-class="{visible: group.open}">
+            ng-if="group.q.visible()"
+            ng-class="{expanded: group.open, 'no-details': !group.data.description}">
         <!--Topic-->
         <div class="panel-heading topic-widget clearfix" role="tab"
                 id="heading-{{:: group.id }}"
                 data-target="#{{:: group.id }}"
                 data-toggle="collapse">
+            <!--Caret-->
+            <span class="fa fa-chevron-right caret-icon"></span>
             <!--Add button-->
-            <button type="button" class="btn btn-default pull-right" id="edit-{{:: group.id }}"
+            <button type="button" class="btn btn-default" id="edit-{{:: group.id }}"
                     ng-show="group.open">
-                <span class="fa fa-plus-circle"></span> New
+                <span class="fa fa-plus"></span> New
             </button>
             <!--Title-->
             <h4 class="panel-title topic-header">
-                <span class="fa fa-caret-right caret-icon"></span>
-                {{:: group.name || '(no topic)' }}
+                {{:: group.data.name || '(no topic)' }}
                 <span class="label label-primary"
-                        ng-if="group.sel.number()">{{ group.sel.number() }}</span>
+                        ng-if="group.q.selectedNum()">{{ group.q.selectedNum() }}</span>
             </h4>
             <!--Sub-title-->
             <div class="topic-details">
-                <span>{{:: group.description }}</span>
+                <span>{{:: group.data.description }}</span>
             </div>
         </div>
         <!--Collapsible content-->

@@ -10,6 +10,7 @@ var path = require('path');
 module.exports = {
     web: {
         port: 5000,
+        server_url: '//localhost:5000',
         static_dir: path.join(__dirname, '.', 'static')
     },
     db: {
@@ -18,5 +19,11 @@ module.exports = {
     },
     email: {
         enable: false
+    },
+    s3: {
+        enable: false,
+        bucket_name: '',
+        aws_access_key: '',
+        aws_secret_key: ''
     }
 };

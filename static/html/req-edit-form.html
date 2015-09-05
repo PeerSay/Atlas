@@ -2,7 +2,7 @@
         ng-class="ctl.class"
         ng-if="ctl.visible">
     <!--Topic-->
-    <div class="form-group form-group-sm">
+    <div class="form-group">
         <label class="label-col control-label text-left-important">Topic:</label>
         <div class="control-col">
             <ui-select ng-model="ctl.topic.selected" theme="bootstrap"
@@ -15,14 +15,14 @@
                     {{ $select.selected.name }}
                 </ui-select-match>
                 <ui-select-choices
-                        repeat="group in ctl.groups().list | filter:$select.search">
+                        repeat="group in ctl.topic.list() | filter:$select.search | orderBy:'-popularity'">
                     <span ng-bind-html="group.name | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>
         </div>
     </div>
     <!--Name-->
-    <div class="form-group form-group-sm">
+    <div class="form-group">
         <label for="req-name" class="label-col control-label text-left-important">Name:</label>
         <div class="control-col">
             <input type="text" id="req-name" class="form-control" placeholder="Name"
@@ -33,7 +33,7 @@
         </div>
     </div>
     <!--Description-->
-    <div class="form-group form-group-sm">
+    <div class="form-group">
         <label for="req-descr" class="label-col control-label text-left-important">Description:</label>
         <div class="control-col">
             <input type="text" id="req-descr" class="form-control" placeholder="Description"
@@ -42,20 +42,20 @@
         </div>
     </div>
     <!--Mandatory-->
-    <div class="form-group form-group-sm">
+    <div class="form-group">
         <div class="label-col"></div>
         <div class="control-col">
-            <label class="checkbox-ext no-select" ng-class="{checked: ctl.model.mandatory}">
+            <label class="no-select" ng-class="{checked: ctl.model.mandatory}">
                 <input type="checkbox" ng-model="ctl.model.mandatory">
                 Mandatory
             </label>
         </div>
     </div>
     <!--Buttons-->
-    <div class="form-group form-group-sm">
+    <div class="form-group">
         <div class="label-col"></div>
         <div class="control-col">
-            <button type="button" class="btn btn-sm btn-primary"
+            <button type="button" class="btn btn-primary"
                     ng-click="ctl.save()"
                     ng-disabled="ctl.editForm.$invalid">Save
             </button>

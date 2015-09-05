@@ -3,32 +3,33 @@
 angular.module('PeerSay')
     .controller('ProjectListCtrl', ProjectListCtrl);
 
-ProjectListCtrl.$inject = ['$state', '$timeout', 'Projects'];
-function ProjectListCtrl($state, $timeout, Projects) {
+ProjectListCtrl.$inject = ['$state', 'Projects'];
+function ProjectListCtrl($state, Projects) {
     var m = this;
 
     m.projects = [];
+    m.newProject = {
+        category: '',
+        customCategory: false
+    };
     m.create = Projects.create;
-    m.creating = false;
     m.toggleCreateDlg = Projects.toggleCreateDlg.bind(Projects);
-    m.removeProject = removeProject;
     m.createProject = createProject;
+    m.removeProject = removeProject;
     m.editProject = editProject;
 
-    Projects.getProjectStubs()
-        .then(function (projects) {
+    activate();
+
+    function activate() {
+        Projects.getProjectStubs().then(function (projects) {
             m.projects = projects;
         });
+    }
 
     function createProject() {
-        m.creating = true;
-        Projects.createProject()
-            .then(function (prj) {
-                editProject(prj.id);
-            })
-            .finally(function () {
-                m.creating = false;
-            });
+        Projects.createProject(m.newProject).then(function (prj) {
+            editProject(prj.id);
+        });
     }
 
     function editProject(id) {

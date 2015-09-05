@@ -111,7 +111,7 @@ function Backend($rootScope, $http, $q, $timeout, Notify, _) {
                 deferred.resolve(res);
             })
             .error(function (data, status/*, headers, config*/) {
-                deferred.reject({status: status, msg: data.error});
+                deferred.reject({status: status, msg: data ? data.error : status});
             });
     }
 

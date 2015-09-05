@@ -1,6 +1,6 @@
 <div class="container-fluid" ng-controller="AuthCtrl as m">
     <div class="row">
-        <div class="col-sm-6 col-sm-offset-3 col-lg-4 col-lg-offset-4">
+        <div class="auth-panel-col">
             <div class="panel panel-default auth">
                 <div class="panel-heading">
                     <h2 class="panel-title">Login</h2>
@@ -8,8 +8,8 @@
                 <ul class="list-group">
                     <!--LinkedIn-->
                     <li class="list-group-item">
-                        <h4 class="text-center">Have LinkedIn account?</h4>
-                        <a href="/auth/linkedin" target="_self" class="btn btn-lg full-width btn-social btn-linkedin page-spacer">
+                        <h3 class="text-center">Have LinkedIn account?</h3>
+                        <a href="/auth/linkedin" target="_self" class="btn full-width btn-social btn-linkedin page-spacer">
                             <span class="fa fa-linkedin"></span>
                             Login with LinkedIn
                         </a>
@@ -86,7 +86,7 @@
                                     </div>
 
                                     <div class="col-sm-4">
-                                        <button type="submit" class="btn btn-lg btn-primary pull-right"
+                                        <button type="submit" class="btn btn-primary pull-right"
                                                 ng-disabled="m.form.$invalid">
                                             Login
                                         </button>

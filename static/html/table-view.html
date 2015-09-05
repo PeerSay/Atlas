@@ -1,90 +1,112 @@
 <div ng-form="form" class="table-responsive">
-    <table class="table" id="decision-table"
-            ng-table="view.tableParams"
-            >
+    <table class="table ps-table" id="decision-table">
         <!--Header-->
-        <thead ng-if="view.rows.length">
+        <thead ng-if="!table.view.empty">
         <tr>
-            <th ng-repeat="col in view.columns" ng-class=":: col.header.class">
-                <div>{{:: col.header.label }}</div>
+            <th ng-repeat="th in table.view.header" ng-class=":: th().class">
+                <div>{{:: th().label }}</div>
             </th>
         </tr>
         </thead>
-        <tbody ng-repeat="group in $groups"
-                ng-init="groupObj = view.groups.get(group.value); group.$hideRows = true;">
+        <!--Groups-->
+        <tbody ng-if="!table.view.empty" ng-repeat="group in table.view.groups" ng-init="groupIdx = $index">
         <!--Group row-->
-        <tr class="ng-table-group"
-                ng-show="group.value"
-                ng-click="group.$hideRows = !group.$hideRows; $event.stopPropagation()">
-            <td colspan="{{ group.$hideRows && 2 || view.columns.length }}">
-                <a href tabindex="-1">
-                    <span class="fa fa-fw" ng-class="{ 'fa-caret-right': group.$hideRows, 'fa-caret-down': !group.$hideRows }"></span>
-                    {{:: group.value }}
-                </a>
+        <tr class="table-group"
+                ng-class="{expanded: group().expanded.on}"
+                ng-click="group().expanded.toggle();">
+            <td colspan="2" class="abs-container">
+                <a href class="group-name no-outline">
+                    <span class="fa fa-chevron-right caret-icon"></span>
+                    {{:: group('name')().label }}</a>
             </td>
-            <!--Group weight-->
-            <td class="strong center" ng-if="group.$hideRows">{{ groupObj.weight() }}%</td>
+            <td class="strong center"
+                    ng-click="$event.stopPropagation()">
+                <div ps-slider-popover container="td" uid="slider-{{:: groupIdx }}"
+                        showIf="group">
+                    <a href tabindex="-1" class="no-outline"
+                            data-toggle="popover"
+                            data-placement="right"
+                            title="Adjust topic weights">
+                        {{ table.view.topicWeights[groupIdx].weight * 100 | number:0 }}%
+                    </a>
+
+                    <form class="slider-content page-spacer" ng-cloak>
+                        <slider class="no-select">
+                            <slider-range model="val.weight" ng-repeat="val in table.view.topicWeights track by val.id"
+                                    ng-class="{'current-range': groupIdx === $index}">
+                                <div class="slider-handle">&nbsp;&nbsp;</div>
+                                <div class="slider-label">{{ val.weight * 100 | number:0 }}%</div>
+                            </slider-range>
+                        </slider>
+                    </form>
+                </div>
+            </td>
             <!--Group grades-->
-            <td colspan="2" class="strong text-right align-fix"
-                    ng-if="group.$hideRows"
-                    ng-repeat="groupCol in groupObj.cols">{{ groupCol.grade() | number:1 }}</td>
+            <td ng-repeat-start="groupGrade in group().skip(1)"></td>
+            <td ng-repeat-end class="strong grade">
+                {{ groupGrade().value() }}
+            </td>
         </tr>
         <!--Rows & cells-->
-        <tr ng-hide="group.$hideRows" ng-repeat="row in group.data">
-            <td class="cell" ng-repeat="cell in row.cells"
-                    ng-class="[cell.type, cell.class]"
-                    ng-class="{'winner' : cell.model.max()}"
+        <tr ng-show="group().expanded.on"
+                ng-repeat="row in table.view.rows | filter : table.view.filerGroupRowsFn(group('name')().label)">
+            <td class="cell" ng-repeat="cell in row().list"
+                    ng-class="[cell().type, cell().class].concat(cell().maxInRow() && 'winner' || '')"
                     ng-click="focusInputEl(cell)">
+
                 <!--Label cell-->
-                <div ng-if=":: cell.type === 'static' ">{{:: cell.label }}</div>
+                <div ng-if=":: cell().type === 'static' ">{{:: cell().label }}</div>
+                <!--Icon cell (mandatory chevron)-->
+                <div ng-if=":: cell().type === 'icon' ">
+                    <span class="fa {{:: cell().label }}"></span>
+                </div>
                 <!--Text cell-->
-                <div ng-if=":: cell.type === 'text' ">
+                <div ng-if=":: cell().type === 'text' ">
                     <textarea class="cell-input noresize"
-                            ng-model="cell.model.value"
-                            ps-table-input="cell"
+                            ng-model="cell().model.value"
+                            ps-table-input="cell()" ctrl="table"
                             msd-elastic></textarea>
                 </div>
                 <!--Number cell-->
-                <div ng-if=":: cell.type === 'number' ">
+                <div ng-if=":: cell().type === 'number' ">
                     <input type="number" class="cell-input center"
-                            min="0" max="{{:: cell.max }}"
-                            ng-model="cell.model.value"
-                            ps-table-input="cell"
+                            min="0" max="{{:: cell().max }}"
+                            ng-model="cell().model.value"
+                            ps-table-input="cell()" ctrl="table"
                             ps-input-number
-                            ps-tooltip="cell.model.tooltip()"
+                            ps-input-nullable
+                            ps-tooltip="cell().tooltip()"
+                            required
                             >
-                </div>
-                <!--Mandatory icon cell-->
-                <div ng-if=":: cell.type === 'icon' ">
-                    <span class="fa {{:: cell.label }}"></span>
                 </div>
             </td>
         </tr>
         </tbody>
         <!--Footer-->
         <tfoot>
-        <tr ng-if="view.rows.length">
-            <th class="abs-container {{:: col.footer.class }}" ng-repeat="col in view.columns"
-                    ng-class="{'winner' : col.footer.model.max()}">
+        <tr ng-if="!table.view.empty">
+            <th class="abs-container {{:: th().class }}" ng-repeat="th in table.view.footer"
+                    ng-class="{'winner': th().maxTotal()}">
                 <!--Label cell-->
-                <div ng-if=":: col.footer.type === 'static' ">{{:: col.footer.label }}</div>
+                <div ng-if=":: th().type === 'static' ">{{:: th().label }}</div>
                 <!--Func cell-->
-                <div ng-if=":: col.footer.type === 'func' ">
-                    {{ col.footer.model.value() }}
+                <div ng-if=":: th().type === 'func' ">
+                    {{ th().value() }}
                 </div>
                 <!--Winner cup-->
-                <span class="fa fa-trophy winner-icon" ng-if="col.footer.model.max()"></span>
+                <span class="fa fa-trophy winner-icon" ng-if="th().maxTotal()"></span>
             </th>
         </tr>
         <!--Empty table row -->
         <tr class="empty-table-content"
-                ng-if="!view.ctrl.loading && !view.rows.length">
+                ng-if="!table.loading && table.view.empty">
             <td colspan="6" class="text-center">
                 <span class="fa fa-info-circle"></span>
                 <h4>Bummer, there's nothing to compare yet.</h4>
+
                 <h3>
                     Please add
-                    <a ui-sref="^.requirements">criteria</a> and
+                    <a ui-sref="^.requirements">Requirements</a> and
                     <a ui-sref="^.products">products</a>.
                 </h3>
             </td>

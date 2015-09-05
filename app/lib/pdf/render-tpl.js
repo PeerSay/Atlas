@@ -9,10 +9,10 @@ swig.setFilter('percent', function (input) {
     return Math.round(input * 100);
 });
 
-swig.setFilter('skip_group', function (input, num) {
+swig.setFilter('skip_list', function (input, num) {
     // Used to prevent exception in swig on parsing the following expression in tpl,
     // which is apparently a bug in swig
-    return input().skip(Number(num));
+    return input.slice(Number(num));
 });
 
 var tableModel = require(appRoot + '/static/js/projects/table-model');
@@ -120,10 +120,10 @@ function buildModel(reqs, topicWeights) {
         T.footer()
             .push('name', {label: 'Overall Grade'})
             .push('weight', {label: '100%', 'class': 'center'});
+        var groupsRange = T.range('groups', {multi: true});
 
         reqs.forEach(function (req, i) {
             // Predefine ranges
-            var groupsRange = T.range('groups', {multi: true});
             var groupRange = groupsRange(req.topic, {topic: req.topic});
             var groupMaxRange = T.range('group-max-' + req.topic)
                 .aggregate({
@@ -152,7 +152,7 @@ function buildModel(reqs, topicWeights) {
             // Group row
             var groupWeight = _.findWhere(topicWeights, {topic: req.topic}).weight;
             groupRange
-                .push('name', {label: req.topic})
+                .push('name', {value: req.topic})
                 .push('weight', {value: groupWeight});
 
             // Req row
@@ -172,7 +172,11 @@ function buildModel(reqs, topicWeights) {
                 var prodGradeKey = 'prod-grade-' + j;
 
                 T.header()
-                    .push(prodGradeKey, {label: prod.name, 'class': 'center grade'});
+                    .push(prodGradeKey, {
+                        label: prod.name,
+                        product: prod.name,
+                        'class': 'center grade'
+                    });
 
                 // Prod grades
                 var prodGradeValue = {value: prod.grade};
@@ -181,6 +185,7 @@ function buildModel(reqs, topicWeights) {
                 rowRange
                     .push(prodGradeKey, {
                         value: gradeStr,
+                        product: prod.name,
                         maxInRow: maxInRangeFn(rowMaxRange, prodGradeValue)
                     });
 
@@ -192,13 +197,15 @@ function buildModel(reqs, topicWeights) {
                 };
                 groupMaxRange.push('', groupGradeValue);
                 groupGradeValue.max = maxInRangeFn(groupMaxRange, groupGradeValue);
+                groupGradeValue.product = prod.name;
                 groupRange
                     .push(prodGradeKey, groupGradeValue);
 
                 // Footer - totals
                 if (i === 0) { // during first run only!
                     maxTotalsRange.push(prodGradeKey, {
-                        value: totalGradeFn(groupsRange, topicWeights, prodGradeKey)
+                        value: totalGradeFn(groupsRange, topicWeights, prodGradeKey),
+                        product: prod.name
                     });
                 }
 
@@ -206,6 +213,7 @@ function buildModel(reqs, topicWeights) {
                     .push(prodGradeKey, {
                         value: totalGradeGetFn(maxTotalsRange, prodGradeKey),
                         maxTotal: maxTotalFn(maxTotalsRange, prodGradeKey),
+                        product: prod.name,
                         'class': 'center'
                     });
             });
@@ -284,9 +292,11 @@ function maxTotalFn(maxTotalsRange, prodKey) {
 //
 function getTopicsTable(model) {
     var res = {};
-    res.header = model.header().list;
-    res.footer = model.footer().list;
-    res.groups = model.groups && model.groups().list;
+    res.header = sortLimitProdColumns(model.header().list, model);
+    res.footer = sortLimitProdColumns(model.footer().list, model);
+    res.groups = _.map(model.groups().list, function (group) {
+        return sortLimitProdColumns(group().list, model);
+    });
 
     return res;
 }
@@ -294,17 +304,40 @@ function getTopicsTable(model) {
 
 function getSingleTopicTable(model, topic) {
     var res = {};
-    res.header = model.header().list;
-
     var topicGroup = _.find(model.groups().list, function (group) {
             return (group().topic === topic);
     });
-    res.group = topicGroup;
-    res.rows = model.rows().list.filter(function (row) {
+    var groupRows = model.rows().list.filter(function (row) {
         return (row().topic === topic);
+    });
+    res.header = sortLimitProdColumns(model.header().list, model);
+    res.group = sortLimitProdColumns(topicGroup().list, model);
+    res.rows = _.map(groupRows, function (row) {
+        return sortLimitProdColumns(row().list, model);
     });
 
     return res;
+}
+
+function sortLimitProdColumns(list, model) {
+    var top3List = model['total-max']().list.map(function (it) {
+        return {
+            value: it().value(),
+            product: it().product
+        };
+    }).sort(function (a, b) {
+        return b.value - a.value;
+    }).slice(0, 3);
+
+    var head = list.slice(0, 2); // name, weight
+    var tail = [];
+    top3List.forEach(function (it) {
+        var next = _.find(list, function (listItem) {
+            return (listItem().product === it.product);
+        });
+        tail.push(next);
+    });
+    return head.concat(tail);
 }
 
 function findSuperTopic(topicWeights) {

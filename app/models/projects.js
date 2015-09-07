@@ -90,7 +90,7 @@ var projectSchema = new Schema({
     // Table
     //
     topicWeights: [{
-        topic: {type: String, required: true},
+        topic: {type: String},
         weight: {type: Number, min: 0, max: 1, default: 0.5}
     }],
     table: [{

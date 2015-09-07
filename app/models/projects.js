@@ -239,7 +239,7 @@ projectSchema.pre('save', function ensureTopicWeights(next) {
 
 function buildNewTopicWeights(requirements) {
     var topics = requirements.reduce(function (acc, req) {
-        var topicName = req.topic || 'No name'; // XXX - OK?
+        var topicName = req.topic || '';
         if (!acc.idx[topicName]) {
             acc.idx[topicName] = 1;
             acc.list.push(topicName); // Order matters!

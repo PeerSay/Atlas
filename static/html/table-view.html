@@ -17,7 +17,7 @@
             <td colspan="2" class="abs-container">
                 <a href class="group-name no-outline">
                     <span class="fa fa-chevron-right caret-icon"></span>
-                    {{:: group('name')().label }}</a>
+                    {{:: group('name')().label || 'No topic'}}</a>
             </td>
             <td class="strong center"
                     ng-click="$event.stopPropagation()">

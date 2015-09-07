@@ -1,137 +1,87 @@
 <div class="container-fluid" ng-controller="ProjectDetailsCtrl as cm">
-    <!--Title-->
-    <div class="title-row">
-        <div class="title-col">
-            <h3 class="page-title toggle-edit text-center">
-                <a class="toggle-value"
-                        ui-sref=".essentials({edit: 'reasons'})"
-                        data-placement="right"
-                        ps-tooltip="cm.project.reasons">
-                    {{ cm.project.title }}
-                    <span class="fa fa-edit hover-edit"></span>
-                </a>
-            </h3>
-        </div>
-    </div>
-
-    <div class="content-row">
-        <!--Left side-bar-->
-        <div class="sidebar-col">
-            <div class="row side-bar" id="js-sidebar-affix">
-                <!--Overview-->
-                <div class="sidebar-section-col">
-                    <h4 class="toggle-edit">Overview</h4>
-                    <ul class="sub-menu">
-                        <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
-                        <li class="menu-item" ui-sref-active="active"><a ui-sref=".decisions">Decision Table</a></li>
-                        <li class="menu-item" ui-sref-active="active"><a ui-sref=".notes">Notes</a></li>
-                    </ul>
-                    <hr class="hidden-xs">
-                    <div class="page-spacer visible-xs-block"></div>
-                </div>
-
-                <!--Essentials-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".essentials({})">Essentials</a>
-                    </h4>
-                    <ul>
-                        <!--Budget-->
-                        <li ng-if="cm.project.budget.amount">
-                            <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: 'budget'})"
-                                    ps-tooltip="cm.sidebar.amountText()">
-                                <span ng-bind-html="cm.sidebar.amountHtml()"></span>
-                            </a>
-                        </li>
-                        <!--Resources-->
-                        <li ng-if="cm.project.notes.resources">
-                            <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: 'resources'})"
-                                    ps-tooltip="cm.project.notes.resources">
-                                {{ cm.project.notes.resources }}
-                            </a>
-                        </li>
-                        <!--Time frame-->
-                        <li ng-if="cm.project.time.duration || cm.project.time.startDate">
-                            <a class="side-text ellipsis"
-                                    ui-sref=".essentials({edit: cm.project.time.duration && 'duration' || 'startDate'})"
-                                    ps-tooltip="cm.sidebar.dateDurationText()">
-                                {{ cm.sidebar.dateDurationText() }}
-                            </a>
-                        </li>
-                    </ul>
-                    <hr class="hidden-xs">
-                    <div class="page-spacer visible-xs-block"></div>
-                </div>
-
-                <div class="clearfix visible-xs-block"></div>
-
-                <!--Products-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".products">
-                            Products
-                            <div class="label label-primary"
-                                    ng-if="(cm.products | filter:{selected: true}).length > 0"
-                                    >{{ (cm.products | filter:{selected: true}).length }}</div>
-                        </a>
-                    </h4>
-                    <ul class="animate-ease-right">
-                        <li class="list-item"
-                                ng-repeat="product in cm.products | filter:{selected: true} | orderBy:'-popularity' | limitTo:5 track by product._id">
-                            {{:: product.name }}
-                        </li>
-                    </ul>
-                    <hr class="hidden-xs">
-                </div>
-
-                <!--Criteria-->
-                <div class="sidebar-section-col">
-                    <h4 class="menu-item" ui-sref-active="active">
-                        <a class="toggle-value" ui-sref=".requirements">
-                            Criteria
-                            <div class="label label-primary"
-                                    ng-if="(cm.requirements | filter:{selected: true}).length > 0"
-                                    >{{ (cm.requirements | filter:{selected: true}).length }}</div>
-                        </a>
-                    </h4>
-                    <ul class="animate-ease-right">
-                        <li class="list-item"
-                                ng-repeat="req in cm.requirements | filter:{selected: true} | orderBy:'-popularity' | limitTo:10 track by req._id">
-                            {{ req.name }}
-                        </li>
-                    </ul>
+    <div class="row">
+        <div class="container-col"
+                ng-class="{'no-menu': cm.noMenu.on, 'full-screen': cm.fullScreen.on}">
+            <!--Title-->
+            <div class=row>
+                <div class="col-xs-12">
+                    <h1 class="page-title text-center">
+                        {{ cm.project.selectedCategory || '(None)' }}
+                    </h1>
                 </div>
             </div>
-        </div>
-
-        <!--Center Col: content-->
-        <div class="content-container-col">
-            <div class="row">
-                <div class="content-col" ng-class="{'full': cm.fullscreen.on}">
+            <!--Content-->
+            <div class=row>
+                <div class="content-col">
                     <!--Content panel-->
                     <div ui-view></div>
 
                     <!--Full screen toggle-->
                     <div class="fullscreen-toggle"
-                            ng-click="cm.fullscreen.toggle()">
+                            ng-click="cm.fullScreen.toggle()">
                         <span class="fa fa-chevron-right"></span>
+                    </div>
+                </div>
+            </div>
+            <!--Side-bar-->
+            <div class="sidebar-container">
+                <!--Toggler-->
+                <div class="sidebar-toggler">
+                    <button type="button" ng-click="cm.noMenu.toggle()">
+                        <span class="fa fa-caret-left"></span>
+                    </button>
+                </div>
+                <div class="sidebar-scroll">
+                    <!--Menu-->
+                    <div class="sidebar-menu">
+                        <!--Overview-->
+                        <div class="sidebar-menu-section">
+                            <h3>Overview</h3>
+                            <ul class="sub-menu">
+                                <li class="menu-item" ui-sref-active="active"><a ui-sref=".dashboard">Dashboard</a></li>
+                                <li class="menu-item" ui-sref-active="active"><a ui-sref=".decisions">Decision Table</a></li>
+                                <!--<li class="menu-item" ui-sref-active="active"><a ui-sref=".notes">Notes</a></li>-->
+                            </ul>
+                            <hr class="menu-div">
+                            <div class="page-spacer visible-xs-block"></div>
+                        </div>
+
+                        <!--Products-->
+                        <div class="sidebar-menu-section">
+                            <h3 class="menu-item" ui-sref-active="active">
+                                <a class="toggle-value" ui-sref=".products">
+                                    Products
+                                    <div class="label label-primary"
+                                            ng-if="(cm.products | filter:{selected: true}).length > 0"
+                                            >{{ (cm.products | filter:{selected: true}).length }}</div>
+                                </a>
+                            </h3>
+                        </div>
+
+                        <!--Criteria-->
+                        <div class="sidebar-menu-section">
+                            <h3 class="menu-item" ui-sref-active="active">
+                                <a class="toggle-value" ui-sref=".requirements">
+                                    Requirements
+                                    <div class="label label-primary"
+                                            ng-if="(cm.requirements | filter:{selected: true}).length > 0"
+                                            >{{ (cm.requirements | filter:{selected: true}).length }}</div>
+                                </a>
+                            </h3>
+                        </div>
+
+                        <!--Presentations-->
+                        <div class="sidebar-menu-section">
+                            <h3 class="menu-item" ui-sref-active="active">
+                                <a class="toggle-value" ui-sref=".presentations">Presentations</a>
+                                <div class="label label-primary"
+                                        ng-if="cm.snapshots.length > 0"
+                                        >{{ cm.snapshots.length }}</div>
+                            </h3>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!--Init JS plugins-->
-<script>
-    $(function () {
-        // Sidebar affix
-        $('#js-sidebar-affix').affix({
-            offset: {
-                top: 60
-            }
-        });
-    });
-</script>

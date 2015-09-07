@@ -1,18 +1,18 @@
 <div class="container-fluid" ng-controller="ProjectListCtrl as list">
     <div class="row">
         <div class="col-xs-12">
-            <h3 class="page-title text-center">
+            <h1 class="page-title text-center">
                 <span class="fa fa-list-alt"></span> My projects
-            </h3>
+            </h1>
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 tile-container" ng-repeat="prj in list.projects"
+        <div class="list-item-col tile-container" ng-repeat="prj in list.projects"
                 ng-class="{'muted': prj.muted}">
             <span ng-if="prj.muted" class="fa fa-spinner fa-spin"></span>
             <a class="panel panel-default tile" href ng-click="list.editProject(prj.id)">
                 <div class="panel-body">
-                    <h4 class="name">{{ prj.title }}</h4>
+                    <h3 class="name">{{ prj.title }}</h3>
                 </div>
             </a>
             <!--Menu-->
@@ -27,16 +27,6 @@
                             <a role="menuitem" tabindex="-1" href ng-click="list.editProject(prj.id)">Edit</a>
                         </li>
                         <li role="presentation" class="divider"></li>
-                        <!--<li role="presentation" class="disabled">
-                            <a role="menuitem" tabindex="-1" href="#">Present to Manager</a>
-                        </li>
-                        <li role="presentation" class="disabled">
-                            <a role="menuitem" tabindex="-1" href="#">Present to Auditor</a>
-                        </li>
-                        <li role="presentation" class="disabled">
-                            <a role="menuitem" tabindex="-1" href="#">Debrief</a>
-                        </li>
-                        <li role="presentation" class="divider"></li>-->
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href ng-click="list.removeProject(prj)">Remove</a>
                         </li>
@@ -44,38 +34,34 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+        <div class="list-item-col">
             <a class="panel panel-default tile create-new" href ng-click="list.toggleCreateDlg(true)">
                 <div class="panel-body">
-                    <h4 class="text-center">Create New...</h4>
+                    <h3 class="text-center">Create New...</h3>
                 </div>
             </a>
 
             <!--Create Project Dialog-->
-            <div class="panel panel-default dialog" ng-show="list.create.showDlg">
+            <div class="panel panel-default dialog" ng-if="list.create.showDlg">
                 <div class="panel-heading">
                     <h3 class="panel-title">Create Project</h3>
                     <button type="button" class="btn close" ng-click="list.toggleCreateDlg(false)"
-                            ng-disabled="list.creating">
+                            ng-disabled="list.create.progress">
                         <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
                     </button>
                 </div>
                 <div class="panel-body">
                     <form name="list.form" ng-submit="list.createProject()">
-                        <div class="form-group">
-                            <label for="project-title" class="control-label">Title</label>
-                            <input type="text" id="project-title" class="form-control"
-                                    placeholder='Like "Storage Project" for example...'
-                                    required
-                                    ng-model="list.create.title"
-                                    ps-focus-on="list.create.showDlg"
-                                    ng-disabled="list.creating">
-                        </div>
+                        <!--Select Category-->
+                        <div ng-controller="ProjectListCategoryCtrl as category"
+                                ng-include="'/html/category-select.html'"></div>
+
+                        <!--Submit-->
                         <button type="submit" class="btn btn-success"
-                                ng-disabled="list.form.$invalid || list.creating"
+                                ng-disabled="!list.newProject.category || list.create.progress"
                                 >
-                            <span ng-if="!list.creating">Create</span>
-                            <span ng-if="list.creating"><span class="fa fa-spinner fa-spin"></span> Creating</span>
+                            <span ng-if="!list.create.progress">Create</span>
+                            <span ng-if="list.create.progress"><span class="fa fa-spinner fa-spin"></span> Creating</span>
                         </button>
                     </form>
                 </div>

@@ -3,34 +3,22 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ShortId = require('mongoose-shortid-nodeps');
 
-var util = require('../../app/util');
-var config = require('../../app/config');
-var projects = require('../../app/models/projects');
-var Project = projects.ProjectModel;
+var util = require(appRoot + '/app/lib/util');
+var config = require(appRoot + '/app/config');
+var codes = require(appRoot + '/app/web/codes');
+var Project = require(appRoot + '/app/models/projects').ProjectModel;
+var Settings = require(appRoot + '/app/models/settings').SettingsModel;
 
 // Need few iterations for fast tests, thus it is configurable
 var HASH_ITERS = config.db.hash_iters || 100000; // TODO - test
-var errors = require('../../app/errors');
-
-
-// Service model required for short incremental ids
-//
-var settingsSchema = new Schema({
-    nextUserId: { type: Number, default: 1 }
-});
-var Settings = mongoose.model('Settings', settingsSchema);
-Settings
-    .findOneAndUpdate({}, {}, {upsert: true})
-    .exec();
 
 
 // Schemas
 //
-
 var projectStubSchema = new Schema({
     title: { type: String, required: true },
     _stub: { type: Boolean, default: true },
-    _ref: { type: ShortId, ref: 'Project' }
+    _ref: { type: ShortId, ref: 'Projects2' }
 });
 
 var userSchema = new Schema({
@@ -64,7 +52,7 @@ userSchema.statics.authenticate = function (email, password, cb) {
         if (err) { return cb(err); }
 
         if (!user) {
-            return cb(null, null, errors.AUTH_NOT_FOUND);
+            return cb(null, null, codes.AUTH_NOT_FOUND);
         }
 
         var verify = split(user.password);
@@ -73,11 +61,11 @@ userSchema.statics.authenticate = function (email, password, cb) {
 
             var hash = result.key.toString('hex');
             if (hash !== verify.hash) {
-                return cb(null, user, errors.AUTH_PWD_MISMATCH);
+                return cb(null, user, codes.AUTH_PWD_MISMATCH);
             }
 
             if (user.needVerify !== false) {
-                return cb(null, user, errors.AUTH_NOT_VERIFIED);
+                return cb(null, user, codes.AUTH_NOT_VERIFIED);
             }
 
             return cb(null, user);
@@ -112,9 +100,9 @@ userSchema.statics.register = function (email, password, user_data, cb) {
                 });
             }
 
-            if (code === errors.AUTH_PWD_MISMATCH) {
+            if (code === codes.AUTH_PWD_MISMATCH) {
                 // user exists, verified but has different password -> show 'already registered'
-                return cb(null, null, errors.AUTH_DUPLICATE);
+                return cb(null, null, codes.AUTH_DUPLICATE);
             }
 
             // user exists & password match, may be LinkedIn login/signup or just full match
@@ -125,10 +113,7 @@ userSchema.statics.register = function (email, password, user_data, cb) {
         User.create(user_data, function (err, user) {
             if (err) { return cb(err); }
 
-            Project.createByUser(null/*default*/, user, function (err) {
-                if (err) { return cb(err); }
-                return cb(null, user, errors.AUTH_NEW_OK);
-            });
+            return cb(null, user, codes.AUTH_NEW_OK);
         })
     });
 };
@@ -139,7 +124,7 @@ userSchema.statics.verifyAccount = function (email, uid, cb) {
         if (err) { return cb(err); }
 
         if (!user) {
-            return cb(null, null, errors.AUTH_NOT_FOUND);
+            return cb(null, null, codes.AUTH_NOT_FOUND);
         }
 
         if (user.needVerify === false) {
@@ -149,7 +134,7 @@ userSchema.statics.verifyAccount = function (email, uid, cb) {
 
         if (user.needVerify !== uid) {
             // Probably bad url copy-paste or something really bad..
-            return cb(null, null, errors.AUTH_NOT_VERIFIED);
+            return cb(null, null, codes.AUTH_NOT_VERIFIED);
         }
 
         user.needVerify = false;
@@ -166,7 +151,7 @@ userSchema.statics.updatePassword = function (email, password, cb) {
         if (err) { return cb(err); }
 
         if (!user) {
-            return cb(null, null, errors.AUTH_NOT_FOUND);
+            return cb(null, null, codes.AUTH_NOT_FOUND);
         }
 
         // This is sort of account validation too, as user can get valid code only from inbox
@@ -185,10 +170,10 @@ userSchema.pre('save', function ensureId(next) {
     if (!user.isNew) { return next(); }
 
     // ensure auto-increment of user.id
-    Settings.findOneAndUpdate({}, {$inc: {nextUserId: 1}}, function (err, settings) {
+    Settings.nextId('user', function (err, res) {
         if (err) { return next(err); }
 
-        user.id = settings.nextUserId;
+        user.id = res;
         next();
     });
 });
@@ -236,6 +221,5 @@ var User = mongoose.model('User', userSchema);
 
 
 module.exports = {
-    SettingsModel: Settings,
     UserModel: User
 };

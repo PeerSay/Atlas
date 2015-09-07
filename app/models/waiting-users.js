@@ -5,11 +5,10 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var errors = require('../../app/errors');
+var codes = require(appRoot + '/app/web/codes');
 
 // Schemas
 //
-
 var waitingUserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     name: { type: String },
@@ -37,7 +36,7 @@ waitingUserSchema.statics.add = function (email, data, cb) {
             return user.save(function (eer, user) {
                 if (err) { return cb(err); }
 
-                return cb(null, user, errors.WAITING_DUPLICATE);
+                return cb(null, user, codes.WAITING_DUPLICATE);
             });
         }
 
@@ -45,7 +44,7 @@ waitingUserSchema.statics.add = function (email, data, cb) {
         WaitingUser.create(data, function (err, user) {
             if (err) { return cb(err); }
 
-            return cb(null, user, errors.WAITING_NEW_OK);
+            return cb(null, user, codes.WAITING_NEW_OK);
         });
     });
 };

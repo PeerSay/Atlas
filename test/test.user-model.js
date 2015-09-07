@@ -3,13 +3,12 @@ var mongoose = require('mongoose');
 
 // Mock config
 process.deploy = {web: {}, db: {hash_iters: 100}, email: {enable: false}};
-var config = require('../app/config');
+var config = require(appRoot + '/app/config');
 
 // Dependencies to Mock
-var errors = require('../app/errors');
-var user = require('../app/models/users');
-var User = user.UserModel;
-var Settings = user.SettingsModel;
+var codes = require(appRoot + '/app/web/codes');
+var User = require(appRoot + '/app/models/users').UserModel;
+var Settings = require(appRoot + '/app/models/settings').SettingsModel;
 
 // --> Connect to test DB
 var DB_URL = 'mongodb://localhost/peersay_test';
@@ -33,7 +32,7 @@ describe('User Model', function () {
         before(function (done) {
             // Ensure initial id=1
             Settings.remove().exec();
-            Settings.findOneAndUpdate({}, {}, {upsert: true}).exec();
+
             // Ensure one verified User exists
             User.create({name: 'me', email: 'some@email.com', password: '1', needVerify: false}, done);
         });
@@ -57,7 +56,7 @@ describe('User Model', function () {
             };
             User.register(data.email, data.password, data, function (err, doc, code) {
                 should.not.exist(err);
-                code.should.be.equal(errors.AUTH_NEW_OK);
+                code.should.be.equal(codes.AUTH_NEW_OK);
                 doc.should.be.an('object');
                 doc.should.have.property('id').equal(2); // next id=2
                 doc.should.have.property('email').equal('some2@email.com');
@@ -92,7 +91,7 @@ describe('User Model', function () {
             };
             User.register(data.email, data.password, data, function (err, doc, code) {
                 should.not.exist(err);
-                code.should.be.equal(errors.AUTH_NEW_OK);
+                code.should.be.equal(codes.AUTH_NEW_OK);
                 doc.should.be.an('object');
                 doc.should.have.property('email').equal('some3@email.com');
                 doc.should.have.property('needVerify').length(88);
@@ -125,7 +124,7 @@ describe('User Model', function () {
             User.register(data.email, data.password, data, function (err, doc, code) {
                 should.not.exist(doc);
                 should.not.exist(err);
-                code.should.be.equal(errors.AUTH_DUPLICATE);
+                code.should.be.equal(codes.AUTH_DUPLICATE);
                 done();
             });
         });
@@ -152,7 +151,7 @@ describe('User Model', function () {
             User.verifyAccount('someNOT@email.com', 'xxx', function (err, doc, code) {
                 should.not.exist(err);
                 should.not.exist(doc);
-                code.should.be.equal(errors.AUTH_NOT_FOUND);
+                code.should.be.equal(codes.AUTH_NOT_FOUND);
                 done();
             });
         });
@@ -161,7 +160,7 @@ describe('User Model', function () {
             User.verifyAccount('some@email.com', 'xxx', function (err, doc, code) {
                 should.not.exist(err);
                 should.not.exist(doc);
-                code.should.be.equal(errors.AUTH_NOT_VERIFIED);
+                code.should.be.equal(codes.AUTH_NOT_VERIFIED);
                 done();
             });
         });
@@ -202,7 +201,7 @@ describe('User Model', function () {
             User.authenticate('some3@email.com', '1', function (err, user, code) {
                 should.not.exist(err);
                 should.not.exist(user);
-                code.should.be.equal(errors.AUTH_NOT_FOUND);
+                code.should.be.equal(codes.AUTH_NOT_FOUND);
                 done();
             });
         });
@@ -210,7 +209,7 @@ describe('User Model', function () {
         it('User.authenticate should reject user with wrong password', function (done) {
             User.authenticate('some2@email.com', '3', function (err, user, code) {
                 should.not.exist(err);
-                code.should.be.equal(errors.AUTH_PWD_MISMATCH);
+                code.should.be.equal(codes.AUTH_PWD_MISMATCH);
                 done();
             });
         });
@@ -219,7 +218,7 @@ describe('User Model', function () {
             User.authenticate('some@email.com', '1', function (err, user, code) {
                 should.not.exist(err);
                 //should.not.exist(user); // returned - OK?
-                code.should.be.equal(errors.AUTH_NOT_VERIFIED);
+                code.should.be.equal(codes.AUTH_NOT_VERIFIED);
                 done();
             });
         });
@@ -241,7 +240,7 @@ describe('User Model', function () {
             User.updatePassword('some2@email.com', '1', function (err, doc, code) {
                 should.not.exist(err);
                 should.not.exist(doc);
-                code.should.be.equal(errors.AUTH_NOT_FOUND);
+                code.should.be.equal(codes.AUTH_NOT_FOUND);
                 done();
             });
         });

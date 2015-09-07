@@ -154,7 +154,8 @@ function AuthCtrl($q, $state, $stateParams, $window, User, Notify, _) {
             var origHide = m.notify.hide;
             m.notify.hide = function () {
                 eraseErrorFromQs();
-                (m.notify.hide = origHide)();
+                m.notify.hide = origHide;
+                origHide();
             };
         }
     }

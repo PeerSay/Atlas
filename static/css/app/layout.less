@@ -1,59 +1,139 @@
+body {
+  /* Move down content because we have a fixed navbar that is 50px tall */
+  padding-top: 50px;
+}
+
+/*See Angular ngCloak*/
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
 /*
-Project Details
+* Auth panel
 */
-// Title
-.title-row {
-  .make-row();
-  .title-col {
+.auth-panel-col {
+  .make-sm-column(6);
+  .make-sm-column-offset(3);
+  .make-lg-column(4);
+  .make-lg-column-offset(4);
+  margin-top: 20px;
+}
+
+/*
+* App Header
+*/
+.page-title {
+  margin: 12px 0;
+}
+.page-spacer {
+  margin-bottom: 15px;
+}
+
+/*
+* Project List
+*/
+
+.list-item-col {
+  .make-sm-column(6);
+  .make-md-column(4);
+  .make-lg-column(3);
+}
+
+/*
+* Project Details
+*/
+.container-col {
+  .make-sm-column(9);
+  .make-sm-column-offset(3);
+  .make-lg-column(8);
+  .make-lg-column-offset(2);
+  &.full-screen:not(.no-menu){
+    .make-lg-column(10);
+  }
+  &.no-menu {
     .make-xs-column(12);
+    .make-xs-column-offset(0);
+    &:not(.full-screen) {
+      .make-lg-column(10);
+    }
+  }
+  transition: all .3s ease;
+
+  // Content
+  .content-col {
+    .make-xs-column(12);
+    position: relative; // for fullscreen-toggle
+  }
+
+  // Right side-bar
+  .right-sidebar-col {
+    .make-sm-column(4);
+    .make-sm-column-push(8);
+    .clearfix();
+  }
+  .content-right-sidebar-col {
+    .make-sm-column(8);
+    .make-sm-column-pull(4);
   }
 }
 
-.content-row {
-  .make-row();
-  //Side-bar
-  .sidebar-col {
-    .make-sm-column(2); // 1/6 of screen on non-mobile
+/*
+* Side-bar
+*/
+.sidebar-container {
+  position: fixed;
+  left: 0; top: 50px;
+  height: ~"calc(100% - 50px)";
+  width: 100% * (1/4); // col-3
+  @media (min-width: @screen-lg-min) {
+    width: 100% * (1/6); // col-2
+  }
+  @media (max-width: @grid-float-breakpoint) {
+    width: 200px; // fixed on mobile
+  }
+  z-index: 1;
 
-    .sidebar-section-col {
-      .make-xs-column(6); // 1/2 of screen on mobile
-      .make-sm-column(12);
+  // Hidden state
+  transition: left .3s, background-color .3s;
+  .no-menu & {
+    background-color: @app-body-bg;
+    left: ~"calc(-25% + 15px)";
+    @media (min-width: @screen-lg-min) {
+      left: ~"calc(-16.6667% + 15px)";
     }
-
-
-    .side-bar {
-      // Vertical scroll bar if no space
-      position: fixed;
-      width: 100% * (1/6);
-      height: ~"calc(100% - 117px)";
-      overflow-y: auto;
-      overflow-x: hidden;
-
-      // Sticky with affix plugin
-      &.affix {
-        top: 60px;
-        height: ~"calc(100% - 60px)";
-      }
+    @media (max-width: @grid-float-breakpoint) {
+      left: -(200px - 15px);
     }
   }
-  //Content
-  .content-container-col {
-    .make-sm-column(10); // 5/6 of screen on non-mobile (all but sidebar)
 
-    .content-col {
-      .make-xs-column(12);
-      &:not(.full) {
-        .make-lg-column(9.6); // makes content centered on lg
-      }
-      transition: width .3s ease;
+  .sidebar-toggler {
+    position: absolute;
+    top: 1px; right: 0;
+  }
+
+  .sidebar-scroll {
+    position: absolute;
+    top: 30px; bottom: 0;
+    left: 0; right: 0;
+    padding-left: 15px;
+    // Vertical scroll bar if no space
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    // Hidden state
+    opacity: 1;
+    transition: opacity .3s ease;
+    .no-menu & {
+      opacity: 0;
     }
   }
 }
+
 /*
 Selector page's form
 */
 .selector-edit-form {
-  .label-col{
+  .label-col {
     .make-sm-column(2);
   }
   .control-col {

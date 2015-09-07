@@ -22,6 +22,9 @@ build/Release
 #staging
 dist
 
+#presentation stuff
+files
+
 # Dependency directory
 # Commenting this out is preferred by some people, see
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
@@ -41,6 +44,7 @@ bower_components
 .tmp
 .doc
 .pocs
+files
 
 # .css files are derived as we use LESS
 *.css

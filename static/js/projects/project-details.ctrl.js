@@ -3,8 +3,8 @@
 angular.module('PeerSay')
     .controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
 
-ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', '$filter', 'Projects', 'budgetFilter', 'FullScreen'];
-function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects, budgetFilter, FullScreen) {
+ProjectDetailsCtrl.$inject = ['$scope', '$rootScope', '$stateParams', 'Projects', 'StorageRecord'];
+function ProjectDetailsCtrl($scope, $rootScope, $stateParams, Projects, StorageRecord) {
     var m = this;
 
     m.projectId = $stateParams.projectId;
@@ -12,21 +12,17 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
     m.project = null;
     m.requirements = [];
     m.products = [];
-    //UI helpers
-    m.sidebar = {
-        amountText: amountText,
-        amountHtml: amountHtml,
-        dateDurationText: dateDurationText
-    };
+    m.snapshots = [];
     //Full screen
-    m.fullscreen = FullScreen;
+    m.fullScreen = StorageRecord.boolean('fs');
+    m.noMenu = StorageRecord.boolean('no-menu');
 
     activate();
 
     function activate() {
         readProject();
 
-        // Re-read on navigation to get fresh (not cached) object
+        // Re-read on navigation to get fresh (not cached) objects
         var off = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
             if(toState.name === 'project.list') { return; } // back to list
             readProject();
@@ -40,28 +36,8 @@ function ProjectDetailsCtrl($scope, $rootScope, $stateParams, $filter, Projects,
             m.project = res;
             m.requirements = res.requirements;
             m.products = res.products;
+            m.snapshots = res.presentation.snapshots;
             return res;
         });
-    }
-
-    // UI helpers
-    function amountHtml() {
-        return budgetFilter(m.project.budget);
-    }
-
-    function amountText() {
-        return budgetFilter(m.project.budget, true);
-    }
-
-    function dateDurationText() {
-        var text = '';
-        if (m.project.time.duration) {
-            text += [m.project.time.duration, m.project.time.durationLabel, ' '].join(' ');
-        }
-        if (m.project.time.startDate) {
-            var date = $filter('date')(m.project.time.startDate, 'MM/dd/yyyy');
-            text += ['@', date].join(' ');
-        }
-        return text;
     }
 }

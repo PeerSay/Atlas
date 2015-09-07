@@ -5,10 +5,8 @@ angular
 function psTableInput() {
     return {
         restrict: 'A',
-        require: '?ngModel',
+        require: 'ngModel',
         link: function (scope, element, attrs, ngModel) {
-            if (!ngModel) { return; }
-
             var $el = $(element);
             var $td = $el.parents('td');
             var $tr = $td.parent();
@@ -17,21 +15,13 @@ function psTableInput() {
                 // using jquery.column.js plugin
                 var $inputCol = $cells.nthCol($td.index());
                 var $gradeCol = $cells.nthCol($td.index() + 1);
-                return $inputCol.add($gradeCol)
+                return $inputCol.add($gradeCol);
             };
 
+            var ctrl = scope.$eval(attrs.ctrl);
             var cell = scope.$eval(attrs.psTableInput);
-            var model = cell.model;
 
-            // This fixes table cell's save logic for type=number inputs in Firefox.
-            // Firefox (unlike Chrome) does not focus input when spinner buttons are clicked, thus it breaks
-            // save logic based on assumption that edited element is focused and blur triggers update.
-            $el.on('input', function () {
-                // 'input' event is triggered on clicking spinner button
-                $(this).focus();
-            });
-
-            // Make active on clicking cell outside input (of cell is larger)
+            // Make active on clicking cell outside input (if cell is larger)
             $td.click(function () {
                 $el.focus();
             });
@@ -45,26 +35,39 @@ function psTableInput() {
             $el.on('blur', function () {
                 $td.removeClass('edited');
                 scope.$apply(function () {
-                    model.save();
+                    if (cell.model.save()) {
+                        ctrl.patchProject();
+                    }
                 });
             });
 
             // Mute zero-weight rows
-            if (cell.model.muteRow) {
-                scope.$watch(cell.model.muteRow, function (newVal/*, oldVal*/) {
+            if (cell.muteRow) {
+                scope.$watch(cell.muteRow, function (newVal/*, oldVal*/) {
                     $tr.toggleClass('muted', newVal);
-                })
+                });
             }
 
             //Mute columns if mandatory requirement is not met
-            if (cell.model.muteProd) {
-                scope.$watch(cell.model.muteProd, function (newVal/*, oldVal*/) {
+            if (cell.muteProd) {
+                scope.$watch(cell.muteProd, function (newVal/*, oldVal*/) {
                     $td.toggleClass('culprit', newVal);
 
                     var $prodCells = productCells();
                     var anyMuted = ($prodCells.filter('.culprit').length > 0);
                     $prodCells.toggleClass('muted', anyMuted);
-                })
+                });
+            }
+
+            // Show invalid input (numbers only) by applying class on parent
+            if (cell.type === 'number') {
+                scope.$watch(function () {
+                    return ngModel.$invalid;
+                }, function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        $td.toggleClass('invalid', newVal);
+                    }
+                });
             }
         }
     };

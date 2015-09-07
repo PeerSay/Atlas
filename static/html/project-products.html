@@ -1,41 +1,21 @@
 <!--Panel-->
 <div class="panel panel-default tile has-fullscreen-toggle" ng-controller="ProjectProductsCtrl as cm">
     <div class="panel-heading">
-        <h3 class="text-center">
+        <h2 class="text-center">
             <span class="fa fa-bar-chart"></span>
             Products
-        </h3>
+        </h2>
     </div>
     <div class="panel-body">
         <!--Select Category-->
-        <form>
-            <div class="form-group">
-                <ui-select ng-model="cm.category.selected" theme="bootstrap"
-                        tagging="cm.addCategory"
-                        tagging-tokens="ENTER"
-                        tagging-label="(adding new)"
-                        on-select="cm.selectCategory($model)">
-                    <!--Label don't work-->
-                    <ui-select-match placeholder="Select or search a category or domain...">
-                        {{ $select.selected.name }}
-                        <span class="fa fa-check"></span>
-                    </ui-select-match>
-                    <ui-select-choices repeat="category in cm.categories | filter:$select.search track by category.name"
-                            group-by="cm.groupByCategory">
-                        <span ng-bind-html="category.name | highlight: $select.search"></span>
-                        <span ng-if="category.name == cm.category.selected.name" class="fa fa-check"></span>
-                                <span ng-if="category.custom" class="delete-category"
-                                        ng-click="cm.deleteCategory(category)">
-                                    <span class="fa fa-trash"></span> <span class="link">Delete</span>
-                                </span>
-                    </ui-select-choices>
-                </ui-select>
-            </div>
+        <form ng-controller="ProjectCategoryCtrl as category">
+            <div ng-include="'/html/category-select.html'"></div>
         </form>
+
         <!--Top form-->
         <form class="row">
             <!--Col2 - Select/Add Products-->
-            <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group">
+            <div class="col-xs-12 col-sm-6 col-sm-push-6 form-group form-group-lg">
                 <ui-select ng-model="cm.product.selected" theme="bootstrap"
                         tagging="cm.addNotFoundProduct"
                         tagging-tokens="ENTER"
@@ -58,14 +38,14 @@
                         ng-click="cm.toggleAddNew()"
                         ng-class="{active: cm.addNew.show}"
                         >
-                    <span class="fa fa-plus-circle"></span> New
+                    <span class="fa fa-plus"></span> New
                 </button>
             </div>
         </form>
 
         <!--Add form-->
         <form name="cm.addForm" class="form-horizontal selector-edit-form add-new page-spacer" ng-show="cm.addNew.show">
-            <div class="form-group form-group-sm">
+            <div class="form-group">
                 <label for="prod-name" class="label-col control-label text-left-important">Name:</label>
                 <div class="control-col">
                     <input type="text" id="prod-name" class="form-control" placeholder="Name"
@@ -74,17 +54,17 @@
                             required>
                 </div>
             </div>
-            <div class="form-group form-group-sm">
+            <div class="form-group">
                 <label for="prod-descr" class="label-col control-label text-left-important">Description:</label>
                 <div class="control-col">
                     <input type="text" id="prod-descr" class="form-control" placeholder="Description"
                             ng-model="cm.addNew.model.description">
                 </div>
             </div>
-            <div class="form-group form-group-sm">
+            <div class="form-group">
                 <div class="label-col"></div>
                 <div class="control-col">
-                    <button type="button" class="btn btn-sm btn-primary"
+                    <button type="button" class="btn btn-primary"
                             ng-click="cm.saveAddNew()"
                             ng-disabled="cm.addForm.$invalid">Add</button>
                     <button type="button" class="btn close inline-close"
@@ -153,11 +133,9 @@
                     </td>
                 </tr>
                 <!--Load more-->
-                <tr ng-if="!cm.noLoadMore">
+                <tr ng-if="cm.loadingMore">
                     <td colspan="5" class="text-center">
-                        <button type="button" class="btn btn-xxs btn-default load-more"
-                                ng-class="{loading: cm.loadingMore}"
-                                ng-click="cm.loadMoreProducts()">
+                        <button type="button" class="btn btn-xxs btn-default" disabled>
                             <span class="fa fa-refresh fa-spin"></span>
                         </button>
                     </td>

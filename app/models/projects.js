@@ -1,30 +1,24 @@
 var _ = require('lodash');
+var path = require('path');
 var mongoose = require('mongoose');
-var ShortId = require('mongoose-shortid-nodeps');
 var Schema = mongoose.Schema;
 var jsonPatch = require('fast-json-patch');
+var psShortId = require('./lib/short-id').psShortId;
+var presentationSchema = require('./presentations').presentationSchema;
+var fs = require('fs-extra');
 
+var config = require(appRoot + '/app/config');
+var util = require(appRoot + '/app/lib/util');
+var s3 = require(appRoot + '/app/lib/pdf/aws-s3');
 
-/**
- * From: https://github.com/coreh/uid2
- * 62 characters in the ascii range that can be used in URLs without special encoding.
- */
-var UIDCHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+var FILES_PATH = path.join(appRoot, '/files');
+
 
 // Presets
 //
-var defaultProject = {
-    title: 'Welcome Project'
-};
 var durationLabelEnum = ['Days', 'Weeks', 'Months'];
 var amountMultiplierEnum = ['----', 'Thousands'];
-var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes (BTC is unofficial)
-var psShortId = {
-    type: ShortId,
-    len: 8,
-    alphabet: UIDCHARS,
-    retries: 10
-};
+var currencyEnum = ['USD', 'EUR', 'GBP', 'ILS']; // ISO 4217 codes
 
 // Schema
 //
@@ -38,11 +32,6 @@ var projectSchema = new Schema({
 
     // Essentials
     //
-
-    //Migrate:
-    // - was:
-    //  startDate: { type: String }, plain string!
-    //  duration: { type: String }, plain string!
     time: {
         startDate: {type: Date},
         duration: {type: Number, min: 0},
@@ -50,8 +39,6 @@ var projectSchema = new Schema({
         durationLabels: {type: String, default: durationLabelEnum.join(',')}
     },
 
-    // Migrate:
-    // - was: budget:String
     budget: {
         amount: {type: Number, min: 0},
         amountMultiplier: {type: String, enum: amountMultiplierEnum, default: '----'},
@@ -60,9 +47,6 @@ var projectSchema = new Schema({
         currencyLabels: {type: String, default: currencyEnum.join(',')}
     },
 
-    // Migrate:
-    // - was summary/recommendations/notes (flat, String)
-    // - was description:String
     notes: {
         reasons: {type: String, default: ''}, // Ensures parent is always created
         goals: {type: String},
@@ -71,26 +55,26 @@ var projectSchema = new Schema({
         recommendations: {type: String}
     },
 
-    // Migrate:
-    // - was: criteria.vendors: []
+    // Criteria
+    //
     requirements: [{
         name: {type: String, required: true},
         description: {type: String},
         topic: {type: String},
         popularity: {type: Number, min: 0, max: 100, default: 0},
-        selected: {type: Boolean}, // default?
+        selected: {type: Boolean, default: true},
         custom: {type: Boolean, default: false},
         mandatory: {type: Boolean, default: false}
     }],
 
-    // Migrate:
-    // - was: vendors - inside criteria! (can get any/first req to migrate)
+    // Products
+    //
     products: [{
         name: {type: String, required: true},
         description: {type: String},
         category: {type: String},
         popularity: {type: Number, min: 0, max: 100, default: 0},
-        selected: {type: Boolean},
+        selected: {type: Boolean, default: true},
         custom: {type: Boolean, default: false}
     }],
 
@@ -103,9 +87,12 @@ var projectSchema = new Schema({
         custom: {type: Boolean, default: false}
     }],
 
-    // Migrate: was
-    // - grade was named score
-    // - weight/input was inside criteria arr
+    // Table
+    //
+    topicWeights: [{
+        topic: {type: String, required: true},
+        weight: {type: Number, min: 0, max: 1, default: 0.5}
+    }],
     table: [{
         reqId: {type: String, required: true},
         name: {type: String, required: true},
@@ -113,31 +100,48 @@ var projectSchema = new Schema({
         weight: {type: Number, min: 0, max: 100, default: 1},
         popularity: {type: Number, min: 0, max: 100, default: 0},
         mandatory: {type: Boolean, default: false},
+        selected: {type: Boolean},
         products: [{
             prodId: {type: String, required: true},
             name: {type: String, required: true},
             input: {type: String, default: ''},
-            grade: {type: Number, min: 0, max: 10, default: 10},
-            popularity: {type: Number, min: 0, max: 100, default: 0}
+            grade: {type: Number, min: 0, max: 10},
+            popularity: {type: Number, min: 0, max: 100, default: 0},
+            selected: {type: Boolean}
         }]
-    }]
+    }],
+
+    // Presentation
+    //
+    presentation: presentationSchema.tree // Cannot nest single subdoc!
 });
 projectSchema.set('toJSON', {virtuals: true});
 
 
-projectSchema.statics.createByUser = function (project, user, next) {
-    project = (project || defaultProject);
-    project.collaborators = [user._id];
+projectSchema.statics.createByUser = function (data, user, next) {
+    var project = {
+        title: data.category,
+        selectedCategory: data.category,
+        collaborators: [user._id],
+        categories: []
+    };
+
+    // If category during creation is new, then add it to project's local list
+    if (data.customCategory) {
+        project.categories.push({
+            name: data.category,
+            custom: true
+        });
+    }
 
     Project.create(project, function (err, prj) {
         if (err) { return next(err); }
 
         // Create stub sub-doc
-        var subDoc = {
-            title: prj.title,
+        user.projects.push({
+            title: prj.selectedCategory,
             _ref: prj._id
-        };
-        user.projects.push(subDoc); // save() is required for sub-doc!
+        });
 
         user.save(function (err, user) {
             if (err) { return next(err); }
@@ -154,8 +158,9 @@ projectSchema.statics.createByUser = function (project, user, next) {
 projectSchema.statics.removeByUser = function (project_id, user, next) {
     Project.findOneAndRemove({_id: project_id}, function (err, doc) {
         if (err) { return next(err); }
-
         if (!doc) { return next(null, null); } // Not found!
+
+        doc.remove(); // this triggers 'remove' hook
 
         // Remove stub sub-doc
         var stubPrj = _.find(user.projects, {_ref: project_id});
@@ -171,6 +176,19 @@ projectSchema.statics.removeByUser = function (project_id, user, next) {
     });
 };
 
+// Pres-save hooks
+//
+
+projectSchema.pre('save', function ensureTitle(next) {
+    var project = this;
+
+    // Make up title after category
+    if (!project.isModified('selectedCategory')) { return next(); }
+
+    project.title = project.selectedCategory || '(None)';
+
+    next();
+});
 
 projectSchema.pre('save', function ensureStubsUpdated(next) {
     var project = this;
@@ -180,7 +198,7 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
     if (!project.isModified('title')) { return next(); }
 
     Project
-        .findById(id, 'collaborators')// XXX: can avoid?
+        .findById(id, 'collaborators')
         .populate('collaborators', 'projects')
         .exec(function (err, prj) {
             if (err) { return next(err); }
@@ -198,6 +216,43 @@ projectSchema.pre('save', function ensureStubsUpdated(next) {
         });
 });
 
+projectSchema.pre('save', function ensureTopicWeights(next) {
+    var doc = this;
+
+    // Skip if not add/remove/select/unselect of a req
+    if (!doc.isModified('requirements')) {
+        return next();
+    }
+
+    var oldTopicWeights = getDocJSON(doc, 'topicWeights');
+    var newTopicWeights = buildNewTopicWeights(_.filter(doc.requirements, {selected: true}));
+    var patches = jsonPatch.compare({topicWeights: oldTopicWeights}, {topicWeights: newTopicWeights});
+    console.log('[DB] topicWeights for[%s] patch: ', doc.id, JSON.stringify(patches));
+
+    if (patches.length) {
+        patchDoc(doc, patches, 'topicWeights');
+        console.log('[DB] topicWeights res=', JSON.stringify(getDocJSON(doc, 'topicWeights')));
+    }
+
+    next();
+});
+
+function buildNewTopicWeights(requirements) {
+    var topics = requirements.reduce(function (acc, req) {
+        var topicName = req.topic || '';
+        if (!acc.idx[topicName]) {
+            acc.idx[topicName] = 1;
+            acc.list.push(topicName); // Order matters!
+        }
+        return acc;
+    }, {list: [], idx: {}});
+
+    var evenWeight = 1 / topics.list.length; // Equality for all!
+
+    return _.map(topics.list, function (topic) {
+        return {topic: topic, weight: evenWeight};
+    });
+}
 
 projectSchema.pre('save', function ensureTableConsistency(next) {
     var doc = this;
@@ -208,19 +263,17 @@ projectSchema.pre('save', function ensureTableConsistency(next) {
     }
 
     if (isEmptyTable(doc)) {
-        doc.table = [];
-        console.log('[DB]: Sync table for[%s] skipped - empty', doc.id);
+        console.log('[DB] Sync table for[%s] skipped - empty', doc.id);
         return next();
     }
 
-    var oldTable = buildOldTable(doc.table);
-    var newTable = buildNewTable(doc.requirements, doc.products);
-    var patches = buildPatch(oldTable, newTable);
-    console.log('[DB]: Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
+    var oldTable = getDocJSON(doc, 'table');
+    var newTable = buildNewTable(doc.requirements, doc.products, doc.table);
+    var patches = jsonPatch.compare({table: oldTable}, {table: newTable});
+    console.log('[DB] Sync table for[%s] patch: ', doc.id, JSON.stringify(patches));
 
     if (patches.length) {
-        patchTable(doc, patches);
-        console.log('[DB]: Sync table for[%s] patch applied', doc.id);
+        patchDoc(doc, patches, 'sync table');
     }
 
     next();
@@ -234,75 +287,113 @@ function isEmptyTable(doc) {
     return !selectedReqs || !selectedProds;
 }
 
-function buildOldTable(table) {
-    // doc.table is Mongoose object with many additional props,
-    // we need to get pure data to generate correct patch form it
-    var res = [];
-    _.forEach(table, function (row) {
-        var dataRow = _.pick(row, 'reqId', 'name', 'topic', 'weight', 'popularity', 'mandatory');
-        dataRow.products = [];
-
-        _.forEach(row.products, function (prod) {
-            var col = _.pick(prod, 'prodId', 'name', 'input', 'grade','popularity');
-            dataRow.products.push(col);
-        });
-
-        res.push(dataRow);
-    });
-
-    return res;
-}
-
-function buildNewTable(requirements, products) {
-    var res = [];
-
-    _.forEach(requirements, function (req) {
-        if (req.selected) {
-            var row = _.pick(req, 'name', 'topic', 'popularity', 'mandatory');
-            row.reqId = req._id;
-            row.products = [];
-
-            _.forEach(products, function (prod) {
-                if (prod.selected) {
-                    var col = _.pick(prod, 'name', 'popularity');
-                    col.prodId = prod._id;
-                    row.products.push(col);
-                }
-            });
-
-            res.push(row);
+function getDocJSON(doc, prop) {
+    // doc is Mongoose object with many additional props,
+    // we need to get pure data to generate correct patch from it
+    var json = doc.toJSON({
+        transform: function (doc, ret) {
+            delete ret._id;
+            delete ret.id;
         }
     });
 
+    return json[prop];
+}
+
+function buildNewTable(requirements, products, table) {
+    var res = [];
+
+    _.forEach(requirements, function (req) {
+        var row = _.pick(req, 'name', 'topic', 'popularity', 'mandatory', 'selected');
+        row.reqId = req._id.toString();
+        row.products = [];
+
+        var oldRow = _.findWhere(table, {reqId: row.reqId});
+        row.weight = oldRow ? oldRow.weight : 1 /*default*/;
+
+        _.forEach(products, function (prod) {
+            var col = _.pick(prod, 'name', 'popularity', 'selected');
+            col.prodId = prod._id.toString();
+
+            var oldCol = oldRow && _.findWhere(oldRow.products, {prodId: col.prodId});
+            col.grade = (oldRow && oldCol) ? oldCol.grade : null;
+            col.input = (oldRow && oldCol) ? oldCol.input : '';
+
+            row.products.push(col);
+        });
+
+        res.push(row);
+    });
+
     return res;
 }
 
-function buildPatch(oldTable, newTable) {
-    var patches = jsonPatch.compare({table: oldTable}, {table: newTable});
-
-    // Remove invalid ones: as far as newTable has no weight|input|grade,
-    // they appear in patches as remove op.
-    patches = _.filter(patches, function (p) {
-        return !/(\/weight|\/input|\/grade)$/.test(p.path);
-    });
-
-    return patches;
-}
-
-function patchTable(doc, patches) {
+function patchDoc(doc, patches, tag) {
     try {
         jsonPatch.apply(doc, patches, true /*validate*/);
     }
     catch (e) {
-        console.log('[DB]: Sync table: patch exception: ', e);
+        console.log('[DB] Patch %s: patch exception: ', tag, e);
     }
+    console.log('[DB] Patch %s for[%s] - patch applied OK', tag, doc.id);
 }
+
+// Presentation logo
+//
+projectSchema.path('presentation.data.logo.image.url').get(function () {
+    var fileName = this.presentation.data.logo.image.fileName;
+    var safeFileName = util.encodeURIComponentExt(fileName);
+    return fileName && ['/files', this._id, safeFileName].join('/');
+});
+
+projectSchema.pre('save', function ensureLogoUploadToS3(next) {
+    var project = this;
+
+    // Upload new image to S3 after it is saved
+    if (!project.isModified('presentation.data.logo.image')) { return next(); }
+
+    var projectId = project._id;
+    var image = this.presentation.data.logo.image;
+    var file = {
+        name: image.fileName,
+        path: path.join(FILES_PATH, projectId, image.fileName),
+        contentType: 'image/' + path.extname(image.fileName).replace('.', '')
+    };
+
+    s3.upload([file], {subDir: projectId})
+        .then(function (res) {
+            console.log('[DB] Upload logo to S3 success: %s', JSON.stringify(res));
+            next();
+        })
+        .catch(function (reason) {
+            next(reason);
+        });
+});
+
+
+// Post-remove hooks
+//
+projectSchema.post('remove', function ensureLocalDirUnlink(doc) {
+    var projectId = doc._id;
+    var fileDir = path.join(FILES_PATH, projectId);
+
+    console.log('[DB] Unlinking dir [%s]', fileDir);
+    fs.removeSync(fileDir);
+});
+
+projectSchema.post('remove', function ensureS3removeBucket(doc) {
+    var projectId = doc._id;
+
+    console.log('[DB] Removing S3 bucket [%s]', projectId);
+    s3.removeBucket(projectId).then(function (res) {
+        console.log('[DB] Remove S3 bucket - success: %s', JSON.stringify(res));
+    });
+});
 
 
 // Model
 //
 var Project = mongoose.model('Projects2', projectSchema);
-
 
 module.exports = {
     ProjectModel: Project

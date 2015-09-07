@@ -6,14 +6,18 @@ angular.module('PeerSay')
 Util.$inject = ['jQuery', '$state'];
 function Util($, $state) {
     var U = {};
-    // Functional
+    // Collection
     U.forEach = angular.forEach.bind(angular);
     U.map = $.map.bind($);
     U.find = find;
     U.findWhere = findWhere;
     U.filter = filter;
     U.removeItem = removeItem;
+    // Function
     U.noop = noop;
+    U.debounce = debounce;
+    //Number
+    U.round = round;
     // Time
     U.now = getNow();
     U.timeIt = timeIt;
@@ -129,9 +133,37 @@ function Util($, $state) {
     }
 
     /**
-     * Noop
+     * Functional
      * */
     function noop() {}
+
+    /**
+    * Debounce - from underscore
+    * */
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function () {
+            var ctx = this, args = arguments;
+            var later = function () {
+                timeout = null;
+                func.apply(ctx, args);
+            };
+            var call_now = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (call_now) func.apply(ctx, args);
+        };
+    }
+
+
+    /**
+     * Number
+     * */
+
+    function round(num, digits) {
+        var pow = Math.pow(10, digits);
+        return Math.round(num * pow) / pow;
+    }
 
     /**
      * Debug utility: logging wrapper for ui-router $state.go()

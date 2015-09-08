@@ -14,7 +14,6 @@
 
 .reveal .table {
   width: 100%;
-  margin-bottom: 500px; // push table on top of the slide
   td {
     border: @table-border;
     color: @td-color;
@@ -68,6 +67,12 @@
     &.winner {
       background-color: @foot-winner-bg;
     }
+  }
+
+  // Zooming large tables
+  td {
+    // May be overridden by JS
+    font-size: 80%;
   }
 }
 

@@ -64,6 +64,7 @@ function renderTemplate(project, logoUrl) {
         if (superTopic !== 'Cost' && _.findWhere(project.topicWeights, {topic: 'Cost'})) {
             table.superTopics.push(getSingleTopicTable(model, 'Cost'));
         }
+        table.showTopOnly = (model['total-max']().list.length > 3);
     }
 
     var locals = _.extend({}, settings, {

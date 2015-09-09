@@ -14,6 +14,5 @@ angular.module('PeerSay', [
     'monospaced.elastic',
     'ng-context-menu',
     'ui.select',
-    'ngFileUpload',
-    'at.multirange-slider'
+    'ngFileUpload'
 ]);

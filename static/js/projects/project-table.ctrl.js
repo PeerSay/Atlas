@@ -39,7 +39,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
     function watch(weights) {
         var debouncedPatch = _.debounce(function (newWeights) {
             _.forEach(newWeights, function (it, i) {
-                m.project.topicWeights[i].weight = _.round(it.weight, 4);
+                m.project.topicWeights[i].weight = _.round(it.weight, 2);
             });
             m.patchProject();
         }, 1000);

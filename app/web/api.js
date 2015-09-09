@@ -67,7 +67,7 @@ function RestApi(app) {
         console.log('[API] Resolving project[%s] for user=[%s]', projectId, email);
 
         Project.findById(projectId, function (err, prj) {
-            if (err) { return modelError(err); }
+            if (err) { return modelError(res, err); }
 
             //TODO - check content type & send
 
@@ -103,7 +103,7 @@ function RestApi(app) {
         console.log('[API] Creating project for user=[%s]', email);
 
         Project.createByUser(data, user, function (err, stubPrj) {
-            if (err) { return modelError(err); }
+            if (err) { return modelError(res, err); }
 
             var result = stubPrj.toJSON({transform: xformStubPrj}); // stub is enough for create
             console.log('[API] Creating project result: %s', JSON.stringify(result));
@@ -120,7 +120,7 @@ function RestApi(app) {
         console.log('[API] Removing project[%s] for user=[%s]', projectId, email);
 
         Project.removeByUser(projectId, user, function (err, doc) {
-            if (err) { return modelError(err); }
+            if (err) { return modelError(res, err); }
 
             if (!doc) {
                 console.log('[API] Removing project[%s] failed - not found!', projectId);
@@ -173,7 +173,7 @@ function RestApi(app) {
         Project.findById(projectId) // Cannot reuse req.project here - model error is raised
             .populate('collaborators') // need user email in presentation
             .exec(function (err, prj) {
-                if (err) { return modelError(err); }
+                if (err) { return modelError(res, err); }
                 if (!prj) {
                     return errRes.notFound(res, 'project:' + projectId);
                 }
@@ -182,7 +182,7 @@ function RestApi(app) {
                 var subDoc = snapshots.create(data);
                 snapshots.push(subDoc);
 
-                prj.save(function (err, newPrj) {
+                prj.save(function (err) {
                     if (err) { return modelError(res, err); }
 
                     var result = subDoc;

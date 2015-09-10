@@ -56,6 +56,13 @@
       .mute();
     }
 
+    // Hide culprits on expanded group row
+    &.expanded {
+      .group-culprit::after {
+        display: none;
+      }
+    }
+
     /*Group row*/
     &.table-group td {
       padding: 8px;
@@ -140,7 +147,8 @@
       &.muted {
         .mute();
 
-        &.culprit {
+        &.culprit,
+        &.group-culprit{
           position: relative;
           &::after {
             content: '';

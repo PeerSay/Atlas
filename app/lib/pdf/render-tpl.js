@@ -252,20 +252,28 @@ function reqWeightPercentFn(range, cell) {
 
 function groupGradeFn(rowWeightRange, prodsGradesInGroupRange) {
     return function () {
+        var anyInit = false;
         var groupGrade = prodsGradesInGroupRange.list.reduce(function (acc, item, i) {
-            var grade = item().value || 0; // null if grade is not init
+            var val = item().value;
+            if (val !== null) {
+                anyInit = true;
+            }
+
+            var grade = val || 0; // null if grade is not init
             var weightModel = rowWeightRange.access(i)();
             var weight = rowWeightRange.weight(weightModel.value); // aggregated
             return acc + grade * weight;
         }, 0);
 
-        return Math.round(groupGrade * 10) / 10;
+        return anyInit ? Math.round(groupGrade * 10) / 10 : '?';
     };
 }
 
 function totalGradeGetFn(maxTotalsRange, prodKey) {
     return function () {
-        return maxTotalsRange.access(prodKey)().value();
+        var val = maxTotalsRange.access(prodKey)().value();
+        // val=NaN when there are groups with grade === '?'
+        return !isNaN(val) ? val: '?';
     };
 }
 

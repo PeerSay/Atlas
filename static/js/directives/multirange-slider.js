@@ -20,9 +20,8 @@ function sliderDirective($parse) {
         controller: ['$scope', '$element', '$attrs', function ($scope, $element, $attrs) {
             var m = this;
             m.ranges = [];
-            m.handles = [];
             m.step = step(); //prop!
-            m.pTotal = pTotal;
+            m.modelTotal = modelTotal;
             m.updateRangeWidths = updateRangeWidths;
             m.elementWidth = elementWidth;
 
@@ -34,34 +33,21 @@ function sliderDirective($parse) {
                 }
             }
 
-            function pTotal() {
+            function modelTotal() {
                 return m.ranges.reduce((function (sum, range) {
                     return sum + range.value();
                 }), 0);
             }
 
-            var clientWidth = 0;
-
             function updateRangeWidths() {
-                clientWidth = $element.prop('clientWidth'); // why here?
-
-                var runningTotal = 0;
-                var total = m.pTotal();
+                var total = m.modelTotal();
                 m.ranges.forEach(function (range) {
-                    runningTotal += range.value();
-                    range.update(runningTotal, total);
-                });
-
-                return m.handles.map(function (handle) {
-                    return handle.updateWidth();
+                    range.update(total);
                 });
             }
 
             function elementWidth() {
-                var handlesWidth = m.handles.reduce(function (sum, handle) {
-                    return sum + handle.width(); // XXX - outerWidth?
-                }, 0);
-                return clientWidth - handlesWidth;
+                return $element.prop('clientWidth');
             }
         }]
     };
@@ -93,7 +79,6 @@ function sliderRangeDirective($parse) {
                     });
 
                     return angular.extend(range, {
-                        widthAdjustment: '0px',
                         value: function (val) {
                             var s = slider.step;
                             if (val == null) {
@@ -104,20 +89,10 @@ function sliderRangeDirective($parse) {
                             }
                             return valueFn.assign(scope, val);
                         },
-                        update: function (runningTotal, total) {
-                            var x = runningTotal / total * 100;
-                            var rangeWidth = this.value() / total * 99.9;
-                            var width = rangeWidth * slider.elementWidth() / 100 > 1
-                                ? "calc(" + rangeWidth + "% - " + this.widthAdjustment + ")"
-                                : '0';
-
-                            return element.css({
-                                width: width,
-                                'margin-left': this.widthAdjustment
-                            });
-                        },
-                        adjustWidth: function (margin) {
-                            return this.widthAdjustment = margin;
+                        update: function (total) {
+                            var rangePercent = this.value() / total * 100;
+                            var width = rangePercent + '%';
+                            element.css({width: width});
                         }
                     });
                 },
@@ -143,26 +118,6 @@ function sliderHandleDirective($document) {
         link: function (scope, element, attrs, ctrls) {
             var slider = ctrls[0],
                 range = ctrls[1];
-            var handle = {
-                _width: 0,
-                width: function () {
-                    return this._width;
-                },
-                updateWidth: function () {
-                    var nextRange = getNextRange();
-                    this._width = element.prop('clientWidth');
-                    element.css({
-                        float: 'right',
-                        marginRight: -handle.width() / 2 + 'px'
-                    });
-                    if (nextRange) {
-                        nextRange.adjustWidth(handle.width() / 2 + 'px')
-                    }
-                }
-            };
-
-            slider.handles.push(handle);
-
 
             function getNextRange() {
                 return slider.ranges[slider.ranges.indexOf(range) + 1];
@@ -171,20 +126,20 @@ function sliderHandleDirective($document) {
             // Dragging
 
             var startX = 0;
-            var startPleft = 0;
-            var startPright = 0;
-
+            var startModelLeft = 0;
+            var startModelRight = 0;
 
             element.on("mousedown", function (event) {
                 var nextRange = getNextRange();
-                if (!nextRange) { return; } //TODO -  How possible?
+                // Practically impossible due to styles, just in case
+                if (!nextRange) { return; }
 
                 // Prevent default dragging of selected content
                 event.preventDefault();
 
                 startX = event.screenX;
-                startPleft = range.value();
-                startPright = nextRange.value();
+                startModelLeft = range.value();
+                startModelRight = nextRange.value();
 
                 $document.on("mousemove", mousemove);
                 $document.on("mouseup", mouseup);
@@ -192,13 +147,17 @@ function sliderHandleDirective($document) {
 
             function mousemove(event) {
                 return scope.$apply(function () {
-                    var dx = (event.screenX - startX) / slider.elementWidth() * slider.pTotal();
-                    if (dx < -startPleft || dx > startPright) { return; }
+                    var dx = event.screenX - startX;
+                    var modelDx = dx / slider.elementWidth() * slider.modelTotal();
+                    if (modelDx < -startModelLeft || modelDx > startModelRight) {
+                        // Prevent negative values & range overlaps
+                        return;
+                    }
 
-                    range.value(startPleft + dx);
+                    range.value(startModelLeft + modelDx);
                     var nextRange = getNextRange();
                     if (nextRange) {
-                        nextRange.value(startPright - dx);
+                        nextRange.value(startModelRight - modelDx);
                     }
 
                     slider.updateRangeWidths();

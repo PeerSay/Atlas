@@ -750,16 +750,11 @@
   ~ .popover {
     min-width: 300px;
     cursor: default;
+    .popover-content {
+      padding: 10px 20px;
+    }
   }
 }
-.ps-multirange-slider {
-  .slider {
-    border: 1px solid #ccc;
-
-  }
-
-}
-
 
 // Slider (adopted from 3rd-party lib)
 //
@@ -777,17 +772,29 @@
   }
 
   .slider-range {
-    height: 2px;
     display: inline-block;
+    position: relative;
+    float: left;
+    height: 2px;
     vertical-align: top;
     &.current-range {
       background-color: @slider-current-range-bg;
+      .slider-label {
+        color: darken(@slider-label-color, 20%);
+      }
+    }
+
+    &:last-child .slider-handle{
+      display: none;
     }
   }
 
+  @handler-height: 1em;
+  @handler-width: .8em;
   .slider-handle {
-    height: 1em;
-    margin-top: -.5em;
+    position: absolute;
+    right: -(@handler-width/2); top: -(@handler-height/2);
+    height: @handler-height; width: @handler-width;
     border: 1px solid darken(@slider-border-color, 20%);
     border-radius: 2px;
     background: #fff;
@@ -795,9 +802,6 @@
     cursor: pointer;
     &:hover {
       background: #ddd;
-    }
-    &:last-child .slider-handle{
-      display: none;
     }
   }
 

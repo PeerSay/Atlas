@@ -65,48 +65,69 @@ function createPage(ph) {
     return deferred.promise;
 }
 
-function render(page, url, outPath) {
+function openUrl(page, url) {
     var deferred = Q.defer();
-    var timeout = 2000;
-    var done = false;
+    var timeout = 5000;
+    var opened = false;
+
+    try {
+        page.open(url, function (status) {
+            console.log("[PH] page opened [%s] status: ", url, status);
+        });
+
+        // Wait till page signals that it is OK to render.
+        // Do not wait for page open to prevent race condition.
+        page.set('onCallback', function(result) {
+            console.log("[PH] callback received: %s", JSON.stringify(result));
+
+            opened = true;
+
+            if (!result.done) {
+                return fail(new Error('bad callback: ' + JSON.stringify(result)));
+            }
+
+            deferred.resolve(page);
+        });
+
+        // Prevent hang on open (e.g. page didn't signal out)
+        setTimeout(function () {
+            if (!opened) {
+                fail(new Error('timeout'));
+            }
+        }, timeout);
+
+    } catch(e) {
+        fail(new Error('failed to open: ' + e.toString()));
+    }
+
+    function fail(err) {
+        page.close();
+        deferred.reject(err);
+    }
+
+    return deferred.promise;
+}
+
+function render(page, outPath) {
+    var deferred = Q.defer();
     var pageSizeOptions = {
         format: 'A4',
         orientation: 'landscape'
     };
 
-    setTimeout(function () {
-        if (!done) {
-            deferred.reject(new Error('timeout reached'));
-        }
-    }, timeout);
-
     try {
-        page.open(url, function (status) {
-            console.log("[PH] page opened [%s] status: ", url, status);
+        page.set('paperSize', pageSizeOptions, function () {
+            page.render(outPath, function () {
+                console.log("[PH] file rendered to [%s]", outPath);
 
-            // Wait till page signals that it is OK to render
-            page.set('onCallback', function(result) {
-                console.log("[PH] callback received: %s", JSON.stringify(result));
+                page.close();
+                console.log("[PH] page closed - done");
 
-                done = true;
-
-                if (!result.done) {
-                    return deferred.reject(new Error('bad callback: ' + JSON.stringify(result)));
-                }
-
-                page.set('paperSize', pageSizeOptions, function () {
-                    page.render(outPath, function () {
-                        console.log("[PH] file rendered to [%s]", outPath);
-
-                        page.close();
-                        console.log("[PH] page closed - done");
-
-                        deferred.resolve(outPath);
-                    });
-                });
+                deferred.resolve(outPath);
             });
         });
     } catch(e) {
+        page.close();
         deferred.reject(new Error('failed to render: ' + e.toString()));
     }
 
@@ -120,11 +141,15 @@ function renderPDF(pageUrl, outPath) {
             return createPage(ph);
         })
         .then(function (page) {
+            console.log('[PH] opening...');
+            return openUrl(page, pageUrl);
+        })
+        .then(function (page) {
             console.log('[PH] rendering...');
-            return render(page, pageUrl, outPath);
+            return render(page, outPath);
         })
         .catch(function (reason) {
-            console.log('[PH] Error: ', reason);
+            console.log('[PH] Error: ', reason.toString());
             return Q.reject(reason);
         });
 }

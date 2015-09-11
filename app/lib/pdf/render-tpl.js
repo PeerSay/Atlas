@@ -186,6 +186,7 @@ function buildModel(reqs, topicWeights) {
                 rowRange
                     .push(prodGradeKey, {
                         value: gradeStr,
+                        input: prod.input,
                         product: prod.name,
                         maxInRow: maxInRangeFn(rowMaxRange, prodGradeValue)
                     });
@@ -194,13 +195,13 @@ function buildModel(reqs, topicWeights) {
                 var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
                     .push('', prodGradeValue);
                 var groupGradeValue = {
-                    value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange)
+                    value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange),
+                    product: prod.name
                 };
-                groupMaxRange.push('', groupGradeValue);
                 groupGradeValue.max = maxInRangeFn(groupMaxRange, groupGradeValue);
-                groupGradeValue.product = prod.name;
-                groupRange
-                    .push(prodGradeKey, groupGradeValue);
+
+                groupMaxRange.push('', groupGradeValue);
+                groupRange.push(prodGradeKey, groupGradeValue);
 
                 // Footer - totals
                 if (i === 0) { // during first run only!

@@ -66,29 +66,48 @@ function createPage(ph) {
 }
 
 function render(page, url, outPath) {
-        var deferred = Q.defer();
+    var deferred = Q.defer();
+    var timeout = 2000;
+    var done = false;
     var pageSizeOptions = {
         format: 'A4',
         orientation: 'landscape'
     };
 
+    setTimeout(function () {
+        if (!done) {
+            deferred.reject(new Error('timeout reached'));
+        }
+    }, timeout);
+
     try {
         page.open(url, function (status) {
             console.log("[PH] page opened [%s] status: ", url, status);
 
-            page.set('paperSize', pageSizeOptions, function () {
-                page.render(outPath, function () {
-                    console.log("[PH] file rendered to [%s]", outPath);
+            // Wait till page signals that it is OK to render
+            page.set('onCallback', function(result) {
+                console.log("[PH] callback received: %s", JSON.stringify(result));
 
-                    page.close();
-                    console.log("[PH] page closed - done");
+                done = true;
 
-                    deferred.resolve(outPath);
+                if (!result.done) {
+                    return deferred.reject(new Error('bad callback: ' + JSON.stringify(result)));
+                }
+
+                page.set('paperSize', pageSizeOptions, function () {
+                    page.render(outPath, function () {
+                        console.log("[PH] file rendered to [%s]", outPath);
+
+                        page.close();
+                        console.log("[PH] page closed - done");
+
+                        deferred.resolve(outPath);
+                    });
                 });
             });
         });
     } catch(e) {
-        deferred.reject(new Error('failed to render: ', e.toString()));
+        deferred.reject(new Error('failed to render: ' + e.toString()));
     }
 
     return deferred.promise;

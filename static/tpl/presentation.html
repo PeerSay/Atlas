@@ -311,8 +311,10 @@
 <script>
     $(function () {
         var containerHeight = !PRINT_MODE ? $('.slides').height() : 700;
+        var $tables = $('.reveal .table');
+        var done = doneFn($tables.length);
 
-        $('.reveal .table').each(function () {
+        $tables.each(function () {
             var size = 80, minSize = 40, step = 5;
             var $table = $(this);
             var margin = $table.parent().find('h2').height() + 30;
@@ -320,14 +322,17 @@
             makeFit($table);
 
             function makeFit($el) {
-                if (isFit($el)) { return; }
+                if (isFit($el)) { return done(); }
 
                 var $tds = $el.find('td');
                 var interval = setInterval(function () {
                     size -= step;
                     $tds.css({'font-size': size + '%'});
 
-                    if (isFit($el) || size < minSize) { clearInterval(interval); }
+                    if (isFit($el) || size < minSize) {
+                        clearInterval(interval);
+                        return done();
+                    }
                 }, 0);
             }
 
@@ -335,6 +340,17 @@
                 return ($el.height() + margin <= containerHeight);
             }
         });
+
+        function doneFn(count) {
+            return function () {
+                count--;
+                if (count) { return; }
+
+                if (typeof window.callPhantom === 'function') {
+                    window.callPhantom({done: true});
+                }
+            };
+        }
     });
 </script>
 </body>

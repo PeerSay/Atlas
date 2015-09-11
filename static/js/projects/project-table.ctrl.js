@@ -183,7 +183,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
         view.filerGroupRowsFn = function (topic) { // TODO - move to model as filter()?
             return function (row) {
                 return (row().topic === topic);
-            }
+            };
         };
         view.topicWeights = m.topicWeights;
 

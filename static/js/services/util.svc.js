@@ -151,7 +151,7 @@ function Util($, $state) {
             var call_now = immediate && !timeout;
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
-            if (call_now) func.apply(ctx, args);
+            if (call_now) { func.apply(ctx, args); }
         };
     }
 

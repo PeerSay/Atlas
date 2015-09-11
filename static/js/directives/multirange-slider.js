@@ -34,9 +34,9 @@ function sliderDirective($parse) {
             }
 
             function modelTotal() {
-                return m.ranges.reduce((function (sum, range) {
+                return m.ranges.reduce(function (sum, range) {
                     return sum + range.value();
-                }), 0);
+                }, 0);
             }
 
             function updateRangeWidths() {

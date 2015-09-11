@@ -48,7 +48,7 @@ function TableModel() {
                     range(name).push(innerKey, ranges.get(innerKey));
                 }
                 return range(innerKey, params);
-            }
+            };
         }
         else {
             return ranges.get(name).extend(params || {});
@@ -62,7 +62,7 @@ function TableModel() {
         var cache = {};
 
         function get(name) {
-            return cache[name] = cache[name] || Range(name)
+            return cache[name] = cache[name] || Range(name);
         }
 
         function reset() {
@@ -136,7 +136,7 @@ function TableModel() {
                 // if data is Range then return its access fn
                 return data.access || function () {
                     return data;
-                }
+                };
             }
 
             function size() {
@@ -163,7 +163,7 @@ function TableModel() {
             return range.list.reduce(function (acc, cur) {
                 return acc + val(cur());
             }, 0);
-        }
+        };
     }
 
     function _max(val) {
@@ -173,7 +173,7 @@ function TableModel() {
                 var v = val(cur());
                 return v > acc ? v : acc;
             }, 0);
-        }
+        };
     }
 
     /////////////////////////////
@@ -182,8 +182,8 @@ function TableModel() {
         return function (range) {
             return function (idx) {
                 return val(range.access(idx)());
-            }
-        }
+            };
+        };
     }
 
     function _div(getter, val) {
@@ -191,8 +191,8 @@ function TableModel() {
         return function (range) {
             return function (idx) {
                 return getter(range)(idx) / val(range)();
-            }
-        }
+            };
+        };
     }
 
     return T;

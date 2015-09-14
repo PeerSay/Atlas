@@ -10,12 +10,17 @@ function psTableInput() {
             var $el = $(element);
             var $td = $el.parents('td');
             var $tr = $td.parent();
-            var productCells = function () {
+            var $tbody = $td.parents('tbody');
+            var allProductCells = function () {
                 var $cells = $('#decision-table th, #decision-table td');
                 // using jquery.column.js plugin
                 var $inputCol = $cells.nthCol($td.index());
                 var $gradeCol = $cells.nthCol($td.index() + 1);
                 return $inputCol.add($gradeCol);
+            };
+            var allGroupGradeCells = function () {
+                var $cells = $tbody.find('td');
+                return $cells.nthCol($td.index() + 1);
             };
 
             var ctrl = scope.$eval(attrs.ctrl);
@@ -51,11 +56,18 @@ function psTableInput() {
             //Mute columns if mandatory requirement is not met
             if (cell.muteProd) {
                 scope.$watch(cell.muteProd, function (newVal/*, oldVal*/) {
+                    // red-triangle class on cell
                     $td.toggleClass('culprit', newVal);
 
-                    var $prodCells = productCells();
+                    // mute 2 columns
+                    var $prodCells = allProductCells();
                     var anyMuted = ($prodCells.filter('.culprit').length > 0);
                     $prodCells.toggleClass('muted', anyMuted);
+
+                    // red-triangle class on group cell
+                    var $groupCells = allGroupGradeCells();
+                    var anyMutedInGroup = ($groupCells.slice(1).filter('.culprit').length > 0);
+                    $groupCells.first().toggleClass('group-culprit', anyMutedInGroup);
                 });
             }
 

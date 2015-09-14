@@ -31,10 +31,10 @@
                     </a>
 
                     <form class="slider-content page-spacer" ng-cloak>
-                        <slider class="no-select">
+                        <slider class="no-select" step=".01">
                             <slider-range model="val.weight" ng-repeat="val in table.view.topicWeights track by val.id"
                                     ng-class="{'current-range': groupIdx === $index}">
-                                <div class="slider-handle">&nbsp;&nbsp;</div>
+                                <div class="slider-handle"></div>
                                 <div class="slider-label">{{ val.weight * 100 | number:0 }}%</div>
                             </slider-range>
                         </slider>

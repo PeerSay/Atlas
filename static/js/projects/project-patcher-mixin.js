@@ -30,7 +30,7 @@ function ProjectPatcherMixin($stateParams, $timeout, Projects, jsonpatch) {
         function patchProject() {
             var nullPromise = $timeout(function () {});
             var patch = jsonpatch.generate(patchObserver);
-            if (!patch.length) { return; nullPromise; }
+            if (!patch.length) { return nullPromise; }
 
             return Projects.patchProject(projectId, patch);
         }

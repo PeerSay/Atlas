@@ -32,7 +32,7 @@ function ProjectPresentationsCtrl($scope, $stateParams, Projects, Upload, Notify
     function activate() {
         Projects.readProject(m.projectId).then(function (res) {
             m.presentation = res.presentation;
-            m.observe({presentation: m.presentation});
+            m.observe({presentation: {data: m.presentation.data}});
 
             m.data = res.presentation.data;
             m.snapshots = res.presentation.snapshots;

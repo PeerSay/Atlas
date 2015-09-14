@@ -110,7 +110,6 @@ module.exports = function (grunt) {
                     'bower_components/angular-ui-router/release/angular-ui-router.min.js',
                     'bower_components/angular-ui-select/dist/select.js',
                     'bower_components/ng-file-upload/ng-file-upload.min.js',
-                    'bower_components/angular-multirange-slider/dist/multirange-slider.js',
                     'js/**/*.js',
                     'test/**/*.js'
                 ],

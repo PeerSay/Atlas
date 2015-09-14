@@ -64,6 +64,7 @@ function renderTemplate(project, logoUrl) {
         if (superTopic !== 'Cost' && _.findWhere(project.topicWeights, {topic: 'Cost'})) {
             table.superTopics.push(getSingleTopicTable(model, 'Cost'));
         }
+        table.showTopOnly = (model['total-max']().list.length > 3);
     }
 
     var locals = _.extend({}, settings, {
@@ -185,6 +186,7 @@ function buildModel(reqs, topicWeights) {
                 rowRange
                     .push(prodGradeKey, {
                         value: gradeStr,
+                        input: prod.input,
                         product: prod.name,
                         maxInRow: maxInRangeFn(rowMaxRange, prodGradeValue)
                     });
@@ -193,13 +195,13 @@ function buildModel(reqs, topicWeights) {
                 var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
                     .push('', prodGradeValue);
                 var groupGradeValue = {
-                    value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange)
+                    value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange),
+                    product: prod.name
                 };
-                groupMaxRange.push('', groupGradeValue);
                 groupGradeValue.max = maxInRangeFn(groupMaxRange, groupGradeValue);
-                groupGradeValue.product = prod.name;
-                groupRange
-                    .push(prodGradeKey, groupGradeValue);
+
+                groupMaxRange.push('', groupGradeValue);
+                groupRange.push(prodGradeKey, groupGradeValue);
 
                 // Footer - totals
                 if (i === 0) { // during first run only!
@@ -251,20 +253,28 @@ function reqWeightPercentFn(range, cell) {
 
 function groupGradeFn(rowWeightRange, prodsGradesInGroupRange) {
     return function () {
+        var anyInit = false;
         var groupGrade = prodsGradesInGroupRange.list.reduce(function (acc, item, i) {
-            var grade = item().value || 0; // null if grade is not init
+            var val = item().value;
+            if (val !== null) {
+                anyInit = true;
+            }
+
+            var grade = val || 0; // null if grade is not init
             var weightModel = rowWeightRange.access(i)();
             var weight = rowWeightRange.weight(weightModel.value); // aggregated
             return acc + grade * weight;
         }, 0);
 
-        return Math.round(groupGrade * 10) / 10;
+        return anyInit ? Math.round(groupGrade * 10) / 10 : '?';
     };
 }
 
 function totalGradeGetFn(maxTotalsRange, prodKey) {
     return function () {
-        return maxTotalsRange.access(prodKey)().value();
+        var val = maxTotalsRange.access(prodKey)().value();
+        // val=NaN when there are groups with grade === '?'
+        return !isNaN(val) ? val: '?';
     };
 }
 

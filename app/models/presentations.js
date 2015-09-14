@@ -277,9 +277,8 @@ function renderSnapshotPDF(htmlFileName, toSubDir, title, cb) {
     console.log('[DB] Rendering PDF to [%s]', filePath);
 
     phantom.renderPDF(htmlUrl, filePath)
-        .catch(function (reason) {
-            var err = reason.toString();
-            console.log('[DB] Render PDF: failed [%s]', err);
+        .catch(function (err) {
+            console.log('[DB] Render PDF: failed [%s]', err.toString());
             cb(err);
         })
         .then(function (file) {

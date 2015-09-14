@@ -99,7 +99,7 @@ describe('REST API - Validation', function () {
                 .send({a: 1})// <-- expected: {email: '...', password: '', longSession: true|false}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email is required'}, done);
+                .expect({error: 'Not valid: "email" is required'}, done);
         });
 
         it('should return 409 on non-email param for /login', function (done) {
@@ -108,7 +108,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'abc'})// <-- expected: {email: '...', password: '', longSession: true|false}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email must be a valid email'}, done);
+                .expect({error: 'Not valid: "email" must be a valid email'}, done);
         });
 
         it('should return 409 on no password param for /login', function (done) {
@@ -117,7 +117,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'a@a'})// <-- expected: {email: '...', password: '', longSession: true|false}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: password is required'}, done);
+                .expect({error: 'Not valid: "password" is required'}, done);
         });
 
         it('should return 409 on ill-formatted password for /login', function (done) {
@@ -126,7 +126,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'a@a', password: '123'}) // <-- min 6 chars pwd
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
+                .expect({error: 'Not valid: "password" length must be at least 6 characters long'}, done);
         });
 
         it('should return 409 on no longSession for /login', function (done) {
@@ -135,7 +135,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'a@a', password: '123123'})
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: longSession is required'}, done);
+                .expect({error: 'Not valid: "longSession" is required'}, done);
         });
 
         it('should return 409 on non-boolean longSession for /login', function (done) {
@@ -144,7 +144,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'a@a', password: '123123', longSession: 'some'})
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: longSession must be a boolean'}, done);
+                .expect({error: 'Not valid: "longSession" must be a boolean'}, done);
         });
     });
 
@@ -156,7 +156,7 @@ describe('REST API - Validation', function () {
                 .send({a: 1})// <-- expected: {email: '...', password: ''}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email is required'}, done);
+                .expect({error: 'Not valid: "email" is required'}, done);
         });
 
         it('should return 409 on non-email param for /signup', function (done) {
@@ -165,7 +165,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'abc'})// <-- expected: {email: '...', password: ''}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email must be a valid email'}, done);
+                .expect({error: 'Not valid: "email" must be a valid email'}, done);
         });
 
         it('should return 409 on no password param for /signup', function (done) {
@@ -174,7 +174,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'a@a'})// <-- expected: {email: '...', password: ''}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: password is required'}, done);
+                .expect({error: 'Not valid: "password" is required'}, done);
         });
 
         it('should return 409 on ill-formatted password for /signup', function (done) {
@@ -183,7 +183,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'a@a', password: '123'}) // <-- min 6 chars pwd
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
+                .expect({error: 'Not valid: "password" length must be at least 6 characters long'}, done);
         });
     });
 
@@ -195,7 +195,7 @@ describe('REST API - Validation', function () {
                 .send({a: 1}) // <-- expected: {email: '...'}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email is required'}, done);
+                .expect({error: 'Not valid: "email" is required'}, done);
         });
 
         it('should return 409 on non-string param for /restore', function (done) {
@@ -204,7 +204,7 @@ describe('REST API - Validation', function () {
                 .send({email: 123}) // <--
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email must be a string'}, done);
+                .expect({error: 'Not valid: "email" must be a string'}, done);
         });
 
         it('should return 409 on non-email param for /restore', function (done) {
@@ -213,7 +213,7 @@ describe('REST API - Validation', function () {
                 .send({email: 'abc'})// <--
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: email must be a valid email'}, done);
+                .expect({error: 'Not valid: "email" must be a valid email'}, done);
         });
 
         it('should return 409 on bad params for /restore/complete', function (done) {
@@ -222,7 +222,7 @@ describe('REST API - Validation', function () {
                 .send({code: 'aaaaaa'})// <-- expected: {code: '...', password: '...'}
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: password is required'}, done);
+                .expect({error: 'Not valid: "password" is required'}, done);
         });
 
         it('should return 409 on ill-formatted password for /restore/complete', function (done) {
@@ -231,7 +231,7 @@ describe('REST API - Validation', function () {
                 .send({code: 'aaa123', password: '123'}) // <-- min 6 chars pwd
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: password length must be at least 6 characters long'}, done);
+                .expect({error: 'Not valid: "password" length must be at least 6 characters long'}, done);
         });
 
         it('should return 409 on ill-formatted code for /restore/complete', function (done) {
@@ -240,7 +240,7 @@ describe('REST API - Validation', function () {
                 .send({code: '-', password: '123123'}) // <-- alpha-num code
                 .set(typeAcceptHeaders)
                 .expect(409)
-                .expect({error: 'Not valid: code must only contain alpha-numeric characters'}, done);
+                .expect({error: 'Not valid: "code" must only contain alpha-numeric characters'}, done);
         });
     });
 });

@@ -750,19 +750,65 @@
   ~ .popover {
     min-width: 300px;
     cursor: default;
-  }
-}
-.at-multirange-slider {
-  .slider {
-    height: 4px;
-    border: 1px solid #ccc;
-    .slider-label {
-      color: #aaa;
-      padding-top: .7em;
+    .popover-content {
+      padding: 10px 20px;
     }
   }
-  @current-range-bg: #4effb4;
-  .current-range {
-    background-color: @current-range-bg;
+}
+
+// Slider (adopted from 3rd-party lib)
+//
+@slider-current-range-bg: @brand-primary;
+@slider-label-color: #aaa;
+@slider-border-color: #d7d7d7;
+
+.ps-multirange-slider {
+  height: 1em;
+  padding-top: .5em;
+
+  .slider {
+    height: 4px;
+    border: 1px solid @slider-border-color;
+  }
+
+  .slider-range {
+    display: inline-block;
+    position: relative;
+    float: left;
+    height: 2px;
+    vertical-align: top;
+    &.current-range {
+      background-color: @slider-current-range-bg;
+      .slider-label {
+        color: darken(@slider-label-color, 20%);
+      }
+    }
+
+    &:last-child .slider-handle{
+      display: none;
+    }
+  }
+
+  @handler-height: 1em;
+  @handler-width: .8em;
+  .slider-handle {
+    position: absolute;
+    right: -(@handler-width/2); top: -(@handler-height/2);
+    height: @handler-height; width: @handler-width;
+    border: 1px solid darken(@slider-border-color, 20%);
+    border-radius: 2px;
+    background: #fff;
+    z-index: 100;
+    cursor: pointer;
+    &:hover {
+      background: #ddd;
+    }
+  }
+
+  .slider-label {
+    font-size: .75em;
+    text-align: center;
+    padding-top: .7em;
+    color: @slider-label-color;
   }
 }

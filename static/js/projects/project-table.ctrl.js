@@ -39,7 +39,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
     function watch(weights) {
         var debouncedPatch = _.debounce(function (newWeights) {
             _.forEach(newWeights, function (it, i) {
-                m.project.topicWeights[i].weight = _.round(it.weight, 4);
+                m.project.topicWeights[i].weight = _.round(it.weight, 2);
             });
             m.patchProject();
         }, 1000);
@@ -145,7 +145,9 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
                     var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
                         .push('', prodGradeModel);
                     groupRange
-                        .push(prodGradeKey, {value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange)});
+                        .push(prodGradeKey, {
+                            value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange)
+                        });
 
                     // Footer - totals
                     var maxTotalsRange = T.range('total-max').aggregate({
@@ -181,7 +183,7 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
         view.filerGroupRowsFn = function (topic) { // TODO - move to model as filter()?
             return function (row) {
                 return (row().topic === topic);
-            }
+            };
         };
         view.topicWeights = m.topicWeights;
 
@@ -215,14 +217,20 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
 
         function groupGradeFn(rowWeightRange, prodsGradesInGroupRange) {
             return function () {
+                var anyInit = false;
                 var groupGrade = prodsGradesInGroupRange.list.reduce(function (acc, item, i) {
-                    var grade = item().value || 0; // null if grade is not init
+                    var val = item().value;
+                    if (val !== null) {
+                        anyInit = true;
+                    }
+
+                    var grade = val || 0; // null if grade is not init
                     var weightModel = rowWeightRange.access(i)();
                     var weight = rowWeightRange.weight(weightModel.value); // aggregated
                     return acc + grade * weight;
                 }, 0);
 
-                return _.round(groupGrade, 1);
+                return anyInit ? _.round(groupGrade, 1) : '?';
             };
         }
 
@@ -239,7 +247,9 @@ function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRec
 
         function totalGradeGetFn(maxTotalsRange, prodKey) {
             return function () {
-                return maxTotalsRange.access(prodKey)().value();
+                var val = maxTotalsRange.access(prodKey)().value();
+                // val=NaN when there are groups with grade === '?'
+                return !isNaN(val) ? val: '?';
             };
         }
 

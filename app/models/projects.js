@@ -91,7 +91,7 @@ var projectSchema = new Schema({
     //
     topicWeights: [{
         topic: {type: String},
-        weight: {type: Number, min: 0, max: 1, default: 0.5}
+        weight: {type: Number, min: 0, max: 1}
     }],
     table: [{
         reqId: {type: String, required: true},
@@ -242,16 +242,25 @@ function buildNewTopicWeights(requirements) {
         var topicName = req.topic || '';
         if (!acc.idx[topicName]) {
             acc.idx[topicName] = 1;
-            acc.list.push(topicName); // Order matters!
+            acc.list.push({
+                topic: topicName,
+                weight: 0
+            });
         }
         return acc;
     }, {list: [], idx: {}});
 
-    var evenWeight = 1 / topics.list.length; // Equality for all!
-
-    return _.map(topics.list, function (topic) {
-        return {topic: topic, weight: evenWeight};
+    // Divide 100 between topics in 'almost-equal' parts
+    for(var i = 0; i < 100; i++) {
+        topics.list[i % topics.list.length].weight += 1;
+    }
+    var res = topics.list.map(function (it) {
+        it.weight = it.weight / 100;
+        return it;
     });
+    //console.log('>>> List res:', JSON.stringify(res));
+
+    return res;
 }
 
 projectSchema.pre('save', function ensureTableConsistency(next) {

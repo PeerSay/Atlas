@@ -169,7 +169,7 @@ describe('TableModel', function () {
                     .aggregate({winner: T._max()})
                     .push('', {value: 1}, {isMax: T.ref('=winner', T._eq())})
                     .push('', {value: 2})
-                    .push('', {value: 3}, {max: '=winner'})
+                    .push('', {value: 3}, {max: '=winner'});
             });
 
             expect(model.group('max')().max()).to.equal(2);

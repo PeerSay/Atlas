@@ -6,7 +6,7 @@ Q.longStackSupport = true;
 
 var phantomBinary = phantomJSExePath(require('phantomjs').path);
 var procPromise = startProcess();
-
+var RENDER_TIMEOUT = 10000; // 10s
 
 process.on('exit', function (code, signal) {
     procPromise.then(function (ph) {
@@ -67,7 +67,7 @@ function createPage(ph) {
 
 function openUrl(page, url) {
     var deferred = Q.defer();
-    var timeout = 5000;
+    var timeout = RENDER_TIMEOUT;
     var opened = false;
 
     try {

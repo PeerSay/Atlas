@@ -2,8 +2,8 @@ angular
     .module('PeerSay')
     .directive('psSliderPopover', psSliderPopover);
 
-psSliderPopover.$inject = ['$rootScope', '$compile', '$timeout'];
-function psSliderPopover($rootScope, $compile, $timeout) {
+psSliderPopover.$inject = ['$rootScope', '$compile', '$parse', '$timeout'];
+function psSliderPopover($rootScope, $compile, $parse, $timeout) {
     return {
         restrict: 'A',
         compile: function (tElement, tAttrs) {
@@ -12,18 +12,19 @@ function psSliderPopover($rootScope, $compile, $timeout) {
             var $tplForm = tElement.find('form').detach();
 
             return function postLink(scope, element, attrs, ctrls, transcludeFn) {
-                var id = attrs.uid;
-                var $toggler = element.find('a');
-                var $container = element.parents(attrs.container);
                 var $form = $tplForm.clone();
                 var isCompiled = false;
 
-                //console.log('>>Slide id:', id);
+                var uid = attrs.uid;
+                var $toggler = element.find('a');
+                var $container = attrs.container ? element.parents(attrs.container) : element;
+                var trigger = attrs.trigger ? 'manual' : 'click';
+
 
                 $toggler.popover({
                     container: $container,
                     //viewport: $viewport,
-                    trigger: 'click',
+                    trigger: trigger,
                     html: true,
                     content: function () {
                         // For proper work, slider el needs to be in proper place in DOM when compiled,
@@ -40,6 +41,15 @@ function psSliderPopover($rootScope, $compile, $timeout) {
                     }
                 });
 
+                if (attrs.trigger) {
+                    scope.$watch(attrs.trigger, function (newVal, oldVal) {
+                        //console.log('>> Watch:', newVal);
+                        if (newVal) {
+                            $toggler.popover('show');
+                        }
+                    });
+                }
+
                 $toggler.on('shown.bs.popover', function () {
                     $('body').on('click', hide);
                 });
@@ -49,17 +59,22 @@ function psSliderPopover($rootScope, $compile, $timeout) {
                 });
 
                 $container.on('click', function () {
-                    scope.$emit('hide.popover', id);
+                    scope.$emit('hide.popover', uid);
                 });
 
-                $rootScope.$on('hide.popover', function (evt, senderId) {
-                    if (senderId !== id) {
+                $rootScope.$on('hide.popover', function (evt, senderUid) {
+                    if (senderUid !== uid) {
                         hide();
                     }
                 });
 
                 function hide() {
                     $toggler.popover('hide');
+                    if (attrs.trigger) {
+                        scope.$apply(function () {
+                            $parse(attrs.trigger).assign(scope, false);
+                        });
+                    }
                 }
             };
         }

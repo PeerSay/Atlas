@@ -16,6 +16,16 @@ function MenuCtrl($state, User, Projects, Notify) {
         toggleCreateDlg: Projects.toggleCreateDlg.bind(Projects)
     };
 
+    //TODO - real data
+    m.peers = {
+        list: [
+            {email: 'my@team', online: true},
+            {email: 'my@team2', online: false},
+            {email: 'mate@me', online: true}
+        ],
+        toggle: false
+    };
+
     activate();
 
     function activate() {

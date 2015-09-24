@@ -21,8 +21,7 @@
             </td>
             <td class="strong center"
                     ng-click="$event.stopPropagation()">
-                <div ps-slider-popover container="td" uid="slider-{{:: groupIdx }}"
-                        showIf="group">
+                <div ps-slider-popover container="td" uid="slider-{{:: groupIdx }}">
                     <a href tabindex="-1" class="no-outline"
                             data-toggle="popover"
                             data-placement="right"
@@ -30,7 +29,7 @@
                         {{ table.view.topicWeights[groupIdx].weight * 100 | number:0 }}%
                     </a>
 
-                    <form class="slider-content page-spacer" ng-cloak>
+                    <form class="page-spacer" ng-cloak>
                         <slider class="no-select" step=".01">
                             <slider-range model="val.weight" ng-repeat="val in table.view.topicWeights track by val.id"
                                     ng-class="{'current-range': groupIdx === $index}">

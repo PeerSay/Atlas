@@ -747,6 +747,7 @@
 // Slider popover
 //
 [ps-slider-popover] {
+  .popover,
   ~ .popover {
     min-width: 300px;
     cursor: default;
@@ -811,4 +812,22 @@
     padding-top: .7em;
     color: @slider-label-color;
   }
+}
+
+/*Team-mates*/
+.peer-status {
+  display: inline-block;
+  float: right;
+  .round(15px);
+  &.online {
+    background-color: #63F363;
+  }
+  &.offline {
+    background-color: #d5d5d5;
+  }
+}
+.menu-popover-toggler {
+  display: block;
+  width: 100%;
+  height: 1px;
 }

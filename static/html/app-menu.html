@@ -64,6 +64,45 @@
                         Projects
                     </a>
                 </li>
+                <!--Project Details: Team mates-->
+                <li class="team-mates" ng-show="$state.includes('project.details')">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Team mates
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="disabled" ng-repeat="p in menu.peers.list">
+                            <a href="#">
+                                {{:: p.email }}
+                                <span class="peer-status"
+                                        ng-class="p.online && 'online' || 'offline' "></span>
+                            </a>
+                        </li>
+                        <li class="divider" role="separator"></li>
+                        <li><a href="#" ng-click="menu.peers.toggle = true">Add</a></li>
+                    </ul>
+                    <!--Add mate popover-->
+                    <div ps-slider-popover uid="menu-popover" trigger="menu.peers.toggle">
+                        <a href class="menu-popover-toggler"
+                                data-toggle="popover"
+                                data-placement="bottom"
+                                title="Invite a teammate to project"></a>
+
+                        <form class="form-horizontal" ng-cloak>
+                            <div class="form-group">
+                                <label for="peer-email" class="col-sm-3 control-label">Email:</label>
+                                <div class="col-sm-9">
+                                    <input type="email" class="form-control" id="peer-email"
+                                            ps-focus-on="menu.peers.toggle">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-9">
+                                    <button type="button" class="btn btn-default pull-right">Send</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </li>
                 <!--User-->
                 <li class="dropdown user">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">

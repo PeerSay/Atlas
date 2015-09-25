@@ -815,19 +815,27 @@
 }
 
 /*Team-mates*/
-.peer-status {
-  display: inline-block;
-  float: right;
-  .round(15px);
-  &.online {
-    background-color: #63F363;
+.team-mates {
+  .peer-status {
+    display: inline-block;
+    float: right;
+    .round(15px);
+    &.online {
+      background-color: #63F363;
+    }
+    &.offline {
+      background-color: #d5d5d5;
+    }
   }
-  &.offline {
-    background-color: #d5d5d5;
+  .menu-popover-toggler {
+    display: block;
+    width: 100%;
+    height: 1px;
   }
-}
-.menu-popover-toggler {
-  display: block;
-  width: 100%;
-  height: 1px;
+  .fa-spinner {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    margin-left: -7px;
+  }
 }

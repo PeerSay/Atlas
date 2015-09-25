@@ -52,7 +52,8 @@
                 <!--Project List: Add new-->
                 <li class="dropdown add" ng-show="$state.includes('project.list')">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="fa fa-plus-circle"></span> Add <span class="caret"></span></a>
+                        <span class="fa fa-plus-circle"></span> Add <span class="caret"></span>
+                    </a>
                     <ul class="dropdown-menu" role="menu">
                         <li><a href ng-click="menu.project.toggleCreateDlg(true)">Add Project</a></li>
                     </ul>
@@ -65,10 +66,14 @@
                     </a>
                 </li>
                 <!--Project Details: Team mates-->
-                <li class="team-mates" ng-show="$state.includes('project.details')">
+                <li class="team-mates" ng-show="$state.includes('project.details')"
+                        ps-on-event="{'show.bs.dropdown': menu.peers.load}">
+                    <!--Menu toggler-->
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         Team mates
-                        <span class="caret"></span></a>
+                        <span class="caret"></span>
+                    </a>
+                    <!--Menu items with peer list-->
                     <ul class="dropdown-menu" role="menu">
                         <li class="disabled" ng-repeat="p in menu.peers.list">
                             <a href="#">
@@ -79,6 +84,10 @@
                         </li>
                         <li class="divider" role="separator"></li>
                         <li><a href="#" ng-click="menu.peers.toggle = true">Add</a></li>
+                        <!--Progress spinner-->
+                        <span class="fa fa-spinner"
+                                ng-show="menu.peers.loading"
+                                ng-class="{'fa-spin' : menu.peers.loading}"></span>
                     </ul>
                     <!--Add mate popover-->
                     <div ps-slider-popover uid="menu-popover" trigger="menu.peers.toggle">

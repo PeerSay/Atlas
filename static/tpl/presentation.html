@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PeerSay - Presentation</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="{{ server }}/bower_components/reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="{{ server }}/bower_components/reveal.js/css/theme/sky.css" id="theme">
+    <link rel="stylesheet" href="{{ server }}/css/tpl.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var PRINT_MODE = window.location.search.match(/print-pdf/gi);
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = PRINT_MODE ?
+                '{{ server }}/bower_components/reveal.js/css/print/pdf.css' :
+                '{{ server }}/bower_components/reveal.js/css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+    <style>
+        .pull-left {
+            text-align: left;
+        }
+        ul {
+            display: block;
+        }
+        .reveal section img.logo {
+            max-height: 300px;
+            border: 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="reveal">
+    <div class="slides">
+        <!--Title page-->
+        <section>
+            <section>
+                {% if logo.include && title.logoUrl %}
+                <img src="{{ server }}{{ title.logoUrl }}" class="logo">
+                {% endif %}
+
+                <h1>{{ title.title }}</h1>
+
+                <p>
+                    <small>Presented by <a href="mailto:{{ title.user.email }}">{{ title.user.name || title.user.email }}</a></small>
+                    <br>
+                    <small>Date: {{ title.date }}</small>
+                </p>
+            </section>
+
+            <!-- Footer: Themes-->
+            <section id="themes">
+                <h2>Select theme</h2>
+
+                <p>
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','{{ server }}/bower_components/reveal.js/css/theme/sky.css'); return false;">Sky (default)</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','{{ server }}/bower_components/reveal.js/css/theme/white.css'); return false;">White</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','{{ server }}/bower_components/reveal.js/css/theme/black.css'); return false;">Black</a> -
+                    <!--
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/moon.css'); return false;">Moon</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/night.css'); return false;">Night</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/league.css'); return false;">League</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/beige.css'); return false;">Beige</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/simple.css'); return false;">Simple</a> <br>
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/serif.css'); return false;">Serif</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/blood.css'); return false;">Blood</a> -
+                    <a href="#" onclick="document.getElementById('theme').setAttribute('href','/bower_components/reveal.js/css/theme/solarized.css'); return false;">Solarized</a>
+                    -->
+                </p>
+            </section>
+        </section>
+
+        <!--Overview page-->
+        {% if overview.include %}
+        <section>
+            <h2>Overview</h2>
+
+            <p>
+                {{ overview.overviewText|escape|replace('\n', '<br>', 'g')|safe }}
+            </p>
+        </section>
+        {% endif %}
+
+        <!--Requirements-->
+        {% if requirements.include %}
+        <section>
+            {% for i, bucket in requirements.list %}
+            <section>
+                <h2>Mandatory Requirements {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
+                {% if bucket.length %}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td>Requirement</td>
+                        <td>Description</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for j, req in bucket %}
+                    <tr>
+                        <td>{{ req.name }}</td>
+                        <td>{{ req.description }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </section>
+            {% endfor %}
+
+            <!--Empty list-->
+            {% if !requirements.list.length %}
+            <h2>Mandatory Requirements</h2>
+
+            <p>(Here there will be requirements)</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!--Products-->
+        {% if products.include %}
+        <section>
+            {% for i, bucket in products.list %}
+            <section>
+                <h2>Candidate products {% if i > 0 %} ({{ i+1 }}){% endif %}</h2>
+                {% if bucket.length > 0 %}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td>Product</td>
+                        <td>Description</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for j, prod in bucket %}
+                    <tr class="{% if prod.warning %} warning {% endif %}">
+                        <td>{{ prod.name }}</td>
+                        <td>{{ prod.description }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </section>
+            {% endfor %}
+
+            <!--Empty list-->
+            {% if !products.list.length %}
+            <h2>Candidate products</h2>
+
+            <p>(Here there will be products)</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!--Table-->
+        {% if table.include %}
+        <section>
+            <!--Topics table-->
+            <section>
+                <h2>Decision table {%if table.showTopOnly %} - Top Three {%endif%}</h2>
+                {% if table.topics %}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        {% for i, head in table.topics.header %}
+                        <td class="{{ head().class }}">{{ head().label }}</td>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i, group in table.topics.groups %}
+                    <tr>
+                        <td>{{ group[0]().value }}</td>
+                        <td class="center">{{ group[1]().value | percent }}%</td>
+
+                        {% for n, grade in group | skip_list(2) %}
+                        <td class="center {% if grade().max() %} winner {% endif %}">
+                            {{ grade().value() }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        {% for i, foot in table.topics.footer %}
+                        <td class="{{ foot().class }} {% if foot().maxTotal() %} winner {% endif %}">
+                            {{ foot().label || foot().value() }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    </tfoot>
+                </table>
+                {% endif %}
+
+                <!--Empty table-->
+                {% if !table.topics %}
+                <p>(Here there will be table)</p>
+                {% endif %}
+            </section>
+
+            <!--SuperTopic tables 1 or 2-->
+            {% for l, superTopic in table.superTopics %}
+            <section>
+                <h2>Decision table - {{ superTopic.group[0]().value }}</h2>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        {% for i, head in superTopic.header %}
+                        <td class="{{ head().class }}">{{ head().label }}</td>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <!--Group row: always one! -->
+                    <tbody>
+                    <tr>
+                        <td colspan="{{ superTopic.group.length }}">
+                            {{ superTopic.group[0]().value }}
+                        </td>
+                    </tr>
+                    </tbody>
+
+                    <!--Reqs rows-->
+                    <tbody>
+                    {% for i, cells in superTopic.rows %}
+                    <tr>
+                        {% for k, cell in cells %}
+                        <td class="{% if k %} center {% endif %} {% if cell().maxInRow() %} winner {% endif %}">
+                            {%if cell().type === 'func' %} {{ cell().value() }} {% else %}
+                            {{ cell().value }} {% endif %}
+                            <span class="input">{{ cell().input || '' }}</span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+
+                    <tfoot>
+                    <tr>
+                        <td>Overall Grade</td>
+                        <td class="center">{{ superTopic.group[1]().value | percent }}%</td>
+                        {% for i, grade in superTopic.group | skip_list(2) %}
+                        <td class="center {% if grade().max() %} winner {% endif %}">
+                            {{ grade().value() }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    </tfoot>
+                </table>
+            </section>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        <!--Summary & recommendations-->
+        {% if notes.include %}
+        <section>
+            <h2>Summary & Recommendation</h2>
+            <ul class="pull-left">
+                {% if notes.summaryText %}
+                <li>
+                    {{ notes.summaryText|escape|replace('\n', '<br>', 'g')|safe }}
+                </li>
+                {% endif %}
+                {% if notes.recommendationText %}
+                <li>
+                    {{ notes.recommendationText|escape|replace('\n', '<br>', 'g')|safe }}
+                </li>
+                {% endif %}
+            </ul>
+        </section>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    if (PRINT_MODE) {
+        var themeSlide = document.getElementById('themes');
+        themeSlide.parentNode.removeChild(themeSlide);
+    }
+</script>
+<script src="{{ server }}/bower_components/reveal.js/lib/js/head.min.js"></script>
+<script src="{{ server }}/bower_components/reveal.js/js/reveal.js"></script>
+<script src="{{ server }}/bower_components/jquery/dist/jquery.min.js"></script>
+<script>
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: false,
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        // Optional reveal.js plugins
+        dependencies: [
+            {src: '{{ server }}/bower_components/reveal.js/plugin/zoom-js/zoom.js', async: true}
+        ]
+    });
+</script>
+<script>
+    $(function () {
+        var containerHeight = !PRINT_MODE ? $('.slides').height() : 700;
+        var $tables = $('.reveal .table');
+        var done = doneFn($tables.length);
+
+        if (!$tables.length) { done(); }
+
+        $tables.each(function () {
+            var size = 80, minSize = 40, step = 5;
+            var $table = $(this);
+            var margin = $table.parent().find('h2').height() + 30;
+
+            makeFit($table);
+
+            function makeFit($el) {
+                if (isFit($el)) { return done(); }
+
+                var $tds = $el.find('td');
+                var interval = setInterval(function () {
+                    size -= step;
+                    $tds.css({'font-size': size + '%'});
+
+                    if (isFit($el) || size < minSize) {
+                        clearInterval(interval);
+                        return done();
+                    }
+                }, 0);
+            }
+
+            function isFit($el) {
+                return ($el.height() + margin <= containerHeight);
+            }
+        });
+
+        function doneFn(count) {
+            return function () {
+                count--;
+                if (count > 0) { return; }
+
+                if (typeof window.callPhantom === 'function') {
+                    window.callPhantom({done: true});
+                }
+            };
+        }
+    });
+</script>
+</body>
+</html>

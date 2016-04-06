@@ -11,8 +11,8 @@ angular.module('PeerSay', [
     'ngMessages',
     'ngSanitize',
     'ngAnimate',
-    'ngTable',
     'monospaced.elastic',
     'ng-context-menu',
-    'ui.select'
+    'ui.select',
+    'ngFileUpload'
 ]);

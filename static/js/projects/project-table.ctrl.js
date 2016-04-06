@@ -1,483 +1,372 @@
 angular.module('PeerSay')
     .controller('ProjectTableCtrl', ProjectTableCtrl);
 
-ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'ngTableParams', 'Projects', 'jsonpatch', 'Util'];
-function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpatch, _) {
-    var m = this;
+ProjectTableCtrl.$inject = ['$scope', '$stateParams', 'Projects', 'TableModel', 'StorageRecord', 'Util', 'ProjectPatcherMixin'];
+function ProjectTableCtrl($scope, $stateParams, Projects, TableModel, StorageRecord, _, ProjectPatcherMixin) {
+    var m = ProjectPatcherMixin(this, $scope);
 
     m.projectId = $stateParams.projectId;
     m.project = null;
-    m.patchObserver = null;
-    m.patchProject = patchProject;
     m.loading = true;
-    m.activate = activate;
     // Table model/view
-    var table = Table(m);
-    m.tableView = table.getView();
-    m.getCsv = table.getCsv.bind(table);
+    m.view = null;
+    m.topicWeights = [];
+    m.getCsv = function () {
+        return Exporter().getCsv(m.view);
+    };
 
 
-    // Called by Table
+    activate();
+
     function activate() {
-        $scope.$on('$destroy', function () {
-            jsonpatch.unobserve(m.project, m.patchObserver);
-        });
+        return Projects.readProject(m.projectId)
+            .then(function (res) {
+                m.project = res;
+                m.observe({table: res.table, topicWeights: res.topicWeights});
 
-        return Projects.readProjectTable(m.projectId).then(function (res) {
-            //console.log('>>', res.table);
+                m.topicWeights = res.topicWeights.reduce(function (acc, it) {
+                    return [].concat(acc, {id: it._id, weight: it.weight});
+                }, []);
+                watch(m.topicWeights);
 
-            m.project = {table: res.table};
-            m.patchObserver = jsonpatch.observe(m.project);
-
-            m.loading = false;
-            return res.table;
-        });
+                m.view = getView(res);
+                return res;
+            }).finally(function () {
+                m.loading = false;
+            });
     }
 
-    function patchProject() {
-        var patch = jsonpatch.generate(m.patchObserver);
-        if (!patch.length) { return; }
+    function watch(weights) {
+        var debouncedPatch = _.debounce(function (newWeights) {
+            _.forEach(newWeights, function (it, i) {
+                m.project.topicWeights[i].weight = _.round(it.weight, 2);
+            });
+            m.patchProject();
+        }, 1000);
 
-        Projects.patchProject(m.projectId, patch);
+        $scope.$watch(function () {
+            return weights;
+        }, function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+                debouncedPatch(newVal);
+            }
+        }, true);
     }
 
-
-    // Table Class
-    function Table(ctrl) {
-        var T = {};
-        T.getView = getView;
-        T.model = {
-            columns: [],
-            rows: []
-        };
-        T.groups = Groups();
-        T.getCsv = Exporter(T.model).getCsv;
-
-        var columnIdx = {};
+    function getView(project) {
         var view = {};
-        // ngTable params
-        var settings = {
-            counts: [], // remove paging
-            defaultSort: 'asc',
-            getData: getData,
-            groupBy: groupBy
-        };
-        var parameters = {
-            count: 2 // must be at least one prop different from defaults!
-        };
+        var model = TableModel.build(function (T) {
+            T.header()
+                .push('name', {label: 'Requirement'})
+                .push('mandatory', {label: 'Mandatory', 'class': 'min'})
+                .push('weight', {label: 'Weight', 'class': 'min'});
 
-        // ngTable stuff
-        function getView() {
-            view.ctrl = ctrl;
-            view.tableParams = new ngTableParams(parameters, settings);
-            return view;
-        }
+            T.footer()
+                .push('name', {label: 'Total:', type: 'static'})
+                .push('mandatory', {label: '', type: 'static'})
+                .push('weight', {label: '100%', type: 'static', 'class': 'center'});
 
-        function groupBy(row) {
-            var key = T.groups.add(row);
-            return key;
-        }
+            var rowIdx = 0;
+            project.table.forEach(function (req, i) {
+                if (!req.selected) { return; }
+                rowIdx++;
 
-        // Groups
-        //
-        function Groups() {
-            var G = {};
-            G.add = add;
-            G.get = get;
-            var cache = {};
-
-            function get(key) {
-                return cache[key];
-            }
-
-            function add(row) {
-                var key = row.req.topic || '(no name)';
-                var group = cache[key] = cache[key] || Group();
-                group.addRow(row);
-
-                return key;
-            }
-
-            function Group() {
-                var G = {};
-                G.addRow = addRow;
-                G.weight = calcWeightPercents;
-                G.cols = [];
-
-                var rows = [];
-                var groupColIdx = {};
-
-                function addRow(row) {
-                    rows.push(row);
-                    addCols(row);
-                }
-
-                function addCols(row) {
-                    var gradeCells = _.map(row.cells, function (cell) {
-                        return cell.class === 'grade' ? cell : null;
+                // Predefine ranges
+                var rowRange = T.rows(i, {topic: req.topic});
+                var rowMaxRange = T.range('row-max-' + i)
+                    .aggregate({
+                        max: T._max()
+                    });
+                var expandedState = StorageRecord.boolean(getExpandedGroupKey(req.topic));
+                var groupsRange = T.range('groups', {multi: true});
+                var groupRange = groupsRange(req.topic, {expanded: expandedState});
+                var rowWeightRange = T.range('req-weights', {multi: true})(req.topic)
+                    .aggregate({
+                        total: T._sum(),
+                        weight: reqWeightFn()
                     });
 
-                    _.forEach(gradeCells, function (cell, idx) {
-                        var colKey = 'group-grade-' + idx;
-                        addCol(colKey, {req: row.req, grade: cell.model});
+
+                groupRange
+                    .push('name', {label: req.topic});
+                //<- no mandatory col
+                //.push('weight', {model: {}}); // <- TODO
+
+                rowRange
+                    .push('name', {label: req.name, type: 'static'})
+                    .push('mandatory', {
+                        label: req.mandatory ? 'fa-check' : '',
+                        type: 'icon',
+                        'class': 'center static'
                     });
-                }
 
-                function addCol(key, data) {
-                    var col = getColumn(key);
-                    col.cells.push(data);
-                }
+                // Req weight
+                var weightModel = CellModel(req, 'weight');
+                rowWeightRange.push('', weightModel);
+                rowRange
+                    .push('weight', {
+                        model: weightModel,
+                        type: 'number', max: 100,
+                        tooltip: reqWeightPercentFn(rowWeightRange, weightModel),
+                        muteRow: muteRowFn(weightModel)
+                    });
 
-                function getColumn(key) {
-                    var col = groupColIdx[key];
-                    if (!col) {
-                        col = groupColIdx[key] = {
-                            cells: [],
-                            grade: function () {
-                                var groupWeight = calcGroupWeight();
-                                if (!groupWeight) { return 0; }
+                req.products.forEach(function (prod, j) {
+                    if (!prod.selected) { return; }
 
-                                var totalGrade =  this.cells.reduce(function (prev, cur) {
-                                    var weight = cur.req.weight;
-                                    var grade = cur.grade.value;
-                                    return prev + grade * weight;
-                                }, 0);
+                    var prodInputKey = 'prod-input-' + j;
+                    var prodGradeKey = 'prod-grade-' + j;
 
-                                var ave = Math.round(totalGrade / groupWeight * 10) / 10; // .1
-                                return ave;
+                    T.header()
+                        .push(prodInputKey, {label: prod.name, 'class': 'text-input'})
+                        .push(prodGradeKey, {label: 'Grade', 'class': 'grade'});
 
-//                                return totalGrade;
+                    // Product input
+                    rowRange
+                        .push(prodInputKey, {
+                            model: CellModel(prod, 'input'),
+                            type: 'text'
+                        });
 
-                            }
-                        };
-                        G.cols.push(col);
+                    // Product grade
+                    var prodGradeModel = CellModel(prod, 'grade');
+                    rowMaxRange.push('', prodGradeModel);
+                    rowRange
+                        .push(prodGradeKey, {
+                            model: prodGradeModel,
+                            type: 'number', max: 10,
+                            'class': 'grade',
+                            maxInRow: maxInRowFn(rowMaxRange, prodGradeModel),
+                            muteProd: muteProdFn(req, prodGradeModel),
+                            tooltip: mandatoryTooltipFn(req, prodGradeModel)
+                        });
+
+                    // Group grade
+                    var prodsGradesInGroupRange = T.range('prod-group-grades-' + j, {multi: true})(req.topic)
+                        .push('', prodGradeModel);
+                    groupRange
+                        .push(prodGradeKey, {
+                            value: groupGradeFn(rowWeightRange, prodsGradesInGroupRange)
+                        });
+
+                    // Footer - totals
+                    var maxTotalsRange = T.range('total-max').aggregate({
+                        max: T._max(function (obj) {
+                            return obj.value(); // default (T._val) assumes .value is not func
+                        })
+                    });
+                    if (rowIdx === 1) {
+                        // during first run only!
+                        maxTotalsRange.push(prodGradeKey, {
+                            value: totalGradeFn(groupsRange, m.project.topicWeights, prodGradeKey)
+                        });
                     }
-                    return col;
-                }
 
-                function calcWeightPercents() {
-                    var totalWeight = calcTotalWeight();
-                    if (!totalWeight) { return 0; }
+                    T.footer()
+                        .push(prodInputKey, {label: '', type: 'static'})
+                        .push(prodGradeKey, {
+                            value: totalGradeGetFn(maxTotalsRange, prodGradeKey),
+                            maxTotal: maxTotalFn(maxTotalsRange, prodGradeKey),
+                            type: 'func',
+                            'class': 'grade'
+                        });
 
-                    var groupWeight = calcGroupWeight();
-                    var weightPercents = Math.round(groupWeight / totalWeight * 100);
-                    return weightPercents;
-                }
+                });
+            });
+        });
 
-                function calcGroupWeight() {
-                    var groupWeight = rows.reduce(function (prev, cur) {
-                        return prev + cur.req.weight;
-                    }, 0);
-                    return groupWeight;
-                }
+        view.empty = !project.table.length;
+        view.header = model.header().list;
+        view.footer = model.footer().list;
+        view.groups = model.groups && model.groups().list;
+        view.rows = model.rows && model.rows().list;
+        view.filerGroupRowsFn = function (topic) { // TODO - move to model as filter()?
+            return function (row) {
+                return (row().topic === topic);
+            };
+        };
+        view.topicWeights = m.topicWeights;
 
-                function calcTotalWeight() {
-                    var weights = columnIdx['weight'].cells;
-                    return weights.reduce(function (prev, cur) {
-                        return prev + cur.model.value;
-                    }, 0);
-                }
-
-                return G;
-            }
-
-            return G;
-        }
-
-        // Model
+        // Compute funcs
         //
-        function getData($defer) {
-            ctrl.activate().then(function (reqs) {
-                buildModel(reqs);
-                view.columns = T.model.columns;
-                view.rows = T.model.rows;
-                view.groups = T.groups;
-
-                $defer.resolve(T.model.rows);
-            });
+        function maxInRowFn(range, cellModel) {
+            return function () {
+                var val = cellModel.value;
+                var max = range.max(); // aggregated
+                return (max === val);
+            };
         }
 
-        function buildModel(reqs) {
-            addHeader('name', {label: 'Requirement'});
-            addFooter('name', {label: 'Total:', type: 'static'});
-
-            addHeader('mandatory', {label: 'Mandatory', 'class': 'min'});
-            addFooter('mandatory', {label: '', type: 'static'});
-
-            addHeader('weight', {label: 'Weight', 'class': 'min'});
-            addFooter('weight', {label: '100%', type: 'static', 'class': 'center'});
-
-            _.forEach(reqs, function (req, rowIdx) {
-                addCell('name', rowIdx, req, {
-                    label: req.name,
-                    type: 'static'
-                });
-                addCell('mandatory', rowIdx, req, {
-                    label: req.mandatory ? 'fa-check' : '',
-                    type: 'icon',
-                    'class': 'center'
-                });
-                addCell('weight', rowIdx, req, {
-                    model: CellModel(req, 'weight', {
-                        tooltipFn: weightPercentComputeFn,
-                        muteRowFn: muteOnZeroFn
-                    }),
-                    type: 'number',
-                    max: 100
-                });
-
-                _.forEach(req.products, function (prod) {
-                    // Input
-                    var colInputKey = 'prod-input-' + prod.prodId;
-                    addHeader(colInputKey, {label: prod.name, 'class': 'text-input'});
-                    addCell(colInputKey, rowIdx, req, {
-                        model: CellModel(prod, 'input'),
-                        type: 'text'
-                    });
-                    addFooter(colInputKey, {label: '', type: 'static'});
-
-                    // Grade
-                    var colGradeKey = 'prod-grade-' + prod.prodId;
-                    addHeader(colGradeKey, {label: 'Grade', 'class': 'grade'});
-                    addCell(colGradeKey, rowIdx, req, {
-                        model: CellModel(prod, 'grade', {
-                            max: gradeMaxInRowFn(req, prod),
-                            muteProdFn: muteProdFnFn(req),
-                            tooltipFn: mandatoryTooltipFnFn(req)
-                        }),
-                        type: 'number', max: 10,
-                        'class': 'grade'
-                    });
-                    addFooter(colGradeKey, {
-                        model: {
-                            value: productGradeComputeFn(colGradeKey),
-                            max: totalGradeMaxFn(colGradeKey)
-                        },
-                        type: 'func',
-                        'class': 'grade'
-                    });
-                });
-            });
-        }
-
-        function getColumn(key) {
-            var col = columnIdx[key];
-            if (!col) {
-                col = columnIdx[key] = {};
-                T.model.columns.push(col);
-            }
-            return col;
-        }
-
-        function addHeader(key, data) {
-            var col = getColumn(key);
-            col.header = data;
-        }
-
-        function addFooter(key, data) {
-            var col = getColumn(key);
-            col.footer = data;
-        }
-
-        function addColumnCell(key, cell) {
-            var col = getColumn(key);
-            col.cells = col.cells || [];
-            col.cells.push(cell);
-        }
-
-        function addCell(colKey, rowIdx, req, data) {
-            var row = T.model.rows[rowIdx];
-            if (!row) {
-                row = {
-                    req: req,
-                    cells: []
+        function reqWeightFn() {
+            return function (range) {
+                return function (val) {
+                    var total = range.total(); // aggregated
+                    return total ? val / total : 0;
                 };
-                T.model.rows.push(row);
-            }
-
-            var cell = data;
-            row.cells.push(cell);
-            addColumnCell(colKey, cell);
-        }
-
-        // Binding/Models
-        //
-        function CellModel(obj, path, addon) {
-            var M = {};
-            M.value = obj[path]; // binded!
-            M.max = (addon || {}).max;
-            M.save = saveValue;
-            M.toString = toString;
-
-            if (addon && addon.tooltipFn) {
-                M.tooltip = addon.tooltipFn(M);
-            }
-            if (addon && addon.muteRowFn) {
-                M.muteRow = addon.muteRowFn(M);
-            }
-            if (addon && addon.muteProdFn) {
-                M.muteProd = addon.muteProdFn(M);
-            }
-
-            var oldValue = m.value;
-
-            function saveValue() {
-                //console.log('>>Saving: ', M.value);
-
-                if (!validate()) {
-                    M.value = oldValue;
-                    return false;
-                }
-
-                obj[path] = oldValue = M.value;
-                m.patchProject();
-                return true
-            }
-
-            function validate() {
-                var invalid = (!M.value && M.value !== 0);
-                return !invalid;
-            }
-
-            function toString() {
-                var val = angular.isDefined(M.value) ? M.value : '';
-                var addon = M.tooltip ? ['/', M.tooltip()].join('') : '';
-                return val + addon;
-            }
-
-            return M;
-        }
-
-        // Computed vals
-        //
-        function productGradeComputeFn(colKey) {
-            return function () {
-                //console.log('>>Reduced!');
-
-                var grades = columnIdx[colKey].cells;
-                var weights = columnIdx['weight'].cells;
-
-                var total = weights.reduce(function (prev, current, i) {
-                    var weight = current.model.value;
-                    var grade = grades[i].model.value;
-                    return {
-                        weight: prev.weight + weight,
-                        grade: prev.grade + grade * weight
-                    };
-                }, {weight: 0, grade: 0});
-
-                var ave = total.weight ? total.grade / total.weight : 0; // weighted average
-                if (ave) {
-                    ave = Math.round(ave * 10) / 10; // .1
-                }
-                return ave;
-            }
-        }
-
-        function weightPercentComputeFn(cellModel) {
-            return function () {
-                var value = cellModel.value;
-                var weights = columnIdx['weight'].cells;
-
-                var totalWeight = weights.reduce(function (prev, current) {
-                    var weight = current.model.value;
-                    return prev + weight;
-                }, 0);
-
-                var percent = totalWeight ? Math.round(value / totalWeight * 100) : 0;
-                return percent + '%';
             };
         }
 
-        function gradeMaxInRowFn(req, prod) {
+        function reqWeightPercentFn(range, cellModel) {
             return function () {
-                var value = prod.grade;
-                if (!value) { return false;}
-
-                var max = req.products.reduce(function (prev, current) {
-                    var grade = current.grade;
-                    return Math.max(prev, grade);
-                }, 0);
-
-                return (value === max);
+                var val = cellModel.value;
+                var weight = range.weight(val); // aggregated
+                var percent = Math.round(weight * 100) + '%';
+                return percent;
             };
         }
 
-        function totalGradeMaxFn(colKey) {
+        function groupGradeFn(rowWeightRange, prodsGradesInGroupRange) {
             return function () {
-                var value = columnIdx[colKey].footer.model.value();
-                if (!value) { return false; }
+                var anyInit = false;
+                var groupGrade = prodsGradesInGroupRange.list.reduce(function (acc, item, i) {
+                    var val = item().value;
+                    if (val !== null) {
+                        anyInit = true;
+                    }
 
-                var max = T.model.columns.reduce(function (prev, current) {
-                    var model = current.footer.model;
-                    var total = model ? model.value() : 0;
-                    return Math.max(prev, total);
+                    var grade = val || 0; // null if grade is not init
+                    var weightModel = rowWeightRange.access(i)();
+                    var weight = rowWeightRange.weight(weightModel.value); // aggregated
+                    return acc + grade * weight;
                 }, 0);
 
-                return (value === max);
-            }
+                return anyInit ? _.round(groupGrade, 1) : '?';
+            };
         }
 
-        function muteOnZeroFn(model) {
+        function totalGradeFn(groupsRange, topicWeights, prodKey) {
+            return function () {
+                var totalGrade = topicWeights.reduce(function (acc, cur) {
+                    var weight = cur.weight;
+                    var grade = groupsRange(cur.topic).access(prodKey)().value();
+                    return acc + grade * weight;
+                }, 0);
+                return _.round(totalGrade, 1);
+            };
+        }
+
+        function totalGradeGetFn(maxTotalsRange, prodKey) {
+            return function () {
+                var val = maxTotalsRange.access(prodKey)().value();
+                // val=NaN when there are groups with grade === '?'
+                return !isNaN(val) ? val: '?';
+            };
+        }
+
+        function maxTotalFn(maxTotalsRange, prodKey) {
+            return function () {
+                var max = maxTotalsRange.max();
+                var val = maxTotalsRange.access(prodKey)().value();
+                return (max === val);
+            };
+        }
+
+        function muteRowFn(model) {
             return function () {
                 return (model.value === 0);
             };
         }
 
-        function muteProdFnFn(req) {
-            return function (model) {
-                return function () {
-                    return req.mandatory && (model.value === 0);
-                };
+        function muteProdFn(req, model) {
+            return function () {
+                return req.mandatory && (model.value === 0);
             };
         }
 
-
-        function mandatoryTooltipFnFn(req) {
-            return function (model) {
-                return function () {
-                    var unsupported = req.mandatory && (model.value === 0);
-                    return  unsupported ? 'Unsupported mandatory requirement' : '';
-                };
+        function mandatoryTooltipFn(req, model) {
+            return function () {
+                var unsupported = req.mandatory && (model.value === 0);
+                return unsupported ? 'Unsupported mandatory requirement' : '';
             };
         }
 
-        return T;
+        function getExpandedGroupKey(topic) {
+            return ['table', m.projectId, topic.replace(/\W/g, '')].join('-');
+        }
+
+        return view;
+    }
+
+
+    // Binding/Models
+    //
+    function CellModel(obj, path) {
+        var M = {};
+        M.value = obj[path]; // binded!
+        M.save = saveValue;
+        M.toString = toString;
+
+
+        var oldValue = M.value;
+
+        function saveValue() {
+            if (!validate()) {
+                M.value = oldValue;
+                return false;
+            }
+
+            obj[path] = oldValue = M.value;
+            return true;
+        }
+
+        function validate() {
+            if (typeof M.value === 'undefined') {
+                // angular undefs value if it is not valid according to model-options
+                return false;
+            }
+            if (typeof M.value === 'number') {
+                M.value = parseInt(M.value, 10); // remove fraction part
+                return true;
+            }
+            return true;
+        }
+
+        function toString() {
+            var val = (typeof M.value !== 'undefined') ? M.value : '';
+            return val;
+        }
+
+        return M;
     }
 
     // Export
     //
-    function Exporter(model) {
+    function Exporter() {
         var E = {};
         E.getCsv = getCsv;
 
-        function getCsv() {
+        function getCsv(view) {
+            var res = '';
+
             // Header
-            var res = getRowStr(model.columns, function (col) {
-                return col.header.label;
+            res += getRowStr(view.header, function (th) {
+                return th().label;
             });
             //console.log('>>> CSV Titles: ', res);
 
             // Rows
-            _.forEach(model.rows, function (row) {
-                res += getRowStr(row.cells, function (cell) {
-                    return (cell.type === 'static') ? cell.label : cell.model.toString();
+            view.rows.forEach(function (row) {
+                res += getRowStr(row().list, function (item) {
+                    var cell = item();
+                    return (cell.type === 'static') ? cell.label :
+                        (cell.type === 'icon') ? !!cell.label : cell.model.toString();
                 });
             });
             //console.log('>>> CSV Rows: ', res);
 
             // Footer
-            res += getRowStr(model.columns, function (col) {
-                var cell = col.footer;
-                return (cell.type === 'static') ? cell.label : cell.model.value();
+            res += getRowStr(view.footer, function (th) {
+                var cell = th();
+                return (cell.type === 'static') ? cell.label : cell.value();
             });
             //console.log('>>> CSV: ', res);
+
             return res;
         }
 
         function getRowStr(arr, valFn) {
             var res = '';
-            _.forEach(arr, function (it, j) {
+            arr.forEach(function (it, j) {
                 var val = valFn(it);
                 var txt = stringify(val);
                 if (j > 0) {
@@ -501,4 +390,29 @@ function ProjectTableCtrl($scope, $stateParams, ngTableParams, Projects, jsonpat
 
         return E;
     }
+
+
+    // Data formats:
+    //
+    //@formatter:off
+    /* table = [{
+        "reqId": "",
+        "name": "",
+        "mandatory": true|false,
+        "weight": 1,
+        "popularity": 0,
+        "products": [{
+            "prodId": "",
+            "name": "",
+            "input": "",
+            "grade": 0,
+            "popularity": 0
+        }]
+
+        topicWeights = [{
+          "topic": "",
+          "weight": 0-1
+        }]
+    }]*/
+    //@formatter:on
 }

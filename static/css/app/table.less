@@ -2,27 +2,29 @@
 
 @header-bg: #f5f5f5;
 @winner-bg: #f5fffa;
-@edit-bg: #f9fbdb;
+@edit-bg: @input-bg-focus;
+@warn-bg: #fbe1dd;
 @winner-cup-color: #00805a;
 @border-vert-color: #ddd;
-@min-text-column-width: 200px;
+@min-text-column-width: 180px;
 
 .mute() {
-  opacity: .3;
+  opacity: .4;
   background-color: rgba(0, 0, 0, 0.07);
+  text-shadow: 1px 1px #fff;
 }
 
 .table-border {
   border: 1px solid @border-vert-color;
-  border-top: 0;
   border-radius: 4px;
 }
 
-.ng-table {
+.ps-table {
   margin-bottom: 0;
 
   /*Header/footer*/
   thead th {
+    text-align: center;
     &.grade {
       width: 1%;
       padding: 3px;
@@ -54,8 +56,15 @@
       .mute();
     }
 
+    // Hide culprits on expanded group row
+    &.expanded {
+      .group-culprit::after {
+        display: none;
+      }
+    }
+
     /*Group row*/
-    &.ng-table-group td {
+    &.table-group td {
       padding: 8px;
       background: @header-bg;
       cursor: pointer;
@@ -63,16 +72,15 @@
       &.strong {
         font-weight: bold;
       }
-      &.align-fix {
-        // Hack!
-        padding-right: 18px;
-      }
-      a {
+      a.group-name {
         display: block;
-        padding: 0;
+        padding: 2px 0 0 25px;
         line-height: 16px;
         text-decoration: none;
-        outline: none;
+        .fa {
+          float: left;
+          margin-bottom: 4px; // align wrapped topic (2 lines max expected!)
+        }
       }
     }
 
@@ -98,7 +106,7 @@
         .cell-input {
           width: 100%;
           background: transparent;
-          border: none;
+          border: 0;
           .box-shadow(none);
           &, &:active, &:focus {
             outline: 0;
@@ -107,7 +115,7 @@
       }
 
       &.static {
-        padding: 2px 5px;
+        padding: 5px;
       }
       &.number {
         width: 1%;
@@ -126,6 +134,9 @@
       &.edited {
         background: @edit-bg !important;
       }
+      &.invalid {
+        background: @warn-bg !important;
+      }
       &.static {
         background: @header-bg;
       }
@@ -136,7 +147,8 @@
       &.muted {
         .mute();
 
-        &.culprit {
+        &.culprit,
+        &.group-culprit{
           position: relative;
           &::after {
             content: '';
@@ -144,6 +156,20 @@
             top: 0; left: 0;
             .triangle-corner(bottom, right, 3px, red);
           }
+        }
+      }
+
+      &.null {
+        cursor: pointer;
+        &:before {
+          content: "?";
+          color: @gray-light;
+        }
+        &:hover:before {
+          color: @text-color;
+        }
+        input {
+          visibility: hidden;
         }
       }
     }
@@ -157,7 +183,11 @@
     font-size: 13px;
   }
 }
-/*Hide pagination*/
-.ng-table-pager {
-  display: none;
+
+/*Override bootstrap*/
+@media (max-width: @grid-float-breakpoint) {
+  .table-responsive {
+    margin-bottom: 0;
+    border: 0;
+  }
 }

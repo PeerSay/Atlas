@@ -1,0 +1,85 @@
+@table-border: 3px solid #fff;
+
+@th-border-bottom: 5px solid #fff;
+@th-color: #fff;
+@th-bg: #5b9bd5;
+
+@td-color: #333;
+@td-bg-odd: #d2deef;
+@td-bg-even: #eaeff7;
+@td-warn-bg: #fbe5d6;
+@td-warn-color: #aeaeae;
+@td-winner-bg: #c5e0b4;
+@foot-winner-bg: #00b050;
+
+.reveal .table {
+  width: 100%;
+  td {
+    border: @table-border;
+    color: @td-color;
+    &.min {
+      width: 1%;
+    }
+    &.center {
+      text-align: center;
+    }
+    &.grade {
+      width: 20%;
+    }
+    &.name {
+      width: 40%
+    }
+
+    .input {
+      display: block;
+      font-size: 60%;
+      line-height: 1.2;
+      text-align: center;
+    }
+  }
+  thead tr:last-child td {
+    border-bottom: @th-border-bottom; // override reveal
+  }
+  tr:last-child td {
+    border: @table-border;
+  }
+
+  tbody {
+    tr {
+      background-color: @td-bg-even;
+      &:nth-of-type(odd) {
+        background-color: @td-bg-odd;
+      }
+    }
+
+    tr.warning td {
+      color: @td-warn-color;
+      background-color: @td-warn-bg;
+    }
+
+    td.winner {
+      background-color: @td-winner-bg;
+    }
+  }
+
+  thead tr td,
+  tfoot tr td {
+    color: @th-color;
+    background-color: @th-bg;
+  }
+  thead tr td {
+    border-bottom: @th-border-bottom;
+  }
+  tfoot tr td {
+    &.winner {
+      background-color: @foot-winner-bg;
+    }
+  }
+
+  // Zooming large tables
+  td {
+    // May be overridden by JS
+    font-size: 80%;
+  }
+}
+

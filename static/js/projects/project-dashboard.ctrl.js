@@ -11,10 +11,6 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
     //Model
     m.project = null;
     m.loading = true;
-    m.essentials = {
-        data: {},
-        initialized: false
-    };
     m.products = {
         data: [],
         initialized: false
@@ -36,28 +32,17 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
             initFields(res);
 
             return (m.project = res);
-        }).then(function () {
+        }).then(function (project) {
             var tableOk = m.decisions.initialized = (m.products.initialized && m.requirements.initialized);
             if (!tableOk) { return; }
 
-            Projects.readProjectTable(m.projectId).then(function (res) {
-                m.decisions.data = findWinners(res.table);
-            });
+            m.decisions.data = findWinners(project.table);
         }).finally(function () {
             m.loading = false;
         });
     }
 
     function initFields(project) {
-        angular.extend(m.essentials.data, {
-            goals: project.notes.goals,
-            category: project.selectedCategory || null,
-            budget: project.budget,
-            duration: project.time.duration,
-            durationLabel: project.time.durationLabel
-        });
-        m.essentials.initialized = hasAnyValue(m.essentials.data, ['goals', 'category', 'budget', 'duration']);
-
         m.products.data = project.products;
         var selectedProducts = _.filter(project.products, function (it) { return !!it.selected; });
         m.products.initialized = (selectedProducts.length > 0);
@@ -65,16 +50,6 @@ function ProjectDashboardCtrl($stateParams, Projects, _) {
         m.requirements.data = project.requirements;
         var selectedReqs = _.filter(project.requirements, function (it) { return !!it.selected; });
         m.requirements.initialized = (selectedReqs.length > 0);
-    }
-
-    function hasAnyValue(obj, keys) {
-        var res = false;
-        angular.forEach(keys, function (key) {
-            if (obj[key]) {
-                res = true;
-            }
-        });
-        return res;
     }
 
     function findWinners(table) {

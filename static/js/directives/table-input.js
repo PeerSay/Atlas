@@ -5,33 +5,28 @@ angular
 function psTableInput() {
     return {
         restrict: 'A',
-        require: '?ngModel',
+        require: 'ngModel',
         link: function (scope, element, attrs, ngModel) {
-            if (!ngModel) { return; }
-
             var $el = $(element);
             var $td = $el.parents('td');
             var $tr = $td.parent();
-            var productCells = function () {
+            var $tbody = $td.parents('tbody');
+            var allProductCells = function () {
                 var $cells = $('#decision-table th, #decision-table td');
                 // using jquery.column.js plugin
                 var $inputCol = $cells.nthCol($td.index());
                 var $gradeCol = $cells.nthCol($td.index() + 1);
-                return $inputCol.add($gradeCol)
+                return $inputCol.add($gradeCol);
+            };
+            var allGroupGradeCells = function () {
+                var $cells = $tbody.find('td');
+                return $cells.nthCol($td.index() + 1);
             };
 
+            var ctrl = scope.$eval(attrs.ctrl);
             var cell = scope.$eval(attrs.psTableInput);
-            var model = cell.model;
 
-            // This fixes table cell's save logic for type=number inputs in Firefox.
-            // Firefox (unlike Chrome) does not focus input when spinner buttons are clicked, thus it breaks
-            // save logic based on assumption that edited element is focused and blur triggers update.
-            $el.on('input', function () {
-                // 'input' event is triggered on clicking spinner button
-                $(this).focus();
-            });
-
-            // Make active on clicking cell outside input (of cell is larger)
+            // Make active on clicking cell outside input (if cell is larger)
             $td.click(function () {
                 $el.focus();
             });
@@ -45,26 +40,46 @@ function psTableInput() {
             $el.on('blur', function () {
                 $td.removeClass('edited');
                 scope.$apply(function () {
-                    model.save();
+                    if (cell.model.save()) {
+                        ctrl.patchProject();
+                    }
                 });
             });
 
             // Mute zero-weight rows
-            if (cell.model.muteRow) {
-                scope.$watch(cell.model.muteRow, function (newVal/*, oldVal*/) {
+            if (cell.muteRow) {
+                scope.$watch(cell.muteRow, function (newVal/*, oldVal*/) {
                     $tr.toggleClass('muted', newVal);
-                })
+                });
             }
 
             //Mute columns if mandatory requirement is not met
-            if (cell.model.muteProd) {
-                scope.$watch(cell.model.muteProd, function (newVal/*, oldVal*/) {
+            if (cell.muteProd) {
+                scope.$watch(cell.muteProd, function (newVal/*, oldVal*/) {
+                    // red-triangle class on cell
                     $td.toggleClass('culprit', newVal);
 
-                    var $prodCells = productCells();
+                    // mute 2 columns
+                    var $prodCells = allProductCells();
                     var anyMuted = ($prodCells.filter('.culprit').length > 0);
                     $prodCells.toggleClass('muted', anyMuted);
-                })
+
+                    // red-triangle class on group cell
+                    var $groupCells = allGroupGradeCells();
+                    var anyMutedInGroup = ($groupCells.slice(1).filter('.culprit').length > 0);
+                    $groupCells.first().toggleClass('group-culprit', anyMutedInGroup);
+                });
+            }
+
+            // Show invalid input (numbers only) by applying class on parent
+            if (cell.type === 'number') {
+                scope.$watch(function () {
+                    return ngModel.$invalid;
+                }, function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        $td.toggleClass('invalid', newVal);
+                    }
+                });
             }
         }
     };

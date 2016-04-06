@@ -25,12 +25,12 @@ function psProgress() {
                 $el.css({
                     width: scope.value + '%',
                     backgroundColor: getBgColor(scope.value)
-                })
+                });
             }
 
             function getBgColor(val) {
-                var colorTpl = 'hsl($$, 90%, 60%)';
-                var hueStart = 10, hueStop = 100;
+                var colorTpl = 'hsl($$, 81%, 58%)';
+                var hueStart = -3, hueStop = 165;
                 var hue = hueStart + Math.floor((hueStop - hueStart) * val / 100);
                 var color = colorTpl.replace('$$', hue);
                 return color;
